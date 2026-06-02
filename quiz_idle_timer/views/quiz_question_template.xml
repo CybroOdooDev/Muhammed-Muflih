@@ -1,0 +1,13 @@
+<odoo>
+      <template id="quiz_page" name="Quiz page">
+        <t t-name="portal.page">
+            <div class="wrap o_survey_wrap d-flex">
+                <div class="o_container_small o_survey_form d-flex flex-column mb-5">
+                    <p>hello quiz is over</p>
+
+
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,42 @@
+<odoo>
+    <record id="action_quiz_general_config" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+<!--        <field name="type">ir.actions.act_window</field>-->
+        <field name="res_model">res.config.settings</field>
+<!--        <field name="path">settings</field>-->
+<!--        <field name="view_id" ref="res.res_config_settings_view_form"/>-->
+        <field name="view_mode">form</field>
+<!--        <field name="target">inline</field>-->
+        <field name="context">{'module' : 'quiz_idle_timer','bin_size': False}</field>
+    </record>
+
+
+<odoo>
+   <record id="quiz_res_config_settings_view_form" model="ir.ui.view">
+       <field name="name">
+           res.config.settings.view.form.inherit.quiz.timer.limit
+       </field>
+       <field name="model">res.config.settings</field>
+       <field name="priority" eval="15"/>
+       <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+       <field name="arch" type="xml">
+           <xpath expr="//form" position="inside">
+               <app data-string="Quiz Management" string="Quiz Management" name="quiz_idle_timer">
+                   <block title="Quiz Management Settings"
+                          name="quiz_management">
+                       <setting string="Quiz"
+                                help="Set the quiz timer"
+                                id="quiz_type_setting">
+                           <field name="time_limit_for_quiz"/>
+
+                       </setting>
+                   </block>
+               </app>
+           </xpath>
+       </field>
+   </record>
+</odoo>
+
+
+
+</odoo>

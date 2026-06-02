@@ -1,0 +1,35 @@
+<odoo>
+    <record id="quiz_idle_timer_action_wizard" model="ir.actions.act_window">
+   <field name="name">Send Quiz</field>
+   <field name="res_model">wizard.sending.quiz.to.users</field>
+   <field name="view_mode">form</field>
+   <field name="target">new</field>
+<!--   <field name="binding_model_id" ref="model_quiz_question"/>-->
+<!--   <field name="binding_view_types">list,form</field>-->
+</record>
+
+
+    <record id="quiz_idle_timer_wizard_form" model="ir.ui.view">
+   <field name="name">quiz.idle.timer.form</field>
+   <field name="model">wizard.sending.quiz.to.users</field>
+   <field name="arch" type="xml">
+       <form>
+           <group>
+               <field name="user_id" domain="[('share', '=', True)]"/>
+           </group>
+           <footer>
+               <button string="Send"
+                       name="action_send_mail"
+                       type="object"
+                       data-hotkey="P"
+                       class="btn-primary"/>
+
+               <button string="Cancel"
+                       class="btn-secondary"
+                       data-hotkey="C"
+                       special="cancel"/>
+           </footer>
+       </form>
+   </field>
+</record>
+</odoo>

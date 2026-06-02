@@ -1,0 +1,8 @@
+<odoo>
+    <menuitem id="quiz_idle_timer_menu_root" name="Quiz Idle Timer"/>
+   <menuitem id="quiz_management_menu_action" name="Configuration"   sequence="4" parent="quiz_idle_timer.quiz_idle_timer_menu_root"/>
+    <menuitem id="quiz_question_menu" action="quiz_question_action"   sequence="1"  parent="quiz_idle_timer_menu_root"/>
+    <menuitem id="quiz_menu" action="quiz_dashboard_action"   sequence="2" parent="quiz_idle_timer_menu_root"/>
+    <menuitem id="quizsettings_menu" action="action_quiz_general_config" parent="quiz_idle_timer.quiz_management_menu_action"/>
+    <menuitem id="quiz_for_users_wizard_menu" action="quiz_idle_timer_action_wizard"   sequence="3" parent="quiz_idle_timer_menu_root"/>
+</odoo>

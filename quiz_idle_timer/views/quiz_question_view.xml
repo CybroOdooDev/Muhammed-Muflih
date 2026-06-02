@@ -1,0 +1,64 @@
+<odoo>
+    <record id="quiz_dashboard_action" model="ir.actions.client">
+  <field name="name"> Start Quiz</field>
+  <field name="tag">quiz_dashboard_tag</field>
+</record>
+
+
+
+     <record id="quiz_question_action" model="ir.actions.act_window">
+        <field name="name">quiz question</field>
+        <field name="res_model">quiz.question</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+
+    <record id="quiz_question_view" model="ir.ui.view">
+        <field name="name"> quiz.question</field>
+        <field name="model">quiz.question</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="sequence"/>
+                        </group>
+                        <newline/>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                         <notebook>
+                            <page name="ANSWER LINE">
+                                     <field name="quiz_answer_ids">
+
+                                        <list string="list" editable="bottom">
+                                            <field name="option_name"/>
+                                            <field name="correct_answer"/>
+
+                                        </list>
+                                    </field>
+
+                            </page>
+
+                         </notebook>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+
+    </record>
+
+     <record id="quiz_question_view_list" model="ir.ui.view">
+        <field name="name">quiz question list</field>
+        <field name="model">quiz.question</field>
+        <field name="arch" type="xml">
+            <list string="list">
+                 <field name="name"/>
+
+            </list>
+        </field>
+    </record>
+</odoo>

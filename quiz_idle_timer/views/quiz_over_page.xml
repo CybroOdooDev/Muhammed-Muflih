@@ -1,0 +1,12 @@
+<odoo>
+      <template id="quiz_over_page" name="Quiz page">
+        <t t-name="portal.page">
+            <div class="wrap o_survey_wrap d-flex">
+                <div class="o_container_small o_survey_form d-flex flex-column mb-5 " style=" margin-top:100px;">
+                    <h2 style="margin:20px; text-align:center; color:#123173;">Quiz Is Over!</h2>
+                    <h2  style="margin:20px; text-align:center; color:#334f3b;"> <t t-esc="message"/></h2>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

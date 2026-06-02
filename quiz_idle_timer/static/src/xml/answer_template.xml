@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--<odoo>-->
+<templates>
+  <t t-name="quiz_idle_timer.Answer">
+      <div class="d-flex" style="border:2px solid #30207a; width:250px; border-radius:5px;">
+          <div class="col-10" style="background:#f3e1f7;">
+              <h4 class="options_answer" ><t t-esc="props.answer"/></h4>
+          </div>
+          <div class="col-2" style="align-items:center;background:#f3e1f7;">
+              <input style="" name="answer" t-att-checked="checked=false" t-on-change="props.checkingAnswer" type="radio"/>
+          </div>
+
+      </div>
+  </t>
+</templates>
+<!--</odoo>-->

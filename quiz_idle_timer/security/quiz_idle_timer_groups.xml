@@ -1,0 +1,30 @@
+<odoo>
+    <data>
+
+
+     <!--category-->
+    <record id="quiz_idle_timer_category" model="ir.module.category">
+        <field name="name">quiz idle timer module management</field>
+        <field name="description">quiz_idle_timer access right security</field>
+    </record>
+
+    <!--privilege -->
+    <record id="quiz_privilege_access" model="res.groups.privilege">
+        <field name="name">quiz idle timer privilege access control</field>
+        <field name="category_id" ref="quiz_idle_timer_category"/>
+    </record>
+
+    <!-- defines groups-->
+    <record  model="res.groups" id="group_admin">
+        <field name="name">Admin</field>
+        <field name="privilege_id" ref="quiz_privilege_access"/>
+<!--        <field name="comment">Can create, edit</field>-->
+    </record>
+
+
+
+
+</data>
+
+
+</odoo>

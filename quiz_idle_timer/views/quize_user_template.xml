@@ -1,0 +1,7 @@
+<odoo>
+      <template id="quiz_user_page" name="Quiz page">
+        <t t-call="portal.portal_layout">
+           <owl-component name="quiz_dashboard_tag"/>
+        </t>
+    </template>
+</odoo>

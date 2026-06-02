@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_quiz_question,access_quiz_question,model_quiz_question,group_admin,1,1,1,1
+access_quiz_answer,access_quiz_answer,model_quiz_answer,group_admin,1,1,1,1
+access_wizard_sending_quiz_to_users,access_wizard_sending_quiz_to_users,model_wizard_sending_quiz_to_users,group_admin,1,1,1,1

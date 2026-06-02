@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    <record id="email_template_for_quiz" model="mail.template">
+        <field name="name">Quiz mail</field>
+        <field name="model_id" ref="quiz_idle_timer.model_wizard_sending_quiz_to_users"/>
+        <field name="use_default_to" eval="False"/>
+        <field name="subject">Play the Quiz!!</field>
+        <field name="email_from">razer2757@gmail.com</field>
+        <field name="email_to">{{object.user_id.email}}</field>
+        <field name="body_html" type="html">
+            <div>
+                <p>
+                    Hello,<t t-out="object.user_id.name"/>
+                    <br/>
+                    <br/>
+                     open the quiz link!
+                    <a href="https://properly-everyday-unsealed.ngrok-free.dev/quiz/user/page/"> CLICK HERE </a>
+                    <br/>
+                    <br/>
+                </p>
+            </div>
+        </field>
+    </record>
+    </data>
+</odoo>
