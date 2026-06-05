@@ -15,6 +15,9 @@
                     </div>
                 </section>
 
+                <!-- 2. Clients Ticker -->
+                <t t-call="theme_odonova.s_odonova_clients_ticker"/>
+
                 <!-- 3. Case Featured -->
                 <section class="s_odonova_cases_featured odonova-featured-cases o_colored_level" data-snippet="s_odonova_cases_featured" data-name="Case Featured">
                     <div class="container">

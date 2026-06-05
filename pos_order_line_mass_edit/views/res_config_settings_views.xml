@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--
+    This view extends the POS configuration settings form to add
+    a new option for enabling "Mass Edit Order Lines" functionality.-->
+    <record id="res_config_settings_view_form_inherit_mass_edit"
+            model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.pos.order.line.mass.edit</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id"
+               ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@id='pos_interface_section']" position="inside">
+                <setting string="Mass Edit Order Lines"
+                         help="Allow users to edit multiple order lines at once from POS screen">
+                    <field name="pos_show_mass_edit_button"/>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

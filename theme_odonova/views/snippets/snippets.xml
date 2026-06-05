@@ -683,6 +683,15 @@ body.editor_enable .animate-on-scroll,
                                 <div class="odonova-stat-num">250+</div>
                                 <div class="odonova-stat-lbl">Successful Implementations</div>
                             </div>
+
+                            <div class="odonova-mission-stat">
+                                <div class="odonova-stat-num">50+</div>
+                                <div class="odonova-stat-lbl">Certified Experts</div>
+                            </div>
+                            <div class="odonova-mission-stat">
+                                <div class="odonova-stat-num">15</div>
+                                <div class="odonova-stat-lbl">Countries Served</div>
+                            </div>
                         </div>
                     </div>
                     <div class="odonova-mission-img">
@@ -900,7 +909,82 @@ body.editor_enable .animate-on-scroll,
             </div>
         </section>
     </template>
-    <!-- 17. Clients Ticker Snippet -->
+    <!-- 17. Retail & E-commerce Featured Industry Snippet -->
+    <template id="s_odonova_retail_ecommerce" name="OdoNova Retail &amp; E-commerce">
+        <section class="s_odonova_retail_ecommerce odonova-featured-industries o_colored_level"
+                 data-snippet="s_odonova_retail_ecommerce"
+                 data-name="Retail &amp; E-commerce">
+            <div class="container">
+                <!-- Normal layout: image LEFT, content RIGHT -->
+                <div class="odonova-featured-industry reversed">
+                    <!-- Image panel -->
+                    <div class="odonova-industry-image animate-on-scroll">
+                        <img src="/theme_odonova/static/src/img/industries/retail_ecommerce.png"
+                             alt="Retail &amp; E-commerce"
+                             class="img-fluid"/>
+                    </div>
+
+                    <!-- Content panel -->
+                    <div class="odonova-industry-content animate-on-scroll">
+                        <span class="odonova-industry-badge">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2">
+                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                                <line x1="3" y1="6" x2="21" y2="6"/>
+                                <path d="M16 10a4 4 0 0 1-8 0"/>
+                            </svg>
+                            Featured Industry
+                        </span>
+
+                        <h2>Retail &amp; E-commerce</h2>
+
+                        <p>
+                            Unify your online and brick-and-mortar operations. Manage inventory
+                            across multiple warehouses, handle complex omnichannel fulfillment,
+                            and deliver a seamless customer experience from browse to delivery.
+                        </p>
+
+                        <div class="odonova-feature-list">
+                            <div class="odonova-feature-item">
+                                <div class="odonova-check">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                        <path d="M20 6L9 17l-5-5"/>
+                                    </svg>
+                                </div>
+                                Integrated Point of Sale (POS) that works offline
+                            </div>
+                            <div class="odonova-feature-item">
+                                <div class="odonova-check">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                        <path d="M20 6L9 17l-5-5"/>
+                                    </svg>
+                                </div>
+                                Automated inventory replenishment rules
+                            </div>
+                            <div class="odonova-feature-item">
+                                <div class="odonova-check">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                        <path d="M20 6L9 17l-5-5"/>
+                                    </svg>
+                                </div>
+                                B2B and B2C webshops powered by real-time data
+                            </div>
+                            <div class="odonova-feature-item">
+                                <div class="odonova-check">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                        <path d="M20 6L9 17l-5-5"/>
+                                    </svg>
+                                </div>
+                                Customer loyalty programmes and gift card management
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- 18. Clients Ticker Snippet -->
     <template id="s_odonova_clients_ticker" name="OdoNova Clients Ticker">
         <section class="s_odonova_clients_ticker py-5 o_colored_level" style="background-color: #f8f9fa;" data-snippet="s_odonova_clients_ticker" data-name="OdoNova Clients Ticker">
             <div class="container text-center">

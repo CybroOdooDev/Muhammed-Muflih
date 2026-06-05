@@ -7,7 +7,7 @@
         <!-- 1. Add 'OdoNova' snippet group/category in the sidebar -->
         <xpath expr="//t[@id='installed_snippets_hook']" position="after">
             <t snippet-group="odonova" t-snippet="website.s_snippet_group" string="OdoNova"
-               t-thumbnail="/theme_odonova/static/src/img/hero_dashboard.png"/>
+               t-thumbnail="/theme_odonova/static/description/theme_screenshot.jpg"/>
         </xpath>
 
         <!-- 2. Register all OdoNova snippet blocks inside snippet_structure -->
@@ -35,6 +35,9 @@
             <t t-snippet="theme_odonova.s_odonova_industries_hero" string="Industries Hero" group="odonova"/>
             <t t-snippet="theme_odonova.s_odonova_industries_featured" string="Industries Featured" group="odonova"/>
             <t t-snippet="theme_odonova.s_odonova_industries_grid" string="Industries Grid" group="odonova"/>
+            <t t-snippet="theme_odonova.s_odonova_retail_ecommerce" string="Retail &amp; E-commerce" group="odonova">
+                <keywords>retail, ecommerce, e-commerce, shop, store, pos, point of sale, omnichannel, b2b, b2c, webshop, inventory, industry, featured</keywords>
+            </t>
 
             <!-- Case Studies Snippets -->
             <t t-snippet="theme_odonova.s_odonova_cases_hero" string="Success Hero" group="odonova"/>
