@@ -23,7 +23,7 @@ from collections import OrderedDict
 from geopy import Nominatim
 import json
 import pytz
-from odoo import http
+from odoo import fields, http
 from odoo.exceptions import AccessError, MissingError
 from odoo.http import request, route
 from odoo.tools.image import image_process
@@ -153,7 +153,7 @@ class ReturnCustomerPortal(CustomerPortal):
         purchase_order = request.env['purchase.order'].sudo()
         account_move = request.env['account.move']
         project = request.env['project.project'].sudo()
-        task = request.env['project.task'].sudo()
+        task = request.env['project.task']
         config_parameters = request.env['ir.config_parameter'].sudo()
         number_project = ""
         projects_limited = ""
@@ -204,15 +204,15 @@ class ReturnCustomerPortal(CustomerPortal):
             if show_project:
                 number_project = config_parameters.get_param(
                     'portal_dashboard.project_count', 5)
-                projects_limited = project.search([],
-                                                  limit=int(number_project))
+                projects_limited = project.search(
+                    [('is_template', '=', False)], limit=int(number_project))
                 tasks_limited = task.search([], limit=int(number_project))
             if show_account:
                 number_account = config_parameters.get_param(
                     'portal_dashboard.account_count', 5)
                 invoices_limited = account_move.search([
-                    ('invoice_user_id', '=', user),
-                    ('state', 'not in', ['draft', 'cancel'])
+                    ('move_type', 'in', ['out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt']),
+                    ('state', 'not in', ['draft', 'cancel']),
                 ], limit=int(number_account))
             sale_orders = order_id.search([
                 ('user_id', '=', user),
@@ -229,9 +229,13 @@ class ReturnCustomerPortal(CustomerPortal):
             rfq = purchase_order.search([
                 ('user_id', '=', user), ('state', 'in', ['sent', 'to approve', 'draft'])
             ])
-            projects = project.search([])
+            projects = project.search([('is_template', '=', False)])
             tasks = task.search([])
-            invoices = account_move.search([])
+            # Fetch invoices & bills using same domain as Odoo's portal /my/invoices
+            invoices = account_move.search([
+                ('move_type', 'in', ['out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt']),
+                ('state', 'not in', ['draft', 'cancel']),
+            ])
         else:
             if show_so_q:
                 number_order = config_parameters.get_param(
@@ -258,16 +262,17 @@ class ReturnCustomerPortal(CustomerPortal):
             if show_project:
                 number_project = config_parameters.get_param(
                     'portal_dashboard.project_count', 0)
-                projects_limited = project.search([('user_id', '=', user)],
-                                                  limit=int(number_project))
-                tasks_limited = task.search([('user_ids', 'in', [user])],
-                                            limit=int(number_project))
+                projects_limited = project.search(
+                    [('user_id', '=', user), ('is_template', '=', False)], limit=int(number_project))
+                tasks_limited = task.search([
+                    ('user_ids', 'in', [user])
+                ], limit=int(number_project))
             if show_account:
                 number_account = config_parameters.get_param(
                     'portal_dashboard.account_count', 0)
                 invoices_limited = account_move.search([
-                    ('partner_id', '=', partners.partner_id.id),
-                    ('state', 'not in', ['draft', 'cancel'])
+                    ('move_type', 'in', ['out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt']),
+                    ('state', 'not in', ['draft', 'cancel']),
                 ], limit=int(number_account))
             sale_orders = order_id.search([
                 ('partner_id', '=', partners.partner_id.id),
@@ -286,11 +291,16 @@ class ReturnCustomerPortal(CustomerPortal):
                 ('state', 'in', ['sent', 'to approve', 'draft'])
             ])
             projects = project.search([
-                ('user_id', '=', user)
+                ('user_id', '=', user),
+                ('is_template', '=', False)
             ])
-            tasks = task.search([('user_ids', 'in', [user])])
+            tasks = task.search([
+                ('user_ids', 'in', [user])
+            ])
+            # Fetch invoices & bills using same domain as Odoo's portal /my/invoices
             invoices = account_move.search([
-                ('access_token', '!=', False)
+                ('move_type', 'in', ['out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt']),
+                ('state', 'not in', ['draft', 'cancel']),
             ])
         values = self._prepare_portal_layout_values()
         values['sale_order_portal'] = sale_orders
@@ -300,6 +310,7 @@ class ReturnCustomerPortal(CustomerPortal):
         values['projects_portal'] = projects
         values['tasks_portal'] = tasks
         values['invoices_portal'] = invoices
+        values['accounting_count'] = len(invoices)
         values['number_so_portal'] = number_order
         values['number_po_portal'] = number_po
         values['number_account_portal'] = number_account
@@ -448,20 +459,15 @@ class ReturnCustomerPortal(CustomerPortal):
         po_count = request.env['purchase.order'].search_count(check_user('purchase.order') + [('state', 'in', ['purchase', 'done'])])
         rfq_count = request.env['purchase.order'].search_count(check_user('purchase.order') + [('state', 'in', ['draft', 'sent'])])
         
-        # Accounting (Invoices & Bills)
-        # For portal users, they usually see invoices addressed to them.
-        invoice_domain = [('move_type', '=', 'out_invoice'), ('state', '!=', 'cancel')]
-        if user.has_group('base.group_user'):
-             invoice_domain += [('invoice_user_id', '=', user.id)]
-        else:
-             invoice_domain += [('partner_id', '=', user.partner_id.id)]
-             
-        # Bills (usually not visible to portal users unless they are vendors, but let's query it)
-        bill_domain = [('move_type', '=', 'in_invoice'), ('state', '!=', 'cancel')]
-        if user.has_group('base.group_user'):
-             bill_domain += [('invoice_user_id', '=', user.id)] # Maybe?
-        else:
-             bill_domain += [('partner_id', '=', user.partner_id.id)]
+        # Accounting (Invoices & Bills) - same domain as Odoo portal /my/invoices
+        invoice_domain = [
+            ('move_type', 'in', ['out_invoice', 'out_refund', 'out_receipt']),
+            ('state', 'not in', ['draft', 'cancel']),
+        ]
+        bill_domain = [
+            ('move_type', 'in', ['in_invoice', 'in_refund', 'in_receipt']),
+            ('state', 'not in', ['draft', 'cancel']),
+        ]
 
         invoice_count = request.env['account.move'].search_count(invoice_domain)
         bill_count = request.env['account.move'].search_count(bill_domain)
@@ -470,4 +476,5 @@ class ReturnCustomerPortal(CustomerPortal):
             'target': [so_count, quotation_count],
             'target_po': [po_count, rfq_count],
             'target_accounting': [invoice_count, bill_count],
+            'accounting_count': invoice_count + bill_count,
         }

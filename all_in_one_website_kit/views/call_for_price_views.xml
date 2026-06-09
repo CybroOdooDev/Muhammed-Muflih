@@ -22,10 +22,10 @@
             <form>
                 <header>
                     <button name="action_done" class="oe_highlight"
-                            invisible="state in ('done','cancel') " string="Done" type="object"/>
-                    <button name="action_cancel" string="Cancel" type="object"  invisible="state in ('cancel') "/>
+                            invisible="state != 'draft'" string="Done" type="object"/>
+                    <button name="action_cancel" string="Cancel" type="object"/>
                     <field name="state" widget="statusbar"
-                           statusbar_visible="draft,done"/>
+                           statusbar_visible="draft,done,cancel"/>
                 </header>
                 <sheet>
                     <group>

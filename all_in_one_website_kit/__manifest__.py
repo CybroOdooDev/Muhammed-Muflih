@@ -22,7 +22,7 @@
     'name': 'All In One Website Kit',
     'version': '19.0.1.0.0',
     'category': 'Website',
-    'summary': """All In One Website for odoo18 community edition to get 
+    'summary': """All In One Website for odoo19 community edition to get 
      multiple website feature """,
     'description': """You will get features of the following modules,
      Call for price, customer geolocation, customer order comment, 

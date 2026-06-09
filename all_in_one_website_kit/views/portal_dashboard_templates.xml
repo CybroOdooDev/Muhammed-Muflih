@@ -124,7 +124,7 @@
                                 </div>
                                 <div>
                                     <h6 class="card-title text-muted mb-1">Invoices &amp; Bills</h6>
-                                    <h3 class="fw-bold mb-0"><t t-esc="len(invoices_portal)"/></h3>
+                                    <h3 class="fw-bold mb-0"><t t-esc="accounting_count"/></h3>
                                 </div>
                             </div>
                             <div class="card-footer bg-transparent border-0 text-end">
