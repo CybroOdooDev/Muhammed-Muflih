@@ -1,0 +1,262 @@
+:root {
+  --wra-primary: #0d4f4f;
+  --wra-primary-dark: #073838;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background-color: #f4f6fb;
+}
+
+/* Right-side marketing / brand panel */
+.login-hero {
+  background: linear-gradient(150deg, #0a4747 0%, #073838 60%, #052a2a 100%);
+  color: #fff;
+}
+
+.login-hero .hero-quote {
+  border-left: 3px solid rgba(255, 255, 255, 0.35);
+  padding-left: 1rem;
+}
+
+.login-hero .hero-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.login-hero .hero-feature .tick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+/* ---- Dashboard shell + sidebar ---- */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1rem;
+}
+
+.sidebar .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.6rem;
+  color: #495057;
+  font-weight: 500;
+  text-decoration: none;
+  margin-bottom: 0.25rem;
+}
+
+.sidebar .nav-link:hover {
+  background: #eef5f5;
+  color: var(--wra-primary);
+}
+
+.sidebar .nav-link.active {
+  background: var(--wra-primary);
+  color: #fff;
+}
+
+.sidebar .nav-link svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+}
+
+.app-content {
+  flex: 1;
+  min-width: 0;
+  background: #f4f6fb;
+}
+
+.app-topbar {
+  background: linear-gradient(150deg, #0a4747 0%, #073838 60%, #052a2a 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Light text on the teal top bar */
+.app-topbar .fw-semibold {
+  color: #fff;
+}
+
+.app-topbar .text-muted {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Profile dropdown */
+.profile-menu {
+  position: relative;
+}
+
+.profile-trigger {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.6rem;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+}
+
+.profile-trigger:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.profile-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 0.6rem;
+  padding: 0.35rem;
+  z-index: 1050;
+}
+
+.dropdown-item-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 0.45rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  color: #495057;
+  cursor: pointer;
+}
+
+.dropdown-item-btn:hover {
+  background: #f1f5f5;
+}
+
+.dropdown-item-btn.text-danger:hover {
+  background: #fde8e8;
+}
+
+/* ---- Report Dashboard table ---- */
+.report-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e9ecef;
+  border-radius: 0.6rem;
+  background: #fff;
+}
+
+.report-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  white-space: nowrap;
+  margin: 0;
+  width: max-content;
+  min-width: 100%;
+}
+
+.report-table th,
+.report-table td {
+  border-bottom: 1px solid #eef1f4;
+  border-right: 1px solid #eef1f4;
+  padding: 0.55rem 0.7rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.report-table thead th {
+  background: var(--wra-primary);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  font-weight: 600;
+  z-index: 1;
+}
+
+.report-table thead th small {
+  display: block;
+  font-weight: 400;
+  opacity: 0.75;
+  font-size: 0.7rem;
+}
+
+/* Sticky first column (employee name) */
+.report-table .emp-col {
+  position: sticky;
+  left: 0;
+  text-align: left;
+  font-weight: 500;
+  background: #fff;
+  min-width: 180px;
+  z-index: 2;
+}
+
+.report-table thead .emp-col {
+  background: var(--wra-primary);
+  z-index: 3;
+}
+
+.report-table tbody tr:hover td {
+  background: #f6fafa;
+}
+
+.report-table tbody tr:hover .emp-col {
+  background: #f6fafa;
+}
+
+.report-table td.is-weekend {
+  background: #f8f9fa;
+}
+
+.cell-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0 0.2rem;
+}
+
+
+.cell-full      { background: #d1fae5; color: #065f46; }  /* green  — worked full day */
+.cell-half      { background: #e0f2fe; color: #075985; }  /* blue   — half worked + half leave */
+.cell-leave-full { background: #fee2e2; color: #991b1b; } /* red    — full day leave */
+.cell-leave-half { background: #fef3c7; color: #92400e; } /* yellow — half day leave, no report */
+.cell-missing   { background: transparent; color: #ced4da; font-weight: 400; }
+.cell-warn        { background: #ffedd5; color: #9a3412; }  /* orange — due but not submitted */
+.cell-danger      { background: #fee2e2; color: #991b1b; } /* red    — missing on Mon–Sat */
+.cell-friday-all  { background: #0d9488; color: #fff; }    /* teal   — WR + TS + Weekly all done on Friday */
+.cell-commit      { background: #dbeafe; color: #1d4ed8; text-decoration: none; }
+.cell-commit:hover { background: #bfdbfe; }
+
+/* Left-side brand mark */
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.65rem;
+  background: var(--wra-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
