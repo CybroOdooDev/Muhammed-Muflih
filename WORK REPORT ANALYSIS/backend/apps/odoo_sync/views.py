@@ -26,19 +26,18 @@ class OdooStatusView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        try:
-            cred = request.user.odoo_credential
-            return Response({
-                "connected": True,
-                "url":   cred.url,
-                "db":    cred.db,
-                "login": cred.login,
-            })
-        except OdooCredential.DoesNotExist:
-            return Response({"connected": False})
+        creds = OdooCredential.objects.filter(user=request.user).order_by('id')
+        return Response([
+            {"id": c.id, "name": c.name, "url": c.url, "db": c.db, "login": c.login}
+            for c in creds
+        ])
 
     def delete(self, request):
-        OdooCredential.objects.filter(user=request.user).delete()
+        pk = request.query_params.get('id')
+        if pk:
+            OdooCredential.objects.filter(user=request.user, pk=pk).delete()
+        else:
+            OdooCredential.objects.filter(user=request.user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -48,6 +47,7 @@ class OdooConnectView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        name    = (request.data.get("name")    or "Default").strip()
         url     = (request.data.get("url")     or "").strip().rstrip("/")
         db      = (request.data.get("db")      or "").strip()
         login   = (request.data.get("login")   or "").strip()
@@ -71,11 +71,11 @@ class OdooConnectView(APIView):
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        OdooCredential.objects.update_or_create(
-            user=request.user,
+        cred, _ = OdooCredential.objects.update_or_create(
+            user=request.user, name=name,
             defaults={"url": url, "db": db, "login": login, "api_key": api_key},
         )
-        return Response({"connected": True})
+        return Response({"connected": True, "id": cred.id, "name": cred.name})
 
 
 class OdooScrumView(APIView):
@@ -84,9 +84,8 @@ class OdooScrumView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        try:
-            cred = request.user.odoo_credential
-        except OdooCredential.DoesNotExist:
+        cred = request.user.odoo_credentials.first()
+        if not cred:
             return Response(
                 {"detail": "Odoo not connected."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -128,9 +127,8 @@ class OdooInspectView(APIView):
 
     def get(self, request):
         model = request.query_params.get('model', 'x_daily_tasks_line_7390c')
-        try:
-            cred = request.user.odoo_credential
-        except OdooCredential.DoesNotExist:
+        cred = request.user.odoo_credentials.first()
+        if not cred:
             return Response({"detail": "Odoo not connected."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             uid = _authenticate(cred.url, cred.db, cred.login, cred.api_key)
@@ -174,9 +172,8 @@ class OdooDailyTaskView(APIView):
         month_start = f"{y}-{m:02d}-01"
         month_end   = f"{y + 1}-01-01" if m == 12 else f"{y}-{m + 1:02d}-01"
 
-        try:
-            cred = request.user.odoo_credential
-        except OdooCredential.DoesNotExist:
+        cred = request.user.odoo_credentials.first()
+        if not cred:
             return Response(
                 {"detail": "Odoo not connected."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -352,3 +349,238 @@ class OdooDailyTaskView(APIView):
             'day_meta':  day_meta,
             'data':      data,
         })
+
+
+class OdooTimesheetView(APIView):
+    """GET ?month=YYYY-MM → per-employee daily hours from Odoo Timesheets."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        month_str = request.query_params.get('month', '')
+        if not month_str:
+            from datetime import datetime
+            now = datetime.now()
+            month_str = f"{now.year}-{now.month:02d}"
+
+        try:
+            parts = month_str.split('-')
+            y, m = int(parts[0]), int(parts[1])
+            if not (1 <= m <= 12):
+                raise ValueError
+        except (ValueError, AttributeError, IndexError):
+            return Response(
+                {"detail": "month must be YYYY-MM."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        month_start = f"{y}-{m:02d}-01"
+        month_end   = f"{y + 1}-01-01" if m == 12 else f"{y}-{m + 1:02d}-01"
+
+        cred = request.user.odoo_credentials.first()
+        if not cred:
+            return Response(
+                {"detail": "Odoo not connected."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            uid = _authenticate(cred.url, cred.db, cred.login, cred.api_key)
+            mdl = xmlrpc.client.ServerProxy(f"{cred.url.rstrip('/')}/xmlrpc/2/object")
+
+            def kw(model, method, domain, kwargs):
+                return mdl.execute_kw(cred.db, uid, cred.api_key, model, method, domain, kwargs)
+
+            entries = kw(
+                'account.analytic.line', 'search_read',
+                [[
+                    ['date', '>=', month_start],
+                    ['date', '<',  month_end],
+                    ['project_id', '!=', False],
+                ]],
+                {
+                    'fields': ['employee_id', 'date', 'unit_amount', 'project_id', 'name'],
+                    'order': 'date asc',
+                },
+            )
+
+        except xmlrpc.client.Fault as e:
+            return Response(
+                {"detail": f"Odoo error: {e.faultString}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except (ValueError, socket.gaierror, ConnectionRefusedError, OSError) as e:
+            return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+        emp_names_ordered = []
+        emp_seen = set()
+        data = {}
+
+        for entry in entries:
+            emp = entry.get('employee_id')
+            if isinstance(emp, (list, tuple)) and len(emp) == 2 and emp[1]:
+                emp_name = emp[1]
+            elif emp and emp is not False:
+                emp_name = str(emp)
+            else:
+                continue
+
+            date_str = entry.get('date', '')
+            try:
+                day_int = int(str(date_str).split('-')[2])
+            except (IndexError, ValueError):
+                continue
+
+            hours     = float(entry.get('unit_amount') or 0)
+            proj      = entry.get('project_id')
+            proj_name = proj[1] if isinstance(proj, (list, tuple)) and len(proj) == 2 else ''
+
+            if emp_name not in emp_seen:
+                emp_seen.add(emp_name)
+                emp_names_ordered.append(emp_name)
+                data[emp_name] = {}
+
+            if day_int not in data[emp_name]:
+                data[emp_name][day_int] = {'hours': 0.0, 'projects': []}
+
+            data[emp_name][day_int]['hours'] = round(
+                data[emp_name][day_int]['hours'] + hours, 2
+            )
+            if proj_name and proj_name not in data[emp_name][day_int]['projects']:
+                data[emp_name][day_int]['projects'].append(proj_name)
+
+        days_in_month = calendar.monthrange(y, m)[1]
+        day_meta = [
+            {'day': d, 'weekend': date_cls(y, m, d).weekday() >= 5}
+            for d in range(1, days_in_month + 1)
+        ]
+
+        return Response({
+            'month':     month_str,
+            'employees': sorted(emp_names_ordered),
+            'day_meta':  day_meta,
+            'data':      data,
+        })
+
+
+class OdooTimesheet2View(APIView):
+    """GET ?start=YYYY-MM-DD&end=YYYY-MM-DD[&employee_id=N] → flat list from Connection 2."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        start       = (request.query_params.get('start')       or '').strip()
+        end         = (request.query_params.get('end')         or '').strip()
+        employee_id = (request.query_params.get('employee_id') or '').strip()
+
+        try:
+            if not start or not end:
+                raise ValueError
+            from datetime import date as _date
+            _date.fromisoformat(start)
+            _date.fromisoformat(end)
+            if start > end:
+                raise ValueError
+        except ValueError:
+            return Response(
+                {"detail": "start and end must be valid YYYY-MM-DD dates with start ≤ end."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        cred = request.user.odoo_credentials.filter(name='Connection 2').first()
+        if not cred:
+            return Response(
+                {"detail": "Odoo Connection 2 not set up."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            uid = _authenticate(cred.url, cred.db, cred.login, cred.api_key)
+            mdl = xmlrpc.client.ServerProxy(f"{cred.url.rstrip('/')}/xmlrpc/2/object")
+
+            domain = [
+                ['date', '>=', start],
+                ['date', '<=', end],
+                ['project_id', '!=', False],
+            ]
+            if employee_id:
+                domain.append(['employee_id', '=', int(employee_id)])
+
+            raw = mdl.execute_kw(
+                cred.db, uid, cred.api_key,
+                'account.analytic.line', 'search_read',
+                [domain],
+                {
+                    'fields': ['employee_id', 'date', 'unit_amount',
+                               'project_id', 'task_id', 'name'],
+                    'order':  'date asc, employee_id asc',
+                },
+            )
+
+        except xmlrpc.client.Fault as e:
+            return Response(
+                {"detail": f"Odoo error: {e.faultString}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except (ValueError, socket.gaierror, ConnectionRefusedError, OSError) as e:
+            return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+        def _m2o_name(val):
+            return val[1] if isinstance(val, (list, tuple)) and len(val) == 2 else ''
+
+        entries = []
+        for e in raw:
+            emp_name  = _m2o_name(e.get('employee_id'))
+            if not emp_name:
+                continue
+            entries.append({
+                'date':        e.get('date', ''),
+                'employee':    emp_name,
+                'project':     _m2o_name(e.get('project_id')),
+                'task':        _m2o_name(e.get('task_id')),
+                'description': (e.get('name') or '').strip(),
+                'hours':       round(float(e.get('unit_amount') or 0), 2),
+            })
+
+        return Response({'entries': entries})
+
+
+class OdooEmployees2View(APIView):
+    """GET → list of active employees from Connection 2."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        cred = request.user.odoo_credentials.filter(name='Connection 2').first()
+        if not cred:
+            return Response(
+                {"detail": "Odoo Connection 2 not set up."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            uid = _authenticate(cred.url, cred.db, cred.login, cred.api_key)
+            mdl = xmlrpc.client.ServerProxy(f"{cred.url.rstrip('/')}/xmlrpc/2/object")
+
+            employees = mdl.execute_kw(
+                cred.db, uid, cred.api_key,
+                'hr.employee', 'search_read',
+                [[['active', '=', True]]],
+                {'fields': ['id', 'name', 'work_email'], 'order': 'name asc'},
+            )
+
+        except xmlrpc.client.Fault as e:
+            return Response(
+                {"detail": f"Odoo error: {e.faultString}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except (ValueError, socket.gaierror, ConnectionRefusedError, OSError) as e:
+            return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+        return Response({'employees': employees})

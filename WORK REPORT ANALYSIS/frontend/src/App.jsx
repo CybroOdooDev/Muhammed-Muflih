@@ -35,7 +35,7 @@ export default function App() {
         <Route path="work-days" element={<WorkDayCount />} />
         <Route path="projects" element={<Projects />} />
         <Route path="odoo-daily" element={<OdooDailyDashboard />} />
-        <Route path="settings" element={<Settings />} />
+<Route path="settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

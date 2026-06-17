@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/client'
 
-function OdooSettings() {
-  const [status,  setStatus]  = useState(null)   // null = loading
+function OdooConnectionCard({ label, slotName, connection, onConnected, onDisconnected }) {
   const [url,     setUrl]     = useState('')
   const [db,      setDb]      = useState('')
   const [login,   setLogin]   = useState('')
@@ -12,28 +11,15 @@ function OdooSettings() {
   const [error,   setError]   = useState('')
   const [success, setSuccess] = useState('')
 
-  useEffect(() => {
-    api.get('/odoo/status/')
-      .then(r => {
-        setStatus(r.data)
-        if (r.data.connected) {
-          setUrl(r.data.url)
-          setDb(r.data.db)
-          setLogin(r.data.login)
-        }
-      })
-      .catch(() => setStatus({ connected: false }))
-  }, [])
-
   function connect(e) {
     e.preventDefault()
     setSaving(true)
     setError('')
     setSuccess('')
-    api.post('/odoo/connect/', { url, db, login, api_key: apiKey })
-      .then(() => {
-        setStatus({ connected: true, url, db, login })
-        setSuccess('Connected to Odoo successfully.')
+    api.post('/odoo/connect/', { name: slotName, url, db, login, api_key: apiKey })
+      .then(r => {
+        onConnected({ id: r.data.id, name: r.data.name, url, db, login })
+        setSuccess('Connected successfully.')
         setApiKey('')
       })
       .catch(err => setError(err.response?.data?.detail || 'Connection failed.'))
@@ -41,9 +27,9 @@ function OdooSettings() {
   }
 
   function disconnect() {
-    api.delete('/odoo/status/')
+    api.delete(`/odoo/status/?id=${connection.id}`)
       .then(() => {
-        setStatus({ connected: false })
+        onDisconnected(connection.id)
         setUrl('')
         setDb('')
         setLogin('')
@@ -54,30 +40,26 @@ function OdooSettings() {
       .catch(() => {})
   }
 
-  if (!status) return null
-
   return (
-    <div className="card shadow-sm mt-4" style={{ maxWidth: 560 }}>
+    <div className="card shadow-sm" style={{ maxWidth: 560 }}>
       <div className="card-body">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h5 className="card-title mb-0">Odoo Connection</h5>
-          {status.connected && (
-            <span className="badge bg-success">Connected</span>
-          )}
+          <h5 className="card-title mb-0">{label}</h5>
+          {connection && <span className="badge bg-success">Connected</span>}
         </div>
 
-        {status.connected && (
+        {connection && (
           <div className="mb-3 small text-muted">
-            <div><span className="fw-semibold">URL:</span> {status.url}</div>
-            <div><span className="fw-semibold">Database:</span> {status.db}</div>
-            <div><span className="fw-semibold">Login:</span> {status.login}</div>
+            <div><span className="fw-semibold">URL:</span> {connection.url}</div>
+            <div><span className="fw-semibold">Database:</span> {connection.db}</div>
+            <div><span className="fw-semibold">Login:</span> {connection.login}</div>
           </div>
         )}
 
         {error   && <div className="alert alert-warning py-2 small mb-3">{error}</div>}
         {success && <div className="alert alert-success py-2 small mb-3">{success}</div>}
 
-        {!status.connected && (
+        {!connection && (
           <form onSubmit={connect} className="d-flex flex-column gap-3">
             <div>
               <label className="form-label fw-semibold mb-1">Odoo URL</label>
@@ -134,12 +116,55 @@ function OdooSettings() {
           </form>
         )}
 
-        {status.connected && (
+        {connection && (
           <button className="btn btn-outline-danger btn-sm" onClick={disconnect}>
             Disconnect
           </button>
         )}
       </div>
+    </div>
+  )
+}
+
+const SLOTS = [
+  { label: ' Daily Task Odoo Connection ', slotName: 'Connection 1' },
+  { label: ' Project Odoo Connection ', slotName: 'Connection 2' },
+]
+
+function OdooSettings() {
+  const [connections, setConnections] = useState(null)
+
+  useEffect(() => {
+    api.get('/odoo/status/')
+      .then(r => setConnections(r.data))
+      .catch(() => setConnections([]))
+  }, [])
+
+  if (connections === null) return null
+
+  function handleConnected(newConn) {
+    setConnections(prev => {
+      const exists = prev.find(c => c.id === newConn.id)
+      return exists ? prev.map(c => c.id === newConn.id ? newConn : c) : [...prev, newConn]
+    })
+  }
+
+  function handleDisconnected(id) {
+    setConnections(prev => prev.filter(c => c.id !== id))
+  }
+
+  return (
+    <div className="mt-4 d-flex flex-column gap-4">
+      {SLOTS.map(slot => (
+        <OdooConnectionCard
+          key={slot.slotName}
+          label={slot.label}
+          slotName={slot.slotName}
+          connection={connections.find(c => c.name === slot.slotName) || null}
+          onConnected={handleConnected}
+          onDisconnected={handleDisconnected}
+        />
+      ))}
     </div>
   )
 }
@@ -186,7 +211,7 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Odoo connection card */}
+      {/* Odoo connections */}
       <OdooSettings />
     </div>
   )

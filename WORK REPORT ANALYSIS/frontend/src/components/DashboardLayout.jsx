@@ -73,8 +73,8 @@ const MENU = [
   { to: '/comparison', label: 'Comparison', icon: icons.comparison },
   { to: '/mom', label: 'MOM Dashboard', icon: icons.mom },
   { to: '/work-days', label: 'Work Day Count', icon: icons.workdays },
-  { to: '/projects', label: 'Projects',       icon: icons.projects },
-  { to: '/odoo-daily',  label: 'Daily Tasks',     icon: icons.daily  },
+  { to: '/projects', label: 'Projects',        icon: icons.projects },
+  { to: '/odoo-daily',  label: 'Daily Tasks',  icon: icons.daily     },
 ]
 
 export default function DashboardLayout() {

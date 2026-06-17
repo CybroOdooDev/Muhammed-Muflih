@@ -246,6 +246,10 @@ body {
 .cell-friday-all  { background: #0d9488; color: #fff; }    /* teal   — WR + TS + Weekly all done on Friday */
 .cell-commit      { background: #dbeafe; color: #1d4ed8; text-decoration: none; }
 .cell-commit:hover { background: #bfdbfe; }
+a.cell-badge      { text-decoration: none; }
+a.cell-badge:hover { opacity: 0.85; cursor: pointer; }
+.cell-ts-full    { background: #d1fae5; color: #065f46; }  /* green  — ≥ 8 h logged */
+.cell-ts-partial { background: #fef3c7; color: #92400e; }  /* yellow — < 8 h logged */
 
 /* Left-side brand mark */
 .brand-mark {
