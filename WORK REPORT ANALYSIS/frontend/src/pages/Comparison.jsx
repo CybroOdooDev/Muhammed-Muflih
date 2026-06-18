@@ -31,12 +31,15 @@ export default function Comparison() {
   const [entries,     setEntries]     = useState(null)
   const [error,       setError]       = useState('')
   const [fetchedFor,  setFetchedFor]  = useState(null) // {name, odooId, odooEmail, start, end}
+  const [aiLoading,   setAiLoading]   = useState(false)
+  const [aiAnalysis,  setAiAnalysis]  = useState(null)
+  const [aiError,     setAiError]     = useState('')
 
   useEffect(() => {
     setInitLoading(true)
     Promise.all([
       api.get('/gmail/employees/').then(r => r.data.employees || []).catch(() => []),
-      api.get('/odoo/employees2/').then(r => r.data.employees || []).catch(e => {
+      api.get('/odoo/employees/').then(r => r.data.employees || []).catch(e => {
         const msg = e.response?.data?.detail || ''
         if (msg.toLowerCase().includes('connection 2')) setError(msg)
         return []
@@ -52,6 +55,21 @@ export default function Comparison() {
     if (!name) return null
     const key = name.toLowerCase()
     return odooList.find(e => (e.work_email || '').split('@')[0].toLowerCase() === key) || null
+  }
+
+  function runAiAnalysis() {
+    setAiLoading(true)
+    setAiError('')
+    setAiAnalysis(null)
+    api.post('/gmail/analyze/', {
+      employee_local: fetchedFor.name.toLowerCase(),
+      start:          fetchedFor.start,
+      end:            fetchedFor.end,
+      odoo_entries:   entries,
+    })
+      .then(r => setAiAnalysis(r.data.sections ?? r.data.analysis))
+      .catch(e => setAiError(e.response?.data?.detail || 'AI analysis failed.'))
+      .finally(() => setAiLoading(false))
   }
 
   function fetchComparison() {
@@ -72,11 +90,13 @@ export default function Comparison() {
     setError('')
     setEntries(null)
     setFetchedFor(null)
+    setAiAnalysis(null)
+    setAiError('')
 
     const params = { start: selStart, end: selEnd }
     if (selName && matched) params.employee_id = matched.id
 
-    api.get('/odoo/timesheet2/', { params })
+    api.get('/odoo/timesheet-entries/', { params })
       .then(r => {
         setEntries(r.data.entries || [])
         setFetchedFor({
@@ -205,16 +225,29 @@ export default function Comparison() {
                 {fetchedFor.start} → {fetchedFor.end}
               </span>
             </h5>
-            <span className="fw-semibold" style={{ color: '#065f46' }}>
-              Total: {fmtHours(totalHours(entries))}
-            </span>
+            <div className="d-flex align-items-center gap-3">
+              <span className="fw-semibold" style={{ color: '#065f46' }}>
+                Total: {fmtHours(totalHours(entries))}
+              </span>
+              {fetchedFor.name && (
+                <button
+                  className="btn btn-sm"
+                  style={{ backgroundColor: '#7c3aed', color: 'white' }}
+                  onClick={runAiAnalysis}
+                  disabled={aiLoading}>
+                  {aiLoading
+                    ? <><span className="spinner-border spinner-border-sm me-1" />Analyzing…</>
+                    : '✦ Analyze with AI'}
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="report-table-wrap">
             <table className="report-table">
               <thead>
                 <tr>
-                  <th style={{ minWidth: 100 }}>Date</th>
+                  <th style={{ minWidth: 100}}>Date</th>
                   {!fetchedFor.odooId && <th style={{ minWidth: 140 }}>Employee</th>}
                   <th style={{ minWidth: 140 }}>Project</th>
                   <th style={{ minWidth: 160 }}>Task</th>
@@ -257,8 +290,72 @@ export default function Comparison() {
               </tfoot>
             </table>
           </div>
-        </>
 
+          {aiError && (
+            <div className="alert alert-warning mt-4">{aiError}</div>
+          )}
+
+          {aiAnalysis && (
+            <div className="mt-4">
+              <h6 className="fw-semibold mb-3" style={{ color: '#7c3aed' }}>✦ AI Analysis</h6>
+
+              {/* Plain-text fallback */}
+              {typeof aiAnalysis === 'string' && (
+                <div className="card border-0 shadow-sm">
+                  <div className="card-body">
+                    <p className="mb-0" style={{ lineHeight: 1.8, color: '#374151' }}>{aiAnalysis}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Structured table */}
+              {typeof aiAnalysis === 'object' && Array.isArray(aiAnalysis.rows) && (
+                <>
+                  <div className="report-table-wrap">
+                    <table className="report-table">
+                      <thead>
+                        <tr style={{ backgroundColor: '#843abd' }}>
+                          <th style={{ minWidth: 90, backgroundColor: '#843abd', color: '#fff' }}>Date</th>
+                          <th style={{ minWidth: 160, backgroundColor: '#843abd', color: '#fff' }}>Task</th>
+                          <th style={{ minWidth: 220, textAlign: 'left', backgroundColor: '#843abd', color: '#fff' }}>Description</th>
+                          <th style={{ minWidth: 70, backgroundColor: '#843abd ', color: '#fff' }}>Time</th>
+                          <th style={{ minWidth: 150, backgroundColor: '#843abd', color: '#fff' }}>Comparison</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {aiAnalysis.rows.map((row, i) => {
+                          return (
+                            <tr key={i}>
+                              <td>{row.date || '–'}</td>
+                              <td style={{ fontWeight: 500 }}>{row.task || '–'}</td>
+                              <td style={{ textAlign: 'left', maxWidth: 300, whiteSpace: 'normal' }}>
+                                {row.description || '–'}
+                              </td>
+                              <td>
+                                <span className="cell-badge cell-ts-partial">{row.time || '–'}</span>
+                              </td>
+                              <td style={{ textAlign: 'left', maxWidth: 320, whiteSpace: 'normal' }}>
+                                <div className="small" style={{ color: '#374151', lineHeight: 1.6 }}>
+                                  {row.comparison || '–'}
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  {aiAnalysis.summary && (
+                    <div className="mt-3 p-3 rounded-3 small"
+                      style={{ background: '#faf5ff', border: '1px solid #e9d5ff', color: '#6b21a8' }}>
+                      <strong>Summary:</strong> {aiAnalysis.summary}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
   )

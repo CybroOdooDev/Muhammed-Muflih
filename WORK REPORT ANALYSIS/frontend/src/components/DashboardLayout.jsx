@@ -80,10 +80,11 @@ const MENU = [
 export default function DashboardLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [menuOpen,    setMenuOpen]    = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const profileRef = useRef(null)
 
-  // Close the dropdown when clicking outside of it.
+  // Close profile dropdown when clicking outside
   useEffect(() => {
     function onClick(e) {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
@@ -94,17 +95,47 @@ export default function DashboardLayout() {
     return () => document.removeEventListener('mousedown', onClick)
   }, [])
 
+  // Close sidebar on resize to desktop
+  useEffect(() => {
+    function onResize() {
+      if (window.innerWidth >= 768) setSidebarOpen(false)
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  function closeSidebar() { setSidebarOpen(false) }
+
   return (
     <div className="app-shell">
+      {/* Mobile backdrop */}
+      <div
+        className={`sidebar-backdrop${sidebarOpen ? ' show' : ''}`}
+        onClick={closeSidebar}
+      />
+
       {/* Sidebar */}
-      <aside className="sidebar">
-        {/* Logo — matches the login page */}
-        <div className="d-flex align-items-center gap-2 mb-5">
-          <span className="brand-mark">WR</span>
-          <span className="fw-semibold">Work Report Analysis</span>
+      <aside className={`sidebar${sidebarOpen ? ' sidebar-visible' : ''}`}>
+        <div className="d-flex align-items-center justify-content-between mb-5">
+          <div className="d-flex align-items-center gap-2">
+            <span className="brand-mark">WR</span>
+            <span className="fw-semibold">Work Report Analysis</span>
+          </div>
+          {/* Close button — mobile only */}
+          <button
+            type="button"
+            className="hamburger-btn d-md-none"
+            style={{ color: '#495057' }}
+            onClick={closeSidebar}
+            aria-label="Close menu"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
-        {/* Menu */}
         <nav className="nav flex-column">
           {MENU.map((item) => (
             <NavLink
@@ -112,6 +143,7 @@ export default function DashboardLayout() {
               to={item.to}
               end={item.end}
               className="nav-link"
+              onClick={closeSidebar}
             >
               {item.icon}
               <span>{item.label}</span>
@@ -122,7 +154,23 @@ export default function DashboardLayout() {
 
       {/* Main content */}
       <div className="app-content d-flex flex-column">
-        <header className="app-topbar d-flex justify-content-end align-items-center px-4 py-2">
+        <header className="app-topbar d-flex justify-content-between align-items-center px-3 px-md-4 py-2">
+          {/* Hamburger — mobile only */}
+          <button
+            type="button"
+            className="hamburger-btn"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open menu"
+          >
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M3 6h18M3 12h18M3 18h18" />
+            </svg>
+          </button>
+
+          {/* Desktop spacer */}
+          <div className="d-none d-md-block" />
+
           <div className="profile-menu" ref={profileRef}>
             <button
               type="button"
@@ -148,7 +196,7 @@ export default function DashboardLayout() {
               <svg
                 viewBox="0 0 24 24" width="16" height="16" fill="none"
                 stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-                strokeLinejoin="round" className="text-muted"
+                strokeLinejoin="round" style={{ color: 'rgba(255,255,255,0.7)' }}
               >
                 <path d="m6 9 6 6 6-6" />
               </svg>
@@ -159,20 +207,14 @@ export default function DashboardLayout() {
                 <button
                   type="button"
                   className="dropdown-item-btn"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    navigate('/settings')
-                  }}
+                  onClick={() => { setMenuOpen(false); navigate('/settings') }}
                 >
                   Settings
                 </button>
                 <button
                   type="button"
                   className="dropdown-item-btn text-danger"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    logout()
-                  }}
+                  onClick={() => { setMenuOpen(false); logout() }}
                 >
                   Sign out
                 </button>

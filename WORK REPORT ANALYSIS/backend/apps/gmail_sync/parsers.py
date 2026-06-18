@@ -229,6 +229,77 @@ def parse_mom(subject: str):
     return None
 
 
+def parse_work_report_rows(html_body: str) -> list:
+    """Extract all data rows from a work-report HTML table.
+
+    Expected columns (detected dynamically): SI No | Project | Task | Status | Remarks | Hours
+    Returns list of dicts: {project, task, description, hours}
+    """
+    if not html_body:
+        return []
+
+    parser = _TableParser()
+    try:
+        parser.feed(html_body)
+    except Exception:
+        return []
+
+    rows_out = []
+    for table in parser.tables:
+        col_map = {}
+        header_idx = None
+        for i, row in enumerate(table):
+            found_any = False
+            for j, cell in enumerate(row):
+                text = _clean_cell(cell).lower()
+                if 'project' in text and 'project' not in col_map:
+                    col_map['project'] = j; found_any = True
+                elif 'task' in text and 'task' not in col_map:
+                    col_map['task'] = j; found_any = True
+                elif ('hour' in text or 'horus' in text or 'time' in text) and 'hours' not in col_map:
+                    col_map['hours'] = j; found_any = True
+                elif ('remark' in text or 'description' in text) and 'description' not in col_map:
+                    col_map['description'] = j; found_any = True
+                elif 'status' in text and 'status' not in col_map:
+                    col_map['status'] = j; found_any = True
+            if found_any:
+                header_idx = i
+                break
+
+        if not col_map or header_idx is None:
+            continue
+
+        for row in table[header_idx + 1:]:
+            def _get(key, _row=row):
+                idx = col_map.get(key)
+                if idx is not None and idx < len(_row):
+                    return _clean_cell(_row[idx])
+                return ''
+
+            project = _get('project')
+            task    = _get('task')
+            if not project and not task:
+                continue
+
+            hours_raw = _get('hours')
+            try:
+                hours = float(re.sub(r'[^\d.]', '', hours_raw)) if hours_raw else 0.0
+            except (ValueError, TypeError):
+                hours = 0.0
+
+            # Use Remarks column if available, fall back to Status
+            description = _get('description') or _get('status')
+
+            rows_out.append({
+                'project':     project,
+                'task':        task,
+                'description': description,
+                'hours':       hours,
+            })
+
+    return rows_out
+
+
 def has_meeting_task(html_body: str) -> bool:
     """Return True if any Task-column cell in the work-report HTML contains 'meeting'."""
     if not html_body:

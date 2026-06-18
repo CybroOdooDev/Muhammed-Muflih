@@ -1,7 +1,10 @@
 import calendar
+import logging
 import socket
 import xmlrpc.client
 from datetime import date as date_cls
+
+logger = logging.getLogger(__name__)
 
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -104,7 +107,7 @@ class OdooScrumView(APIView):
                 {
                     "fields": ["name", "date_start", "date_stop", "state", "description"],
                     "order":  "date_start desc",
-                    "limit":  200,
+                    # "limit":  200,
                 },
             )
         except xmlrpc.client.Fault as e:

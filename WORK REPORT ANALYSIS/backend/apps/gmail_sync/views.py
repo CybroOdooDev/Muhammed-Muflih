@@ -1,7 +1,10 @@
 import base64
 import calendar
+import logging
 import re
 from datetime import datetime, timedelta, timezone
+
+logger = logging.getLogger(__name__)
 
 from django.conf import settings
 from google.auth.transport.requests import Request
@@ -15,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import GmailCredential, Project
-from .parsers import has_meeting_task, parse_leave, parse_mom, parse_work_report
+from .parsers import has_meeting_task, parse_leave, parse_mom, parse_work_report, parse_work_report_rows
 from .serializers import ProjectSerializer
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
@@ -164,8 +167,9 @@ class GmailSyncView(APIView):
                     if emp:
                         key = (date.year, date.month)
                         month_leaves.setdefault(key, {}).setdefault(emp, {})[date.day] = leave_type
-            except Exception:
-                continue   # skip any malformed message silently
+            except Exception as exc:
+                logger.warning("Skipped malformed message %s: %s", msg.get("id"), exc)
+                continue
 
         all_keys = sorted(month_reports.keys() | month_leaves.keys(), reverse=True)
 
@@ -546,25 +550,22 @@ class EmployeesListView(APIView):
 
         query = 'subject:Daily Work Report'
 
+        service = _build_service(cred_obj)
+        msgs    = _batch_get_messages(
+            service,
+            _list_ids(service, query),
+            fmt="metadata",
+            metadata_headers=["Subject", "From"],
+        )
         employees = set()
-        try:
-            service = _build_service(cred_obj)
-            msgs    = _batch_get_messages(
-                service,
-                _list_ids(service, query),
-                fmt="metadata",
-                metadata_headers=["Subject", "From"],
-            )
-            for msg in msgs:
-                subject = _msg_header(msg, "subject")
-                sender  = _msg_sender(msg)
-                parsed  = parse_work_report(subject, sender_fallback=sender)
-                if parsed:
-                    emp = _emp_name(msg)
-                    if emp:
-                        employees.add(emp)
-        except Exception:
-            pass
+        for msg in msgs:
+            subject = _msg_header(msg, "subject")
+            sender  = _msg_sender(msg)
+            parsed  = parse_work_report(subject, sender_fallback=sender)
+            if parsed:
+                emp = _emp_name(msg)
+                if emp:
+                    employees.add(emp)
 
         return Response({"employees": sorted(employees)})
 
@@ -636,7 +637,8 @@ class MomSyncView(APIView):
                     continue
                 key = (date.year, date.month)
                 meeting_days.setdefault(emp, {}).setdefault(key, set()).add(date.day)
-            except Exception:
+            except Exception as exc:
+                logger.warning("Skipped malformed work-report message %s: %s", msg.get("id"), exc)
                 continue
 
         # emp -> (y, m) -> set[day]  — days where employee sent a MOM email
@@ -654,7 +656,8 @@ class MomSyncView(APIView):
                     continue
                 key = (date.year, date.month)
                 mom_days.setdefault(emp, {}).setdefault(key, set()).add(date.day)
-            except Exception:
+            except Exception as exc:
+                logger.warning("Skipped malformed MOM message %s: %s", msg.get("id"), exc)
                 continue
 
         def _build(y, m):
@@ -749,3 +752,221 @@ class ProjectDetailView(APIView):
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ---------------------------------------------------------------------------
+# AI Analysis — compare Gmail work-report emails vs Odoo timesheet entries
+# ---------------------------------------------------------------------------
+
+class AIAnalyzeView(APIView):
+    """POST {employee_local, start, end, odoo_entries} →
+    Fetch Gmail work-report emails for that employee in the date range,
+    parse task/hours rows from each email body, then call Claude Haiku
+    to compare against the provided Odoo timesheet entries.
+    Returns {"sections": {"rows": [...], "summary": "..."}}
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        employee_local = (request.data.get("employee_local") or "").strip().lower()
+        start_str      = (request.data.get("start") or "").strip()
+        end_str        = (request.data.get("end")   or "").strip()
+        odoo_entries   = request.data.get("odoo_entries") or []
+
+        # --- validate input ---------------------------------------------------
+        if not employee_local:
+            return Response({"detail": "employee_local is required."}, status=status.HTTP_400_BAD_REQUEST)
+        if not odoo_entries or not isinstance(odoo_entries, list):
+            return Response({"detail": "odoo_entries must be a non-empty list."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            start_date = datetime.strptime(start_str, "%Y-%m-%d").date()
+            end_date   = datetime.strptime(end_str,   "%Y-%m-%d").date()
+        except ValueError:
+            return Response({"detail": "start and end must be YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # --- check API key ----------------------------------------------------
+        api_key = settings.ANTHROPIC_API_KEY
+        if not api_key:
+            return Response(
+                {"detail": "AI API key not configured. Set ANTHROPIC_API_KEY in .env."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        # --- check Gmail credential -------------------------------------------
+        try:
+            cred_obj = request.user.gmail_credential
+        except GmailCredential.DoesNotExist:
+            return Response({"detail": "Gmail not connected."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # --- fetch Gmail emails (two-phase: metadata → filter → full body) ------
+        try:
+            service = _build_service(cred_obj)
+            buf    = timedelta(days=14)
+            after  = (start_date - buf).strftime("%Y/%m/%d")
+            before = (end_date   + buf).strftime("%Y/%m/%d")
+            all_ids = _list_ids(service, f'subject:Daily Work Report after:{after} before:{before}')
+
+            # Phase 1: metadata only — cheap, no body download
+            meta_msgs = _batch_get_messages(
+                service, all_ids, fmt="metadata",
+                metadata_headers=["From", "Subject"],
+            )
+
+            # Filter to only this employee's message IDs before fetching bodies
+            matched_ids = []
+            for m in meta_msgs:
+                from_local   = _msg_from_email_local(m).lower()
+                display_name = _msg_sender(m).lower()
+                if (
+                    from_local == employee_local
+                    or display_name == employee_local
+                    or display_name.startswith(employee_local + " ")
+                    or display_name.startswith(employee_local + ".")
+                ):
+                    matched_ids.append(m["id"])
+
+            # Phase 2: full body only for matching emails
+            msgs = _batch_get_messages(service, matched_ids, fmt="full") if matched_ids else []
+        except HttpError as e:
+            return Response({"detail": f"Gmail error: {e}"}, status=status.HTTP_502_BAD_GATEWAY)
+        except Exception as e:
+            return Response({"detail": f"Gmail error: {e}"}, status=status.HTTP_502_BAD_GATEWAY)
+
+        # --- parse email rows -------------------------------------------------
+        email_rows = []   # [{date, project, task, description, hours}]
+        total_msgs_found = len(all_ids)
+        matched_msgs = 0
+
+        for msg in msgs:
+            subject = _msg_header(msg, "subject")
+            if not subject:
+                continue
+            sender = _msg_sender(msg)
+            parsed = parse_work_report(subject, sender_fallback=sender)
+            if not parsed:
+                continue
+            date, _ = parsed
+            if not (start_date <= date <= end_date):
+                continue
+
+            matched_msgs += 1
+            rows = parse_work_report_rows(_msg_html_body(msg))
+            for r in rows:
+                email_rows.append({**r, "date": date.isoformat()})
+
+        if not email_rows:
+            if total_msgs_found == 0:
+                detail = (
+                    f"No work-report emails found in Gmail for the date range "
+                    f"{start_str} to {end_str}. Check that Gmail is synced."
+                )
+            elif matched_msgs == 0:
+                detail = (
+                    f"Found {total_msgs_found} work-report email(s) in the date range but none "
+                    f"matched '{employee_local}'. The employee's Gmail address may not start with "
+                    f"'{employee_local}'."
+                )
+            else:
+                detail = (
+                    f"Found {matched_msgs} email(s) from {employee_local} but could not parse "
+                    "task rows from the email body. The work-report table format may differ."
+                )
+            return Response({"sections": {"rows": [], "summary": detail}})
+
+        # --- build prompt -----------------------------------------------------
+        odoo_cap   = odoo_entries[:100]
+        email_cap  = email_rows[:100]
+        odoo_total = round(sum(float(e.get("hours") or 0) for e in odoo_cap), 2)
+
+        odoo_lines  = "\n".join(
+            f"  {e.get('date','')} | {e.get('project','')} | {e.get('task','')} | "
+            f"{e.get('hours',0)}h | {e.get('description','')}"
+            for e in odoo_cap
+        )
+        email_lines = "\n".join(
+            f"  {r['date']} | {r['project']} | {r['task']} | "
+            f"{r['hours']}h | {r['description']}"
+            for r in email_cap
+        )
+
+        prompt = (
+            f"Employee: {employee_local}   Period: {start_str} to {end_str}\n\n"
+            f"=== ODOO TIMESHEET ({len(odoo_cap)} entries, total {odoo_total}h) ===\n"
+            f"  Date | Project | Task | Hours | Description\n"
+            f"{odoo_lines}\n\n"
+            f"=== GMAIL WORK-REPORT EMAILS ({len(email_cap)} rows across {matched_msgs} emails) ===\n"
+            f"  Date | Project | Task | Hours mentioned | Remarks\n"
+            f"{email_lines}\n\n"
+            "For each Odoo entry, find the best matching Gmail row and classify it.\n"
+            "Return ONLY a JSON object (no markdown, no preamble) with this exact shape:\n"
+            "{\n"
+            '  "rows": [\n'
+            '    {\n'
+            '      "date": "YYYY-MM-DD",\n'
+            '      "task": "task name from Odoo",\n'
+            '      "description": "description from Odoo",\n'
+            '      "time": "Xh",\n'
+            '      "status": one of ["matching_all", "matching_task", "matching_hours", "not_matching"],\n'
+            '      "comparison": "2-3 sentences comparing this Odoo entry against the Gmail row: task name match, hours alignment, any description difference. Be specific and factual."\n'
+            '    }\n'
+            '  ],\n'
+            '  "summary": "one sentence overall assessment"\n'
+            "}\n\n"
+            "Status rules:\n"
+            "  matching_all    = task name, description AND hours all closely match a Gmail row\n"
+            "  matching_task   = task name matches but hours or description differ significantly\n"
+            "  matching_hours  = hours match but task name differs\n"
+            "  not_matching    = no Gmail row matches this Odoo entry at all\n"
+            "Be factual. Do not fabricate details not in the data."
+        )
+
+        # --- call Claude Haiku ------------------------------------------------
+        try:
+            import anthropic
+            import json as _json
+            client = anthropic.Anthropic(api_key=api_key)
+            message = client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=min(4096, max(1200, len(odoo_cap) * 300 + 500)),
+                system=(
+                    "You are an HR analyst. Compare Odoo timesheet entries against Gmail "
+                    "work-report emails row by row. Return ONLY valid JSON — no markdown fences, "
+                    "no preamble, no extra text outside the JSON object."
+                ),
+                messages=[{"role": "user", "content": prompt}],
+            )
+            raw = message.content[0].text.strip()
+            # Strip markdown fences if present
+            if raw.startswith("```"):
+                raw = raw.split("```")[1]
+                if raw.startswith("json"):
+                    raw = raw[4:]
+                raw = raw.rsplit("```", 1)[0].strip()
+            # Extract outermost {...} block to handle any leading/trailing text
+            import re as _re
+            brace_match = _re.search(r'\{.*\}', raw, _re.DOTALL)
+            if brace_match:
+                raw = brace_match.group(0)
+            try:
+                sections = _json.loads(raw)
+            except _json.JSONDecodeError:
+                sections = {"rows": [], "summary": "Analysis could not be parsed. Please try again."}
+            analysis = sections
+        except anthropic.AuthenticationError:
+            return Response(
+                {"detail": "AI API key is invalid. Check ANTHROPIC_API_KEY in .env."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        except anthropic.RateLimitError:
+            return Response(
+                {"detail": "AI rate limit reached. Please try again shortly."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+        except Exception as e:
+            return Response(
+                {"detail": f"AI error: {e}"},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        return Response({"sections": analysis})

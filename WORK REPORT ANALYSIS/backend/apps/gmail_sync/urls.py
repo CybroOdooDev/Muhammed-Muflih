@@ -4,7 +4,7 @@ from .views import (
     GmailConnectView, GmailStatusView, GmailSyncView,
     WorkDayCountView, EmployeesListView,
     ProjectListCreateView, ProjectDetailView,
-    MomSyncView,
+    MomSyncView, AIAnalyzeView,
 )
 
 urlpatterns = [
@@ -16,4 +16,5 @@ urlpatterns = [
     path("employees/", EmployeesListView.as_view()),
     path("projects/", ProjectListCreateView.as_view()),
     path("projects/<int:pk>/", ProjectDetailView.as_view()),
+    path("analyze/", AIAnalyzeView.as_view()),
 ]

@@ -81,7 +81,7 @@ export default function Login() {
 
             <div className="d-grid my-3">
               <button
-                className="btn btn-outline-dark d-flex align-items-center justify-content-center gap-2 py-2"
+                className="btn btn-outline-dark  login_btn d-flex align-items-center justify-content-center gap-2 py-2"
                 onClick={() => handleGoogleLogin()}
                 disabled={!CLIENT_ID || loading}
               >

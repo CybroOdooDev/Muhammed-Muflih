@@ -8,7 +8,7 @@ urlpatterns = [
     path("scrum/",        OdooScrumView.as_view()),
     path("daily-tasks/",  OdooDailyTaskView.as_view()),
     path("timesheet/",    OdooTimesheetView.as_view()),
-    path("timesheet2/",   OdooTimesheet2View.as_view()),
-    path("employees2/",   OdooEmployees2View.as_view()),
+    path("timesheet-entries/", OdooTimesheet2View.as_view()),
+    path("employees/",         OdooEmployees2View.as_view()),
     path("inspect/",      OdooInspectView.as_view()),
 ]
