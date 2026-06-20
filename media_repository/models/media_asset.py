@@ -44,6 +44,7 @@ class MediaAsset(models.Model):
     create_uid = fields.Many2one(comodel_name='res.users', string="Uploaded By", readonly=True, tracking=True,default=lambda self: self.env.uid)
     create_date = fields.Datetime(string="Upload Date", readonly=True,default=fields.Date.today)
     favorite=fields.Boolean(string="Favorite", tracking=True,default=False)
+    media_tag_ids=fields.Many2many(comodel_name='media.tag', string="Tags")
     state = fields.Selection([('draft', 'Draft'), ('confirmed', 'Confirmed')],default='draft',tracking=True)
 
     @api.depends('file', 'source_type')
