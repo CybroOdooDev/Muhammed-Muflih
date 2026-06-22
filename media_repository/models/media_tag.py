@@ -18,11 +18,10 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import api, fields, models
+from odoo import fields,models
 
-class MediaCategory(models.Model):
-    _name = "media.category"
-    _description = "Media Category"
+class MediaTag(models.Model):
+    _name = 'media.tag'
+    _description = 'Media Tag'
 
-    name = fields.Char(string="Name",help="Name of the category")
-    
+    name = fields.Char(string="Name",help="Name of the tag")
