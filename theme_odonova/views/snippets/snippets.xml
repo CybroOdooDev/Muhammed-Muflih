@@ -866,42 +866,52 @@ body.editor_enable .animate-on-scroll,
                     <!-- RIGHT: Form Card -->
                     <div class="odonova-form-card animate-on-scroll">
                         <h2>Schedule your call</h2>
-                        <form id="contactus_form_snippet" action="/website/form/" method="post" enctype="multipart/form-data" class="o_mark_required s_website_form s_website_form_no_recaptcha" data-mark="*" data-model_name="mail.mail" data-success-mode="redirect" data-success-page="/contactus-thank-you" data-pre-fill="true">
-                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                            
+                        <form id="contactus_form_snippet" action="/odonova/contact/submit"
+                              method="post">
+                            <input type="hidden" name="csrf_token"
+                                   t-att-value="request.csrf_token()"/>
+
                             <div class="odonova-form-row">
-                                <div class="odonova-form-group s_website_form_field">
-                                    <label for="fname">First Name</label>
-                                    <input type="text" name="name" placeholder="Jane" class="form-control s_website_form_input" required=""/>
+                                <div class="odonova-form-group">
+                                    <label for="fname_s">First Name</label>
+                                    <input type="text" name="fname" id="fname_s"
+                                           placeholder="Jane" class="form-control" required="required"/>
                                 </div>
-                                <div class="odonova-form-group s_website_form_field">
-                                    <label for="lname">Last Name</label>
-                                    <input type="text" name="subject" placeholder="Doe" class="form-control s_website_form_input"/>
+                                <div class="odonova-form-group">
+                                    <label for="lname_s">Last Name</label>
+                                    <input type="text" name="lname" id="lname_s"
+                                           placeholder="Doe" class="form-control"/>
                                 </div>
                             </div>
 
-                            <div class="odonova-form-group s_website_form_field">
-                                <label for="email">Work Email</label>
-                                <input type="email" name="email_from" placeholder="jane@company.com" class="form-control s_website_form_input" required=""/>
+                            <div class="odonova-form-group">
+                                <label for="email_s">Work Email <span class="text-danger">*</span></label>
+                                <input type="email" name="email_from" id="email_s"
+                                       placeholder="jane@company.com" class="form-control" required="required"/>
                             </div>
 
-                            <div class="odonova-form-group s_website_form_field">
-                                <label for="company">Company Name</label>
-                                <input type="text" name="partner_name" placeholder="Acme Corp" class="form-control s_website_form_input"/>
+                            <div class="odonova-form-group">
+                                <label for="company_s">Company Name</label>
+                                <input type="text" name="partner_name" id="company_s"
+                                       placeholder="Acme Corp" class="form-control"/>
                             </div>
 
-                            <div class="odonova-form-group s_website_form_field">
-                                <label for="goals">What are your primary goals?</label>
-                                <textarea name="description" placeholder="Tell us briefly about your bottlenecks or what you are looking to achieve with Odoo..." rows="4" class="form-control s_website_form_input"></textarea>
+                            <div class="odonova-form-group">
+                                <label for="goals_s">What are your primary goals?</label>
+                                <textarea name="description" id="goals_s"
+                                          placeholder="Tell us briefly about your bottlenecks..."
+                                          rows="4" class="form-control"></textarea>
                             </div>
 
-                            <div class="s_website_form_submit">
-                                <button type="submit" class="odonova-btn-submit btn s_website_form_send">Request Consultation</button>
-                                <span id="s_website_form_result"></span>
+                            <div class="odonova-form-submit-row">
+                                <button type="submit" class="odonova-btn-submit btn">
+                                    Request Consultation
+                                </button>
                             </div>
-                            
+
                             <div class="odonova-form-disclaimer">
-                                By submitting this form, you agree to our <a href="/privacy">Privacy Policy</a>.
+                                By submitting this form, you agree to our
+                                <a href="/privacy">Privacy Policy</a>.
                             </div>
                         </form>
                     </div>

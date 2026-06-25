@@ -57,28 +57,31 @@ class OdoNovaThemeController(http.Controller):
         csrf=True,
     )
     def submit_consultation(self, **kwargs):
-        fname = kwargs.get('fname', '').strip()
-        lname = kwargs.get('lname', '').strip()
-        email = kwargs.get('email_from', '').strip()
-        company = kwargs.get('partner_name', '').strip()
-        goals = kwargs.get('description', '').strip()
+        fname = (kwargs.get('fname') or '').strip()
+        lname = (kwargs.get('lname') or '').strip()
+        email = (kwargs.get('email_from') or '').strip()
+        company = (kwargs.get('partner_name') or '').strip()
+        goals = (kwargs.get('description') or '').strip()
 
-        full_name = '%s %s' % (fname, lname)
-        company_email = request.env.user.company_id.email or ''
+        full_name = ('%s %s' % (fname, lname)).strip() or 'Unknown'
 
-        request.env['mail.mail'].sudo().create({
-            'subject': 'New Consultation Request — %s' % full_name,
-            'email_from': email,
-            'email_to': company_email,
-            'body_html': '''
-                    <h3>New Consultation Request</h3>
-                    <p><b>Name:</b> %s</p>
-                    <p><b>Email:</b> %s</p>
-                    <p><b>Company:</b> %s</p>
-                    <p><b>Goals:</b></p>
-                    <p>%s</p>
-                ''' % (full_name, email, company, goals),
-        }).send()
+        try:
+            company_email = request.env.company.email or ''
+            body = (
+                '<h3>New Consultation Request</h3>'
+                '<p><b>Name:</b> %s</p>'
+                '<p><b>Email:</b> %s</p>'
+                '<p><b>Company:</b> %s</p>'
+                '<p><b>Goals:</b></p><p>%s</p>'
+            ) % (full_name, email, company, goals)
+            request.env['mail.mail'].sudo().create({
+                'subject': 'New Consultation Request — %s' % full_name,
+                'email_from': company_email or email,
+                'email_to': company_email,
+                'body_html': body,
+            })
+        except Exception:
+            pass
 
         return request.redirect('/thankyou')
 
