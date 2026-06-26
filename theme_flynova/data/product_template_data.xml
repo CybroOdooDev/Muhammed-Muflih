@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Demo data for product.template records representing the core Flynova tour and hotel products published on the website. -->
 <odoo>
     <data noupdate="1">
         <!-- Tour Products -->

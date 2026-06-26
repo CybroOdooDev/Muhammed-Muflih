@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Demo data for product.public.category records that group Flynova products into Tours and Hotels categories on the website. -->
 <odoo>
     <data noupdate="1">
         <!-- Parent Categories -->
