@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- This file contains the default extra service records for bookings. -->
 <odoo>
     <data noupdate="1">
         <record id="extra_service_health_insurance" model="flynova.extra.service">

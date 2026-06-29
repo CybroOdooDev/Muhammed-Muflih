@@ -13,7 +13,8 @@
                      style="height: 300px; overflow: hidden;">
                     <img src="/theme_flynova/static/src/img/images/about.jpg"
                          alt="Hotels banner"
-                         class="flynova-page-banner__image"/>
+                         style="object-fit: cover;"
+                         class="flynova-page-banner__image w-100 h-100"/>
                     <div class="position-absolute w-100 h-100 top-0 left-0 flynova-page-banner__overlay" style="background: rgba(0,0,0,0.2);"></div>
                     <div class="position-absolute w-100 h-100 top-0 left-0 d-flex align-items-center justify-content-center flynova-page-banner__content">
                         <h1 class="text-white font-weight-bold"

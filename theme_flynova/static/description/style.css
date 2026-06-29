@@ -152,7 +152,7 @@ header.active {
   left: -20px;
   width: 240px;
   height: 90px;
-  background-image: url(../img/images/arr1.png);
+  background-image: url(../src/img/images/arr1.png);
   background-size: contain;
   background-repeat: no-repeat;
 }
@@ -163,7 +163,7 @@ header.active {
   left: 215px;
   width: 250px;
   height: 80px;
-  background-image: url(../img/images/arr2.png);
+  background-image: url(../src/img/images/arr2.png);
   background-size: contain;
   background-repeat: no-repeat;
 }
@@ -922,7 +922,7 @@ header.active {
   left: 0;
   right: 0;
   bottom: 0;
-  background: url(./img/images/bg.jpg) no-repeat center center;
+  background: url(../src/img/images/bg.jpg) no-repeat center center;
   background-size: cover;
   opacity: 0.3;
 }
@@ -1254,7 +1254,7 @@ header.active {
   text-align: left !important;
 }
 .inbanner {
-  background-image: url(./img/images/about.jpg);
+  background-image: url(../src/img/images/about.jpg);
   background-size: cover;
   background-position: center;
   position: relative;

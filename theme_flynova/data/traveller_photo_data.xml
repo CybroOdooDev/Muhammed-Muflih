@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- This file contains the default traveller photo records for the theme snippets. -->
 <odoo>
     <data noupdate="1">
         <record id="traveller_photo_1" model="flynova.traveller.photo">

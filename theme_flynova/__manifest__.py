@@ -78,7 +78,7 @@
             'theme_flynova/static/src/scss/primary_variables.scss',
         ],
     },
-    'images': ['static/src/img/images/flynova.png'],
+    'images': ['static/description/theme_screenshort.jpg'],
     'license': 'LGPL-3',
     'installable': True,
     'auto_install': False,

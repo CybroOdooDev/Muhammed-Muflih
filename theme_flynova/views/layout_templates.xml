@@ -285,5 +285,9 @@
                      title="FlyNova"/>
             </xpath>
         </template>
+
+        <template id="header_cart_flynova" inherit_id="website_sale.header_cart_link" name="Flynova Hide Cart">
+            <xpath expr="//li[a[@href='/shop/cart']]" position="replace"/>
+        </template>
     </data>
 </odoo>

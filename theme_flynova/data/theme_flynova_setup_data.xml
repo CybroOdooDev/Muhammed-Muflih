@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <data>
-        <function model="website" name="theme_flynova_cleanup_menus"/>
-    </data>
-</odoo>
