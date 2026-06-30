@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- About Page Template -->
+    <!-- 1. About Base Template (empty wrap for builder compatibility) -->
     <template id="about_template" name="About Us | OdoNova" key="theme_odonova.about_template">
         <t t-call="website.layout">
-            <div id="wrap" class="oe_structure">
+            <div id="wrap" class="oe_structure oe_empty"/>
+        </t>
+    </template>
+
+    <!-- 2. About Initial Content (injected via child view so inherit_branding adds data-oe-* to the oe_structure wrapper) -->
+    <template id="about_content" inherit_id="theme_odonova.about_template" name="About Us Content">
+        <xpath expr="//div[@id='wrap']" position="inside">
+            <div class="oe_structure">
                 <!-- 1. About Hero -->
                 <section class="s_odonova_about_hero odonova-about-hero o_colored_level" data-snippet="s_odonova_about_hero" data-name="About Hero">
                     <div class="container">
@@ -139,10 +146,10 @@
                     </div>
                 </section>
             </div>
-        </t>
+        </xpath>
     </template>
 
-    <!-- About Page Record -->
+    <!-- 3. About Page Record -->
     <data noupdate="1">
         <record id="about_page" model="theme.website.page">
             <field name="url">/about_us</field>

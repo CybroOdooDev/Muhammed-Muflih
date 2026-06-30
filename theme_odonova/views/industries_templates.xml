@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- 2. Industries Page Template -->
+    <!-- 1. Industries Base Template (empty wrap for builder compatibility) -->
     <template id="industries_template" name="Industries" key="theme_odonova.industries_template">
         <t t-call="website.layout">
-            <div id="wrap" class="oe_structure">
+            <div id="wrap" class="oe_structure oe_empty"/>
+        </t>
+    </template>
+
+    <!-- 2. Industries Initial Content (injected via child view so inherit_branding adds data-oe-* to the oe_structure wrapper) -->
+    <template id="industries_content" inherit_id="theme_odonova.industries_template" name="Industries Content">
+        <xpath expr="//div[@id='wrap']" position="inside">
+            <div class="oe_structure">
                 <!-- 1. Industries Hero -->
                 <section class="s_odonova_industries_hero odonova-industries-hero o_colored_level" data-snippet="s_odonova_industries_hero" data-name="Industries Hero">
                     <div class="container">
@@ -276,7 +283,7 @@
                     </div>
                 </section>
             </div>
-        </t>
+        </xpath>
     </template>
 
     <!-- 3. Industries Page Record -->
