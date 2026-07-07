@@ -1,4 +1,4 @@
-.. image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+.. image:: https://img.shields.io/badge/license-LGPL--3-green.svg
     :target: https://www.gnu.org/licenses/lgpl-3.0-standalone.html
     :alt: License: LGPL-3
 
@@ -18,7 +18,7 @@ Company
 
 License
 -------
-General Public License, Version 3 (LGPL v3).
+Lesser General Public License, Version 3 (LGPL v3).
 (https://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
 Credits

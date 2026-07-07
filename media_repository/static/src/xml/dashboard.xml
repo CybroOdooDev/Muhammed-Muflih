@@ -9,8 +9,8 @@
                 </div>
                 <div class="bg-white px-3 py-2 rounded-pill shadow-sm border d-flex align-items-center gap-2">
                     <i class="fa fa-cubes text-primary"/>
-                    <span class="text-secondary fw-semibold">Total Assets</span>
-                    <span class="badge rounded-pill bg-primary" t-out="this.result.count[0] + this.result.count[1] + this.result.count[2] + this.result.count[3] + this.result.count[4]"/>
+                    <span class="text-primary fw-semibold">Total Assets</span>
+                    <span class="badge rounded-pill bg-secondary" t-out="this.result.count[0] + this.result.count[1] + this.result.count[2] + this.result.count[3] + this.result.count[4]"/>
                 </div>
             </div>
 
