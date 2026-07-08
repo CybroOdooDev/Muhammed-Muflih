@@ -3,7 +3,7 @@
     <data>
      <!--category-->
     <record id="media_repository_category" model="ir.module.category">
-        <field name="name">media repository category</field>
+        <field name="name">media repository</field>
         <field name="description">media repository access right security</field>
     </record>
 

@@ -46,7 +46,7 @@ class CleaningRequest(models.Model):
                                      required=True, tracking=True,
                                      string="Cleaning Type",
                                      help="Choose what is to be cleaned")
-    room_id = fields.Many2one('hotel.room', string="Room",
+    room_id = fields.Many2one('product.template', string="Room",
                               help="Choose the room")
     hotel = fields.Char(string="Hotel", help="Cleaning request space in hotel")
     vehicle_id = fields.Many2one('fleet.vehicle.model',
@@ -130,14 +130,20 @@ class CleaningRequest(models.Model):
 
     def action_maintain_request(self):
         """Button action for creating the maintenance request"""
-        self.env['maintenance.request'].sudo().create({
+        vals = {
             'name': 'Maintenance Request - %s' % self.sequence,
             'date': fields.Date.today(),
             'state': 'draft',
             'type': self.cleaning_type,
-            'vehicle_maintenance_id': self.vehicle_id.id,
             'is_hotel': True,
-        })
+        }
+        if self.cleaning_type == 'room':
+            vals['room_maintenance_ids'] = [(6, 0, self.room_id.ids)]
+        elif self.cleaning_type == 'vehicle':
+            vals['vehicle_maintenance_id'] = self.vehicle_id.id
+        elif self.cleaning_type == 'hotel':
+            vals['hotel_maintenance'] = self.hotel
+        self.env['maintenance.request'].sudo().create(vals)
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',

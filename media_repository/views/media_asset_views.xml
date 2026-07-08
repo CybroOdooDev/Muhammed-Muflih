@@ -168,6 +168,7 @@
     <!-- MENU ITEMS -->
     <menuitem id="menu_media_repository_root"
               name="Media Repository"
+              web_icon="media_repository,static/description/icon.png"
               sequence="11"/>
     <menuitem id="menu_media_repository_configuration"
               name="Configuration"

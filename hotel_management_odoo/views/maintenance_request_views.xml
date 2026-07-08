@@ -53,6 +53,10 @@
                         <group>
                             <field name="date"/>
                             <field name="type"/>
+                            <field name="room_maintenance_ids" invisible="type != 'room'" widget="many2many_tags"  domain="[('is_room','=',True)]"/>
+                            <field name="vehicle_maintenance_id" invisible="type != 'vehicle'"/>
+                            <field name="hotel_maintenance" invisible="type != 'hotel'"/>
+                            <field name="cleaning_maintenance" invisible="type != 'cleaning'"/>
                             <field name="support_reason" invisible="state != 'ongoing'"/>
                         </group>
                         <group>
