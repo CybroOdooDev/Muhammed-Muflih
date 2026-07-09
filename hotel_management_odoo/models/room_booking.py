@@ -663,11 +663,11 @@ class RoomBooking(models.Model):
                                                   is_dst=False)
         if tz_name:
             context_today = today_utc.astimezone(pytz.timezone(tz_name))
-            total_room = self.env['product.template'].search_count([])
+            total_room = self.env['product.template'].search_count([('is_room', '=', True)])
             check_in = self.env['room.booking'].search_count(
                 [('state', '=', 'check_in')])
             available_room = self.env['product.template'].search(
-                [('status', '=', 'available')])
+                [('status', '=', 'available'), ('is_room', '=', True)])
             reservation = self.env['room.booking'].search_count(
                 [('state', '=', 'reserved')])
             check_outs = self.env['room.booking'].search([])

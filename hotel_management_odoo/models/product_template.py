@@ -31,7 +31,7 @@ class ProductTemplate(models.Model):
         """Method for getting the default uom id"""
         return self.env.ref('uom.product_uom_unit')
 
-    is_room = fields.Boolean(string="Room", help="room boolean")
+    is_room = fields.Boolean(string="Room", help="It's room")
     status = fields.Selection([("available", "Available"),
                                ("reserved", "Reserved"),
                                ("occupied", "Occupied")],

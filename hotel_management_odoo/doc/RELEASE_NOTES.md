@@ -24,3 +24,8 @@
 #### Version 17.0.1.2.4
 #### UPDATE
 - Updated the invisible condition of 'create invoice' button in room booking model
+
+#### 09.7.2026
+#### Version 17.0.1.2.5
+#### UPDATE
+- Replaced the Room model with product.template, fixed validation issues, and updated the index file.

@@ -56,8 +56,9 @@ class RoomBookingLine(models.Model):
                              string="Unit of Measure",
                              help="This will set the unit of measure used",
                              readonly=True)
-    price_unit = fields.Float(related='room_id.list_price', string='Rent',
+    price_unit = fields.Float(string='Rent',
                               digits='Product Price',
+                              compute='_compute_price_unit_room', store=True, readonly=False,
                               help="The rent price of the selected room.")
     tax_ids = fields.Many2many('account.tax',
                                'hotel_room_order_line_taxes_rel',
@@ -105,6 +106,30 @@ class RoomBookingLine(models.Model):
             if diffdate.total_seconds() > 0:
                 qty = qty + 1
             self.uom_qty = qty
+
+    @api.depends('room_id', 'booking_id.pricelist_id', 'booking_id.partner_id', 'uom_qty', 'uom_id')
+    def _compute_price_unit_room(self):
+        for line in self:
+            if not line.room_id:
+                line.price_unit = 0.0
+                continue
+            
+            pricelist = line.booking_id.pricelist_id
+            if pricelist:
+                product = line.room_id.product_variant_id
+                if not product and line.room_id.product_variant_ids:
+                    product = line.room_id.product_variant_ids[:1]
+                
+                if product:
+                    line.price_unit = pricelist._get_product_price(
+                        product,
+                        line.uom_qty or 1.0,
+                        uom=line.uom_id,
+                    )
+                else:
+                    line.price_unit = line.room_id.list_price
+            else:
+                line.price_unit = line.room_id.list_price
 
     @api.depends('uom_qty', 'price_unit', 'tax_ids')
     def _compute_price_subtotal(self):

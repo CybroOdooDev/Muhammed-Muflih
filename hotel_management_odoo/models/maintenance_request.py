@@ -106,6 +106,14 @@ class MaintenanceRequest(models.Model):
 
     def action_assign_team(self):
         """Button action for changing the state to team_leader_approve"""
+        if self.type == 'room' and not self.room_maintenance_ids:
+            raise ValidationError(_('Please choose a Room'))
+        if self.type == 'vehicle' and not self.vehicle_maintenance_id:
+            raise ValidationError(_('Please choose a Vehicle'))
+        if self.type == 'hotel' and not self.hotel_maintenance:
+            raise ValidationError(_('Please enter the Hotel Maintenance details'))
+        if self.type == 'cleaning' and not self.cleaning_maintenance:
+            raise ValidationError(_('Please enter the Cleaning Maintenance details'))
         if self.team_id:
             self.state = 'team_leader_approve'
         else:
@@ -148,5 +156,3 @@ class MaintenanceRequest(models.Model):
     def action_verify(self):
         """Button action for changing the state to done"""
         self.state = 'done'
-        if self.vehicle_maintenance_id:
-            self.vehicle_maintenance_id.status = 'available'

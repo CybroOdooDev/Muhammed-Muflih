@@ -83,6 +83,7 @@ fetch_data() {
                     view_mode:'tree,form',
                     view_type:'form',
                     views:[[false,'list'],[false,'form']],
+                    domain: [['is_room', '=', true]],
                     target:'current'
                 },options)
     }
@@ -204,7 +205,7 @@ fetch_data() {
             view_mode:'tree,form',
             view_type:'form',
             views:[[false,'list'],[false,'form']],
-            domain: [['status', '=', 'available']],
+            domain: [['status', '=', 'available'], ['is_room', '=', true]],
             target:'current'
         },options)
     }
