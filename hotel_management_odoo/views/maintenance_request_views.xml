@@ -53,6 +53,10 @@
                         <group>
                             <field name="date"/>
                             <field name="type"/>
+                            <field name="room_maintenance_ids" invisible="type != 'room'" domain="[('is_room','=',True)]" widget="many2many_tags"/>
+                            <field name="hotel_maintenance" invisible="type != 'hotel'"/>
+                            <field name="vehicle_maintenance_id" invisible="type != 'vehicle'"/>
+                            <field name="cleaning_maintenance" invisible="type != 'cleaning'"/>
                             <field name="support_reason" invisible="state != 'ongoing'"/>
                         </group>
                         <group>
@@ -65,6 +69,21 @@
                     </group>
                 </sheet>
             </form>
+        </field>
+    </record>
+
+
+     <!--   maintenance Team List view-->
+    <record id="maintenance_request_view_list" model="ir.ui.view">
+        <field name="name">maintenance.request.view.list</field>
+        <field name="model">maintenance.request</field>
+        <field name="arch" type="xml">
+            <list>
+                 <field name="sequence"/>
+                <field name="type"/>
+                <field name="team_id"/>
+                <field name="state"/>
+            </list>
         </field>
     </record>
     <!--    Maintenance Request Menu Action-->

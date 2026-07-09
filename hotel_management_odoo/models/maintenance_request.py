@@ -68,7 +68,7 @@ class MaintenanceRequest(models.Model):
                                        ('hotel', 'Hotel'),
                                        ('cleaning', 'Cleaning')], string="Type",
                             help="The type for which the request is creating",
-                            tracking=True)
+                            tracking=True,required=True)
     room_maintenance_ids = fields.Many2many('product.template',
                                             string="Room Maintenance",
                                             help="Choose Room Maintenance")
@@ -108,11 +108,21 @@ class MaintenanceRequest(models.Model):
 
     def action_assign_team(self):
         """Button action for changing the state to team_leader_approve"""
-        if self.team_id:
-            self.state = 'team_leader_approve'
-        else:
+        if self.type == 'room' and not self.room_maintenance_ids:
+           raise ValidationError(("Please choose the Room"))
+        if self.type == 'vehicle' and not self.vehicle_maintenance_id:
+           raise ValidationError(("Please choose the Vehicle"))
+        if self.type == 'hotel' and not self.hotel_maintenance:
+           raise ValidationError(
+            ("Please enter the Hotel Maintenance details"))
+        if self.type == 'cleaning' and not self.cleaning_maintenance:
             raise ValidationError(
-                _("Please assign a Team"))
+            ("Please enter the Cleaning Maintenance details"))
+        if self.team_id:
+           self.state = 'team_leader_approve'
+        else:
+           raise ValidationError(
+            ("Please assign a Team"))
 
     def action_assign_user(self):
         """Button action for changing the state to pending"""
@@ -150,5 +160,4 @@ class MaintenanceRequest(models.Model):
     def action_verify(self):
         """Button action for changing the state to done"""
         self.state = 'done'
-        if self.vehicle_maintenance_id:
-            self.vehicle_maintenance_id.status = 'available'
+

@@ -40,7 +40,7 @@
 #### UPDT
 - Fixed the issue of reserved room can not be reserved although the reserve date is different.
 
-#### 07.07.2026
+#### 09.07.2026
 #### Version 18.0.1.1.6
 #### UPDT
-- Fixed the Maintenance Request workflow issue and resolved field validation issues in the Cleaning Request. Added a Products menu to the module.
+- Updated the Sale Order report to include a state selection field, and updated the index file.
