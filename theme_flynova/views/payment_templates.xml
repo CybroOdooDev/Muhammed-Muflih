@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Website templates for the Flynova multi-step booking flow: the payment step and the post-payment booking confirmation page. -->
 <odoo>
-
     <template id="flynova_booking_confirmation" name="Booking Confirmation">
         <t t-call="website.layout">
             <div id="wrap" class="inpage">
