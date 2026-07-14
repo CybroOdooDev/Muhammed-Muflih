@@ -9,83 +9,6 @@
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
                 <link rel="stylesheet"
                       href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&amp;family=Island+Moments&amp;display=swap"/>
-                <script>
-                    (function () {
-                        var wrapScrollBound = false;
-
-                        function getFlynovaScrollTop() {
-                            var wrap = document.querySelector('#wrapwrap');
-                            return window.scrollY
-                                || document.documentElement.scrollTop
-                                || document.body.scrollTop
-                                || (wrap &amp;&amp; wrap.scrollTop)
-                                || 0;
-                        }
-
-                        function syncFlynovaHeader() {
-                            var header = document.querySelector('header#top');
-                            if (!header) {
-                                window.requestAnimationFrame(syncFlynovaHeader);
-                                return;
-                            }
-                            /* Odoo injects inline transform: translate(0px,-100%) on o_header_affixed
-                               which overrides even !important CSS rules. Strip it every tick. */
-                            header.style.removeProperty('transform');
-                            header.style.removeProperty('right');
-                            header.classList.toggle('active', getFlynovaScrollTop() &gt; 1);
-                        }
-
-                        function prepareFlynovaHeaderForScroll(event) {
-                            var header = document.querySelector('header#top');
-                            if (!header) {
-                                return;
-                            }
-                            if ((event.deltaY || 0) &gt; 0 || getFlynovaScrollTop() &gt; 1) {
-                                header.classList.add('active');
-                            }
-                        }
-
-                        function bindWrapScroll() {
-                            var wrap = document.querySelector('#wrapwrap');
-                            if (!wrap) {
-                                window.requestAnimationFrame(bindWrapScroll);
-                                return;
-                            }
-                            if (!wrapScrollBound) {
-                                wrap.addEventListener('scroll', syncFlynovaHeader, { passive: true });
-                                wrapScrollBound = true;
-                            }
-                        }
-
-                        /* Use a MutationObserver to catch whenever Odoo rewrites the inline style */
-                        function watchHeader() {
-                            var header = document.querySelector('header#top');
-                            if (!header) {
-                                window.requestAnimationFrame(watchHeader);
-                                return;
-                            }
-                            var observer = new MutationObserver(function () {
-                                if (header.style.transform || header.style.right) {
-                                    header.style.removeProperty('transform');
-                                    header.style.removeProperty('right');
-                                }
-                            });
-                            observer.observe(header, { attributes: true, attributeFilter: ['style'] });
-                            bindWrapScroll();
-                            syncFlynovaHeader();
-                        }
-
-                        window.addEventListener('scroll', syncFlynovaHeader, { passive: true });
-                        window.addEventListener('wheel', prepareFlynovaHeaderForScroll, { passive: true });
-                        window.addEventListener('touchstart', prepareFlynovaHeaderForScroll, { passive: true });
-                        window.addEventListener('pageshow', syncFlynovaHeader);
-                        if (document.readyState === 'loading') {
-                            document.addEventListener('DOMContentLoaded', watchHeader);
-                        } else {
-                            watchHeader();
-                        }
-                    })();
-                </script>
             </xpath>
             <xpath expr="//footer" position="replace">
                 <footer class="footer">
@@ -245,9 +168,7 @@
             <xpath expr="//div[@id='top_menu_collapse_mobile']//t[@t-call='website.placeholder_header_search_box']" position="replace"/>
             <xpath expr="//div[@id='top_menu_collapse_mobile']//t[@t-call='website.placeholder_header_text_element']" position="replace"/>
             <xpath expr="//div[@id='top_menu_collapse_mobile']//t[@t-call='website.placeholder_header_social_links']" position="replace"/>
-            <xpath expr="//div[@id='top_menu_collapse_mobile']//ul[hasclass('navbar-nav')][2]" position="attributes">
-                <attribute name="class" add="d-none" separator=" "/>
-            </xpath>
+
             <xpath expr="//t[@t-foreach='website.menu_id.child_id']" position="replace">
                 <t t-set="flynova_mobile_menus"
                    t-value="website.menu_id.child_id.filtered(lambda menu: menu.url not in ['/shop', '/event', '/events'])"/>

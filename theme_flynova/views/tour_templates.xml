@@ -27,11 +27,11 @@
                     <div class="row">
                         <!-- Filter Sidebar -->
                         <div class="col-lg-3">
-                            <form t-attf-action="/tours" method="get" class="bg-white p-4 rounded shadow-sm border mb-4"
+                            <form t-attf-action="/tours" method="get" class="bg-white p-4 rounded shadow-sm border mb-4 flynova-listing-filter"
                                   id="flynova_filter_form">
                                 <h6 class="font-weight-bold mb-3">Select your destination :</h6>
                                 <select name="destination" class="form-control mb-4 bg-light border-0"
-                                        onchange="this.form.submit()" style="border-radius: 10px;">
+                                        style="border-radius: 10px;">
                                     <option value="All Destinations">All Destinations</option>
                                     <t t-foreach="destinations" t-as="dest">
                                         <option t-att-value="dest"
@@ -42,7 +42,7 @@
 
                                 <h6 class="font-weight-bold mb-3">Package :</h6>
                                 <select name="package" class="form-control mb-4 bg-light border-0"
-                                        onchange="this.form.submit()" style="border-radius: 10px;">
+                                        style="border-radius: 10px;">
                                     <option value="">All Packages</option>
                                     <t t-foreach="packages" t-as="pkg">
                                         <option t-att-value="pkg.id"
@@ -53,12 +53,10 @@
 
                                 <h6 class="font-weight-bold mb-3 d-flex justify-content-between">
                                     Max Price :
-                                    <span class="text-dark">$<span id="max_price_val"><t t-esc="active_filters.get('max_price', 5000)"/></span></span>
+                                    <span class="text-dark">$<span id="max_price_val" class="flynova-price-display"><t t-esc="active_filters.get('max_price', 5000)"/></span></span>
                                 </h6>
                                 <input type="range" name="max_price" class="custom-range mb-4" min="0" max="5000"
-                                       t-att-value="active_filters.get('max_price', 5000)"
-                                       oninput="document.getElementById('max_price_val').textContent = this.value"
-                                       onchange="this.form.submit()"/>
+                                       t-att-value="active_filters.get('max_price', 5000)"/>
 
                                 <h6 class="font-weight-bold mb-3">Durations :</h6>
                                 <div class="row mb-2">
@@ -67,31 +65,13 @@
                                             <div class="custom-control custom-checkbox">
                                                 <input type="checkbox" name="duration" class="custom-control-input"
                                                        t-attf-id="dur_#{dur_index}" t-att-value="dur"
-                                                       t-att-checked="dur in active_filters.get('duration', [])"
-                                                       onchange="updateFilters()"/>
+                                                       t-att-checked="dur in active_filters.get('duration', [])"/>
                                                 <label class="custom-control-label small text-muted"
                                                        t-attf-for="dur_#{dur_index}" t-esc="dur"/>
                                             </div>
                                         </div>
                                     </t>
                                 </div>
-
-                                <script type="text/javascript">
-                                    function updateFilters() {
-                                    const form = document.getElementById('flynova_filter_form');
-                                    const durations =
-                                    Array.from(form.querySelectorAll('input[name="duration"]:checked')).map(cb =>
-                                    cb.value);
-
-                                    let url = new URL(window.location.origin + '/tours');
-                                    url.searchParams.set('destination', form.destination.value);
-                                    url.searchParams.set('package', form.package.value);
-                                    url.searchParams.set('max_price', form.max_price.value);
-                                    if (durations.length > 0) url.searchParams.set('duration', durations.join(','));
-
-                                    window.location.href = url.toString();
-                                    }
-                                </script>
                             </form>
                         </div>
 
@@ -186,7 +166,7 @@
                             </div>
                         </div>
 
-                        <div class="top-section">
+                        <div class="top-section flynova-booking-detail">
                             <div class="image-gallery mb-5 mb-lg-0">
                                 <div class="main-image">
                                     <img t-attf-src="/web/image/product.template/{{ product.id }}/image_1920"

@@ -19,9 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-
 from urllib.parse import urlencode
-
 from odoo import http
 from odoo.http import request
 from odoo.addons.payment.controllers.portal import PaymentPortal

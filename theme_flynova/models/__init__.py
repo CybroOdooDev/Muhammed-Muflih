@@ -19,9 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-
 from . import event_event
 from . import product_template
 from . import sale_order
-from . import traveller_photo
-from . import extra_service
+from . import flynova_traveller_photo
+from . import flynova_extra_service

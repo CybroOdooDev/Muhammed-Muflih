@@ -33,9 +33,9 @@
                         <div class="row">
                             <!-- Filter Sidebar -->
                             <div class="col-lg-3">
-                                <form action="/packages" method="get" class="bg-white p-4 rounded shadow-sm border mb-4" id="flynova_filter_form">
+                                <form action="/packages" method="get" class="bg-white p-4 rounded shadow-sm border mb-4 flynova-listing-filter" id="flynova_filter_form">
                                     <h6 class="font-weight-bold mb-3">Select your destination :</h6>
-                                    <select name="destination" class="form-control mb-4 bg-light border-0" onchange="this.form.submit()" style="border-radius: 10px;">
+                                    <select name="destination" class="form-control mb-4 bg-light border-0" style="border-radius: 10px;">
                                         <option value="All Destinations">All Destinations</option>
                                         <t t-foreach="destinations" t-as="dest">
                                             <option t-att-value="dest" t-att-selected="dest == active_filters.get('destination')" t-esc="dest"/>
@@ -50,7 +50,7 @@
                                         <t t-foreach="tags" t-as="tag">
                                             <div class="col-6 mb-2">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input type="checkbox" name="type" class="custom-control-input" t-attf-id="tag_#{tag.id}" t-att-value="tag.name" t-att-checked="tag.name in active_filters.get('type', [])" onchange="updateFilters()"/>
+                                                    <input type="checkbox" name="type" class="custom-control-input" t-attf-id="tag_#{tag.id}" t-att-value="tag.name" t-att-checked="tag.name in active_filters.get('type', [])"/>
                                                     <label class="custom-control-label small text-muted" t-attf-for="tag_#{tag.id}" t-esc="tag.name"/>
                                                 </div>
                                             </div>
@@ -58,9 +58,9 @@
                                     </div>
 
                                     <h6 class="font-weight-bold mb-3 d-flex justify-content-between">
-                                        Max Price : <span class="text-dark">$ <t t-esc="active_filters.get('max_price', 5000)"/></span>
+                                        Max Price : <span class="text-dark">$ <span class="flynova-price-display"><t t-esc="active_filters.get('max_price', 5000)"/></span></span>
                                     </h6>
-                                    <input type="range" name="max_price" class="custom-range mb-4" min="0" max="5000" t-att-value="active_filters.get('max_price', 5000)" onchange="this.form.submit()"/>
+                                    <input type="range" name="max_price" class="custom-range mb-4" min="0" max="5000" t-att-value="active_filters.get('max_price', 5000)"/>
 
                                     <div class="custom-control custom-checkbox mb-4">
                                         <input type="checkbox" class="custom-control-input" id="promo"/>
@@ -72,28 +72,12 @@
                                         <t t-foreach="available_durations" t-as="dur">
                                             <div class="col-6 mb-2">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input type="checkbox" name="duration" class="custom-control-input" t-attf-id="dur_#{dur_index}" t-att-value="dur" t-att-checked="dur in active_filters.get('duration', [])" onchange="updateFilters()"/>
+                                                    <input type="checkbox" name="duration" class="custom-control-input" t-attf-id="dur_#{dur_index}" t-att-value="dur" t-att-checked="dur in active_filters.get('duration', [])"/>
                                                     <label class="custom-control-label small text-muted" t-attf-for="dur_#{dur_index}" t-esc="dur"/>
                                                 </div>
                                             </div>
                                         </t>
                                     </div>
-                                    
-                                    <script type="text/javascript">
-                                        function updateFilters() {
-                                            const form = document.getElementById('flynova_filter_form');
-                                            const types = Array.from(form.querySelectorAll('input[name="type"]:checked')).map(cb => cb.value);
-                                            const durations = Array.from(form.querySelectorAll('input[name="duration"]:checked')).map(cb => cb.value);
-                                            
-                                            let url = new URL(window.location.origin + '/packages');
-                                            url.searchParams.set('destination', form.destination.value);
-                                            url.searchParams.set('max_price', form.max_price.value);
-                                            if (types.length > 0) url.searchParams.set('type', types.join(','));
-                                            if (durations.length > 0) url.searchParams.set('duration', durations.join(','));
-                                            
-                                            window.location.href = url.toString();
-                                        }
-                                    </script>
                                 </form>
                             </div>
                             

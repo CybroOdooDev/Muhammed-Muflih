@@ -22,7 +22,7 @@
 
 {
     'name': 'Theme Flynova',
-    'version': '17.0.1.0.1',
+    'version': '17.0.1.0.0',
     'category': 'Theme/eCommerce',
     'summary': 'Tour booking theme with snippets for Odoo Website',
     'description': """
@@ -62,10 +62,10 @@
         'data/event_tag_data.xml',
         'data/event_event_data.xml',
         'data/event_event_ticket_data.xml',
-        'data/extra_service_data.xml',
+        'data/flynova_extra_service_data.xml',
         'data/product_category_data.xml',
         'data/product_template_data.xml',
-        'data/traveller_photo_data.xml',
+        'data/flynova_traveller_photo_data.xml',
     ],
     'assets': {
         'web.assets_frontend': [
@@ -73,6 +73,7 @@
             'theme_flynova/static/src/css/theme.css',
             'theme_flynova/static/src/xml/theme_flynova.xml',
             'theme_flynova/static/src/js/theme_flynova.js',
+            'theme_flynova/static/src/js/flynova_filter_widgets.js',
         ],
         'website.assets_wysiwyg': [
             'theme_flynova/static/src/scss/primary_variables.scss',

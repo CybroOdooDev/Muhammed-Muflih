@@ -28,10 +28,10 @@
                         <!-- Filter Sidebar -->
                         <div class="col-lg-3">
                             <form t-attf-action="/hotels" method="get"
-                                  class="bg-white p-4 rounded shadow-sm border mb-4" id="flynova_filter_form_hotels">
+                                  class="bg-white p-4 rounded shadow-sm border mb-4 flynova-listing-filter" id="flynova_filter_form_hotels">
                                 <h6 class="font-weight-bold mb-3">Select your destination :</h6>
                                 <select name="destination" class="form-control mb-4 bg-light border-0"
-                                        onchange="this.form.submit()" style="border-radius: 10px;">
+                                        style="border-radius: 10px;">
                                     <option value="All Destinations">All Destinations</option>
                                     <t t-foreach="destinations" t-as="dest">
                                         <option t-att-value="dest"
@@ -42,7 +42,7 @@
 
                                 <h6 class="font-weight-bold mb-3">Hotel Type :</h6>
                                 <select name="package" class="form-control mb-4 bg-light border-0"
-                                        onchange="this.form.submit()" style="border-radius: 10px;">
+                                        style="border-radius: 10px;">
                                     <option value="">All Hotels</option>
                                     <t t-foreach="packages" t-as="pkg">
                                         <option t-att-value="pkg.id"
@@ -53,23 +53,10 @@
 
                                 <h6 class="font-weight-bold mb-3 d-flex justify-content-between">
                                     Max Price :
-                                    <span class="text-dark">$<span id="max_price_val_hotel"><t t-esc="active_filters.get('max_price', 5000)"/></span></span>
+                                    <span class="text-dark">$<span id="max_price_val_hotel" class="flynova-price-display"><t t-esc="active_filters.get('max_price', 5000)"/></span></span>
                                 </h6>
                                 <input type="range" name="max_price" class="custom-range mb-4" min="0" max="5000"
-                                       t-att-value="active_filters.get('max_price', 5000)"
-                                       oninput="document.getElementById('max_price_val_hotel').textContent = this.value"
-                                       onchange="this.form.submit()"/>
-
-                                <script type="text/javascript">
-                                    function updateFiltersHotels() {
-                                    const form = document.getElementById('flynova_filter_form_hotels');
-                                    let url = new URL(window.location.origin + '/hotels');
-                                    url.searchParams.set('destination', form.destination.value);
-                                    url.searchParams.set('package', form.package.value);
-                                    url.searchParams.set('max_price', form.max_price.value);
-                                    window.location.href = url.toString();
-                                    }
-                                </script>
+                                       t-att-value="active_filters.get('max_price', 5000)"/>
                             </form>
                         </div>
 
@@ -163,7 +150,7 @@
                             </div>
                         </div>
 
-                        <div class="top-section">
+                        <div class="top-section flynova-booking-detail">
                             <div class="image-gallery mb-5 mb-lg-0">
                                 <div class="main-image">
                                     <img t-attf-src="/web/image/product.template/{{ product.id }}/image_1920"
