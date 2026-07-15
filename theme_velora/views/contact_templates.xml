@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         VELORA CONTACT PAGE
+         Inherits website.contactus and replaces the #wrap with:
+           Snippet 1: s_velora_contact_banner  – hero / page banner
+           Snippet 2: s_velora_contact_section – info + form (2 cols)
+           Snippet 3: s_velora_contact_map     – full-width map
+         All three are pre-rendered via t-snippet-call so they are
+         visible to visitors by default, and also draggable/editable
+         in the Website Builder.
+    ============================================================ -->
+    <template id="velora_contactus"
+              name="Velora Contact Us"
+              inherit_id="website.contactus">
+        <xpath expr="//div[@id='wrap']" position="replace">
+            <div id="wrap" class="oe_structure">
+
+                <!-- Snippet 1: Page Banner -->
+                <t t-snippet-call="theme_velora.s_velora_contact_banner"/>
+
+                <div class="oe_structure oe_empty"/>
+
+                <!-- Snippet 2: Contact Info + Form -->
+                <t t-snippet-call="theme_velora.s_velora_contact_section"/>
+
+                <div class="oe_structure oe_empty"/>
+
+                <!-- Snippet 3: Map -->
+                <t t-snippet-call="theme_velora.s_velora_contact_map"/>
+
+                <div class="oe_structure oe_empty"/>
+
+            </div>
+        </xpath>
+    </template>
+
+</odoo>

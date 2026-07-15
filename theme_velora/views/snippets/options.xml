@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         Register Velora snippets into the Website Builder panel.
+         Uses the correct Odoo 18 t-snippet / <snippets> format.
+    ============================================================ -->
+    <template id="velora_snippets_options"
+              inherit_id="website.snippets"
+              name="Velora Snippets">
+
+        <!-- 1. Register the custom "Velora" category group in the snippets panel -->
+        <xpath expr="//snippets[@id='snippet_groups']" position="inside">
+            <t t-snippet="website.s_snippet_group"
+               t-thumbnail="/theme_velora/static/src/img/hero.webp"
+               string="Velora"
+               snippet-group="velora_snippets"/>
+        </xpath>
+
+        <!-- 2. Add Velora snippets to the standard Structure section, assigned to the custom group -->
+        <xpath expr="//snippets[@id='snippet_structure']" position="inside">
+            <t t-snippet="theme_velora.s_velora_snippet_hero"
+               string="Hero Banner"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+            <t t-snippet="theme_velora.s_velora_snippet_collections"
+               string="Featured Collections"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/mens_collection.jpeg"/>
+            <t t-snippet="theme_velora.s_velora_snippet_bestsellers"
+               string="Best Sellers"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+            <t t-snippet="theme_velora.s_velora_snippet_categories"
+               string="Fragrance Categories"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+            <t t-snippet="theme_velora.s_velora_snippet_about"
+               string="About the Brand"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/img1.jpg"/>
+            <t t-snippet="theme_velora.s_velora_snippet_why_us"
+               string="Why Choose Us"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+            <t t-snippet="theme_velora.s_velora_snippet_testimonials"
+               string="Testimonials"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/amara.jpeg"/>
+            <t t-snippet="theme_velora.s_velora_snippet_faq"
+               string="FAQ Accordion"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+            <t t-snippet="theme_velora.s_velora_snippet_newsletter"
+               string="Newsletter"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+            <t t-snippet="theme_velora.s_velora_contact_banner"
+               string="Contact Banner"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+            <t t-snippet="theme_velora.s_velora_contact_section"
+               string="Contact Info &amp; Form"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/img1.jpg"/>
+            <t t-snippet="theme_velora.s_velora_contact_map"
+               string="Contact Map"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+        </xpath>
+
+    </template>
+
+</odoo>

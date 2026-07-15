@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="homepage_velora_arch" inherit_id="website.homepage" name="Velora Homepage">
+        <!-- Keep the original #wrap element (and its Website Builder edit-tracking
+             attributes) intact; only append content inside it and extend its
+             class. Replacing the whole div here would strip the data-oe-*
+             attributes/o_editable marker Odoo adds to the homepage's #wrap,
+             which breaks the "drop a block here" feature site-wide. -->
+        <xpath expr="//div[@id='wrap']" position="attributes">
+            <attribute name="class">oe_structure velora-page</attribute>
+        </xpath>
+        <xpath expr="//div[@id='wrap']" position="inside">
+            <main id="main-content">
+                <div class="oe_structure oe_empty"/>
+                <!-- Hero Banner -->
+                <t t-snippet-call="theme_velora.s_velora_snippet_hero"/>
+                <div class="oe_structure oe_empty"/>
+
+                <!-- Featured Collections -->
+                <t t-snippet-call="theme_velora.s_velora_snippet_collections"/>
+                <div class="oe_structure oe_empty"/>
+
+                <!-- Best Sellers -->
+                <t t-snippet-call="theme_velora.s_velora_snippet_bestsellers"/>
+                <div class="oe_structure oe_empty"/>
+
+                <!-- Fragrance Categories -->
+                <t t-snippet-call="theme_velora.s_velora_snippet_categories"/>
+                <div class="oe_structure oe_empty"/>
+
+                <!-- About the Brand -->
+                <t t-snippet-call="theme_velora.s_velora_snippet_about"/>
+                <div class="oe_structure oe_empty"/>
+
+                <!-- Why Choose Us -->
+                <t t-snippet-call="theme_velora.s_velora_snippet_why_us"/>
+                <div class="oe_structure oe_empty"/>
+
+                <!-- Testimonials -->
+                <t t-snippet-call="theme_velora.s_velora_snippet_testimonials"/>
+                <div class="oe_structure oe_empty"/>
+
+                <!-- FAQ -->
+                <t t-snippet-call="theme_velora.s_velora_snippet_faq"/>
+                <div class="oe_structure oe_empty"/>
+
+                <!-- Newsletter -->
+                <t t-snippet-call="theme_velora.s_velora_snippet_newsletter"/>
+                <div class="oe_structure oe_empty"/>
+            </main>
+        </xpath>
+    </template>
+</odoo>
