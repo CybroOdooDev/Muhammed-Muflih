@@ -4120,7 +4120,7 @@ a.get-register-btn.w-25 {
   font-weight: 600 !important;
 }
 
-#top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-menu {
+#top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-menu:not(.js_usermenu) {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -4129,8 +4129,8 @@ a.get-register-btn.w-25 {
   position: static !important;
 }
 
-#top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-menu .dropdown-item,
-#top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-menu .dropdown-item span {
+#top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-menu:not(.js_usermenu) .dropdown-item,
+#top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-menu:not(.js_usermenu) .dropdown-item span {
   font-family: "Montserrat", sans-serif !important;
   font-size: 1.05rem !important;
   font-weight: 500 !important;
@@ -4141,10 +4141,42 @@ a.get-register-btn.w-25 {
   border: none !important;
 }
 
-#top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-menu .dropdown-item:hover,
-#top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-menu .dropdown-item:hover span {
+#top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-menu:not(.js_usermenu) .dropdown-item:hover,
+#top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-menu:not(.js_usermenu) .dropdown-item:hover span {
   color: var(--primary-color) !important;
   background: transparent !important;
+}
+
+/* User account dropdown (Apps / My Account / Logout) — keep it a legible,
+   opaque card instead of the transparent flattened treatment used for the
+   page-menu submenus above (they share the same Bootstrap dropdown-menu
+   markup, so this widget needs to be excluded from that rule via :not()). */
+#top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-menu.js_usermenu {
+  position: static !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06) !important;
+  padding: 0.35rem 0 !important;
+  margin: 0.5rem 0 0.25rem !important;
+}
+
+#top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-menu.js_usermenu .dropdown-item,
+#top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-menu.js_usermenu .dropdown-item span {
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  color: #64748b !important;
+  padding: 0.6rem 1rem !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+#top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-menu.js_usermenu .dropdown-item:hover,
+#top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-menu.js_usermenu .dropdown-item:hover span {
+  color: var(--primary-color) !important;
+  background: rgba(111, 66, 193, 0.08) !important;
 }
 
 #top_menu_collapse_mobile.flynova-mobile-offcanvas .navbar-nav .dropdown-toggle::after {

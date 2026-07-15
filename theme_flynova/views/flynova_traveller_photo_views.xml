@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Backend views for the flynova.traveller.photo model.
-     Provides action, list, kanban, form, and search views used in the
-     Website > Configuration > Flynova Packages > Traveller Photos menu. -->
 <odoo>
-
     <!-- Action: opens the Traveller Photos manager with kanban as the default view.
          Includes an empty-state help message for first-time use. -->
     <record id="flynova_traveller_photo_action" model="ir.actions.act_window">

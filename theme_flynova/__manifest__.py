@@ -19,7 +19,6 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-
 {
     'name': 'Theme Flynova',
     'version': '17.0.1.0.0',
@@ -33,7 +32,7 @@
     'company': 'Cybrosys Techno Solutions',
     'maintainer':'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['website', 'website_event', 'event_sale', 'payment', 'sale', 'website_sale'],
+    'depends': [ 'website_event', 'event_sale', 'website_sale'],
     'data': [
         'security/ir.model.access.csv',
         'views/layout_templates.xml',
