@@ -16,7 +16,8 @@
         "views/snippets/snippets.xml",
         "views/snippets/options.xml",
         "views/homepage_templates.xml",
-        "views/contact_templates.xml"
+        "views/contact_templates.xml",
+        "views/about_templates.xml",
     ],
     "assets": {
         "web.assets_frontend": [

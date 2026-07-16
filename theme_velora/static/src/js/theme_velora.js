@@ -252,6 +252,106 @@
     });
   });
 
+  /* ============ WISHLIST (Homepage Product Cards) ============ */
+  /**
+   * Retrieve wishlist product IDs from sessionStorage (same cache Odoo uses).
+   */
+  function getWishlistIds() {
+    try {
+      return JSON.parse(sessionStorage.getItem('website_sale_wishlist_product_ids') || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  function setWishlistIds(ids) {
+    sessionStorage.setItem('website_sale_wishlist_product_ids', JSON.stringify(ids));
+  }
+
+  /**
+   * Update every wishlist count badge in the page header.
+   */
+  function updateWishCountBadge(ids) {
+    $$('header .my_wish_quantity, .js-wishlist-count').forEach((el) => {
+      el.textContent = String(ids.length);
+    });
+  }
+
+  /**
+   * Mark a wishlist button as "already in wishlist" (red heart).
+   */
+  function markWishlistBtn(btn, inWish) {
+    const icon = btn.querySelector('i');
+    if (inWish) {
+      btn.classList.add('vc-in-wish');
+      btn.setAttribute('disabled', 'disabled');
+      if (icon) {
+        icon.classList.remove('fa-regular');
+        icon.classList.add('fa-solid');
+      }
+    } else {
+      btn.classList.remove('vc-in-wish');
+      btn.removeAttribute('disabled');
+      if (icon) {
+        icon.classList.add('fa-regular');
+        icon.classList.remove('fa-solid');
+      }
+    }
+  }
+
+  /**
+   * On page load, pre-mark any card whose product is already in the wishlist.
+   */
+  function initWishlistBtns() {
+    const ids = getWishlistIds();
+    $$('.wishlist-btn[data-product-product-id]').forEach((btn) => {
+      const pid = parseInt(btn.dataset.productProductId, 10);
+      if (ids.includes(pid)) markWishlistBtn(btn, true);
+    });
+  }
+
+  /**
+   * Handle wishlist button clicks.
+   */
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.wishlist-btn[data-product-product-id]');
+    if (!btn) return;
+
+    // Skip if Odoo's widget already handled it (it disables the button first)
+    if (btn.hasAttribute('disabled')) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const productId = parseInt(btn.dataset.productProductId, 10);
+    if (!productId) return;
+
+    const ids = getWishlistIds();
+
+    // If already in wishlist, do nothing (button is disabled, this won't run)
+    if (ids.includes(productId)) return;
+
+    // Optimistic UI: mark immediately
+    markWishlistBtn(btn, true);
+    const newIds = [...ids, productId];
+    setWishlistIds(newIds);
+    updateWishCountBadge(newIds);
+
+    try {
+      await jsonRpc('/shop/wishlist/add', { product_id: productId });
+      showToast('Added to wishlist ♥');
+    } catch (err) {
+      // Rollback on error
+      markWishlistBtn(btn, false);
+      setWishlistIds(ids);
+      updateWishCountBadge(ids);
+      showToast('Could not add to wishlist. Please try again.');
+    }
+  });
+
+  // Seed initial state from session cache
+  initWishlistBtns();
+
   /* ============ SCROLL REVEAL (Intersection Observer) ============ */
   const revealItems = $$('.reveal');
   const revealObserver = new IntersectionObserver(
@@ -506,4 +606,124 @@
   const yearEl = $('#year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
+  /* ============ WISHLIST TOAST ============ */
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.o_add_wishlist');
+    if (btn && !btn.disabled) {
+      showToast('Added to wishlist ✓');
+    }
+  });
+
+  /* ============ DYNAMIC COLLECTIONS REDIRECT ============ */
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (!link) return;
+
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('/collections/')) {
+      // 1. Check if we're in a homepage collection card
+      const card = link.closest('.collection-card, .collection-overlay');
+      if (card) {
+        const h3 = card.querySelector('h3');
+        if (h3) {
+          const categoryName = h3.textContent.trim();
+          if (categoryName) {
+            e.preventDefault();
+            window.location.href = `/collections/redirect?name=${encodeURIComponent(categoryName)}`;
+            return;
+          }
+        }
+      }
+
+      // 2. Fallback to using the text content of the link itself (e.g. for footer links)
+      const linkText = link.textContent.trim();
+      if (linkText && linkText !== 'Shop Now') {
+        e.preventDefault();
+        window.location.href = `/collections/redirect?name=${encodeURIComponent(linkText)}`;
+      }
+    }
+  });
+
+  /* ============ WISHLIST ADD TO CART AJAX ============ */
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.velora-wishlist-page .o_wish_add');
+    if (!btn || btn.classList.contains('disabled')) return;
+
+    // Prevent Odoo's default event listener from running!
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    const tr = btn.closest('tr');
+    if (!tr) return;
+
+    const productId = parseInt(tr.dataset.productId, 10);
+    const wishId = parseInt(tr.dataset.wishId, 10);
+    if (!productId) return;
+
+    btn.disabled = true;
+    btn.classList.add('disabled');
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+    try {
+      // 1. Add to cart via AJAX
+      await jsonRpc('/shop/cart/update_json', {
+        product_id: productId,
+        add_qty: 1,
+        display: true,
+      });
+
+      // 2. Handle wishlist removal if checkbox b2b_wish is NOT checked
+      const b2bWish = document.getElementById('b2b_wish');
+      const keepInWishlist = b2bWish && b2bWish.checked;
+
+      if (!keepInWishlist && wishId) {
+        // Remove from wishlist DB
+        await jsonRpc(`/shop/wishlist/remove/${wishId}`);
+        // Remove product ID from sessionStorage
+        let sessionIds = JSON.parse(sessionStorage.getItem('website_sale_wishlist_product_ids') || '[]');
+        sessionIds = sessionIds.filter(id => id !== productId);
+        sessionStorage.setItem('website_sale_wishlist_product_ids', JSON.stringify(sessionIds));
+        
+        // Update header wishlist quantity badge
+        const wishButtons = document.querySelectorAll('.o_wsale_my_wish');
+        wishButtons.forEach(wb => {
+          const qtyEl = wb.querySelector('.my_wish_quantity');
+          if (qtyEl) qtyEl.textContent = sessionIds.length;
+          if (wb.classList.contains('o_wsale_my_wish_hide_empty')) {
+            wb.classList.toggle('d-none', !sessionIds.length);
+          }
+        });
+
+        // Animate row removal beautifully!
+        tr.style.transition = 'all 0.4s ease';
+        tr.style.opacity = '0';
+        tr.style.transform = 'translateX(50px)';
+        setTimeout(() => {
+          tr.remove();
+          // If no rows left, reload the page or redirect to cart
+          const remainingRows = document.querySelectorAll('.velora-wishlist-page #o_comparelist_table tbody tr');
+          if (remainingRows.length === 0) {
+            window.location.href = '/shop/cart';
+          }
+        }, 400);
+      }
+
+      // 3. Load cart drawer and display success
+      await loadCartDrawer();
+      showToast('Added to your bag ✓');
+      openCart();
+
+    } catch (err) {
+      showToast('Could not add to bag. Please try again.');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('disabled');
+      btn.innerHTML = originalHtml;
+    }
+  }, true); // Capture phase to preempt Odoo's handler
+
 })();
+
+

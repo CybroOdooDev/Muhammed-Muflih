@@ -67,8 +67,33 @@
                string="Contact Map"
                group="velora_snippets"
                t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+            <t t-snippet="theme_velora.s_velora_about_banner"
+               string="About Banner"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+            <t t-snippet="theme_velora.s_velora_about_story"
+               string="About Story Detail"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/men.jpg"/>
+            <t t-snippet="theme_velora.s_velora_about_stats"
+               string="About Stats"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/img2.jpg"/>
+            <t t-snippet="theme_velora.s_velora_about_philosophy"
+               string="Brand Philosophy"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/img1.jpg"/>
+            <t t-snippet="theme_velora.s_velora_bestseller_banner"
+               string="Best Sellers Banner"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+            <t t-snippet="theme_velora.s_velora_bestseller_products"
+               string="Best Sellers Products"
+               group="velora_snippets"
+               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
         </xpath>
 
     </template>
 
 </odoo>
+
