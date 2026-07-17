@@ -587,6 +587,38 @@
     }
   });
 
+  /* ============ AJAX ADD TO CART (STANDALONE BUTTONS) ============ */
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.add-cart-btn');
+    if (!btn || btn.closest('form')) return;
+
+    e.preventDefault();
+    if (btn.disabled) return;
+
+    const productId = parseInt(btn.dataset.productId, 10);
+    if (!productId) return;
+
+    btn.disabled = true;
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+    try {
+      const data = await jsonRpc('/shop/cart/update_json', {
+        product_id: productId,
+        add_qty: 1,
+        display: true,
+      });
+      applyCartData(data);
+      showToast('Added to your bag ✓');
+      openCart();
+    } catch (err) {
+      showToast('Could not add to bag. Please try again.');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  });
+
   /* ============ BUTTON RIPPLE EFFECT ============ */
   $$('.btn').forEach((btn) => {
     btn.addEventListener('click', function (e) {
@@ -621,8 +653,8 @@
 
     const href = link.getAttribute('href');
     if (href && href.startsWith('/collections/')) {
-      // 1. Check if we're in a homepage collection card
-      const card = link.closest('.collection-card, .collection-overlay');
+      // 1. Check if we're in a homepage or collections page card
+      const card = link.closest('.collection-card, .collection-overlay, .collections-page-card');
       if (card) {
         const h3 = card.querySelector('h3');
         if (h3) {
@@ -633,13 +665,6 @@
             return;
           }
         }
-      }
-
-      // 2. Fallback to using the text content of the link itself (e.g. for footer links)
-      const linkText = link.textContent.trim();
-      if (linkText && linkText !== 'Shop Now') {
-        e.preventDefault();
-        window.location.href = `/collections/redirect?name=${encodeURIComponent(linkText)}`;
       }
     }
   });
@@ -723,6 +748,30 @@
       btn.innerHTML = originalHtml;
     }
   }, true); // Capture phase to preempt Odoo's handler
+
+  /* ============ USER MENU DROPDOWN ============ */
+  document.addEventListener('click', (e) => {
+    const userMenuButton = e.target.closest('#userMenuButton');
+    const userDropdown = document.querySelector('.velora-user-dropdown');
+
+    if (userMenuButton && userDropdown) {
+      e.preventDefault();
+      e.stopPropagation();
+      const isExpanded = userMenuButton.getAttribute('aria-expanded') === 'true';
+      userMenuButton.setAttribute('aria-expanded', String(!isExpanded));
+      userDropdown.classList.toggle('show');
+      return;
+    }
+
+    // Close user dropdown if clicking outside
+    if (userDropdown && userDropdown.classList.contains('show')) {
+      if (!e.target.closest('.user-dropdown-wrap')) {
+        const button = document.querySelector('#userMenuButton');
+        if (button) button.setAttribute('aria-expanded', 'false');
+        userDropdown.classList.remove('show');
+      }
+    }
+  }, true);
 
 })();
 

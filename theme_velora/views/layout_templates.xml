@@ -34,6 +34,7 @@
 
       <ul class="nav-links" id="navLinks">
         <li><a href="/collections" class="nav-link">Collections</a></li>
+        <li><a href="/shop" class="nav-link">Shop</a></li>
         <li><a href="/best-sellers" class="nav-link">Best Sellers</a></li>
         <!-- <li><a href="#categories" class="nav-link">Fragrances</a></li> -->
         <li><a href="/about-us" class="nav-link">Our Story</a></li>
@@ -45,17 +46,46 @@
         <button class="icon-btn" id="searchToggle" aria-label="Open search" aria-expanded="false">
           <i class="fa-solid fa-magnifying-glass"></i>
         </button>
-        <a href="/shop/wishlist" class="icon-btn nav-actions-secondary" id="wishlistToggle" aria-label="View wishlist">
+        <a href="/shop/wishlist" t-attf-class="icon-btn nav-actions-secondary o_wsale_my_wish o_wsale_my_wish_hide_empty #{'d-none' if not website_sale_wish_quantity else ''}" id="wishlistToggle" aria-label="View wishlist">
           <i class="fa-regular fa-heart"></i>
-          <span class="badge js-wishlist-count" id="wishlistCount" t-esc="website_sale_wish_quantity"/>
+          <span class="badge js-wishlist-count my_wish_quantity" id="wishlistCount" t-esc="website_sale_wish_quantity"/>
         </a>
         <button class="icon-btn nav-actions-secondary" id="cartToggle" aria-label="View shopping cart">
           <i class="fa-solid fa-bag-shopping"></i>
           <span class="badge js-cart-count" id="cartCount" t-esc="website_sale_cart_quantity"/>
         </button>
-        <button class="icon-btn" aria-label="My account">
-          <i class="fa-regular fa-user"></i>
-        </button>
+        <div class="dropdown user-dropdown-wrap">
+          <button class="icon-btn" type="button" id="userMenuButton" aria-expanded="false" aria-label="My account">
+            <i class="fa-regular fa-user"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end velora-user-dropdown" aria-labelledby="userMenuButton">
+            <t t-nocache="Each user is different regardless of the page visited.">
+              <t t-set="curr_user" t-value="request.env.user"/>
+              <t t-if="not curr_user._is_public()">
+                <li class="dropdown-header">
+                  <span t-esc="curr_user.name"/>
+                </li>
+                <li>
+                  <hr class="dropdown-divider"/>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="/my/home">My Account</a>
+                </li>
+                <li>
+                  <hr class="dropdown-divider"/>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="/web/session/logout?redirect=/web/login">Logout</a>
+                </li>
+              </t>
+              <t t-else="">
+                <li>
+                  <a class="dropdown-item" href="/web/login">Sign in</a>
+                </li>
+              </t>
+            </t>
+          </ul>
+        </div>
         <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
           <span></span><span></span><span></span>
         </button>
@@ -84,6 +114,7 @@
   </div>
   <ul>
    <li><a href="/collections" class="nav-link">Collections</a></li>
+        <li><a href="/shop" class="nav-link">Shop</a></li>
         <li><a href="/best-sellers" class="nav-link">Best Sellers</a></li>
         <!-- <li><a href="#categories" class="nav-link">Fragrances</a></li> -->
         <li><a href="/about-us" class="nav-link">Our Story</a></li>
@@ -91,10 +122,10 @@
         <li><a href="/contactus" class="nav-link">Contact</a></li>
   </ul>
   <div class="mobile-menu-actions">
-    <a href="/shop/wishlist" class="mobile-menu-action-btn" id="wishlistToggleMobile">
+    <a href="/shop/wishlist" t-attf-class="mobile-menu-action-btn o_wsale_my_wish o_wsale_my_wish_hide_empty #{'d-none' if not website_sale_wish_quantity else ''}" id="wishlistToggleMobile">
       <i class="fa-regular fa-heart"></i>
       <span>Wishlist</span>
-      <span class="badge js-wishlist-count" t-esc="website_sale_wish_quantity"/>
+      <span class="badge js-wishlist-count my_wish_quantity" t-esc="website_sale_wish_quantity"/>
     </a>
     <button class="mobile-menu-action-btn" id="cartToggleMobile">
       <i class="fa-solid fa-bag-shopping"></i>
@@ -337,19 +368,19 @@
                             <span itemprop="price" style="display:none;" t-esc="template_price_vals['price_reduce']" />
                             <span itemprop="priceCurrency" style="display:none;" t-esc="website.currency_id.name" />
                         </div>
-
-                        <!-- Add to Cart Button -->
-                        <t t-if="product_variant_id and template_price_vals['price_reduce'] or not website.prevent_zero_price_sale">
-                            <button t-if="product._website_show_quick_add()"
-                                    type="submit"
-                                    class="btn btn-primary add-cart-btn-text a-submit"
-                                    style="padding: 0.8rem 1rem; font-size: 0.85rem;"
-                                    aria-label="Add to cart"
-                            >
-                                Add to Cart
-                            </button>
-                        </t>
                     </div>
+
+                    <!-- Add to Cart Button -->
+                    <t t-if="product_variant_id and template_price_vals['price_reduce'] or not website.prevent_zero_price_sale">
+                        <button t-if="product._website_show_quick_add()"
+                                type="submit"
+                                class="btn btn-primary add-cart-btn btn-full-text w-100 mt-2"
+                                style="width: 100% !important; background: var(--color-black) !important; border-color: var(--color-black) !important; color: var(--color-white) !important; border-radius: 999px !important; padding: 0.8rem 1.5rem !important;"
+                                aria-label="Add to cart"
+                        >
+                            ADD TO CART
+                        </button>
+                    </t>
                 </div>
 
             </form>
@@ -361,5 +392,7 @@
             <attribute name="class" add="velora-product-details-page" separator=" "/>
         </xpath>
     </template>
+
+    <!-- Shop link is now hard-coded directly in the nav lists above -->
 </odoo>
 

@@ -18,10 +18,15 @@
         "views/homepage_templates.xml",
         "views/contact_templates.xml",
         "views/about_templates.xml",
+        "views/collections_templates.xml",
+        "views/bestseller_templates.xml",
+        "views/confirmation_templates.xml",
     ],
     "assets": {
         "web.assets_frontend": [
             "theme_velora/static/src/css/style.css",
+            "theme_velora/static/src/css/bestseller.css",
+            "theme_velora/static/src/css/confirmation.css",
             "theme_velora/static/src/js/theme_velora.js"
         ],
         "website.assets_wysiwyg": [

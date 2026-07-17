@@ -1,24 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="homepage_velora_arch" inherit_id="website.homepage" name="Velora Homepage">
-<!--        <xpath expr="//div[@id='wrap']" position="attributes">-->
-<!--            <attribute name="class">oe_structure velora-page</attribute>-->
-<!--        </xpath>-->
         <xpath expr="//div[@id='wrap']" position="replace">
-            <div id="wrap" class="oe_structure oe_empty">
+            <div id="wrap" class="oe_structure">
                 <!-- Hero Banner -->
         <section class="hero s_velora o_colored_level" id="hero" data-snippet="theme_velora.s_velora_snippet_hero" data-name="Hero Banner">
             <div class="hero-bg">
                 <img src="/theme_velora/static/src/img/hero.webp"
                      alt="Velora signature perfume bottle on marble surface with golden light"
-                     class="o_we_custom_image"
-                     loading="eager"/>
+                     class="o_we_custom_image oe_editable"/>
                 <div class="hero-overlay"></div>
             </div>
 
             <div class="hero-text-top">
                 <h1 class="hero-title">
-                    <span class="title-line reveal">Discover Your</span><br/>
+                    <span class="title-line reveal oe_editable">Discover Your</span><br/>
                     <em class="title-line title-line-gold reveal">Signature <br/>Scent</em>
                 </h1>
             </div>
@@ -26,7 +22,7 @@
             <div class="hero-text-bottom">
                 <p class="hero-desc reveal">Exquisitely crafted fragrances born from rare botanicals and precious woods — an olfactory journey designed for those who leave a lasting impression.</p>
                 <div class="hero-actions reveal">
-                    <a href="/shop" class="btn btn-primary">
+                    <a href="/best-sellers" class="btn btn-primary">
                         <span>Shop Best Sellers</span>
                     </a>
                     <a href="/about-us" class="btn btn-outline-light">
@@ -101,62 +97,7 @@
                 </section>
                 <div class="oe_structure oe_empty"/>
 
-                <!-- Best Sellers -->
-                <section class="bestsellers section s_velora o_colored_level" id="bestsellers" data-snippet="theme_velora.s_velora_snippet_bestsellers" data-name="Best Sellers">
-                    <div class="container">
-                        <div class="section-head reveal">
-                            <p class="eyebrow">Adored Worldwide</p>
-                            <h2 class="section-title">Best Sellers</h2>
-                            <p class="section-sub">The fragrances our connoisseurs return to again and again.</p>
-                        </div>
 
-                        <t t-set="velora_products"
-                           t-value="request.env['product.template'].sudo().search([('sale_ok', '=', True), ('website_published', '=', True)], limit=8) or request.env['product.template'].sudo().search([('sale_ok', '=', True)], limit=8)"/>
-                        <div class="product-grid" id="productGrid">
-                            <t t-foreach="velora_products" t-as="product">
-                                <article class="product-card reveal">
-                                    <a class="product-media" t-att-href="product.website_url or '/shop/product/%s' % product.id">
-                                        <img t-att-src="'/web/image/product.template/%s/image_1024' % product.id"
-                                             t-att-alt="product.name"
-                                             loading="lazy"/>
-                                    </a>
-                                    <button type="button" role="button" class="wishlist-btn o_add_wishlist"
-                                       t-att-data-product-template-id="product.id"
-                                       t-att-data-product-product-id="product._get_first_possible_variant_id()"
-                                       data-action="o_wishlist"
-                                       t-att-aria-label="'Add %s to wishlist' % product.name">
-                                        <i class="fa-regular fa-heart"></i>
-                                    </button>
-                                    <div class="product-info">
-                                        <span class="product-brand" t-esc="product.categ_id.name or 'Product'"/>
-                                        <a t-att-href="product.website_url or '/shop/product/%s' % product.id">
-                                            <h3 class="product-name" t-esc="product.name"/>
-                                        </a>
-                                        <p class="product-desc" t-esc="product.description_sale or product.public_categ_ids[:1].name or product.categ_id.name or ''"/>
-                                        <div class="product-price-row">
-                                            <div class="price-group">
-                                                <span class="price-current"
-                                                      t-field="product.list_price"
-                                                      t-options="{'widget': 'monetary', 'display_currency': product.currency_id}"/>
-                                            </div>
-                                            <form action="/shop/cart/update" method="post">
-                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                                <input type="hidden" name="product_id" t-att-value="product.product_variant_id.id"/>
-                                                <input type="hidden" name="add_qty" value="1"/>
-                                                <button type="submit" class="add-cart-btn"
-                                                        t-att-aria-label="'Add %s to cart' % product.name">
-                                                    <i class="fa-solid fa-bag-shopping"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </article>
-                            </t>
-                            <div t-if="not velora_products" class="empty-state">No products are available.</div>
-                        </div>
-                    </div>
-                </section>
-                <div class="oe_structure oe_empty"/>
 
                 <!-- Fragrance Categories -->
                 <section class="categories section s_velora o_colored_level" id="categories" data-snippet="theme_velora.s_velora_snippet_categories" data-name="Fragrance Categories">

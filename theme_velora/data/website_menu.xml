@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
+    <data noupdate="0">
         <record id="menu_collections" model="theme.website.menu">
             <field name="name">Collections</field>
             <field name="url">/collections</field>
             <field name="use_main_menu_as_parent">True</field>
             <field name="sequence" type="int">20</field>
         </record>
+        <record id="menu_shop" model="theme.website.menu">
+            <field name="name">Shop</field>
+            <field name="url">/shop</field>
+            <field name="use_main_menu_as_parent">True</field>
+            <field name="sequence" type="int">25</field>
+        </record>
         <record id="menu_best_sellers" model="theme.website.menu">
             <field name="name">Best Sellers</field>
-            <field name="url">/best-sellers</field>
+            <field name="url">/bestsellers</field>
             <field name="use_main_menu_as_parent">True</field>
             <field name="sequence" type="int">30</field>
         </record>

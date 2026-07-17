@@ -24,7 +24,7 @@
             <div class="hero-text-bottom">
                 <p class="hero-desc reveal">Exquisitely crafted fragrances born from rare botanicals and precious woods — an olfactory journey designed for those who leave a lasting impression.</p>
                 <div class="hero-actions reveal">
-                    <a href="/shop" class="btn btn-primary">
+                    <a href="/best-sellers" class="btn btn-primary">
                         <span>Shop Best Sellers</span>
                     </a>
                     <a href="/about-us" class="btn btn-outline-light">
@@ -97,66 +97,6 @@
                             <a href="/collections/limited_editions" class="btn btn-gold-outline">Shop Now</a>
                         </div>
                     </article>
-                </div>
-            </div>
-        </section>
-    </template>
-
-    <!-- ============================================================
-         SNIPPET: BEST SELLERS
-    ============================================================ -->
-    <template id="s_velora_snippet_bestsellers" name="Velora Best Sellers">
-        <section class="bestsellers section s_velora o_colored_level" id="bestsellers" data-snippet="theme_velora.s_velora_snippet_bestsellers" data-name="Best Sellers">
-            <div class="container">
-                <div class="section-head reveal">
-                    <p class="eyebrow">Adored Worldwide</p>
-                    <h2 class="section-title">Best Sellers</h2>
-                    <p class="section-sub">The fragrances our connoisseurs return to again and again.</p>
-                </div>
-
-                <t t-set="velora_products"
-                   t-value="request.env['product.template'].sudo().search([('sale_ok', '=', True), ('website_published', '=', True)], limit=8) or request.env['product.template'].sudo().search([('sale_ok', '=', True)], limit=8)"/>
-                <div class="product-grid" id="productGrid">
-                    <t t-foreach="velora_products" t-as="product">
-                        <article class="product-card reveal">
-                            <a class="product-media" t-att-href="product.website_url or '/shop/product/%s' % product.id">
-                                <img t-att-src="'/web/image/product.template/%s/image_1024' % product.id"
-                                     t-att-alt="product.name"
-                                     loading="lazy"/>
-                            </a>
-                            <button type="button" role="button" class="wishlist-btn o_add_wishlist"
-                               t-att-data-product-template-id="product.id"
-                               t-att-data-product-product-id="product._get_first_possible_variant_id()"
-                               data-action="o_wishlist"
-                               t-att-aria-label="'Add %s to wishlist' % product.name">
-                                <i class="fa-regular fa-heart"></i>
-                            </button>
-                            <div class="product-info">
-                                <span class="product-brand" t-esc="product.categ_id.name or 'Product'"/>
-                                <a t-att-href="product.website_url or '/shop/product/%s' % product.id">
-                                    <h3 class="product-name" t-esc="product.name"/>
-                                </a>
-                                <p class="product-desc" t-esc="product.description_sale or product.public_categ_ids[:1].name or product.categ_id.name or ''"/>
-                                <div class="product-price-row">
-                                    <div class="price-group">
-                                        <span class="price-current"
-                                              t-field="product.list_price"
-                                              t-options="{'widget': 'monetary', 'display_currency': product.currency_id}"/>
-                                    </div>
-                                    <form action="/shop/cart/update" method="post">
-                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                        <input type="hidden" name="product_id" t-att-value="product.product_variant_id.id"/>
-                                        <input type="hidden" name="add_qty" value="1"/>
-                                        <button type="submit" class="add-cart-btn"
-                                                t-att-aria-label="'Add %s to cart' % product.name">
-                                            <i class="fa-solid fa-bag-shopping"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </article>
-                    </t>
-                    <div t-if="not velora_products" class="empty-state">No products are available.</div>
                 </div>
             </div>
         </section>
@@ -302,7 +242,7 @@
                 </div>
             </div>
         </section>
-    </template>
+     </template> 
 
     <!-- ============================================================
          SNIPPET: TESTIMONIALS
@@ -784,16 +724,113 @@
     </template>
 
     <!-- ============================================================
-         SNIPPET: BESTSELLERS BANNER
+         SNIPPET: COLLECTIONS BANNER
     ============================================================ -->
-    <template id="s_velora_bestseller_banner" name="Velora Best Sellers Banner">
+    <template id="s_velora_collections_banner" name="Velora Collections Banner">
         <section class="page-banner s_velora o_colored_level"
-                 data-snippet="theme_velora.s_velora_bestseller_banner"
-                 data-name="Best Sellers Banner">
+                 data-snippet="theme_velora.s_velora_collections_banner"
+                 data-name="Collections Banner">
             <div class="page-banner-bg"></div>
             <div class="page-banner-content container">
-                <p class="hero-eyebrow reveal"><span class="hero-eyebrow-line"></span><span>Chosen by Connoisseurs</span><span class="hero-eyebrow-line"></span></p>
-                <h1 class="page-banner-title hero-title reveal">Our Bestselling <em>Fragrances</em></h1>
+                <p class="hero-eyebrow reveal"><span class="hero-eyebrow-line"></span><span>Crafted for Every Occasion</span><span class="hero-eyebrow-line"></span></p>
+                <h1 class="page-banner-title hero-title reveal">Our latest <em>Collections</em></h1>
+                <nav class="breadcrumb reveal" aria-label="Breadcrumb">
+                    <a href="/">Home</a>
+                    <span aria-hidden="true">/</span>
+                    <span aria-current="page">Collections</span>
+                </nav>
+            </div>
+        </section>
+    </template>
+
+    <!-- ============================================================
+         SNIPPET: COLLECTIONS GRID
+    ============================================================ -->
+    <template id="s_velora_collections_grid" name="Velora Collections Grid">
+        <section class="collections-page-section s_velora o_colored_level"
+                 data-snippet="theme_velora.s_velora_collections_grid"
+                 data-name="Collections Grid">
+            <div class="container">
+                <div class="section-header reveal">
+                    <p class="eyebrow">Signature Collection</p>
+                    <h2 class="section-title">Explore Every Fragrance Story</h2>
+                    <p class="section-sub">
+                        Every perfume is carefully crafted to express elegance, confidence,
+                        and individuality. Discover timeless scents inspired by nature,
+                        luxury, and unforgettable moments.
+                    </p>
+                </div>
+
+                <div class="collections-page-grid">
+                    <article class="collections-page-card reveal">
+                        <div class="collections-page-image">
+                            <img src="/theme_velora/static/src/img/men.jpg" alt="Men's Fragrance Collection" loading="lazy" class="o_we_custom_image"/>
+                        </div>
+                        <div class="collections-page-content">
+                            <span>01</span>
+                            <h3>Men's Collection</h3>
+                            <p>
+                                Rich woody accords blended with leather, amber and fresh citrus
+                                for the modern gentleman.
+                            </p>
+                            <a href="/collections/mens_collection" class="btn-outline">
+                                Explore Collection
+                            </a>
+                        </div>
+                    </article>
+
+                    <article class="collections-page-card reveal reverse">
+                        <div class="collections-page-image">
+                            <img src="/theme_velora/static/src/img/women.jpg" alt="Women's Fragrance Collection" loading="lazy" class="o_we_custom_image"/>
+                        </div>
+                        <div class="collections-page-content">
+                            <span>02</span>
+                            <h3>Women's Collection</h3>
+                            <p>
+                                Elegant floral compositions with jasmine, rose and vanilla,
+                                created for timeless sophistication.
+                            </p>
+                            <a href="/collections/womens_collection" class="btn-outline">
+                                Explore Collection
+                            </a>
+                        </div>
+                    </article>
+
+                    <article class="collections-page-card reveal">
+                        <div class="collections-page-image">
+                            <img src="/theme_velora/static/src/img/unisex.jpeg" alt="Unisex Fragrance Collection" loading="lazy" class="o_we_custom_image"/>
+                        </div>
+                        <div class="collections-page-content">
+                            <span>03</span>
+                            <h3>Unisex Collection</h3>
+                            <p>
+                                Modern fragrances balancing freshness, woods and musk for
+                                effortless everyday luxury.
+                            </p>
+                            <a href="/collections/unisex" class="btn-outline">
+                                Explore Collection
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="s_velora_bestsellers_banner" name="Velora Bestsellers Banner">
+        <section class="page-banner s_velora o_colored_level"
+                 data-snippet="theme_velora.s_velora_bestsellers_banner"
+                 data-name="Bestsellers Banner">
+            <div class="page-banner-bg"></div>
+            <div class="page-banner-content container">
+                <p class="hero-eyebrow reveal">
+                    <span class="hero-eyebrow-line"></span>
+                    Chosen by Connoisseurs
+                    <span class="hero-eyebrow-line"></span>
+                </p>
+                <h1 class="page-banner-title hero-title reveal">
+                    Our Bestselling <em>Fragrances</em>
+                </h1>
                 <nav class="breadcrumb reveal" aria-label="Breadcrumb">
                     <a href="/">Home</a>
                     <span aria-hidden="true">/</span>
@@ -803,156 +840,99 @@
         </section>
     </template>
 
-    <!-- ============================================================
-         SNIPPET: BESTSELLERS PRODUCTS
-    ============================================================ -->
-    <template id="s_velora_bestseller_products" name="Velora Best Sellers Products">
-        <section class="best-sellers section s_velora o_colored_level" id="bestsellers"
-                 data-snippet="theme_velora.s_velora_bestseller_products"
-                 data-name="Best Sellers Products">
+    <template id="s_velora_bestsellers" name="Velora Bestsellers">
+        <section class="bestsellers section s_velora_bestsellers o_colored_level" id="bestsellers" data-snippet="theme_velora.s_velora_bestsellers" data-name="Velora Bestsellers">
             <div class="container">
-                <div class="section-header reveal">
-                    <p class="eyebrow">Best Sellers</p>
-                    <h2 class="section-title">Our Most Loved Fragrances</h2>
-                    <p class="section-sub">
-                        Discover the perfumes our customers return to time and time again.
-                        Crafted with exceptional ingredients and timeless elegance, these
-                        signature fragrances define the essence of Velora.
-                    </p>
+                <div class="section-head reveal">
+                    <p class="eyebrow">Adored Worldwide</p>
+                    <h2 class="section-title">Best Sellers</h2>
+                    <p class="section-sub">The fragrances our connoisseurs return to again and again.</p>
                 </div>
-                
-                <t t-set="velora_products"
-                   t-value="request.env['product.template'].sudo().search([('sale_ok', '=', True), ('website_published', '=', True)], limit=8)"/>
-                
-                <div class="product-grid">
-                    <t t-if="velora_products">
-                        <t t-foreach="velora_products" t-as="product">
-                            <article class="product-card reveal">
-                                <div class="product-media">
-                                    <span class="discount-badge">Bestseller</span>
-                                    <t t-if="product.product_variant_id">
-                                        <button type="button" role="button" class="wishlist-btn o_add_wishlist"
-                                                t-att-data-product-template-id="product.id"
-                                                t-att-data-product-product-id="product._get_first_possible_variant_id()"
-                                                data-action="o_wishlist"
-                                                t-att-aria-label="'Add %s to wishlist' % product.name">
-                                            <i class="fa-regular fa-heart"></i>
-                                        </button>
-                                    </t>
-                                    <a t-att-href="product.website_url or '/shop/product/%s' % product.id">
-                                        <img t-att-src="'/web/image/product.template/%s/image_1024' % product.id"
-                                             t-att-alt="product.name"
-                                             loading="lazy"/>
-                                    </a>
-                                </div>
-                                <div class="product-info">
-                                    <span class="product-brand" t-esc="product.categ_id.name or 'Velora Maison'"/>
-                                    <a t-att-href="product.website_url or '/shop/product/%s' % product.id">
-                                        <h3 class="product-name" t-esc="product.name"/>
-                                    </a>
-                                    <p class="product-desc" t-esc="product.description_sale or product.public_categ_ids[:1].name or product.categ_id.name or ''"/>
-                                    <div class="product-rating">
-                                        <span aria-hidden="true" style="color:var(--color-gold)">★★★★★</span>
-                                        <span>5.0</span>
-                                    </div>
-                                    <div class="product-price-row" style="flex-direction: column; align-items: stretch; gap: 1rem;">
-                                        <div class="price-group" style="text-align: center; margin-bottom: 0.5rem;">
-                                            <span class="price-current"
-                                                  t-field="product.list_price"
-                                                  t-options="{'widget': 'monetary', 'display_currency': product.currency_id}"/>
-                                        </div>
-                                        <t t-if="product.product_variant_id">
-                                            <form action="/shop/cart/update" method="post">
-                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                                <input type="hidden" name="product_id" t-att-value="product.product_variant_id.id"/>
-                                                <input type="hidden" name="add_qty" value="1"/>
-                                                <button type="submit" class="btn btn-primary add-cart-btn-text w-100" style="padding: 0.8rem 1rem; font-size: 0.85rem;" t-att-aria-label="'Add %s to cart' % product.name">Add to Cart</button>
-                                            </form>
-                                        </t>
-                                    </div>
-                                </div>
-                            </article>
-                        </t>
-                    </t>
-                    <t t-else="">
-                        <!-- Product 1 -->
-                        <article class="product-card reveal">
-                            <div class="product-media">
-                                <span class="discount-badge">Bestseller</span>
-                                <button class="wishlist-btn" data-id="p1" aria-label="Add Midnight Noir to wishlist" aria-pressed="false">
-                                    <i class="fa-regular fa-heart"></i>
-                                </button>
-                                <img src="https://images.unsplash.com/photo-1523293182086-7651a899d37f?q=80&amp;w=1200&amp;auto=format&amp;fit=crop" alt="Midnight Noir" loading="lazy" class="o_we_custom_image"/>
-                            </div>
-                            <div class="product-info">
-                                <span class="product-brand">Velora Maison</span>
-                                <h3 class="product-name">Midnight Noir</h3>
-                                <p class="product-desc">Warm amber, oud wood and rich vanilla blended into an unforgettable signature scent.</p>
-                                <div class="product-rating">
-                                    <span aria-hidden="true" style="color:var(--color-gold)">★★★★★</span>
-                                    <span>5.0 (214)</span>
-                                </div>
-                                <div class="product-price-row" style="flex-direction: column; align-items: stretch; gap: 1rem;">
-                                    <div class="price-group" style="text-align: center; margin-bottom: 0.5rem;">
-                                        <span class="price-current">$145.00</span>
-                                    </div>
-                                    <button class="btn btn-primary add-cart-btn-text" data-id="p1" style="padding: 0.8rem 1rem; font-size: 0.85rem;" aria-label="Add Midnight Noir to cart">Add to Cart</button>
-                                </div>
-                            </div>
-                        </article>
 
-                        <!-- Product 2 -->
+                <div class="product-grid">
+                    <t t-set="products"
+                       t-value="request.env['product.template'].sudo().search([('website_published', '=', True), ('sale_ok', '=', True)], limit=3, order='create_date desc')"/>
+                    <t t-foreach="products" t-as="product">
                         <article class="product-card reveal">
                             <div class="product-media">
-                                <span class="discount-badge">New</span>
-                                <button class="wishlist-btn" data-id="p4" aria-label="Add Fleur Lumière to wishlist" aria-pressed="false">
+                                <t t-set="ribbon"
+                                   t-value="product.website_ribbon_id"/>
+                                <span class="discount-badge"
+                                      t-if="ribbon"
+                                      t-out="ribbon.name"/>
+                                <button class="wishlist-btn"
+                                        aria-label="Add to wishlist">
                                     <i class="fa-regular fa-heart"></i>
                                 </button>
-                                <img src="https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&amp;w=800&amp;auto=format&amp;fit=crop" alt="Fleur Lumière" loading="lazy" class="o_we_custom_image"/>
+                                <a t-attf-href="/shop/#{product.id}">
+                                    <img t-att-src="'/web/image/product.template/%s/image_1024' % product.id"
+                                         t-att-alt="product.name"
+                                         loading="lazy"/>
+                                </a>
                             </div>
                             <div class="product-info">
                                 <span class="product-brand">Velora Maison</span>
-                                <h3 class="product-name">Fleur Lumière</h3>
-                                <p class="product-desc">Rose petals, jasmine and soft musk wrapped in delicate luxury.</p>
+                                <h3 class="product-name">
+                                    <a t-attf-href="/shop/#{product.id}"
+                                       t-field="product.name"/>
+                                </h3>
+                                <p class="product-desc">A luxurious fragrance crafted with the finest ingredients.</p>
+
                                 <div class="product-rating">
-                                    <span aria-hidden="true" style="color:var(--color-gold)">★★★★★</span>
+                                    <span aria-hidden="true"
+                                          style="color:var(--color-gold)">
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star-half-stroke"></i>
+                                    </span>
                                     <span>4.8 (97)</span>
                                 </div>
-                                <div class="product-price-row" style="flex-direction: column; align-items: stretch; gap: 1rem;">
-                                    <div class="price-group" style="text-align: center; margin-bottom: 0.5rem;">
-                                        <span class="price-current">$165.00</span>
-                                    </div>
-                                    <button class="btn btn-primary add-cart-btn-text" data-id="p4" style="padding: 0.8rem 1rem; font-size: 0.85rem;" aria-label="Add Fleur Lumière to cart">Add to Cart</button>
-                                </div>
-                            </div>
-                        </article>
 
-                        <!-- Product 3 -->
-                        <article class="product-card reveal">
-                            <div class="product-media">
-                                <span class="discount-badge">Premium</span>
-                                <button class="wishlist-btn" data-id="p6" aria-label="Add Ocean Essence to wishlist" aria-pressed="false">
-                                    <i class="fa-regular fa-heart"></i>
-                                </button>
-                                <img src="https://imgs.search.brave.com/WJsNA4mO4F1mkeccxcaedOxWrNYORLfve9D2ZAVpUjE/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9oaXBz/LmhlYXJzdGFwcHMu/Y29tL3ZhZGVyLXBy/b2QuczMuYW1hem9u/YXdzLmNvbS9wcm9k/dWN0LWltYWdlcy8x/NjI5NzA4OC1kMDZm/LTQwYzEtYWU5ZC1l/MGEyZDEyOTkyYmIv/ZTVkMGE5ZjgtMjlk/My00MDUwLWJlYTUt/NjIwMDg4YjNkYTg0/LmpwZWc_Y3JvcD0x/eHc6MC43NXhoOzB4/dywwLjI1eGgmcmVz/aXplPTk4MDoq" alt="Ocean Essence" loading="lazy" class="o_we_custom_image"/>
-                            </div>
-                            <div class="product-info">
-                                <span class="product-brand">Velora Maison</span>
-                                <h3 class="product-name">Ocean Essence</h3>
-                                <p class="product-desc">Fresh citrus and marine notes balanced with luxurious cedarwood.</p>
-                                <div class="product-rating">
-                                    <span aria-hidden="true" style="color:var(--color-gold)">★★★★★</span>
-                                    <span>4.5 (88)</span>
-                                </div>
-                                <div class="product-price-row" style="flex-direction: column; align-items: stretch; gap: 1rem;">
-                                    <div class="price-group" style="text-align: center; margin-bottom: 0.5rem;">
-                                        <span class="price-current">$155.00</span>
+                                <div class="product-price-row">
+                                    <div class="price-group">
+                                        <span class="price-current"
+                                              t-field="product.list_price"
+                                              t-options="{'widget': 'monetary', 'display_currency': request.env.company.currency_id}"/>
                                     </div>
-                                    <button class="btn btn-primary add-cart-btn-text" data-id="p6" style="padding: 0.8rem 1rem; font-size: 0.85rem;" aria-label="Add Ocean Essence to cart">Add to Cart</button>
+                                    <button class="add-cart-btn btn-full-text"
+                                            t-att-data-product-id="product.product_variant_id.id"
+                                            t-att-data-template-id="product.id"
+                                            t-attf-aria-label="Add #{product.name} to cart">
+                                        ADD TO CART
+                                    </button>
                                 </div>
                             </div>
                         </article>
                     </t>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- ============================================================
+         SNIPPET: ORDER CONFIRMATION
+    ============================================================ -->
+    <template id="s_velora_confirmation" name="Velora Confirmation">
+        <section class="page-banner s_velora s_velora_confirmation o_colored_level"
+                 data-snippet="theme_velora.s_velora_confirmation"
+                 data-name="Velora Confirmation">
+            <div class="page-banner-bg"></div>
+            <div class="page-banner-content container">
+                <div class="confirmation-icon reveal">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h1 class="page-banner-title hero-title reveal">
+                    Order <em>Confirmed</em>
+                </h1>
+                <p class="confirmation-desc reveal">
+                    Thank you for your purchase! Your bill has been paid and your order is now being processed. We will send you an email confirmation shortly.
+                </p>
+                <div class="reveal">
+                    <a href="/shop" class="btn btn-gold">
+                        <span>Continue Shopping</span>
+                    </a>
                 </div>
             </div>
         </section>

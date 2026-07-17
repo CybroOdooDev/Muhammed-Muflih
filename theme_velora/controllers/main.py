@@ -35,11 +35,6 @@ class ThemeVeloraCart(http.Controller):
 class ThemeVeloraCollections(http.Controller):
     """Handles redirecting collection routes to Odoo eCommerce categories."""
 
-    @http.route('/collections', type='http', auth='public', website=True)
-    def collections_all(self, **kwargs):
-        """Redirects the general collections link to the main shop page."""
-        return request.redirect('/shop')
-
     @http.route('/collections/<string:collection_name>', type='http', auth='public', website=True)
     def get_collection(self, collection_name, **kwargs):
         """Finds the matching eCommerce category and redirects, else falls back to all categories."""
@@ -131,6 +126,14 @@ class ThemeVeloraAboutUs(FlynovaThemeController if FlynovaThemeController is not
     @http.route(['/about-us', '/about', '/aboutus'], type='http', auth='public', website=True)
     def about_page(self, **kwargs):
         return request.render('website.aboutus', {})
+
+
+class ThemeVeloraBestsellers(http.Controller):
+
+    @http.route(['/bestsellers', '/best-sellers'], type='http', auth='public', website=True, sitemap=True)
+    def bestsellers(self, **kw):
+        return request.render('theme_velora.theme_velora_bestsellers')
+
 
 
 
