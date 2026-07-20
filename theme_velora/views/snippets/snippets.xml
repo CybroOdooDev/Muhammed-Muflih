@@ -2,32 +2,40 @@
 <odoo>
 
     <!-- ============================================================
-         SNIPPET: HERO BANNER
+         NEW HOMEPAGE SNIPPETS (Aligned with theme_velorav19)
     ============================================================ -->
-    <template id="s_velora_snippet_hero" name="Velora Hero Banner">
-        <section class="hero s_velora o_colored_level" id="hero" data-snippet="theme_velora.s_velora_snippet_hero" data-name="Hero Banner">
+
+    <template id="s_velora_hero" name="Velora Hero">
+        <section class="hero s_velora_hero" id="hero" data-snippet="s_velora_hero" data-name="Velora Hero">
             <div class="hero-bg">
                 <img src="/theme_velora/static/src/img/hero.webp"
                      alt="Velora signature perfume bottle on marble surface with golden light"
-                     class="o_we_custom_image"
                      loading="eager"/>
                 <div class="hero-overlay"></div>
             </div>
 
             <div class="hero-text-top">
+                <!-- <p class="hero-eyebrow reveal"><span class="hero-eyebrow-line"></span>Maison de Parfum<span class="hero-eyebrow-line"></span></p> -->
                 <h1 class="hero-title">
-                    <span class="title-line reveal">Discover Your</span><br/>
-                    <em class="title-line title-line-gold reveal">Signature <br/>Scent</em>
+                    <span class="title-line reveal">Discover Your</span>
+                    <br/>
+                    <em class="title-line title-line-gold reveal">
+                        Signature<br/>Scent
+                    </em>
                 </h1>
             </div>
 
             <div class="hero-text-bottom">
-                <p class="hero-desc reveal">Exquisitely crafted fragrances born from rare botanicals and precious woods — an olfactory journey designed for those who leave a lasting impression.</p>
+                <p class="hero-desc reveal">Exquisitely crafted
+                    fragrances born from rare botanicals and precious
+                    woods — an olfactory journey designed for those who
+                    leave a lasting impression.
+                </p>
                 <div class="hero-actions reveal">
-                    <a href="/best-sellers" class="btn btn-primary">
-                        <span>Shop Best Sellers</span>
-                    </a>
-                    <a href="/about-us" class="btn btn-outline-light">
+                    <a href="/bestsellers" class="btn btn-primary">
+                      <span>Shop Best Sellers</span>
+                   </a>
+                    <a href="/about" class="btn btn-outline-light">
                         <span>Explore Our Story</span>
                     </a>
                 </div>
@@ -35,66 +43,82 @@
         </section>
     </template>
 
-    <!-- ============================================================
-         SNIPPET: FEATURED COLLECTIONS
-    ============================================================ -->
-    <template id="s_velora_snippet_collections" name="Velora Featured Collections">
-        <section class="collections section s_velora o_colored_level" id="collections" data-snippet="theme_velora.s_velora_snippet_collections" data-name="Featured Collections">
+    <template id="s_velora_collections" name="Velora Collections">
+        <section class="collections section s_velora_collections" id="velora_collections"
+                 style="background-color: var(--color-bg-light, #FAF9F6);" data-snippet="s_velora_collections" data-name="Velora Collections">
             <div class="container">
                 <div class="section-head reveal">
                     <p class="eyebrow">Curated For You</p>
                     <h2 class="section-title">Featured Collections</h2>
-                    <p class="section-sub">Each collection tells a different story — find the one that speaks to you.</p>
+                    <p class="section-sub">Each collection tells a
+                        different story — find the one that speaks to
+                        you.
+                    </p>
                 </div>
 
                 <div class="collection-grid">
                     <article class="collection-card reveal large">
-                        <img src="/theme_velora/static/src/img/mens_collection.jpeg"
-                             alt="Men's fragrance collection bottle" loading="lazy"/>
+                        <img src="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?q=80&amp;w=1200&amp;auto=format&amp;fit=crop"
+                             alt="Men's fragrance collection bottle"
+                             loading="lazy"/>
                         <div class="collection-overlay">
                             <h3>Men's Collection</h3>
                             <p>Bold, woody &amp; magnetic</p>
-                            <a href="/collections/mens_collection" class="btn btn-gold-outline">Shop Now</a>
+                            <a t-attf-href="/shop/category/#{request.env.ref('theme_velora.theme_velora_category_mens').id}"
+                               class="btn btn-gold-outline">Shop Now
+                            </a>
                         </div>
                     </article>
 
                     <article class="collection-card reveal">
-                        <img src="/theme_velora/static/src/img/womens_collection.jpeg"
-                             alt="Women's fragrance collection bottle" loading="lazy"/>
+                        <img src="https://images.unsplash.com/photo-1587017539504-67cfbddac569?q=80&amp;w=1200&amp;auto=format&amp;fit=crop"
+                             alt="Women's fragrance collection bottle"
+                             loading="lazy"/>
                         <div class="collection-overlay">
                             <h3>Women's Collection</h3>
                             <p>Floral, radiant &amp; timeless</p>
-                            <a href="/collections/womens_collection" class="btn btn-gold-outline">Shop Now</a>
+                            <a t-attf-href="/shop/category/#{request.env.ref('theme_velora.theme_velora_category_womens').id}"
+                               class="btn btn-gold-outline">Shop Now
+                            </a>
                         </div>
                     </article>
 
                     <article class="collection-card reveal">
-                        <img src="/theme_velora/static/src/img/unisex.jpeg"
-                             alt="Unisex fragrance collection bottle" loading="lazy"/>
+                        <img src="https://images.unsplash.com/photo-1523293182086-7651a899d37f?q=80&amp;w=1200&amp;auto=format&amp;fit=crop"
+                             alt="Unisex fragrance collection bottle"
+                             loading="lazy"/>
                         <div class="collection-overlay">
                             <h3>Unisex</h3>
                             <p>Fluid, modern &amp; bold</p>
-                            <a href="/collections/unisex" class="btn btn-gold-outline">Shop Now</a>
+                            <a t-attf-href="/shop/category/#{request.env.ref('theme_velora.theme_velora_category_unisex').id}"
+                               class="btn btn-gold-outline">Shop Now
+                            </a>
                         </div>
                     </article>
 
                     <article class="collection-card reveal">
-                        <img src="/theme_velora/static/src/img/lexury gift.jpeg"
-                             alt="Luxury gift set of perfumes" loading="lazy"/>
+                        <img src="https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&amp;w=800&amp;auto=format&amp;fit=crop"
+                             alt="Luxury gift set of perfumes"
+                             loading="lazy"/>
                         <div class="collection-overlay">
                             <h3>Luxury Gift Sets</h3>
                             <p>Curated with elegance</p>
-                            <a href="/collections/luxury_gift_sets" class="btn btn-gold-outline">Shop Now</a>
+                            <a t-attf-href="/shop/category/#{request.env.ref('theme_velora.theme_velora_category_gift_sets').id}"
+                               class="btn btn-gold-outline">Shop Now
+                            </a>
                         </div>
                     </article>
 
                     <article class="collection-card reveal">
-                        <img src="/theme_velora/static/src/img/limited editions.jpeg"
-                             alt="Limited edition perfume bottle" loading="lazy"/>
+                        <img src="https://images.unsplash.com/photo-1615529182904-14819c35db37?q=80&amp;w=1200&amp;auto=format&amp;fit=crop"
+                             alt="Limited edition perfume bottle"
+                             loading="lazy"/>
                         <div class="collection-overlay">
                             <h3>Limited Editions</h3>
                             <p>Rare &amp; exclusive releases</p>
-                            <a href="/collections/limited_editions" class="btn btn-gold-outline">Shop Now</a>
+                            <a t-attf-href="/shop/category/#{request.env.ref('theme_velora.theme_velora_category_limited_editions').id}"
+                               class="btn btn-gold-outline">Shop Now
+                            </a>
                         </div>
                     </article>
                 </div>
@@ -102,48 +126,137 @@
         </section>
     </template>
 
-    <!-- ============================================================
-         SNIPPET: FRAGRANCE CATEGORIES
-    ============================================================ -->
-    <template id="s_velora_snippet_categories" name="Velora Fragrance Categories">
-        <section class="categories section s_velora o_colored_level" id="categories" data-snippet="theme_velora.s_velora_snippet_categories" data-name="Fragrance Categories">
+    <template id="s_velora_bestsellers" name="Velora Bestsellers">
+        <section class="bestsellers section s_velora_bestsellers" id="velora_bestsellers" data-snippet="s_velora_bestsellers" data-name="Velora Bestsellers">
+            <div class="container">
+                <div class="section-head reveal">
+                    <p class="eyebrow">Adored Worldwide</p>
+                    <h2 class="section-title">Best Sellers</h2>
+                    <p class="section-sub">The fragrances our
+                        connoisseurs return to again and again.
+                    </p>
+                </div>
+
+                <div class="product-grid">
+                    <!-- Fetch published products sorted by sales_count in Python (non-stored field) -->
+                    <t t-set="products" t-value="request.env['product.template'].sudo().search(
+                        [('website_published', '=', True), ('sale_ok', '=', True)]
+                    ).sorted('sales_count', reverse=True)[:3]"/>
+                    <t t-foreach="products" t-as="product">
+                        <article class="product-card reveal">
+                            <div class="product-media">
+                                <t t-set="ribbon"
+                                   t-value="product.website_ribbon_id"/>
+                                <span class="discount-badge"
+                                      t-if="ribbon"
+                                      t-out="ribbon.name"/>
+                                <button class="wishlist-btn"
+                                        t-att-data-product-product-id="product.product_variant_id.id"
+                                        t-att-data-product-template-id="product.id"
+                                        aria-label="Add to wishlist">
+                                    <i class="fa-regular fa-heart"></i>
+                                </button>
+                                <a t-attf-href="/shop/#{product.id}">
+                                    <img t-att-src="'/web/image/product.template/%s/image_1024' % product.id"
+                                         t-att-alt="product.name"
+                                         loading="lazy"/>
+                                </a>
+                            </div>
+                            <div class="product-info">
+                                <span class="product-brand">Velora
+                                    Maison
+                                </span>
+                                <h3 class="product-name">
+                                    <a t-attf-href="/shop/#{product.id}"
+                                       t-field="product.name"/>
+                                </h3>
+                                <p class="product-desc">A luxurious
+                                    fragrance crafted with the finest
+                                    ingredients.
+                                </p>
+
+                                <div class="product-rating">
+                                    <span aria-hidden="true"
+                                          style="color:var(--color-gold)">
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star-half-stroke"></i>
+                                    </span>
+                                    <span>4.8 (97)</span>
+                                </div>
+
+                                <div class="product-price-row">
+                                    <div class="price-group">
+                                        <span class="price-current"
+                                              t-field="product.list_price"
+                                              t-options="{'widget': 'monetary', 'display_currency': request.env.company.currency_id}"/>
+                                    </div>
+                                    <button class="add-cart-btn btn-full-text"
+                                            t-att-data-product-id="product.product_variant_id.id"
+                                            t-att-data-template-id="product.id"
+                                            t-attf-aria-label="Add #{product.name} to cart">
+                                        ADD TO CART
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                    </t>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="s_velora_categories" name="Velora Categories">
+        <section class="categories section s_velora_categories" id="velora_categories" data-snippet="s_velora_categories" data-name="Velora Categories">
             <div class="container">
                 <div class="section-head reveal">
                     <p class="eyebrow">Find Your Note</p>
                     <h2 class="section-title">Fragrance Categories</h2>
-                    <p class="section-sub">Every scent tells a story. Which one is yours?</p>
+                    <p class="section-sub">Every scent tells a story.
+                        Which one is yours?
+                    </p>
                 </div>
 
                 <div class="category-grid">
-                    <button class="category-card reveal" data-note="Floral">
+                    <button class="category-card reveal"
+                            data-note="Floral">
                         <i class="fa-solid fa-fan"></i>
                         <span>Floral</span>
                     </button>
-                    <button class="category-card reveal" data-note="Woody">
+                    <button class="category-card reveal"
+                            data-note="Woody">
                         <i class="fa-solid fa-tree"></i>
                         <span>Woody</span>
                     </button>
-                    <button class="category-card reveal" data-note="Fresh">
+                    <button class="category-card reveal"
+                            data-note="Fresh">
                         <i class="fa-solid fa-wind"></i>
                         <span>Fresh</span>
                     </button>
-                    <button class="category-card reveal" data-note="Citrus">
+                    <button class="category-card reveal"
+                            data-note="Citrus">
                         <i class="fa-solid fa-lemon"></i>
                         <span>Citrus</span>
                     </button>
-                    <button class="category-card reveal" data-note="Amber">
+                    <button class="category-card reveal"
+                            data-note="Amber">
                         <i class="fa-solid fa-gem"></i>
                         <span>Amber</span>
                     </button>
-                    <button class="category-card reveal" data-note="Musk">
+                    <button class="category-card reveal"
+                            data-note="Musk">
                         <i class="fa-solid fa-feather"></i>
                         <span>Musk</span>
                     </button>
-                    <button class="category-card reveal" data-note="Oriental">
+                    <button class="category-card reveal"
+                            data-note="Oriental">
                         <i class="fa-solid fa-moon"></i>
                         <span>Oriental</span>
                     </button>
-                    <button class="category-card reveal" data-note="Aquatic">
+                    <button class="category-card reveal"
+                            data-note="Aquatic">
                         <i class="fa-solid fa-water"></i>
                         <span>Aquatic</span>
                     </button>
@@ -152,43 +265,88 @@
         </section>
     </template>
 
-    <!-- ============================================================
-         SNIPPET: ABOUT THE BRAND
-    ============================================================ -->
-    <template id="s_velora_snippet_about" name="Velora About the Brand">
-        <section class="about section s_velora o_colored_level" id="about" data-snippet="theme_velora.s_velora_snippet_about" data-name="About the Brand">
+    <template id="s_velora_about_story" name="Velora About Story">
+        <section class="about-story section s_velora_about_story" id="velora_about_story"
+                 style="background-color: var(--color-bg-light, #FAF9F6);" data-snippet="s_velora_about_story" data-name="Velora About Story">
             <div class="container">
-                <div class="row about-grid align-items-center">
-                    <div class="col-lg-6 col-12 about-content reveal">
-                        <p class="eyebrow">Since 1998</p>
-                        <h2 class="section-title">The Art of<br/>Fine Perfumery</h2>
-                        <p>Velora was born from a singular obsession: to bottle emotion. In our Grasse atelier, master perfumers blend the rarest absolutes and precious woods, aging every composition to perfection before it ever reaches you.</p>
-                        <p>Every bottle is a promise — of craftsmanship, of heritage, and of a scent that becomes unmistakably yours.</p>
+                <div class="about-grid">
 
+                    <!-- Left: Image with Inner Border Effect -->
+                    <div class="about-image reveal">
+                        <img src="/theme_velora/static/src/img/img1.jpg"
+                             alt="Velora signature gold perfume bottle"
+                             loading="lazy"/>
+                    </div>
+
+                    <!-- Right: Content & Stats -->
+                    <div class="about-content reveal">
+                        <p class="eyebrow"
+                           style="letter-spacing: 0.2em; color: var(--color-text-soft); font-size: 0.8rem; margin-bottom: 1rem; text-transform: uppercase;">
+                            Since 1998
+                        </p>
+                        <h2 class="section-title"
+                            style="font-size: 3.5rem; line-height: 1.1; margin-bottom: 1.5rem; color: var(--color-black); font-family: 'Playfair Display', serif;">
+                            The Art of<br/>Fine Perfumery
+                        </h2>
+                        <p style="font-size: 1.05rem; line-height: 1.8; color: var(--color-text-soft); margin-bottom: 1.5rem;">
+                            Velora was born from a singular obsession:
+                            to bottle emotion. In our Grasse atelier,
+                            master perfumers blend the rarest absolutes
+                            and precious woods, aging every composition
+                            to perfection before it ever reaches you.
+                        </p>
+                        <p style="font-size: 1.05rem; line-height: 1.8; color: var(--color-text-soft); margin-bottom: 2rem;">
+                            Every bottle is a promise — of
+                            craftsmanship, of heritage, and of a scent
+                            that becomes unmistakably yours.
+                        </p>
+
+                        <!-- Stats Section -->
                         <div class="stats-grid">
                             <div class="stat">
-                                <span class="stat-number" data-count="27">0</span>
-                                <span class="stat-label">Years of Heritage</span>
+                                <span class="stat-number"
+                                      data-count="27"
+                                      style="color: var(--color-gold-dark);">
+                                    0
+                                </span>
+                                <span class="stat-label"
+                                      style="font-size: 0.75rem; color: var(--color-text-soft); margin-top: 0.5rem;">
+                                    Years of Heritage
+                                </span>
                             </div>
                             <div class="stat">
-                                <span class="stat-number" data-count="150">0</span>
-                                <span class="stat-label">Signature Scents</span>
+                                <span class="stat-number"
+                                      data-count="150"
+                                      style="color: var(--color-gold-dark);">
+                                    0
+                                </span>
+                                <span class="stat-label"
+                                      style="font-size: 0.75rem; color: var(--color-text-soft); margin-top: 0.5rem;">
+                                    Signature Scents
+                                </span>
                             </div>
                             <div class="stat">
-                                <span class="stat-number" data-count="2400">0</span>
-                                <span class="stat-label">Happy Customers</span>
+                                <span class="stat-number"
+                                      data-count="2400"
+                                      style="color: var(--color-gold-dark);">
+                                    0
+                                </span>
+                                <span class="stat-label"
+                                      style="font-size: 0.75rem; color: var(--color-text-soft); margin-top: 0.5rem;">
+                                    Happy Customers
+                                </span>
                             </div>
                             <div class="stat">
-                                <span class="stat-number" data-count="48">0</span>
-                                <span class="stat-label">Countries Reached</span>
+                                <span class="stat-number"
+                                      data-count="48"
+                                      style="color: var(--color-gold-dark);">
+                                    0
+                                </span>
+                                <span class="stat-label"
+                                      style="font-size: 0.75rem; color: var(--color-text-soft); margin-top: 0.5rem;">
+                                    Countries Reached
+                                </span>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 col-12">
-                        <div class="about-media reveal">
-                            <img src="/theme_velora/static/src/img/img1.jpg"
-                                 alt="Velora perfumer crafting fragrance in atelier" loading="lazy" class="o_we_custom_image"/>
-                            <div class="about-frame" aria-hidden="true"></div>
                         </div>
                     </div>
                 </div>
@@ -196,11 +354,9 @@
         </section>
     </template>
 
-    <!-- ============================================================
-         SNIPPET: WHY CHOOSE US
-    ============================================================ -->
-    <template id="s_velora_snippet_why_us" name="Velora Why Choose Us">
-        <section class="why-us section s_velora o_colored_level" data-snippet="theme_velora.s_velora_snippet_why_us" data-name="Why Choose Us">
+    <template id="s_velora_why_us" name="Velora Why Us">
+        <section class="why-us section s_velora_why_us" data-snippet="s_velora_why_us" data-name="Velora Why Us">
+            <!-- <img src="/theme_velora/static/src/img/bg.jpg" alt="" loading="lazy"/> -->
             <div class="why-us-overlay"></div>
             <div class="container">
                 <div class="section-head reveal">
@@ -212,43 +368,52 @@
                     <div class="feature-card reveal">
                         <i class="fa-solid fa-certificate"></i>
                         <h3>Authentic Products</h3>
-                        <p>100% genuine fragrances sourced directly from the house of Velora.</p>
+                        <p>100% genuine fragrances sourced directly from
+                            the house of Velora.
+                        </p>
                     </div>
                     <div class="feature-card reveal">
                         <i class="fa-solid fa-box-open"></i>
                         <h3>Luxury Packaging</h3>
-                        <p>Every order arrives wrapped in signature velvet and gold foil detailing.</p>
+                        <p>Every order arrives wrapped in signature
+                            velvet and gold foil detailing.
+                        </p>
                     </div>
                     <div class="feature-card reveal">
                         <i class="fa-solid fa-lock"></i>
                         <h3>Secure Payment</h3>
-                        <p>Bank-level encryption protects every transaction, every time.</p>
+                        <p>Bank-level encryption protects every
+                            transaction, every time.
+                        </p>
                     </div>
                     <div class="feature-card reveal">
                         <i class="fa-solid fa-truck-fast"></i>
                         <h3>Fast Shipping</h3>
-                        <p>Complimentary express delivery on all orders over $150.</p>
+                        <p>Complimentary express delivery on all orders
+                            over $150.
+                        </p>
                     </div>
                     <div class="feature-card reveal">
                         <i class="fa-solid fa-gift"></i>
                         <h3>Gift Wrapping</h3>
-                        <p>Add a personalised note and hand-tied ribbon to any order.</p>
+                        <p>Add a personalised note and hand-tied ribbon
+                            to any order.
+                        </p>
                     </div>
                     <div class="feature-card reveal">
                         <i class="fa-solid fa-rotate-left"></i>
                         <h3>Easy Returns</h3>
-                        <p>30-day hassle-free returns on every unopened fragrance.</p>
+                        <p>30-day hassle-free returns on every unopened
+                            fragrance.
+                        </p>
                     </div>
                 </div>
             </div>
         </section>
-     </template> 
+    </template>
 
-    <!-- ============================================================
-         SNIPPET: TESTIMONIALS
-    ============================================================ -->
-    <template id="s_velora_snippet_testimonials" name="Velora Testimonials">
-        <section class="testimonials section s_velora o_colored_level" id="testimonials" data-snippet="theme_velora.s_velora_snippet_testimonials" data-name="Testimonials">
+    <template id="s_velora_testimonials" name="Velora Testimonials">
+        <section class="testimonials section s_velora_testimonials" id="velora_testimonials" data-snippet="s_velora_testimonials" data-name="Velora Testimonials">
             <div class="container">
                 <div class="section-head reveal">
                     <p class="eyebrow">Loved By Many</p>
@@ -256,12 +421,21 @@
                 </div>
 
                 <div class="testimonial-track-wrap reveal">
-                    <div class="testimonial-track" id="testimonialTrack">
+                    <div class="testimonial-track"
+                         id="testimonialTrack">
                         <article class="testimonial-card">
-                            <div class="stars" aria-label="5 out of 5 stars">★★★★★</div>
-                            <p>"Velora Noir Oud has become my identity. I receive compliments every single time I wear it. The packaging alone feels like a luxury gift."</p>
+                            <div class="stars"
+                                 aria-label="5 out of 5 stars">★★★★★
+                            </div>
+                            <p>"Velora Noir Oud has become my identity.
+                                I receive compliments every single time
+                                I wear it. The packaging alone feels
+                                like a luxury gift."
+                            </p>
                             <div class="testimonial-author">
-                                <img src="/theme_velora/static/src/img/amara.jpeg" alt="Portrait of Amara S." loading="lazy"/>
+                                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&amp;w=200&amp;auto=format&amp;fit=crop"
+                                     alt="Portrait of Amara S."
+                                     loading="lazy"/>
                                 <div>
                                     <strong>Amara S.</strong>
                                     <span>Dubai, UAE</span>
@@ -270,10 +444,18 @@
                         </article>
 
                         <article class="testimonial-card">
-                            <div class="stars" aria-label="5 out of 5 stars">★★★★★</div>
-                            <p>"The longevity is unmatched. A single spritz of Velora Rose Elixir lasts me the entire day. Truly a masterpiece of perfumery."</p>
+                            <div class="stars"
+                                 aria-label="5 out of 5 stars">★★★★★
+                            </div>
+                            <p>"The longevity is unmatched. A single
+                                spitz of Velora Rose Elixir lasts me
+                                the entire day. Truly a masterpiece of
+                                perfumery."
+                            </p>
                             <div class="testimonial-author">
-                                <img src="/theme_velora/static/src/img/julien.jpeg" alt="Portrait of Julien M." loading="lazy"/>
+                                <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&amp;w=200&amp;auto=format&amp;fit=crop"
+                                     alt="Portrait of Julien M."
+                                     loading="lazy"/>
                                 <div>
                                     <strong>Julien M.</strong>
                                     <span>Paris, France</span>
@@ -282,10 +464,18 @@
                         </article>
 
                         <article class="testimonial-card">
-                            <div class="stars" aria-label="5 out of 5 stars">★★★★★</div>
-                            <p>"From unboxing to first spray, everything about Velora feels premium. Fast shipping and the gift wrap made my anniversary gift unforgettable."</p>
+                            <div class="stars"
+                                 aria-label="5 out of 5 stars">★★★★★
+                            </div>
+                            <p>"From unboxing to first spray, everything
+                                about Velora feels premium. Fast
+                                shipping and the gift wrap made my
+                                anniversary gift unforgettable."
+                            </p>
                             <div class="testimonial-author">
-                                <img src="/theme_velora/static/src/img/sophia.jpeg" alt="Portrait of Sophia L." loading="lazy"/>
+                                <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&amp;w=200&amp;auto=format&amp;fit=crop"
+                                     alt="Portrait of Sophia L."
+                                     loading="lazy"/>
                                 <div>
                                     <strong>Sophia L.</strong>
                                     <span>New York, USA</span>
@@ -294,10 +484,17 @@
                         </article>
 
                         <article class="testimonial-card">
-                            <div class="stars" aria-label="5 out of 5 stars">★★★★★</div>
-                            <p>"I've tried many designer perfumes, but Velora's Amber Mystique has a depth and warmth I haven't found anywhere else."</p>
+                            <div class="stars"
+                                 aria-label="5 out of 5 stars">★★★★★
+                            </div>
+                            <p>"I've tried many designer perfumes, but
+                                Velora's Amber Mystique has a depth and
+                                warmth I haven't found anywhere else."
+                            </p>
                             <div class="testimonial-author">
-                                <img src="/theme_velora/static/src/img/rehan.jpeg" alt="Portrait of Rehan K." loading="lazy"/>
+                                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&amp;w=200&amp;auto=format&amp;fit=crop"
+                                     alt="Portrait of Rehan K."
+                                     loading="lazy"/>
                                 <div>
                                     <strong>Rehan K.</strong>
                                     <span>London, UK</span>
@@ -306,58 +503,78 @@
                         </article>
                     </div>
 
-                    <div class="testimonial-dots" id="testimonialDots"></div>
+                    <div class="testimonial-dots"
+                         id="testimonialDots"></div>
                 </div>
             </div>
         </section>
     </template>
 
-    <!-- ============================================================
-         SNIPPET: FAQ ACCORDION
-    ============================================================ -->
-    <template id="s_velora_snippet_faq" name="Velora FAQ">
-        <section class="faq section s_velora o_colored_level" id="faq" data-snippet="theme_velora.s_velora_snippet_faq" data-name="FAQ Accordion">
+    <template id="s_velora_faq" name="Velora FAQ">
+        <section class="faq section s_velora_faq" id="velora_faq" data-snippet="s_velora_faq" data-name="Velora FAQ">
             <div class="container">
                 <div class="section-head reveal">
                     <p class="eyebrow">Need Help?</p>
-                    <h2 class="section-title">Frequently Asked Questions</h2>
+                    <h2 class="section-title">Frequently Asked
+                        Questions
+                    </h2>
                 </div>
 
-                <div class="accordion reveal" id="accordion">
-                    <div class="accordion-item">
-                        <button class="accordion-header" aria-expanded="false">
+                <div class="velora-accordion reveal" id="velora-accordion">
+                    <div class="velora-accordion-item">
+                        <button class="velora-accordion-header"
+                                aria-expanded="false">
                             <span>How long does shipping take?</span>
                             <i class="fa-solid fa-plus"></i>
                         </button>
-                        <div class="accordion-panel">
-                            <p>Standard delivery takes 3–5 business days. Express shipping (1–2 days) is complimentary on all orders over $150.</p>
+                        <div class="velora-accordion-panel">
+                            <p>Standard delivery takes 3&amp;ndash;5
+                                business days. Express shipping (1&amp;ndash;2
+                                days) is complimentary on all orders
+                                over $150.
+                            </p>
                         </div>
                     </div>
-                    <div class="accordion-item">
-                        <button class="accordion-header" aria-expanded="false">
-                            <span>Are Velora fragrances cruelty-free?</span>
+                    <div class="velora-accordion-item">
+                        <button class="velora-accordion-header"
+                                aria-expanded="false">
+                            <span>Are Velora fragrances cruelty-free?
+                            </span>
                             <i class="fa-solid fa-plus"></i>
                         </button>
-                        <div class="accordion-panel">
-                            <p>Yes. All Velora products are cruelty-free and never tested on animals, certified by international ethical beauty standards.</p>
+                        <div class="velora-accordion-panel">
+                            <p>Yes. All Velora products are cruelty-free
+                                and never tested on animals, certified
+                                by international ethical beauty
+                                standards.
+                            </p>
                         </div>
                     </div>
-                    <div class="accordion-item">
-                        <button class="accordion-header" aria-expanded="false">
+                    <div class="velora-accordion-item">
+                        <button class="velora-accordion-header"
+                                aria-expanded="false">
                             <span>Can I return an opened bottle?</span>
                             <i class="fa-solid fa-plus"></i>
                         </button>
-                        <div class="accordion-panel">
-                            <p>For hygiene reasons we can only accept returns on unopened, unused bottles within 30 days of delivery in original packaging.</p>
+                        <div class="velora-accordion-panel">
+                            <p>For hygiene reasons we can only accept
+                                returns on unopened, unused bottles
+                                within 30 days of delivery in original
+                                packaging.
+                            </p>
                         </div>
                     </div>
-                    <div class="accordion-item">
-                        <button class="accordion-header" aria-expanded="false">
+                    <div class="velora-accordion-item">
+                        <button class="velora-accordion-header"
+                                aria-expanded="false">
                             <span>Do you offer gift wrapping?</span>
                             <i class="fa-solid fa-plus"></i>
                         </button>
-                        <div class="accordion-panel">
-                            <p>Absolutely. Add luxury gift wrapping with a hand-tied ribbon and personalised note at checkout for a small fee.</p>
+                        <div class="velora-accordion-panel">
+                            <p>Absolutely. Add luxury gift wrapping with
+                                a hand-tied ribbon and personalised note
+                                at checkout for a small fee.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -365,29 +582,37 @@
         </section>
     </template>
 
-    <!-- ============================================================
-         SNIPPET: NEWSLETTER
-    ============================================================ -->
-    <template id="s_velora_snippet_newsletter" name="Velora Newsletter">
-        <section class="newsletter section s_velora o_colored_level" id="newsletter" data-snippet="theme_velora.s_velora_snippet_newsletter" data-name="Newsletter">
+    <template id="s_velora_newsletter" name="Velora Newsletter">
+        <section class="newsletter section s_velora_newsletter" id="velora_newsletter" data-snippet="s_velora_newsletter" data-name="Velora Newsletter">
             <div class="newsletter-bg" aria-hidden="true"></div>
             <div class="container newsletter-content reveal">
-                <span class="logo-mark large">✦</span>
-                <h2 class="section-title light">Join the Velora Circle</h2>
-                <p>Be the first to discover new fragrances, exclusive offers, and invitations to private launches.</p>
-                <form class="newsletter-form" id="newsletterForm" novalidate="">
-                    <label for="newsletterEmail" class="sr-only">Email address</label>
+                <span class="logo-mark large">&amp;#10022;</span>
+                <h2 class="section-title light">Join the Velora Circle
+                </h2>
+                <p>Be the first to discover new fragrances, exclusive
+                    offers, and invitations to private launches.
+                </p>
+                <form class="newsletter-form" id="newsletterForm"
+                      novalidate="novalidate">
+                    <label for="newsletterEmail" class="sr-only">Email
+                        address
+                    </label>
                     <input type="email" id="newsletterEmail"
                            placeholder="Enter your email address"
-                           required="" aria-required="true"/>
+                           required="required" aria-required="true"/>
                     <button type="submit" class="btn btn-gold">
                         <span>Subscribe</span>
                     </button>
                 </form>
-                <p class="form-message" id="formMessage" role="status" aria-live="polite"></p>
+                <p class="form-message" id="formMessage" role="status" aria-live="polite"/>
             </div>
         </section>
     </template>
+
+
+    <!-- ============================================================
+         EXISTING INNER PAGES SNIPPETS (Unchanged from original)
+    ============================================================ -->
 
     <!-- ============================================================
          SNIPPET 1: CONTACT PAGE BANNER
@@ -430,7 +655,6 @@
                     <p class="eyebrow">Get In Touch</p>
                     <h2 class="section-title">Visit, Call, Or Write</h2>
                     <p class="section-sub">Our concierge team is available to help you discover your signature scent, track an order, or arrange a private fragrance consultation.</p>
-
                     <ul class="contact-info-list">
                         <li>
                             <span class="contact-info-icon"><i class="fa-solid fa-location-dot"></i></span>
@@ -489,7 +713,6 @@
                                   data-pre-fill="true">
 
                                 <div class="s_website_form_rows row s_col_no_bgcolor g-3">
-
                                     <div class="col-md-6 s_website_form_field s_website_form_custom s_website_form_required form-field"
                                          data-type="char" data-name="Field">
                                         <label for="vc_name">Full Name</label>
@@ -539,7 +762,6 @@
                                         </a>
                                         <span id="s_website_form_result"></span>
                                     </div>
-
                                 </div>
                             </form>
                         </div>
@@ -594,100 +816,45 @@
     </template>
 
     <!-- ============================================================
-         SNIPPET 5: ABOUT STORY DETAIL
-    ============================================================ -->
-   <template id="s_velora_about_story" name="Velora About Story">
-    <section class="about-story section s_velora o_colored_level"
-             data-snippet="theme_velora.s_velora_about_story"
-             data-name="About Story Detail">
-        <div class="container">
-            <div class="row align-items-center about-story-grid">
-                <!-- Left Image -->
-                <div class="col-lg-6">
-                    <div class="about-image">
-                        <img src="/theme_velora/static/src/img/men.jpg"
-                             alt="Velora Perfume"
-                             class="img-fluid o_we_custom_image"
-                             loading="lazy"/>
-                    </div>
-                </div>
-
-                <!-- Right Content -->
-                <div class="col-lg-6">
-                    <div class="about-content">
-                        <p class="eyebrow">Maison Velora</p>
-
-                        <h2 class="section-title">
-                            Where Every <br/>
-                            Fragrance Tells A <br/>
-                            Story
-                        </h2>
-
-                        <p class="section-sub">
-                            Founded with a passion for fine perfumery, Velora believes that fragrance is more than a scent—it is an expression of identity, emotion, and timeless elegance.
-                        </p>
-
-                        <p>
-                            Every bottle is thoughtfully crafted using exceptional ingredients, refined artistry, and meticulous attention to detail. From delicate florals to rich woody accords, our collections celebrate the beauty of individuality and the memories that fragrances create.
-                        </p>
-
-                        <a href="/shop" class="btn btn-primary">
-                            Explore Collection
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-</template>
-
-    <!-- ============================================================
-         SNIPPET 6: ABOUT STATS
+         SNIPPET 5: ABOUT STATS
     ============================================================ -->
     <template id="s_velora_about_stats" name="Velora About Stats">
-    <section class="about-stats s_velora o_colored_level"
-             data-snippet="theme_velora.s_velora_about_stats"
-             data-name="About Stats">
-
-        <div class="container">
-            <div class="row justify-content-center border-top border-bottom border-white border-opacity-25 py-5">
-
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat reveal">
-                        <h2>28+</h2>
-                        <span>Years of Excellence</span>
+        <section class="about-stats s_velora o_colored_level"
+                 data-snippet="theme_velora.s_velora_about_stats"
+                 data-name="About Stats">
+            <div class="container">
+                <div class="row justify-content-center border-top border-bottom border-white border-opacity-25 py-5">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat reveal">
+                            <h2>28+</h2>
+                            <span>Years of Excellence</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat reveal">
+                            <h2>150+</h2>
+                            <span>Luxury Fragrances</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat reveal">
+                            <h2>40+</h2>
+                            <span>Countries Served</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat reveal">
+                            <h2>250K+</h2>
+                            <span>Happy Customers</span>
+                        </div>
                     </div>
                 </div>
-
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat reveal">
-                        <h2>150+</h2>
-                        <span>Luxury Fragrances</span>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat reveal">
-                        <h2>40+</h2>
-                        <span>Countries Served</span>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat reveal">
-                        <h2>250K+</h2>
-                        <span>Happy Customers</span>
-                    </div>
-                </div>
-
             </div>
-        </div>
-
-    </section>
-</template>
+        </section>
+    </template>
 
     <!-- ============================================================
-         SNIPPET 7: BRAND PHILOSOPHY
+         SNIPPET 6: BRAND PHILOSOPHY
     ============================================================ -->
     <template id="s_velora_about_philosophy" name="Velora About Philosophy">
         <section class="brand-philosophy section s_velora o_colored_level"
@@ -817,6 +984,9 @@
         </section>
     </template>
 
+    <!-- ============================================================
+         SNIPPET: BESTSELLERS BANNER
+    ============================================================ -->
     <template id="s_velora_bestsellers_banner" name="Velora Bestsellers Banner">
         <section class="page-banner s_velora o_colored_level"
                  data-snippet="theme_velora.s_velora_bestsellers_banner"
@@ -836,77 +1006,6 @@
                     <span aria-hidden="true">/</span>
                     <span aria-current="page">Best Sellers</span>
                 </nav>
-            </div>
-        </section>
-    </template>
-
-    <template id="s_velora_bestsellers" name="Velora Bestsellers">
-        <section class="bestsellers section s_velora_bestsellers o_colored_level" id="bestsellers" data-snippet="theme_velora.s_velora_bestsellers" data-name="Velora Bestsellers">
-            <div class="container">
-                <div class="section-head reveal">
-                    <p class="eyebrow">Adored Worldwide</p>
-                    <h2 class="section-title">Best Sellers</h2>
-                    <p class="section-sub">The fragrances our connoisseurs return to again and again.</p>
-                </div>
-
-                <div class="product-grid">
-                    <t t-set="products"
-                       t-value="request.env['product.template'].sudo().search([('website_published', '=', True), ('sale_ok', '=', True)], limit=3, order='create_date desc')"/>
-                    <t t-foreach="products" t-as="product">
-                        <article class="product-card reveal">
-                            <div class="product-media">
-                                <t t-set="ribbon"
-                                   t-value="product.website_ribbon_id"/>
-                                <span class="discount-badge"
-                                      t-if="ribbon"
-                                      t-out="ribbon.name"/>
-                                <button class="wishlist-btn"
-                                        aria-label="Add to wishlist">
-                                    <i class="fa-regular fa-heart"></i>
-                                </button>
-                                <a t-attf-href="/shop/#{product.id}">
-                                    <img t-att-src="'/web/image/product.template/%s/image_1024' % product.id"
-                                         t-att-alt="product.name"
-                                         loading="lazy"/>
-                                </a>
-                            </div>
-                            <div class="product-info">
-                                <span class="product-brand">Velora Maison</span>
-                                <h3 class="product-name">
-                                    <a t-attf-href="/shop/#{product.id}"
-                                       t-field="product.name"/>
-                                </h3>
-                                <p class="product-desc">A luxurious fragrance crafted with the finest ingredients.</p>
-
-                                <div class="product-rating">
-                                    <span aria-hidden="true"
-                                          style="color:var(--color-gold)">
-                                        <i class="fa-solid fa-star"></i>
-                                        <i class="fa-solid fa-star"></i>
-                                        <i class="fa-solid fa-star"></i>
-                                        <i class="fa-solid fa-star"></i>
-                                        <i class="fa-solid fa-star-half-stroke"></i>
-                                    </span>
-                                    <span>4.8 (97)</span>
-                                </div>
-
-                                <div class="product-price-row">
-                                    <div class="price-group">
-                                        <span class="price-current"
-                                              t-field="product.list_price"
-                                              t-options="{'widget': 'monetary', 'display_currency': request.env.company.currency_id}"/>
-                                    </div>
-                                    <button class="add-cart-btn btn-full-text"
-                                            t-att-data-product-id="product.product_variant_id.id"
-                                            t-att-data-template-id="product.id"
-                                            t-attf-aria-label="Add #{product.name} to cart">
-                                        ADD TO CART
-                                    </button>
-                                </div>
-                            </div>
-                        </article>
-                    </t>
-                </div>
             </div>
         </section>
     </template>

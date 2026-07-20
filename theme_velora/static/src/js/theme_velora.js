@@ -1,11 +1,10 @@
-
-
 (() => {
   'use strict';
 
   /* ============ UTILITIES ============ */
   const $ = (sel, ctx = document) => ctx.querySelector(sel);
   const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
+  const isEditMode = () => document.body.classList.contains('editor_enable');
 
   /* ============ SCROLL PROGRESS + HEADER STATE ============ */
   const scrollProgress = $('#scrollProgress');
@@ -13,6 +12,7 @@
   const backToTop = $('#backToTop');
 
   function onScroll() {
+    if (isEditMode()) return;
     const scrollTop = window.scrollY;
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
     const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
@@ -34,6 +34,7 @@
   onScroll();
 
   backToTop?.addEventListener('click', () => {
+    if (isEditMode()) return;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
@@ -49,6 +50,7 @@
   }
 
   hamburger?.addEventListener('click', () => {
+    if (isEditMode()) return;
     const isActive = hamburger.classList.toggle('active');
     hamburger.setAttribute('aria-expanded', String(isActive));
     mobileMenu?.classList.toggle('active', isActive);
@@ -64,6 +66,7 @@
   const searchInput = $('#searchInput');
 
   function openSearch() {
+    if (isEditMode()) return;
     searchOverlay?.classList.add('active');
     searchToggle?.setAttribute('aria-expanded', 'true');
     setTimeout(() => searchInput?.focus(), 300);
@@ -133,6 +136,7 @@
     if (!cartTotalEl) return;
     $$('.a-submit', cartTotalEl).forEach((link) => {
       link.addEventListener('click', (e) => {
+        if (isEditMode()) return;
         e.preventDefault();
         link.closest('form')?.submit();
       });
@@ -167,17 +171,22 @@
       .join('');
 
     $$('.qty-decrease', cartItemsEl).forEach((btn) =>
-      btn.addEventListener('click', () =>
-        changeCartLine(btn.dataset.productId, btn.dataset.lineId, Math.max(parseInt(btn.dataset.qty, 10) - 1, 0))
-      )
+      btn.addEventListener('click', () => {
+        if (isEditMode()) return;
+        changeCartLine(btn.dataset.productId, btn.dataset.lineId, Math.max(parseInt(btn.dataset.qty, 10) - 1, 0));
+      })
     );
     $$('.qty-increase', cartItemsEl).forEach((btn) =>
-      btn.addEventListener('click', () =>
-        changeCartLine(btn.dataset.productId, btn.dataset.lineId, parseInt(btn.dataset.qty, 10) + 1)
-      )
+      btn.addEventListener('click', () => {
+        if (isEditMode()) return;
+        changeCartLine(btn.dataset.productId, btn.dataset.lineId, parseInt(btn.dataset.qty, 10) + 1);
+      })
     );
     $$('.cart-item-remove', cartItemsEl).forEach((btn) =>
-      btn.addEventListener('click', () => changeCartLine(btn.dataset.productId, btn.dataset.lineId, 0))
+      btn.addEventListener('click', () => {
+        if (isEditMode()) return;
+        changeCartLine(btn.dataset.productId, btn.dataset.lineId, 0);
+      })
     );
   }
 
@@ -229,10 +238,12 @@
     cartDrawer?.setAttribute('aria-hidden', 'true');
   }
   cartToggle?.addEventListener('click', (e) => {
+    if (isEditMode()) return;
     e.preventDefault();
     openCart();
   });
   cartToggleMobile?.addEventListener('click', (e) => {
+    if (isEditMode()) return;
     e.preventDefault();
     closeMobileMenu();
     openCart();
@@ -241,18 +252,22 @@
   drawerBackdrop?.addEventListener('click', closeCart);
 
   const wishlistToggleMobile = $('#wishlistToggleMobile');
-  wishlistToggleMobile?.addEventListener('click', closeMobileMenu);
+  wishlistToggleMobile?.addEventListener('click', () => {
+    if (isEditMode()) return;
+    closeMobileMenu();
+  });
 
   /* ============ CATEGORY QUICK-FILTER ============ */
   $$('.category-card').forEach((card) => {
     card.addEventListener('click', () => {
+      if (isEditMode()) return;
       const note = card.dataset.note;
       showToast(`Exploring ${note} fragrances`);
-      $('#bestsellers')?.scrollIntoView({ behavior: 'smooth' });
+      $('#velora_bestsellers')?.scrollIntoView({ behavior: 'smooth' });
     });
   });
 
-  /* ============ WISHLIST (Homepage Product Cards) ============ */
+  /* ============ WISHLIST (Homepage & Bestsellers Product Cards) ============ */
   /**
    * Retrieve wishlist product IDs from sessionStorage (same cache Odoo uses).
    */
@@ -269,28 +284,34 @@
   }
 
   /**
-   * Update every wishlist count badge in the page header.
+   * Update every wishlist count badge + show/hide the header heart icon.
    */
-  function updateWishCountBadge(ids) {
-    $$('header .my_wish_quantity, .js-wishlist-count').forEach((el) => {
-      el.textContent = String(ids.length);
+  function updateWishCountBadge(count) {
+    const n = typeof count === 'number' ? count : count.length;
+    // Update all badge spans
+    $$('.js-wishlist-count, .my_wish_quantity').forEach((el) => {
+      el.textContent = String(n);
+    });
+    // Show/hide the header wishlist anchor (hidden by d-none when count=0)
+    $$('.o_wsale_my_wish_hide_empty').forEach((el) => {
+      el.classList.toggle('d-none', n === 0);
     });
   }
 
   /**
-   * Mark a wishlist button as "already in wishlist" (red heart).
+   * Mark a wishlist button as "already in wishlist" (red solid heart).
    */
   function markWishlistBtn(btn, inWish) {
     const icon = btn.querySelector('i');
     if (inWish) {
-      btn.classList.add('vc-in-wish');
+      btn.classList.add('vc-in-wish', 'active');
       btn.setAttribute('disabled', 'disabled');
       if (icon) {
         icon.classList.remove('fa-regular');
         icon.classList.add('fa-solid');
       }
     } else {
-      btn.classList.remove('vc-in-wish');
+      btn.classList.remove('vc-in-wish', 'active');
       btn.removeAttribute('disabled');
       if (icon) {
         icon.classList.add('fa-regular');
@@ -300,7 +321,8 @@
   }
 
   /**
-   * On page load, pre-mark any card whose product is already in the wishlist.
+   * On page load, pre-mark cards whose products are already in the wishlist.
+   * Also sync the header badge from the rendered server count.
    */
   function initWishlistBtns() {
     const ids = getWishlistIds();
@@ -308,16 +330,24 @@
       const pid = parseInt(btn.dataset.productProductId, 10);
       if (ids.includes(pid)) markWishlistBtn(btn, true);
     });
+    // Sync header badge visibility from rendered server count on page load
+    const serverCount = parseInt(
+      document.querySelector('.my_wish_quantity')?.textContent?.trim() || '0', 10
+    );
+    if (!isNaN(serverCount)) updateWishCountBadge(serverCount);
   }
 
   /**
-   * Handle wishlist button clicks.
+   * Handle wishlist button clicks on custom product cards.
+   * Skips buttons that have Odoo's o_add_wishlist class (handled by Odoo's own widget).
    */
   document.addEventListener('click', async (e) => {
-    const btn = e.target.closest('.wishlist-btn[data-product-product-id]');
+    if (isEditMode()) return;
+    // Only handle our custom wishlist-btn (exclude Odoo shop page native buttons)
+    const btn = e.target.closest('.wishlist-btn[data-product-product-id]:not(.o_add_wishlist)');
     if (!btn) return;
 
-    // Skip if Odoo's widget already handled it (it disables the button first)
+    // Already in wishlist — button is disabled
     if (btn.hasAttribute('disabled')) return;
 
     e.preventDefault();
@@ -327,24 +357,23 @@
     if (!productId) return;
 
     const ids = getWishlistIds();
-
-    // If already in wishlist, do nothing (button is disabled, this won't run)
     if (ids.includes(productId)) return;
 
-    // Optimistic UI: mark immediately
+    // Optimistic UI: turn heart red immediately
     markWishlistBtn(btn, true);
     const newIds = [...ids, productId];
     setWishlistIds(newIds);
-    updateWishCountBadge(newIds);
+    updateWishCountBadge(newIds.length);
 
     try {
       await jsonRpc('/shop/wishlist/add', { product_id: productId });
-      showToast('Added to wishlist ♥');
+      showToast('Added to wishlist \u2665');
     } catch (err) {
       // Rollback on error
       markWishlistBtn(btn, false);
-      setWishlistIds(ids);
-      updateWishCountBadge(ids);
+      const rolled = ids.filter((id) => id !== productId);
+      setWishlistIds(rolled);
+      updateWishCountBadge(rolled.length);
       showToast('Could not add to wishlist. Please try again.');
     }
   });
@@ -411,6 +440,7 @@
     let activeIndex = 0;
 
     function goToTestimonial(index) {
+      if (isEditMode()) return;
       const target = (index + cards.length) % cards.length;
       const card = cards[target];
       const trackRect = testimonialTrack.getBoundingClientRect();
@@ -423,7 +453,10 @@
       const dot = document.createElement('button');
       dot.setAttribute('aria-label', `Go to testimonial ${i + 1}`);
       if (i === 0) dot.classList.add('active');
-      dot.addEventListener('click', () => goToTestimonial(i));
+      dot.addEventListener('click', () => {
+        if (isEditMode()) return;
+        goToTestimonial(i);
+      });
       testimonialDots.appendChild(dot);
     });
 
@@ -446,7 +479,7 @@
     let autoplayTimer = null;
 
     function startAutoplay() {
-      if (prefersReducedMotionTestimonials) return;
+      if (isEditMode() || prefersReducedMotionTestimonials) return;
       stopAutoplay();
       autoplayTimer = setInterval(() => goToTestimonial(activeIndex + 1), AUTOPLAY_DELAY);
     }
@@ -490,6 +523,7 @@
   /* ============ FAQ ACCORDION ============ */
   $$('.accordion-header').forEach((header) => {
     header.addEventListener('click', () => {
+      if (isEditMode()) return;
       const panel = header.nextElementSibling;
       const isOpen = header.getAttribute('aria-expanded') === 'true';
 
@@ -511,6 +545,7 @@
   const formMessage = $('#formMessage');
 
   newsletterForm?.addEventListener('submit', (e) => {
+    if (isEditMode()) return;
     e.preventDefault();
     const emailInput = $('#newsletterEmail');
     const email = emailInput.value.trim();
@@ -533,6 +568,7 @@
   const contactFormMessage = $('#contactFormMessage');
 
   contactForm?.addEventListener('submit', (e) => {
+    if (isEditMode()) return;
     e.preventDefault();
     const name = $('#contactName').value.trim();
     const email = $('#contactEmail').value.trim();
@@ -554,6 +590,7 @@
 
   /* ============ AJAX ADD TO CART ============ */
   document.addEventListener('submit', async (e) => {
+    if (isEditMode()) return;
     const form = e.target.closest('form[action="/shop/cart/update"]');
     if (!form) return;
     const btn = form.querySelector('.add-cart-btn');
@@ -589,6 +626,7 @@
 
   /* ============ AJAX ADD TO CART (STANDALONE BUTTONS) ============ */
   document.addEventListener('click', async (e) => {
+    if (isEditMode()) return;
     const btn = e.target.closest('.add-cart-btn');
     if (!btn || btn.closest('form')) return;
 
@@ -622,6 +660,7 @@
   /* ============ BUTTON RIPPLE EFFECT ============ */
   $$('.btn').forEach((btn) => {
     btn.addEventListener('click', function (e) {
+      if (isEditMode()) return;
       const rect = btn.getBoundingClientRect();
       const ripple = document.createElement('div');
       const size = Math.max(rect.width, rect.height);
@@ -640,6 +679,7 @@
 
   /* ============ WISHLIST TOAST ============ */
   document.addEventListener('click', (e) => {
+    if (isEditMode()) return;
     const btn = e.target.closest('.o_add_wishlist');
     if (btn && !btn.disabled) {
       showToast('Added to wishlist ✓');
@@ -648,6 +688,7 @@
 
   /* ============ DYNAMIC COLLECTIONS REDIRECT ============ */
   document.addEventListener('click', (e) => {
+    if (isEditMode()) return;
     const link = e.target.closest('a');
     if (!link) return;
 
@@ -671,6 +712,7 @@
 
   /* ============ WISHLIST ADD TO CART AJAX ============ */
   document.addEventListener('click', async (e) => {
+    if (isEditMode()) return;
     const btn = e.target.closest('.velora-wishlist-page .o_wish_add');
     if (!btn || btn.classList.contains('disabled')) return;
 
@@ -751,6 +793,7 @@
 
   /* ============ USER MENU DROPDOWN ============ */
   document.addEventListener('click', (e) => {
+    if (isEditMode()) return;
     const userMenuButton = e.target.closest('#userMenuButton');
     const userDropdown = document.querySelector('.velora-user-dropdown');
 
@@ -774,5 +817,3 @@
   }, true);
 
 })();
-
-

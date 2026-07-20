@@ -67,6 +67,26 @@ html {
   scroll-padding-top: var(--header-height);
 }
 
+/* Disable smooth scrolling, scroll-padding, and transitions in Odoo website editor
+   to prevent jitter/unwanted scroll jump when clicking inside sections (e.g. hero banner) */
+html.editor_enable,
+html:has(body.editor_enable) {
+  scroll-behavior: auto !important;
+  scroll-padding-top: 0 !important;
+}
+body.editor_enable,
+body.editor_enable * {
+  scroll-behavior: auto !important;
+}
+
+/* Prevent the full-viewport hero from causing scroll jumps in the editor */
+body.editor_enable .hero,
+body.editor_enable .s_velora_hero {
+  min-height: 500px !important;
+  height: auto !important;
+}
+
+
 body {
   font-family: var(--font-body);
   color: var(--color-text);
@@ -498,22 +518,28 @@ h4 {
   margin-top: auto;
   padding-top: 2rem;
   border-top: 1px solid var(--color-border);
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* guarantees pixel-perfect equal width */
   gap: 1rem;
 }
 .mobile-menu-action-btn {
   position: relative;
-  flex: 1;
+  height: 88px;          /* fixed equal height for both */
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 0.5rem;
-  border: 1px solid var(--color-border);
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.75rem 0.5rem;
+  border: 1px solid var(--color-border) !important;
+  background: none !important;
   border-radius: var(--radius-md);
   font-size: 0.8rem;
   letter-spacing: 0.02em;
   color: var(--color-black);
+  text-align: center;
+  box-sizing: border-box;
+  width: 100%;           /* fill the grid cell */
   transition:
     border-color var(--transition-fast),
     background var(--transition-fast);
@@ -521,15 +547,37 @@ h4 {
 .mobile-menu-action-btn i {
   font-size: 1.2rem;
   color: var(--color-gold-dark);
+  line-height: 1;
+}
+/* Label text - same font size, no wrap */
+.mobile-menu-action-btn span:not(.badge) {
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--color-black);
 }
 .mobile-menu-action-btn:hover {
   border-color: var(--color-gold);
-  background: rgba(212, 175, 55, 0.06);
+  background: rgba(212, 175, 55, 0.06) !important;
 }
+/* Count badge - identical size and position on both */
 .mobile-menu-action-btn .badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 6px;
+  right: 6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-gold-dark);
+  color: var(--color-white);
 }
 
 .drawer {
@@ -2228,6 +2276,17 @@ body.editor_enable .hero .reveal {
   }
   .newsletter-form {
     flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    padding: 0 1rem;
+  }
+  .newsletter-form input {
+    width: 100%;
+    min-width: unset;
+    text-align: center;
+  }
+  .newsletter-form .btn {
+    width: 100%;
   }
   .back-to-top {
     right: 1.2rem;
@@ -2270,10 +2329,11 @@ body.editor_enable .hero .reveal {
   min-height: 70vh;
 }
 
-/* Header style override ONLY on the wishlist page, product detail page, and login page */
+/* Header style override ONLY on the wishlist page, product detail page, login page, and checkout/payment pages */
 #wrapwrap:has(.velora-wishlist-page) .site-header .nav-container,
 #wrapwrap:has(.velora-product-details-page) .site-header .nav-container,
-#wrapwrap:has(.oe_website_login_container) .site-header .nav-container {
+#wrapwrap:has(.oe_website_login_container) .site-header .nav-container,
+#wrapwrap:has(.velora-checkout-page) .site-header .nav-container {
   background: var(--color-black) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -2288,7 +2348,10 @@ body.editor_enable .hero .reveal {
 #wrapwrap:has(.velora-product-details-page) .site-header .icon-btn,
 #wrapwrap:has(.oe_website_login_container) .site-header .logo,
 #wrapwrap:has(.oe_website_login_container) .site-header .nav-link,
-#wrapwrap:has(.oe_website_login_container) .site-header .icon-btn {
+#wrapwrap:has(.oe_website_login_container) .site-header .icon-btn,
+#wrapwrap:has(.velora-checkout-page) .site-header .logo,
+#wrapwrap:has(.velora-checkout-page) .site-header .nav-link,
+#wrapwrap:has(.velora-checkout-page) .site-header .icon-btn {
   color: var(--color-white) !important;
 }
 
@@ -2297,14 +2360,22 @@ body.editor_enable .hero .reveal {
 #wrapwrap:has(.velora-product-details-page) .site-header .nav-link:hover,
 #wrapwrap:has(.velora-product-details-page) .site-header .icon-btn:hover,
 #wrapwrap:has(.oe_website_login_container) .site-header .nav-link:hover,
-#wrapwrap:has(.oe_website_login_container) .site-header .icon-btn:hover {
+#wrapwrap:has(.oe_website_login_container) .site-header .icon-btn:hover,
+#wrapwrap:has(.velora-checkout-page) .site-header .nav-link:hover,
+#wrapwrap:has(.velora-checkout-page) .site-header .icon-btn:hover {
   color: var(--color-gold) !important;
 }
 
 #wrapwrap:has(.velora-wishlist-page) .site-header .hamburger span,
 #wrapwrap:has(.velora-product-details-page) .site-header .hamburger span,
-#wrapwrap:has(.oe_website_login_container) .site-header .hamburger span {
+#wrapwrap:has(.oe_website_login_container) .site-header .hamburger span,
+#wrapwrap:has(.velora-checkout-page) .site-header .hamburger span {
   background: var(--color-white) !important;
+}
+
+/* Spacing between fixed header and checkout/payment content */
+.velora-checkout-page {
+  padding-top: clamp(100px, 12vh, 140px) !important;
 }
 
 /* Wishlist page table and container styling */
@@ -2405,6 +2476,92 @@ body.editor_enable .hero .reveal {
   border-color: var(--color-gold-dark) !important;
   transform: translateY(-2px) !important;
   box-shadow: var(--shadow-soft) !important;
+}
+
+/* ── Wishlist Mobile Responsive ── */
+@media (max-width: 640px) {
+  /* Make table a scrollable container or convert to cards */
+  .velora-wishlist-page #o_comparelist_table {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  /* Hide the table header on mobile */
+  .velora-wishlist-page #o_comparelist_table thead {
+    display: none !important;
+  }
+
+  /* Each row becomes a card */
+  .velora-wishlist-page #o_comparelist_table tbody tr {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    background: var(--color-white) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-md) !important;
+    margin-bottom: 1rem !important;
+    padding: 1rem !important;
+    box-shadow: var(--shadow-soft) !important;
+    width: 100% !important;
+  }
+
+  /* All cells become flex items */
+  .velora-wishlist-page #o_comparelist_table td {
+    display: block !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  /* Product image — small thumbnail */
+  .velora-wishlist-page #o_comparelist_table td.td-img {
+    flex: 0 0 72px !important;
+    width: 72px !important;
+  }
+  .velora-wishlist-page #o_comparelist_table td.td-img img {
+    width: 72px !important;
+    height: 72px !important;
+    max-height: 72px !important;
+    object-fit: contain !important;
+    border-radius: var(--radius-sm) !important;
+    border: 1px solid var(--color-border) !important;
+  }
+
+  /* Product name + remove — takes remaining space */
+  .velora-wishlist-page #o_comparelist_table td:has(strong) {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+  }
+
+  /* Price — full row below image + name */
+  .velora-wishlist-page #o_comparelist_table td.o_wish_price {
+    flex: 1 1 auto !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+  }
+
+  /* Add to cart button — full width at bottom */
+  .velora-wishlist-page #o_comparelist_table td:has(.o_wish_add) {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+  }
+  .velora-wishlist-page #o_comparelist_table .o_wish_add {
+    width: 100% !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.85rem !important;
+    text-align: center !important;
+  }
+
+  /* Remove button */
+  .velora-wishlist-page #o_comparelist_table .o_wish_rm {
+    font-size: 0.75rem !important;
+    margin-top: 0.3rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+  }
 }
 
 /*======================================

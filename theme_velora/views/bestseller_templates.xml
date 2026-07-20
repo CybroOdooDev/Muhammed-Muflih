@@ -39,15 +39,22 @@
                             <p class="section-sub">The fragrances our connoisseurs return to again and again.</p>
                         </div>
 
-                        <!-- Dynamic product grid from Odoo (limit 3) -->
+                        <!-- Fetch published products sorted by sales_count in Python (non-stored field) -->
                         <div class="product-grid">
-                            <t t-set="products" t-value="request.env['product.template'].sudo().search([('website_published', '=', True), ('sale_ok', '=', True)], limit=3, order='create_date desc')"/>
+                            <t t-set="products" t-value="request.env['product.template'].sudo().search(
+                                [('website_published', '=', True), ('sale_ok', '=', True)]
+                            ).sorted('sales_count', reverse=True)[:3]"/>
                             <t t-foreach="products" t-as="product">
                                 <article class="product-card reveal">
                                     <div class="product-media">
                                         <t t-set="ribbon" t-value="product.website_ribbon_id"/>
                                         <span class="discount-badge" t-if="ribbon" t-out="ribbon.name"/>
-                                        <button class="wishlist-btn" aria-label="Add to wishlist"><i class="fa-regular fa-heart"></i></button>
+                                        <button class="wishlist-btn"
+                                                t-att-data-product-product-id="product.product_variant_id.id"
+                                                t-att-data-product-template-id="product.id"
+                                                aria-label="Add to wishlist">
+                                            <i class="fa-regular fa-heart"></i>
+                                        </button>
                                         <a t-attf-href="/shop/#{product.id}">
                                             <img t-att-src="'/web/image/product.template/%s/image_1024' % product.id"
                                                  t-att-alt="product.name" loading="lazy"/>

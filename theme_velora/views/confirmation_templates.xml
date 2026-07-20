@@ -4,7 +4,7 @@
     <template id="theme_velora_confirmation" inherit_id="website_sale.confirmation" name="Theme Velora Confirmation">
         <xpath expr="//t[@t-call='website_sale.checkout_layout']" position="replace">
             <t t-call="website.layout">
-                <div id="wrap" class="oe_structure oe_empty">
+                <div id="wrap" class="oe_structure oe_empty velora-checkout-page">
                     <!-- Snippet: Order Confirmation -->
                     <section class="page-banner s_velora s_velora_confirmation o_colored_level"
                              data-snippet="theme_velora.s_velora_confirmation"

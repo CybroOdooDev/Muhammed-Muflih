@@ -393,6 +393,18 @@
         </xpath>
     </template>
 
+    <template id="checkout_layout_velora" inherit_id="website_sale.checkout_layout" name="Velora Checkout Layout">
+        <xpath expr="//div[@id='wrap']" position="attributes">
+            <attribute name="class" add="velora-checkout-page" separator=" "/>
+        </xpath>
+    </template>
+
+    <template id="address_velora" inherit_id="website_sale.address" name="Velora Address Page">
+        <xpath expr="//div[@id='wrap']" position="attributes">
+            <attribute name="class" add="velora-checkout-page" separator=" "/>
+        </xpath>
+    </template>
+
     <!-- Shop link is now hard-coded directly in the nav lists above -->
 </odoo>
 

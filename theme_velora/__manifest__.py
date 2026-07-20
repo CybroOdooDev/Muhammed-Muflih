@@ -11,6 +11,7 @@
     "website": "https://www.cybrosys.com",
     "depends": ["website", "website_sale", "website_sale_wishlist"],
     "data": [
+        "data/categories.xml",
         "data/website_menu.xml",
         "views/layout_templates.xml",
         "views/snippets/snippets.xml",

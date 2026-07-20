@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-
-        <!-- Record Rule: group_user can only see and filter their own media assets -->
+        <!-- Record Rule: User group users can only read, write, create their own media assets -->
         <record id="media_asset_rule_group_user" model="ir.rule">
             <field name="name">Media Asset: Users See Own Records</field>
             <field name="model_id" ref="model_media_asset"/>
@@ -14,7 +13,7 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Record Rule: group_manager can see all media assets -->
+        <!-- Record Rule: Manager group can see, modify, create, and delete all media assets -->
         <record id="media_asset_rule_group_manager" model="ir.rule">
             <field name="name">Media Asset: Managers See All Records</field>
             <field name="model_id" ref="model_media_asset"/>
@@ -25,6 +24,5 @@
             <field name="perm_create" eval="True"/>
             <field name="perm_unlink" eval="True"/>
         </record>
-
     </data>
 </odoo>
