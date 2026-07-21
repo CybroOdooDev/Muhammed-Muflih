@@ -5,8 +5,8 @@
         Model: event.event Inherits the core Odoo event form to surface Flynova-specific travel
         fields (event image, trip duration, and destination) in the backend.
     -->
-    <record id="event_event_view_form_inherit_flynova" model="ir.ui.view">
-        <field name="name">event.event.view.form.inherit.flynova</field>
+    <record id="event_view_form" model="ir.ui.view">
+        <field name="name">event.event.view.form.inherit.theme.flynova</field>
         <field name="model">event.event</field>
         <field name="inherit_id" ref="event.view_event_form"/>
         <field name="arch" type="xml">

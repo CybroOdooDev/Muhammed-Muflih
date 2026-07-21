@@ -152,14 +152,14 @@
             </svg>
         </xpath>
         <xpath expr="//div[@id='top_menu_collapse_mobile']" position="attributes">
-            <attribute name="t-attf-class">offcanvas offcanvas-start o_navbar_mobile flynova-mobile-offcanvas</attribute>
+            <attribute name="t-attf-class">offcanvas offcanvas-end o_navbar_mobile flynova-mobile-offcanvas</attribute>
         </xpath>
         <xpath expr="//div[@id='top_menu_collapse_mobile']/div[hasclass('offcanvas-body')]" position="attributes">
             <attribute name="class">offcanvas-body flynova-mobile-offcanvas-body</attribute>
         </xpath>
         <xpath expr="//div[@id='top_menu_collapse_mobile']//button[@data-bs-dismiss='offcanvas']" position="replace">
             <button type="button" class="close-btn flynova-mobile-close-btn" data-bs-dismiss="offcanvas" aria-label="Close">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="#ffffff" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                     <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
                 </svg>
             </button>
@@ -181,14 +181,55 @@
                             or (flynova_menu_path == '/about-us' and flynova_current_path.startswith('/about-us'))
                             or (flynova_menu_path == '/explore' and flynova_current_path.startswith('/explore'))
                             or (flynova_menu_path in ['/contactus', '/contact-us'] and flynova_current_path in ['/contactus', '/contact-us'])"/>
-                <t t-call="website.submenu">
-                    <t t-set="item_class"
-                       t-valuef="nav-item flynova-mobile-nav-item #{flynova_menu_active and 'active' or ''}"/>
-                    <t t-set="link_class" t-valuef="nav-link flynova-mobile-nav-link #{flynova_menu_active and 'active' or ''}"/>
-                    <t t-set="dropdown_toggler_classes" t-valuef="d-flex justify-content-between align-items-center"/>
-                    <t t-set="dropdown_menu_classes" t-valuef="position-relative rounded-0 o_dropdown_without_offset"/>
-                </t>
+                <li t-attf-class="nav-item flynova-mobile-nav-item #{flynova_menu_active and 'active' or ''}"
+                    style="border-bottom: 1px solid #eef0f6; margin: 0; padding: 0; list-style: none; display: block; width: 100%;">
+                    <a t-att-href="submenu.url"
+                       t-attf-class="nav-link flynova-mobile-nav-link #{flynova_menu_active and 'active' or ''}"
+                       style="font-family: 'Montserrat', sans-serif !important; font-size: 1.35rem !important; font-weight: 500 !important; color: #1e293b !important; padding: 1.4rem 1.5rem !important; margin: 0 !important; line-height: 1.2 !important; text-decoration: none !important; display: block !important; width: 100% !important; background: transparent !important; border: none !important;">
+                        <t t-if="flynova_menu_active">
+                            <span style="font-size: 1.35rem !important; font-weight: 600 !important; color: #7749f8 !important;"><t t-out="submenu.name"/></span>
+                        </t>
+                        <t t-else="">
+                            <span style="font-size: 1.35rem !important; font-weight: 500 !important; color: #1e293b !important;"><t t-out="submenu.name"/></span>
+                        </t>
+                    </a>
+                </li>
             </t>
+        </xpath>
+
+        <xpath expr="//div[@id='top_menu_collapse_mobile']//ul[hasclass('gap-2')]" position="replace">
+            <div class="flynova-mobile-bottom mt-auto pt-3">
+                <!-- Phone info -->
+                <div class="flynova-mobile-phone mb-3">
+                    <i class="fa fa-phone me-3"/>
+                    <a t-attf-href="tel:#{res_company.phone or website.company_id.phone or '+1 555-555-5556'}">
+                        <t t-out="res_company.phone or website.company_id.phone or '+1 555-555-5556'"/>
+                    </a>
+                </div>
+
+                <!-- User Dropdown / Sign In -->
+                <div class="flynova-mobile-user mb-3">
+                    <ul class="navbar-nav w-100">
+                        <t t-call="portal.placeholder_user_sign_in">
+                            <t t-set="_link_class" t-valuef="btn btn-outline-secondary w-100"/>
+                        </t>
+                        <t t-call="portal.user_dropdown">
+                            <t t-set="_icon" t-value="true"/>
+                            <t t-set="_user_name" t-value="true"/>
+                            <t t-set="_user_name_class" t-valuef="me-auto small"/>
+                            <t t-set="_link_class" t-valuef="btn-outline-secondary d-flex align-items-center border-0 px-2"/>
+                            <t t-set="_icon_class" t-valuef="me-2"/>
+                            <t t-set="_item_class" t-valuef="dropdown dropup"/>
+                            <t t-set="_dropdown_menu_class" t-valuef="w-100"/>
+                        </t>
+                    </ul>
+                </div>
+
+                <!-- Call to action button -->
+                <div class="flynova-mobile-cta">
+                    <a href="/contactus" class="oe_unremovable bttn btn_cta w-100">Get Featured</a>
+                </div>
+            </div>
         </xpath>
     </template>
 
