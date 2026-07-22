@@ -402,7 +402,9 @@
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          animateCount(entry.target);
+          if (!isEditMode()) {
+            animateCount(entry.target);
+          }
           statObserver.unobserve(entry.target);
         }
       });
@@ -412,7 +414,14 @@
   statNumbers.forEach((el) => statObserver.observe(el));
 
   function animateCount(el) {
-    const target = parseInt(el.dataset.count, 10);
+    const rawTextNum = parseInt(el.textContent.replace(/[^\d]/g, ''), 10);
+    let target = parseInt(el.dataset.count, 10);
+    if (!isNaN(rawTextNum) && rawTextNum > 0 && rawTextNum !== target) {
+      target = rawTextNum;
+      el.dataset.count = target;
+    }
+    if (isNaN(target)) return;
+
     const duration = 1800;
     const startTime = performance.now();
 
@@ -429,6 +438,33 @@
     }
     requestAnimationFrame(tick);
   }
+
+  /* ============ DYNAMIC FEATURED COLLECTIONS CATEGORY REDIRECT ============ */
+  $$('.collection-card, .collections-page-card').forEach((card) => {
+    const titleEl = card.querySelector('h3, .h3');
+    if (!titleEl) return;
+
+    function navigateToCategory(e) {
+      if (isEditMode()) return;
+      const categoryName = titleEl.textContent.trim();
+      if (categoryName) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.location.href = `/collections/redirect?name=${encodeURIComponent(categoryName)}`;
+      }
+    }
+
+    const links = card.querySelectorAll('a');
+    links.forEach((link) => {
+      link.addEventListener('click', navigateToCategory);
+    });
+
+    card.addEventListener('click', (e) => {
+      if (isEditMode()) return;
+      if (e.target.closest('a') || e.target.closest('button')) return;
+      navigateToCategory(e);
+    });
+  });
 
   /* ============ TESTIMONIAL CAROUSEL DOTS + AUTOPLAY ============ */
   const testimonialTrack = $('#testimonialTrack');

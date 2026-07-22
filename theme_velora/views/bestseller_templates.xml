@@ -3,9 +3,10 @@
     <template id="theme_velora_bestsellers" name="Best Sellers">
         <t t-call="website.layout">
             <t t-set="additional_title">Best Sellers</t>
-            <div id="wrap" class="oe_structure oe_empty">
+            <div id="wrap" class="oe_structure oe_empty o_editable">
 
                 <!-- ============ PAGE BANNER ============ -->
+                <div class="oe_structure oe_empty o_editable">
                 <section class="page-banner s_velora o_colored_level"
                          data-snippet="theme_velora.s_velora_bestsellers_banner"
                          data-name="Bestsellers Banner">
@@ -26,6 +27,7 @@
                         </nav>
                     </div>
                 </section>
+                </div>
                 <div class="oe_structure oe_empty"/>
 
                 <!-- ============ BEST SELLERS INTRO ============ -->

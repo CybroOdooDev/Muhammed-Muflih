@@ -91,45 +91,50 @@ class ThemeVeloraCollections(http.Controller):
         return request.redirect('/shop')
 
     @http.route('/collections/redirect', type='http', auth='public', website=True)
-    def redirect_collection(self, name, **kwargs):
-        """Finds the matching eCommerce category by name and redirects, else falls back to shop."""
-        if not name:
+    def redirect_collection(self, name=None, **kwargs):
+        """Finds the matching eCommerce category by frontend name and redirects, else falls back to shop."""
+        if not name or not name.strip():
             return request.redirect('/shop')
-            
-        name_clean = name.strip().lower()
-        search_terms = [name, name_clean]
-        
-        # Expand common search variations for reliability
+
+        raw_name = name.strip()
+        name_clean = raw_name.lower()
+        search_terms = [raw_name, name_clean]
+
+        cleaned = name_clean.replace("collection", "").replace("collections", "").replace("'s", "").replace("`s", "").strip()
+        if cleaned and cleaned not in search_terms:
+            search_terms.append(cleaned)
+
         if 'men' in name_clean:
-            search_terms.extend(['Mens collection', "Men's Collection", 'men'])
+            search_terms.extend(["Men's Collection", 'Mens Collection', 'men'])
         if 'women' in name_clean:
-            search_terms.extend(['womens collection', "Women's Collection", 'women'])
+            search_terms.extend(["Women's Collection", 'Womens Collection', 'women'])
         if 'unisex' in name_clean:
             search_terms.extend(['unisex'])
         if 'gift' in name_clean:
-            search_terms.extend(['lexury gift sets', 'luxury gift sets', 'Luxury Gift Sets', 'gift sets', 'gift'])
+            search_terms.extend(['Luxury Gift Sets', 'gift sets', 'gift'])
         if 'limited' in name_clean:
-            search_terms.extend(['Limited Editions', 'limited editions', 'limited'])
-            
+            search_terms.extend(['Limited Editions', 'limited'])
+
+        Category = request.env['product.public.category'].sudo()
         category = False
-        
-        # Try exact case-insensitive matches first
+
+        # 1. Try exact case-insensitive matches first
         for term in search_terms:
-            category = request.env['product.public.category'].sudo().search([
-                ('name', '=ilike', term)
-            ], limit=1)
+            if not term:
+                continue
+            category = Category.search([('name', '=ilike', term)], limit=1)
             if category:
                 break
-                
-        # Try substring case-insensitive matches next
+
+        # 2. Try substring case-insensitive matches next
         if not category:
             for term in search_terms:
-                category = request.env['product.public.category'].sudo().search([
-                    ('name', 'ilike', term)
-                ], limit=1)
+                if not term or len(term) < 2:
+                    continue
+                category = Category.search([('name', 'ilike', term)], limit=1)
                 if category:
                     break
-                    
+
         if category:
             return request.redirect(f'/shop/category/{category.id}')
         return request.redirect('/shop')

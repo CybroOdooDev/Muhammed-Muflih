@@ -1362,7 +1362,6 @@ h4 {
 /* ============ 12. ABOUT ============ */
 .about-grid {
   align-items: center;
-  row-gap: clamp(2rem, 5vw, 5rem);
 }
 .about-grid > [class*="col-"] {
   padding-left: clamp(1rem, 2.5vw, 2.5rem);
@@ -1396,33 +1395,39 @@ h4 {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1.8rem;
-  padding-top: 2.5rem;
-  border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
-     padding-bottom: 2.5rem;
+  gap: 1.5rem;
+  padding-top: 2.2rem;
+  padding-bottom: 2.2rem;
+  border-top: 1px solid var(--color-border, #e7e0d3);
+  border-bottom: 1px solid var(--color-border, #e7e0d3);
+  margin-top: 2rem;
 }
 .stat {
   display: flex;
   flex-direction: column;
+  text-align: left;
+  align-items: flex-start;
 }
 .stat-number {
-  font-family: var(--font-body);
+  font-family: var(--font-body, "Poppins", sans-serif);
   font-weight: 600;
-  font-size: clamp(2rem, 3vw, 2.8rem);
-  color: var(--color-gold-dark);
+  font-size: clamp(2.4rem, 3.5vw, 3.2rem);
+  color: #B58E2B !important;
   display: inline-block;
+  line-height: 1.1;
 }
 .stat-suffix {
-  font-family: var(--font-body);
+  font-family: var(--font-body, "Poppins", sans-serif);
   font-weight: 600;
-  font-size: 1.7rem;
-  color: var(--color-gold-dark);
+  font-size: 1.8rem;
+  color: #B58E2B !important;
 }
 .stat-label {
-  font-size: 13px;
-  color: var(--color-text-soft);
-  margin-top: 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--color-text-soft, #6b665c) !important;
+  margin-top: 0.6rem;
+  line-height: 1.45;
 }
 
 /* ============ 13. WHY CHOOSE US ============ */
@@ -1644,25 +1649,42 @@ h4 {
 
 /* ============ 16. FAQ ACCORDION ============ */
 .accordion {
-  max-width: 760px;
+  max-width: 720px;
   margin: 0 auto;
+  border: 1px solid var(--color-border, #EAE5DD);
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-bg-light, #FAF9F6);
+  overflow: hidden;
 }
 .accordion-item {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border, #EAE5DD);
+}
+.accordion-item:last-child {
+  border-bottom: none;
 }
 .accordion-header {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.5rem 0.5rem;
+  padding: 1.25rem 1.75rem;
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
+  font-weight: 500;
   text-align: left;
   color: var(--color-black);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.accordion-header:hover {
+  background: rgba(0, 0, 0, 0.015);
 }
 .accordion-header i {
   color: var(--color-gold-dark);
+  font-size: 1rem;
+  font-weight: 600;
   transition: transform var(--transition-fast);
 }
 .accordion-header[aria-expanded="true"] i {
@@ -1675,12 +1697,15 @@ h4 {
   transition:
     max-height var(--transition-med),
     padding var(--transition-med);
-  padding: 0 0.5rem;
+  padding: 0 1.75rem;
 }
 .accordion-panel p {
   color: var(--color-text-soft);
-  padding-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  margin: 0;
   max-width: 640px;
+  font-size: 0.95rem;
+  line-height: 1.7;
 }
 
 /* ============ 17. NEWSLETTER ============ */
@@ -3010,18 +3035,18 @@ input[type="number"].quantity {
     gap:30px;
 }
 
-.stat{
+.about-stats .stat{
     text-align:center;
 }
 
-.stat h2{
+.about-stats .stat h2{
     font-family:"Playfair Display",serif;
     font-size:4rem;
     color:#D4AF37;
     margin-bottom:10px;
 }
 
-.stat span{
+.about-stats .stat span{
     color:#fff;
     letter-spacing:1px;
 }
@@ -3065,7 +3090,7 @@ input[type="number"].quantity {
     .about-image img{
         height:420px;
     }
-    .stat h2{
+    .about-stats .stat h2{
         font-size:3rem;
     }
     .stats-grid{
