@@ -629,19 +629,21 @@
     if (isEditMode()) return;
     const form = e.target.closest('form[action="/shop/cart/update"]');
     if (!form) return;
-    const btn = form.querySelector('.add-cart-btn');
-    if (!btn) return;
+    const btn = form.querySelector('.add-cart-btn, .shop-add-cart-btn, button[type="submit"]');
 
     e.preventDefault();
 
-    const productId = parseInt(form.querySelector('[name="product_id"]')?.value, 10);
+    let productId = parseInt(form.querySelector('[name="product_id"]')?.value, 10);
+    if (!productId && form.dataset.productId) {
+      productId = parseInt(form.dataset.productId, 10);
+    }
     const addQty = parseFloat(form.querySelector('[name="add_qty"]')?.value || '1');
     if (!productId) return;
 
     // visual feedback — disable button while adding
-    btn.disabled = true;
-    const originalHtml = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    if (btn) btn.disabled = true;
+    const originalHtml = btn ? btn.innerHTML : '';
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
     try {
       const data = await jsonRpc('/shop/cart/update_json', {
@@ -655,15 +657,17 @@
     } catch (err) {
       showToast('Could not add to bag. Please try again.');
     } finally {
-      btn.disabled = false;
-      btn.innerHTML = originalHtml;
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+      }
     }
   });
 
   /* ============ AJAX ADD TO CART (STANDALONE BUTTONS) ============ */
   document.addEventListener('click', async (e) => {
     if (isEditMode()) return;
-    const btn = e.target.closest('.add-cart-btn');
+    const btn = e.target.closest('.add-cart-btn, .shop-add-cart-btn');
     if (!btn || btn.closest('form')) return;
 
     e.preventDefault();

@@ -163,16 +163,16 @@
 
 #wrapwrap .bestsellers .product-price-row {
     display: flex !important;
-    flex-direction: column !important;
+    flex-direction: row !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: space-between !important;
     gap: 12px !important;
     margin-top: auto !important;
     width: 100% !important;
 }
 
 #wrapwrap .bestsellers .price-group {
-    text-align: center !important;
+    text-align: left !important;
     margin-bottom: 0 !important;
 }
 
@@ -191,30 +191,29 @@
 }
 
 #wrapwrap .bestsellers .add-cart-btn {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    border-radius: 999px !important;
-    padding: 12px 24px !important;
-    font-size: 0.85rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 1.5px !important;
-    background: #111 !important;
-    color: #fff !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    font-size: 1.1rem !important;
+    background: #111111 !important;
+    color: #ffffff !important;
     border: none !important;
-    text-transform: uppercase !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    transition: all 0.3s ease !important;
+    transition: background 0.3s ease, transform 0.3s ease !important;
     cursor: pointer !important;
-    margin-top: 8px !important;
+    margin-top: 0 !important;
+    flex-shrink: 0 !important;
 }
 
 #wrapwrap .bestsellers .add-cart-btn:hover {
     background: #c8a55a !important;
-    color: #fff !important;
-    transform: translateY(-2px) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px) scale(1.06) !important;
 }
 
 /* ---- Bestseller CTA ---- */

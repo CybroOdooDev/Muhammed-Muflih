@@ -82,8 +82,8 @@
                                                 <span class="price-current" t-field="product.list_price"
                                                       t-options="{'widget': 'monetary', 'display_currency': request.env.company.currency_id}"/>
                                             </div>
-                                            <button class="add-cart-btn btn-full-text" t-att-data-product-id="product.product_variant_id.id" t-att-data-template-id="product.id" t-attf-aria-label="Add #{product.name} to cart">
-                                                ADD TO CART
+                                            <button class="add-cart-btn" t-att-data-product-id="product.product_variant_id.id" t-att-data-template-id="product.id" t-attf-aria-label="Add #{product.name} to cart">
+                                                <i class="fa-solid fa-bag-shopping"></i>
                                             </button>
                                         </div>
                                     </div>

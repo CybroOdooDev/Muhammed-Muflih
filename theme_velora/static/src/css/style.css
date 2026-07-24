@@ -1301,62 +1301,98 @@ h4 {
 }
 
 /* ============ 11. CATEGORIES ============ */
+/* ============ 11. CATEGORIES ============ */
 .category-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
 }
+
 .category-card {
   position: relative;
-  background: var(--gradient-champagne);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 2.4rem 1rem;
+  background: #FBF9F4;
+  border: 1px solid rgba(228, 211, 174, 0.45);
+  border-radius: 16px;
+  padding: 2.2rem 1.2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
+  gap: 0.9rem;
   text-align: center;
   overflow: hidden;
-  transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast),
-    border-color var(--transition-fast);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), border-color 0.35s var(--ease), background 0.35s var(--ease);
+  cursor: pointer;
+  text-decoration: none !important;
 }
+
 .category-card::before {
   content: "";
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    circle at 50% 0%,
-    rgba(212, 175, 55, 0.25),
-    transparent 70%
+    circle at 50% 30%,
+    rgba(212, 175, 55, 0.22) 0%,
+    rgba(251, 249, 244, 0) 75%
   );
   opacity: 0;
-  transition: opacity var(--transition-fast);
+  transition: opacity 0.35s var(--ease);
+  pointer-events: none;
 }
-.category-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-medium);
-  border-color: var(--color-gold);
+
+.category-card:hover,
+.category-card.active {
+  transform: translateY(-5px);
+  border-color: #C8A55A;
+  box-shadow: 0 12px 28px rgba(200, 165, 90, 0.14);
+  background: #FBF7ED;
 }
-.category-card:hover::before {
+
+.category-card:hover::before,
+.category-card.active::before {
   opacity: 1;
 }
+
 .category-card i {
-  font-size: 2.2rem;
-  color: var(--color-gold-dark);
-  transition: transform var(--transition-fast);
+  font-size: 2.1rem;
+  color: #B38E36;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.35s var(--ease), color 0.35s var(--ease);
 }
-.category-card:hover i {
-  transform: rotate(10deg) scale(1.15);
+
+.category-card:hover i,
+.category-card.active i {
+  transform: scale(1.12);
+  color: #9A7727;
 }
+
 .category-card span {
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
+  font-weight: 500;
   color: var(--color-black);
   position: relative;
   z-index: 1;
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 991px) {
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.9rem;
+  }
+  .category-card {
+    padding: 1.8rem 0.8rem;
+  }
 }
 
 /* ============ 12. ABOUT ============ */
@@ -3452,3 +3488,191 @@ input[type="number"].quantity {
   border-top: 1px solid rgba(228, 211, 174, 0.2) !important;
   margin: 0 !important;
 }
+
+/* ============ VELORA LOGIN PAGE STYLING ============ */
+.contact-form .form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.contact-form .form-field label {
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: var(--color-text-soft);
+}
+
+.contact-form input.form-control {
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-ivory);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: none;
+}
+
+.contact-form input.form-control:focus {
+  outline: none;
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+  background: var(--color-ivory);
+}
+
+.contact-form .alert {
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  margin-top: 1rem;
+}
+
+.contact-form .velora-auth-link,
+.contact-form a.btn-link {
+  color: var(--color-gold-dark) !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  display: inline-block;
+  transition: color var(--transition-fast);
+}
+
+.contact-form .velora-auth-link:hover,
+.contact-form a.btn-link:hover {
+  color: var(--color-gold) !important;
+  text-decoration: underline !important;
+}
+
+.password-actions {
+  margin-top: 0.4rem;
+}
+
+/* ============ SHOP PAGE ADD TO CART BUTTON ============ */
+#wrapwrap .shop-add-cart-btn {
+  width: auto !important;
+  height: auto !important;
+  min-width: unset !important;
+  max-width: unset !important;
+  background: var(--color-black) !important;
+  border-color: var(--color-black) !important;
+  color: var(--color-white) !important;
+  border-radius: 999px !important;
+  padding: 0.6rem 1.4rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background var(--transition-fast), transform var(--transition-fast) !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+#wrapwrap .shop-add-cart-btn:hover {
+  background: var(--color-gold-dark) !important;
+  border-color: var(--color-gold-dark) !important;
+  color: var(--color-white) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-medium) !important;
+}
+
+/* ============ CART DRAWER & CART PAGE COUPON / APPLY BUTTON ALIGNMENT ============ */
+form[name="coupon_code"] .input-group,
+.coupon_form .input-group,
+#cart_total form[name="coupon_code"] .input-group,
+.oe_website_sale_gift_card .input-group {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+form[name="coupon_code"] .input-group .form-control,
+.coupon_form .input-group .form-control,
+.oe_website_sale_gift_card .input-group .form-control {
+  border-radius: 999px !important;
+  padding: 0.6rem 1.2rem !important;
+  border: 1px solid var(--color-border, #e4d3ae) !important;
+  font-size: 0.85rem !important;
+  height: auto !important;
+}
+
+form[name="coupon_code"] .input-group .a-submit,
+form[name="coupon_code"] .input-group .btn,
+.coupon_form .input-group .a-submit,
+.coupon_form .input-group .btn,
+#cart_total form[name="coupon_code"] .a-submit,
+#cart_total form[name="coupon_code"] .btn,
+.oe_website_sale_gift_card .a-submit,
+.oe_website_sale_gift_card .btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 0.65rem 1.4rem !important;
+  margin: 0 !important;
+  border-radius: 999px !important;
+  background: #2c3240 !important;
+  border: 1px solid #2c3240 !important;
+  color: #ffffff !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
+  min-width: 90px !important;
+  height: auto !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast) !important;
+}
+
+form[name="coupon_code"] .input-group .a-submit:hover,
+form[name="coupon_code"] .input-group .btn:hover,
+.coupon_form .input-group .a-submit:hover,
+.coupon_form .input-group .btn:hover,
+#cart_total form[name="coupon_code"] .a-submit:hover,
+#cart_total form[name="coupon_code"] .btn:hover,
+.oe_website_sale_gift_card .a-submit:hover,
+.oe_website_sale_gift_card .btn:hover {
+  background: var(--color-gold-dark, #c8a55a) !important;
+  border-color: var(--color-gold-dark, #c8a55a) !important;
+  color: #ffffff !important;
+}
+
+/* ============ CONFIRMATION PAGE DARK HEADER & BACKGROUND FIX ============ */
+#wrapwrap:has(.velora-confirmation-page),
+#wrapwrap:has(.s_velora_confirmation),
+body:has(.velora-confirmation-page),
+body:has(.s_velora_confirmation) {
+  background-color: #0b0b0c !important;
+}
+
+#wrapwrap:has(.velora-confirmation-page) #wrap,
+#wrapwrap:has(.s_velora_confirmation) #wrap {
+  background-color: #0b0b0c !important;
+}
+
+#wrapwrap:has(.velora-confirmation-page) .page-banner,
+#wrapwrap:has(.s_velora_confirmation) .page-banner {
+  min-height: 100vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-image: linear-gradient(135deg, #0b0b0c 0%, #1a1a1c 55%, #262019 100%) !important;
+}
+
+
+
+
+

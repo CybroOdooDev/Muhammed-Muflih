@@ -22,6 +22,7 @@
         "views/collections_templates.xml",
         "views/bestseller_templates.xml",
         "views/confirmation_templates.xml",
+        "views/login_templates.xml",
     ],
     "assets": {
         "web.assets_frontend": [

@@ -33,6 +33,7 @@
       </a>
 
       <ul class="nav-links" id="navLinks">
+        <li><a href="/" class="nav-link">Home</a></li>
         <li><a href="/collections" class="nav-link">Collections</a></li>
         <li><a href="/shop" class="nav-link">Shop</a></li>
         <li><a href="/best-sellers" class="nav-link">Best Sellers</a></li>
@@ -113,7 +114,8 @@
     </button>
   </div>
   <ul>
-   <li><a href="/collections" class="nav-link">Collections</a></li>
+        <li><a href="/" class="nav-link">Home</a></li>
+        <li><a href="/collections" class="nav-link">Collections</a></li>
         <li><a href="/shop" class="nav-link">Shop</a></li>
         <li><a href="/best-sellers" class="nav-link">Best Sellers</a></li>
         <!-- <li><a href="#categories" class="nav-link">Fragrances</a></li> -->
@@ -342,12 +344,12 @@
                     <p class="product-desc mb-0" t-else="">Amber • Floral • Sandalwood</p>
                     
                     <!-- Ratings -->
-                    <div class="product-rating">
+                    <div class="product-rating mb-1">
                         <span style="color:var(--color-gold-dark)">★★★★★</span>
-                        <span>5.0</span>
+                        <span>5.0 (95)</span>
                     </div>
 
-                    <!-- Price Row -->
+                    <!-- Price Row & Add to Cart -->
                     <div class="product-price-row mt-auto">
                         <t t-set="template_price_vals" t-value="get_product_prices(product)"/>
                         <div class="price-group" itemprop="offers" itemscope="itemscope" itemtype="http://schema.org/Offer">
@@ -368,19 +370,18 @@
                             <span itemprop="price" style="display:none;" t-esc="template_price_vals['price_reduce']" />
                             <span itemprop="priceCurrency" style="display:none;" t-esc="website.currency_id.name" />
                         </div>
-                    </div>
 
-                    <!-- Add to Cart Button -->
-                    <t t-if="product_variant_id and template_price_vals['price_reduce'] or not website.prevent_zero_price_sale">
-                        <button t-if="product._website_show_quick_add()"
-                                type="submit"
-                                class="btn btn-primary add-cart-btn btn-full-text w-100 mt-2"
-                                style="width: 100% !important; background: var(--color-black) !important; border-color: var(--color-black) !important; color: var(--color-white) !important; border-radius: 999px !important; padding: 0.8rem 1.5rem !important;"
-                                aria-label="Add to cart"
-                        >
-                            ADD TO CART
-                        </button>
-                    </t>
+                        <!-- Add to Cart Button for Shop Page (Pill Button with ADD TO CART) -->
+                        <t t-if="product_variant_id and template_price_vals['price_reduce'] or not website.prevent_zero_price_sale">
+                            <button t-if="product._website_show_quick_add()"
+                                    type="submit"
+                                    class="shop-add-cart-btn btn btn-primary"
+                                    aria-label="Add to cart"
+                            >
+                                ADD TO CART
+                            </button>
+                        </t>
+                    </div>
                 </div>
 
             </form>

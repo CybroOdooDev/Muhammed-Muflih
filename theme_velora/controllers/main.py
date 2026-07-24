@@ -146,11 +146,11 @@ except ImportError:
     FlynovaThemeController = object
 
 
-class ThemeVeloraAboutUs(FlynovaThemeController if FlynovaThemeController is not object else http.Controller):
+class ThemeVeloraAboutUs(http.Controller):
 
-    @http.route(['/about-us', '/about', '/aboutus'], type='http', auth='public', website=True)
-    def about_page(self, **kwargs):
-        return request.render('website.aboutus', {})
+    @http.route(['/aboutus', '/about'], type='http', auth='public', website=True)
+    def about_page_redirect(self, **kwargs):
+        return request.redirect('/about-us', code=301)
 
 
 class ThemeVeloraBestsellers(http.Controller):

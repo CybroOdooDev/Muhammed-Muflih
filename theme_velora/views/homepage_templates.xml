@@ -31,10 +31,10 @@
                         leave a lasting impression.
                     </p>
                     <div class="hero-actions reveal">
-                        <a href="/bestsellers" class="btn btn-primary">
+                        <a href="/shop" class="btn btn-primary">
                             <span>Shop Best Sellers</span>
                         </a>
-                        <a href="/about" class="btn btn-outline-light">
+                        <a href="/about-us" class="btn btn-outline-light">
                             <span>Explore Our Story</span>
                         </a>
                     </div>
@@ -193,11 +193,11 @@
                                                       t-field="product.list_price"
                                                       t-options="{'widget': 'monetary', 'display_currency': request.env.company.currency_id}"/>
                                             </div>
-                                            <button class="add-cart-btn btn-full-text"
+                                            <button class="add-cart-btn"
                                                     t-att-data-product-id="product.product_variant_id.id"
                                                     t-att-data-template-id="product.id"
                                                     t-attf-aria-label="Add #{product.name} to cart">
-                                                ADD TO CART
+                                                <i class="fa-solid fa-bag-shopping"></i>
                                             </button>
                                         </div>
                                     </div>
