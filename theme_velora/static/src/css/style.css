@@ -2100,7 +2100,8 @@ h4 {
 }
 
 /* ============ 19. TOAST & BACK TO TOP ============ */
-.toast {
+/* ============ 19. TOAST & BACK TO TOP ============ */
+#toast {
   position: fixed;
   bottom: 2rem;
   left: 50%;
@@ -2122,16 +2123,130 @@ h4 {
     transform var(--transition-fast),
     visibility var(--transition-fast);
 }
-.toast.show {
+#toast.show {
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
 }
-.toast::before {
+#toast::before {
   content: "\2713";
   color: var(--color-gold-light);
   font-weight: 700;
 }
+
+/* ============ ODOO ADD TO CART POPUP / NOTIFICATION STYLING ============ */
+.o_notification_fade .toast,
+div[role="alert"].toast,
+.toast.o_cc1 {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  width: 350px !important;
+  max-width: calc(100vw - 30px) !important;
+  background: #ffffff !important;
+  border: 1px solid #e4d3ae !important;
+  border-radius: 16px !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.08) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  margin-top: 15px !important;
+  z-index: 1055 !important;
+}
+
+.o_notification_fade .toast::before,
+div[role="alert"].toast::before,
+.toast.o_cc1::before {
+  display: none !important;
+  content: none !important;
+}
+
+.o_notification_fade .toast .toast-header,
+div[role="alert"].toast .toast-header,
+.toast.o_cc1 .toast-header {
+  background: #FAF7F2 !important;
+  border-bottom: 1px solid #e4d3ae !important;
+  padding: 0.75rem 1.1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  color: #111111 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.o_notification_fade .toast .toast-header strong,
+div[role="alert"].toast .toast-header strong,
+.toast.o_cc1 .toast-header strong {
+  font-family: var(--font-body, sans-serif) !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  color: #111111 !important;
+}
+
+.o_notification_fade .toast .toast-header .btn-close,
+div[role="alert"].toast .toast-header .btn-close,
+.toast.o_cc1 .toast-header .btn-close {
+  margin: 0 !important;
+  padding: 0.35rem !important;
+  opacity: 0.6 !important;
+  background-size: 0.85em !important;
+}
+
+.o_notification_fade .toast .toast-header .btn-close:hover,
+div[role="alert"].toast .toast-header .btn-close:hover {
+  opacity: 1 !important;
+}
+
+.o_notification_fade .toast .toast-body,
+div[role="alert"].toast .toast-body,
+.toast.o_cc1 .toast-body {
+  padding: 1.1rem !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+.o_notification_fade .toast .toast-body img,
+div[role="alert"].toast .toast-body img {
+  border-radius: 8px !important;
+  object-fit: cover !important;
+  border: 1px solid #e4d3ae !important;
+}
+
+.o_notification_fade .toast .toast-body a.btn-primary,
+div[role="alert"].toast .toast-body a.btn-primary,
+.toast.o_cc1 .toast-body a.btn-primary {
+  background: var(--color-black, #111111) !important;
+  border-color: var(--color-black, #111111) !important;
+  color: #ffffff !important;
+  border-radius: 999px !important;
+  padding: 0.6rem 1.2rem !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  display: block !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  margin-top: 0.75rem !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.2s ease !important;
+}
+
+.o_notification_fade .toast .toast-body a.btn-primary:hover,
+div[role="alert"].toast .toast-body a.btn-primary:hover,
+.toast.o_cc1 .toast-body a.btn-primary:hover {
+  background: var(--color-gold-dark, #b89d5d) !important;
+  border-color: var(--color-gold-dark, #b89d5d) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+}
+
 
 .back-to-top {
   position: fixed;
@@ -2817,17 +2932,8 @@ body.editor_enable .hero .reveal {
   padding-bottom: 100px !important;
 }
 
-/* Override product card container column spacing */
-.velora-shop-page #o_wsale_products_grid {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
-  gap: 2.5rem !important;
-}
-
-/* Disable default grid/layout wrappers and bootstrap flex columns on outer wrapper to allow CSS Grid */
+/* Allow Odoo default grid columns (ppr) customization while maintaining card spacing */
 .velora-shop-page #o_wsale_products_grid .oe_product {
-  grid-column: span 1 !important;
-  width: auto !important;
   padding: 0 !important;
   margin: 0 !important;
 }
@@ -3671,6 +3777,164 @@ body:has(.s_velora_confirmation) {
   justify-content: center !important;
   background-image: linear-gradient(135deg, #0b0b0c 0%, #1a1a1c 55%, #262019 100%) !important;
 }
+
+/* ============ CATEGORY HEADER & BREADCRUMBS ============ */
+.velora-category-header {
+  margin-bottom: 1.5rem !important;
+  padding-bottom: 0.5rem;
+}
+
+.velora-category-title {
+  font-family: var(--font-heading, serif);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 400;
+  color: var(--color-black, #111111);
+  line-height: 1.2;
+}
+
+.category-breadcrumb-wrap .breadcrumb-velora,
+.category-breadcrumb-wrap .breadcrumb {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 0.95rem !important;
+  color: #666666 !important;
+  background: transparent !important;
+}
+
+.category-breadcrumb-wrap .breadcrumb-item {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.category-breadcrumb-wrap .breadcrumb-item + .breadcrumb-item::before {
+  content: "/" !important;
+  padding: 0 0.5rem !important;
+  color: #999999 !important;
+}
+
+.category-breadcrumb-wrap .breadcrumb-item a {
+  color: #555555 !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease !important;
+}
+
+.category-breadcrumb-wrap .breadcrumb-item a:hover {
+  color: var(--color-gold-dark, #b89d5d) !important;
+}
+
+.category-breadcrumb-wrap .breadcrumb-item.active,
+.category-breadcrumb-wrap .breadcrumb-item span {
+  color: #888888 !important;
+}
+
+/* ============ MOBILE RESPONSIVE SHOP PRODUCT ALIGNMENT ============ */
+@media (max-width: 768px) {
+  /* Prevent horizontal card overflow and fix gap */
+  .velora-shop-page #o_wsale_products_grid .oe_product {
+    padding: 6px !important;
+  }
+
+  .product-card {
+    border-radius: var(--radius-md, 12px) !important;
+    overflow: hidden !important;
+  }
+
+  .product-info {
+    padding: 0.85rem 0.85rem 1rem !important;
+    gap: 0.25rem !important;
+  }
+
+  .product-brand {
+    font-size: 0.65rem !important;
+  }
+
+  .product-name {
+    font-size: 0.98rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .product-desc {
+    font-size: 0.75rem !important;
+    line-height: 1.25 !important;
+    margin-bottom: 0.2rem !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .product-rating {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .product-price-row {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.4rem !important;
+    margin-top: auto !important;
+  }
+
+  .price-group {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 0.4rem !important;
+    flex-wrap: wrap !important;
+  }
+
+  .price-current {
+    font-size: 1.05rem !important;
+  }
+
+  .price-original {
+    font-size: 0.8rem !important;
+  }
+
+  #wrapwrap .shop-add-cart-btn {
+    width: 100% !important;
+    padding: 0.45rem 0.6rem !important;
+    font-size: 0.7rem !important;
+    justify-content: center !important;
+    text-align: center !important;
+    white-space: normal !important;
+    line-height: 1.2 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Wishlist button on media container for mobile */
+  .wishlist-btn {
+    top: 8px !important;
+    right: 8px !important;
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.85rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .velora-shop-page #o_wsale_products_grid .oe_product {
+    padding: 4px !important;
+  }
+
+  .product-info {
+    padding: 0.75rem 0.75rem 0.9rem !important;
+  }
+
+  .product-name {
+    font-size: 0.9rem !important;
+  }
+
+  .price-current {
+    font-size: 1rem !important;
+  }
+}
+
+
 
 
 
