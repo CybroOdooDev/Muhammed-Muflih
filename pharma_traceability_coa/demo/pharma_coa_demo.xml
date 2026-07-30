@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================= -->
+    <!--  Certificate of Analysis — Demo Records                       -->
+    <!--  Mirrors the data visible in the COA form screenshots:        -->
+    <!--  Parameters: Appearance, Average Weight, Weight Variation,    -->
+    <!--  Hardness, Thickness, Friability, Disintegration, Dissolution,-->
+    <!--  Assay, Related Substances, Microbial Limit, Identification,  -->
+    <!--  Moisture, pH, Appearance (2nd)                               -->
+    <!-- ============================================================= -->
+
+    <!-- ── Demo Lot/Batch for Paracetamol 500 mg ─────────────────── -->
+    <record id="demo_lot_paracetamol_500_batch_001" model="stock.lot">
+        <field name="name">BATCH-2026-0001</field>
+        <field name="product_id"
+               ref="pharmaceutical_base.product_fg_paracetamol_500"/>
+        <field name="company_id" ref="base.main_company"/>
+    </record>
+
+    <!-- ── Demo Lot/Batch for Paracetamol 650 mg ─────────────────── -->
+    <record id="demo_lot_paracetamol_650_batch_002" model="stock.lot">
+        <field name="name">BATCH-2026-0002</field>
+        <field name="product_id"
+               ref="pharmaceutical_base.product_fg_paracetamol_650"/>
+        <field name="company_id" ref="base.main_company"/>
+    </record>
+
+    <!-- ============================================================= -->
+    <!--  COA Record 1 — Paracetamol 500 mg  (matches image 2/3)      -->
+    <!--  All parameters PASS except pH which is OOS                  -->
+    <!-- ============================================================= -->
+    <record id="demo_coa_paracetamol_500_001" model="pharma.coa">
+        <field name="name">COA/2026/00001</field>
+        <field name="product_id"
+               ref="pharmaceutical_base.product_fg_paracetamol_500"/>
+        <field name="lot_id"
+               ref="demo_lot_paracetamol_500_batch_001"/>
+        <field name="released_by" ref="base.user_admin"/>
+        <field name="release_date">2026-07-30 08:24:00</field>
+        <field name="is_locked">False</field>
+        <field name="coa_line_ids" eval="[
+            (0, 0, {'parameter': 'Appearance',        'expected_min': 0.0,   'expected_max': 0.0,   'actual_value': 0.0,   'uom': '',    'status': 'pass'}),
+            (0, 0, {'parameter': 'Average Weight',    'expected_min': 620.0, 'expected_max': 650.0, 'actual_value': 635.0, 'uom': 'mg',  'status': 'pass'}),
+            (0, 0, {'parameter': 'Weight Variation',  'expected_min': 0.0,   'expected_max': 0.0,   'actual_value': 0.0,   'uom': '',    'status': 'pass'}),
+            (0, 0, {'parameter': 'Hardness',          'expected_min': 60.0,  'expected_max': 90.0,  'actual_value': 80.0,  'uom': 'N',   'status': 'pass'}),
+            (0, 0, {'parameter': 'Thickness',         'expected_min': 4.8,   'expected_max': 5.3,   'actual_value': 5.0,   'uom': 'mm',  'status': 'pass'}),
+            (0, 0, {'parameter': 'Friability',        'expected_min': 0.0,   'expected_max': 1.0,   'actual_value': 1.0,   'uom': '%',   'status': 'pass'}),
+            (0, 0, {'parameter': 'Disintegration',    'expected_min': 0.0,   'expected_max': 15.0,  'actual_value': 10.0,  'uom': 'min', 'status': 'pass'}),
+            (0, 0, {'parameter': 'Dissolution',       'expected_min': 80.0,  'expected_max': 100.0, 'actual_value': 90.0,  'uom': '%',   'status': 'pass'}),
+            (0, 0, {'parameter': 'Assay',             'expected_min': 95.0,  'expected_max': 105.0, 'actual_value': 100.0, 'uom': '%',   'status': 'pass'}),
+            (0, 0, {'parameter': 'Related Substances','expected_min': 0.0,   'expected_max': 0.0,   'actual_value': 0.0,   'uom': '',    'status': 'pass'}),
+            (0, 0, {'parameter': 'Microbial Limit',   'expected_min': 0.0,   'expected_max': 0.0,   'actual_value': 0.0,   'uom': '',    'status': 'pass'}),
+            (0, 0, {'parameter': 'Identification',    'expected_min': 0.0,   'expected_max': 0.0,   'actual_value': 0.0,   'uom': '',    'status': 'pass'}),
+            (0, 0, {'parameter': 'Moisture',          'expected_min': 0.0,   'expected_max': 5.0,   'actual_value': 4.0,   'uom': '%',   'status': 'pass'}),
+            (0, 0, {'parameter': 'pH',                'expected_min': 4.5,   'expected_max': 7.5,   'actual_value': 4.0,   'uom': '',    'status': 'oos'}),
+            (0, 0, {'parameter': 'Appearance',        'expected_min': 0.0,   'expected_max': 0.0,   'actual_value': 0.0,   'uom': '',    'status': 'pass'}),
+        ]"/>
+    </record>
+
+    <!-- ============================================================= -->
+    <!--  COA Record 2 — Paracetamol 650 mg  (second demo record)     -->
+    <!--  All parameters PASS — no OOS                                 -->
+    <!-- ============================================================= -->
+    <record id="demo_coa_paracetamol_650_002" model="pharma.coa">
+        <field name="name">COA/2026/00002</field>
+        <field name="product_id"
+               ref="pharmaceutical_base.product_fg_paracetamol_650"/>
+        <field name="lot_id"
+               ref="demo_lot_paracetamol_650_batch_002"/>
+        <field name="released_by" ref="base.user_admin"/>
+        <field name="release_date">2026-07-30 09:10:00</field>
+        <field name="is_locked">False</field>
+        <field name="coa_line_ids" eval="[
+            (0, 0, {'parameter': 'Appearance',        'expected_min': 0.0,   'expected_max': 0.0,   'actual_value': 0.0,   'uom': '',    'status': 'pass'}),
+            (0, 0, {'parameter': 'Average Weight',    'expected_min': 780.0, 'expected_max': 820.0, 'actual_value': 800.0, 'uom': 'mg',  'status': 'pass'}),
+            (0, 0, {'parameter': 'Weight Variation',  'expected_min': 0.0,   'expected_max': 0.0,   'actual_value': 0.0,   'uom': '',    'status': 'pass'}),
+            (0, 0, {'parameter': 'Hardness',          'expected_min': 70.0,  'expected_max': 110.0, 'actual_value': 90.0,  'uom': 'N',   'status': 'pass'}),
+            (0, 0, {'parameter': 'Thickness',         'expected_min': 5.6,   'expected_max': 6.2,   'actual_value': 5.9,   'uom': 'mm',  'status': 'pass'}),
+            (0, 0, {'parameter': 'Friability',        'expected_min': 0.0,   'expected_max': 1.0,   'actual_value': 0.5,   'uom': '%',   'status': 'pass'}),
+            (0, 0, {'parameter': 'Disintegration',    'expected_min': 0.0,   'expected_max': 15.0,  'actual_value': 12.0,  'uom': 'min', 'status': 'pass'}),
+            (0, 0, {'parameter': 'Dissolution',       'expected_min': 80.0,  'expected_max': 100.0, 'actual_value': 88.0,  'uom': '%',   'status': 'pass'}),
+            (0, 0, {'parameter': 'Assay',             'expected_min': 95.0,  'expected_max': 105.0, 'actual_value': 98.5,  'uom': '%',   'status': 'pass'}),
+            (0, 0, {'parameter': 'Related Substances','expected_min': 0.0,   'expected_max': 0.0,   'actual_value': 0.0,   'uom': '',    'status': 'pass'}),
+            (0, 0, {'parameter': 'Microbial Limit',   'expected_min': 0.0,   'expected_max': 0.0,   'actual_value': 0.0,   'uom': '',    'status': 'pass'}),
+            (0, 0, {'parameter': 'Identification',    'expected_min': 0.0,   'expected_max': 0.0,   'actual_value': 0.0,   'uom': '',    'status': 'pass'}),
+            (0, 0, {'parameter': 'Moisture',          'expected_min': 0.0,   'expected_max': 5.5,   'actual_value': 3.0,   'uom': '%',   'status': 'pass'}),
+            (0, 0, {'parameter': 'pH',                'expected_min': 4.5,   'expected_max': 7.5,   'actual_value': 6.2,   'uom': '',    'status': 'pass'}),
+            (0, 0, {'parameter': 'Appearance',        'expected_min': 0.0,   'expected_max': 0.0,   'actual_value': 0.0,   'uom': '',    'status': 'pass'}),
+        ]"/>
+    </record>
+
+</odoo>
