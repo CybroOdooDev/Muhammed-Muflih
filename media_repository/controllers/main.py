@@ -1,3 +1,24 @@
+# -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cybrosys Technologies Pvt. Ltd.
+#
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import hashlib
 import os
 import shutil
@@ -16,7 +37,6 @@ class MediaAssetUploadController(http.Controller):
     without causing MemoryError in the Odoo server.
     """
 
-    # 53687091200 bytes = 50 GB limit
     @http.route('/media_repository/asset/upload_file', type='http', auth='user', methods=['POST'], max_content_length=53687091200)
     def upload_media_asset_file(self, model, id, ufile, **kwargs):
         if model != 'media.asset':
@@ -46,16 +66,13 @@ class MediaAssetUploadController(http.Controller):
         ])
         attachments.unlink()
 
-        # Stream the uploaded file directly to a temporary file on disk 
-        # instead of reading everything into memory (ufile.read())
+
         filestore_path = tools.config.filestore(request.env.cr.dbname)
         temp_path = os.path.join(filestore_path, f'tmp_upload_{asset.id}')
-        
-        # Save Werkzeug FileStorage spooled file to our temp file
+
         with open(temp_path, 'wb') as f:
             uploaded_file.save(f)
 
-        # Calculate SHA1 and File Size safely in chunks
         sha1 = hashlib.sha1()
         file_size = 0
         with open(temp_path, 'rb') as f:
@@ -68,7 +85,6 @@ class MediaAssetUploadController(http.Controller):
 
         checksum = sha1.hexdigest()
 
-        # Move it to the proper Odoo filestore path format (sha[:2]/sha)
         final_dir = os.path.join(filestore_path, checksum[:2])
         os.makedirs(final_dir, exist_ok=True)
         final_path = os.path.join(final_dir, checksum)
@@ -78,7 +94,6 @@ class MediaAssetUploadController(http.Controller):
         else:
             shutil.move(temp_path, final_path)
 
-        # Create an empty attachment record first
         attachment = request.env['ir.attachment'].sudo().create({
             'name': filename,
             'res_model': 'media.asset',
@@ -87,9 +102,7 @@ class MediaAssetUploadController(http.Controller):
             'type': 'binary',
         })
         
-        # Manually update the attachment record with the filestore info via SQL,
-        # bypassing the ORM's memory checks for raw fields.
-        # Cap file_size to PostgreSQL integer max to prevent 'integer out of range' errors
+
         safe_file_size = min(file_size, 2147483647)
         store_fname = f"{checksum[:2]}/{checksum}"
         request.env.cr.execute("""

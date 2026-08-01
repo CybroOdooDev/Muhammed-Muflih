@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Large File Binary Field Template
+     Handles file upload, download, clear, and preview for media repository assets. -->
 <templates xml:space="preserve">
     <t t-name="media_repository.LargeFileBinaryField">
         <t t-if="!props.readonly">
