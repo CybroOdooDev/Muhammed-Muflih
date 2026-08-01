@@ -1,28 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-     <!--  FORM VIEW-->
-    <record id="media_category_view_form" model="ir.ui.view">
-        <field name="name">media.category.form</field>
-        <field name="model">media.category</field>
-        <field name="arch" type="xml">
-            <form string="Media Category">
-                <sheet>
-                    <group>
-                       <field name="name" placeholder="Media Name…"/>
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
-
-
      <!--LIST VIEW-->
     <record id="media_category_view_list" model="ir.ui.view">
         <field name="name">media.category.list</field>
         <field name="model">media.category</field>
         <field name="arch" type="xml">
-            <tree string="Media Category">
+            <tree string="Media Category" editable="bottom">
                 <field name="name"/>
             </tree>
         </field>
@@ -39,12 +22,11 @@
     </record>
 
 
-
+      <!--MENU-->
      <menuitem id="menu_media_category"
               name="Media Category"
-              parent="media_repository_root_menu"
-              action="media_category_action"
-              sequence="11"/>
+              parent="menu_media_repository_configuration"
+              action="media_category_action"/>
 </odoo>
 
 

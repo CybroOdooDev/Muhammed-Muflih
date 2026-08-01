@@ -1,8 +1,8 @@
-## Module <hr_payroll_community>
+## Module <media_repository>
 
-#### 30.06.2026
+#### 1.07.2026
 #### Version 17.0.1.0.0
 #### ADD
-- Initial commit for Odoo19 media repository
+- Initial commit for Odoo17 media repository
 
 

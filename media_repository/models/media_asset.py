@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-#############################################################################
+###############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
-#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
-#    Author: Muhammed Muflih c(odoo@cybrosys.com)
+#
+#    Copyright (C) 2024-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
 #    You can modify it under the terms of the GNU LESSER
 #    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
@@ -17,7 +18,7 @@
 #    (LGPL v3) along with this program.
 #    If not, see <http://www.gnu.org/licenses/>.
 #
-#############################################################################
+###############################################################################
 from odoo import api, fields, models
 
 class MediaAsset(models.Model):
@@ -108,7 +109,16 @@ class MediaAsset(models.Model):
                     ('res_field', '=', 'file'),
                     ('res_id', '=', rec.id),
                 ], limit=1)
-                rec.file_size = (attachment.file_size or 0) / (1024.0 * 1024.0)
+                
+                real_size = attachment.file_size or 0
+                if real_size == 2147483647 and attachment.store_fname:
+                    import os
+                    try:
+                        real_size = os.path.getsize(attachment._full_path(attachment.store_fname))
+                    except Exception:
+                        pass
+                
+                rec.file_size = real_size / (1024.0 * 1024.0)
             else:
                 rec.file_size = 0.0
 

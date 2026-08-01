@@ -53,7 +53,7 @@
                     </group>
 
                     <group string="Upload" >
-                        <field name="file" filename="file_name" widget="binary" invisible="source_type =='url' or not source_type" readonly="state in 'confirmed'"/>
+                        <field name="file" filename="file_name" widget="media_large_file" invisible="source_type =='url' or not source_type" readonly="state in 'confirmed'"/>
                         <field name="source_url" widget="url" placeholder="https://…" invisible="source_type =='file' or not source_type " readonly="state in 'confirmed'"/>
                         <field name="file_name" invisible="source_type =='url' or not source_type" readonly="state in 'confirmed'"/>
                         <field name="file_size" invisible="source_type =='url' or not source_type" readonly="state in 'confirmed'"/>
@@ -71,7 +71,6 @@
 
 
       <!-- KANBAN VIEW -->
-
     <record id="media_asset_view_kanban" model="ir.ui.view">
         <field name="name">media.asset.kanban</field>
         <field name="model">media.asset</field>
@@ -172,16 +171,20 @@
         </field>
     </record>
 
-
-
     <!--MENU ITEMS-->
     <menuitem id="media_repository_root_menu"
               name="Media Repository"
-              sequence="10"/>
+              web_icon="media_repository,static/description/icon.png"
+              sequence="11"/>
+
+     <menuitem id="menu_media_repository_configuration"
+              name="Configuration"
+              parent="media_repository_root_menu"
+              sequence="20"/>
 
     <menuitem id="menu_media_assets"
               name="Media Assets"
               parent="media_repository_root_menu"
               action="media_asset_action"
-              sequence="10"/>
+              sequence="11"/>
 </odoo>
