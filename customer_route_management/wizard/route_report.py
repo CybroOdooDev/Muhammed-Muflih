@@ -127,7 +127,7 @@ class RouteReport(models.TransientModel):
                     i += 1
                     if data['payment']:
                         total = 0.0
-                        for dues in v.get_all_dues():
+                        for dues in v.get_all_dues(o.company_id.id):
                             total += dues['amount_residual_signed']
                             if not data['consolidated']:
                                 sheet.merge_range(

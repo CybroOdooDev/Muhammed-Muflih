@@ -26,20 +26,24 @@ class ResPartner(models.Model):
     """This class inherits model 'res.partner' and adds fields"""
     _inherit = 'res.partner'
     _order = 'sequence'
-    _check_company_auto = True
 
-    location_id = fields.Many2one('route.line', string='Location',
-                                  help="Location of route.")
+    location_id = fields.Many2one(
+        'route.line',
+        string='Location',
+        domain="[('company_id', 'in', [False, current_company_id])]",
+        help="Location of route. Filtered by the currently active company.")
     sequence = fields.Integer(default=10)
 
-    def get_all_dues(self):
+    def get_all_dues(self, company_id=None):
         """This function gives all the dues and invoices details
         of selected customer"""
+        company_id = company_id or self.env.company.id
         query = """select name, invoice_date_due, amount_residual_signed
                 from account_move where partner_id in
                 (select id from res_partner where id = %s or parent_id = %s)
                 and state = 'posted' and amount_residual_signed != 0
+                and company_id = %s
                 order by create_date"""
-        self.env.cr.execute(query, [self.id, self.id])
+        self.env.cr.execute(query, (self.id, self.id, company_id))
         dues = self.env.cr.dictfetchall()
         return dues

@@ -51,7 +51,7 @@
                                                 <span t-esc="v.email"/>
                                             </th>
                                         </tr>
-                                        <t t-set="dues_list" t-value="v.get_all_dues()"/>
+                                        <t t-set="dues_list" t-value="v.get_all_dues(o.company_id.id)"/>
                                         <t t-if="dues_list">
                                             <tr style="border:2px solid white; border-bottom:2px solid black;">
                                                 <td/>

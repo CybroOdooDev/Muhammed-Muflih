@@ -6,6 +6,9 @@ class TestCustomerRouteManagement(AccountTestInvoicingCommon):
     def setUpClass(cls):
         super().setUpClass()
 
+        cls.env.user.groups_id += cls.env.ref(
+            "customer_route_management.group_delivery_route_manager"
+        )
         cls.delivery_route = cls.env["delivery.route"].create({
             "name": "North Route",
         })
@@ -67,3 +70,30 @@ class TestCustomerRouteManagement(AccountTestInvoicingCommon):
             {due["amount_residual_signed"] for due in dues},
             {100.0, 50.0},
         )
+
+    def test_get_all_dues_multi_company(self):
+        other_company = self.env["res.company"].create({"name": "Other Company"})
+        current_inv = self.init_invoice(
+            move_type="out_invoice",
+            partner=self.partner_a,
+            amounts=[100.0],
+            post=True,
+            company=self.env.company,
+        )
+        other_inv = self.init_invoice(
+            move_type="out_invoice",
+            partner=self.partner_a,
+            amounts=[200.0],
+            post=True,
+            company=other_company,
+        )
+        dues_current = self.partner_a.get_all_dues(self.env.company.id)
+        due_names_current = {due["name"] for due in dues_current}
+        self.assertIn(current_inv.name, due_names_current)
+        self.assertNotIn(other_inv.name, due_names_current)
+
+        dues_other = self.partner_a.get_all_dues(other_company.id)
+        due_names_other = {due["name"] for due in dues_other}
+        self.assertIn(other_inv.name, due_names_other)
+        self.assertNotIn(current_inv.name, due_names_other)
+

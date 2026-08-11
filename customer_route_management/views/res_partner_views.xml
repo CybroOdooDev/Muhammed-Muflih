@@ -11,7 +11,8 @@
             <page name="sales_purchases" position="inside">
                 <group string="Locations">
                     <group>
-                        <field name="location_id"/>
+                        <field name="location_id"
+                               domain="[('company_id', 'in', [False, current_company_id])]"/>
                         <field name="sequence" invisible="1"/>
                     </group>
                 </group>

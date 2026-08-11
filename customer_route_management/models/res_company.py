@@ -19,7 +19,13 @@
 #    THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 ###############################################################################
-from . import delivery_route
-from . import res_partner
-from . import route_line
-from . import res_company
+from odoo import  fields, models
+
+class ResCompany(models.Model):
+    _inherit = "res.company"
+
+    # location_id = fields.Many2one(
+    #     'route.line',
+    #     string='Location',
+    #     readonly=True,
+    #     help="Location of route. Filtered by the currently active company.")
