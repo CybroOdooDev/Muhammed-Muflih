@@ -4,7 +4,7 @@
 #    Cybrosys Technologies Pvt. Ltd.
 #
 #    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
-#    Author: Henna Mehjabin (odoo@cybrosys.com)
+#    Author:Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
 #    This program is under the terms of the Odoo Proprietary License v1.0
 #    (OPL-1) It is forbidden to publish, distribute, sublicense, or
@@ -22,4 +22,4 @@
 from . import delivery_route
 from . import res_partner
 from . import route_line
-from . import res_company
+
