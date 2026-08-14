@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="mobile_service_d1bbe8b7-8cd7-4579-94b4-f28ea13d214a" model="ir.ui.menu" context="{'studio': True}">
+    <field name="name">Mobile Service</field>
+    <field name="web_icon">fa fa-mobile-phone,#00CEB3,#FFFFFF</field>
+  </record>
+  <record id="mobile_service_repai_227942a9-f5a4-40f3-b012-8ddeb5e523d3" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="repair_request_ac5f9b1c-ad5f-4e1a-9f17-2ae6a567dae4"/>
+    <field name="name">Repair Request</field>
+    <field name="parent_id" ref="mobile_service_d1bbe8b7-8cd7-4579-94b4-f28ea13d214a"/>
+    <field name="sequence">1</field>
+  </record>
+  <record id="mobile_service_confi_ed81d464-8457-4081-b86f-f2f6547d08a8" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="base.action_open_website"/>
+    <field name="name">Configuration</field>
+    <field name="parent_id" ref="mobile_service_d1bbe8b7-8cd7-4579-94b4-f28ea13d214a"/>
+    <field name="sequence">5</field>
+  </record>
+  <record id="mobile_service_brand_150f1104-8b86-45fb-a5b1-429dc3b9aa59" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="brand_3d87cae9-48aa-403c-817e-a6cd65f075cd"/>
+    <field name="name">Brand</field>
+    <field name="parent_id" ref="mobile_service_confi_ed81d464-8457-4081-b86f-f2f6547d08a8"/>
+    <field name="sequence">1</field>
+  </record>
+  <record id="mobile_service_model_37ddb39e-627b-42e6-952e-3f81eb9eecd6" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="models_43254792-26b7-44f6-ae98-484244677189"/>
+    <field name="name">Models</field>
+    <field name="parent_id" ref="mobile_service_confi_ed81d464-8457-4081-b86f-f2f6547d08a8"/>
+    <field name="sequence">2</field>
+  </record>
+  <record id="mobile_service_compl_83589893-b84c-4dc8-b976-27a341a640cd" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="complaint_type_e5b66efc-e68a-4305-94f3-a33944cbcf44"/>
+    <field name="name">Complaint Type</field>
+    <field name="parent_id" ref="mobile_service_confi_ed81d464-8457-4081-b86f-f2f6547d08a8"/>
+    <field name="sequence">3</field>
+  </record>
+  <record id="mobile_service_compl_e867b5d0-f1d4-4948-a622-714bf43de64a" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="complaint_template_99c0dfb9-156a-44b0-99d6-bffe493813c1"/>
+    <field name="name">Complaint  Template</field>
+    <field name="parent_id" ref="mobile_service_confi_ed81d464-8457-4081-b86f-f2f6547d08a8"/>
+    <field name="sequence">4</field>
+  </record>
+  <record id="mobile_service_parts_40d7ee7c-8dbe-45b3-9e8a-8619a1dbb535" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="parts_25483a02-bb3c-4bdb-933b-80a637655687"/>
+    <field name="name">Parts</field>
+    <field name="parent_id" ref="mobile_service_d1bbe8b7-8cd7-4579-94b4-f28ea13d214a"/>
+    <field name="sequence">2</field>
+  </record>
+  <record id="mobile_service_acces_23fdc689-4f34-4725-8287-6540ff7463c9" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="accessories_549f58b6-f5b3-4641-88e3-e8a2e228ca7b"/>
+    <field name="name">Accessories</field>
+    <field name="parent_id" ref="mobile_service_d1bbe8b7-8cd7-4579-94b4-f28ea13d214a"/>
+    <field name="sequence">3</field>
+  </record>
+  <record id="mobile_service_recei_8d864a79-2172-4eb1-a507-244b83881e31" model="ir.ui.menu" context="{'studio': True}">
+    <field name="action" ref="received_items_da43b579-854e-4761-8c7c-67436f59eb8b"/>
+    <field name="name">Received Items</field>
+    <field name="parent_id" ref="mobile_service_d1bbe8b7-8cd7-4579-94b4-f28ea13d214a"/>
+    <field name="sequence">4</field>
+  </record>
+</odoo>

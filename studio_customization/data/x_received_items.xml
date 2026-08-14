@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo noupdate="1">
+  <record id="x_received_items_1" model="x_received_items">
+    <field name="x_name">Phone Case</field>
+    <field name="x_studio_item_picture" type="bytes" file="studio_customization/static/src/binary/x_received_items/1-x_studio_item_picture"/>
+  </record>
+  <record id="x_received_items_2" model="x_received_items">
+    <field name="x_name">Charger</field>
+  </record>
+</odoo>

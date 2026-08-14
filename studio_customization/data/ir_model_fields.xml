@@ -1,0 +1,724 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="description_repair_r_2f739560-c713-4c2b-89e7-e23e51954563" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Description</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_name</field>
+    <field name="on_delete" eval="False"/>
+    <field name="required" eval="True"/>
+    <field name="tracking">1</field>
+    <field name="translate">standard</field>
+  </record>
+  <record id="active_repair_reques_476a1d56-05af-4344-a7a2-058113867083" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">boolean</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Active</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_active</field>
+    <field name="on_delete" eval="False"/>
+    <field name="tracking">1</field>
+  </record>
+  <record id="responsible_repair_r_cf82cfdd-c75d-4796-9a36-5b4268baef06" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="domain">[('share', '=', False)]</field>
+    <field name="field_description">Technician</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_user_id</field>
+    <field name="relation">res.users</field>
+    <field name="tracking">1</field>
+  </record>
+  <record id="contact_repair_reque_43765a05-04a3-4c20-9422-dbb489388788" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Contact</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_partner_id</field>
+    <field name="relation">res.partner</field>
+    <field name="tracking">1</field>
+  </record>
+  <record id="phone_repair_request_555ee6bd-2dcc-45c9-994b-a022b0cb1f4c" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="related">x_studio_partner_id.phone</field>
+    <field name="field_description">Phone</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_partner_phone</field>
+    <field name="on_delete" eval="False"/>
+    <field name="tracking">2</field>
+  </record>
+  <record id="email_repair_request_2116d791-75a4-4f2b-9df3-e1b8eea60f53" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="related">x_studio_partner_id.email</field>
+    <field name="field_description">Email</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_partner_email</field>
+    <field name="on_delete" eval="False"/>
+    <field name="tracking">1</field>
+  </record>
+  <record id="image_repair_request_6ab1108f-2217-4c4e-af2e-68644f660a2a" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">binary</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Image</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_image</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="sequence_repair_requ_6c7291ef-ce29-4f51-8699-ed571f6c63f6" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">integer</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Sequence</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_sequence</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="description_brand_25dfa75b-0a8b-431e-9938-c83a013bc2ab" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Description</field>
+    <field name="model">x_brand</field>
+    <field name="model_id" ref="brand_a44add05-0049-429f-be04-b0228004478f"/>
+    <field name="name">x_name</field>
+    <field name="on_delete" eval="False"/>
+    <field name="required" eval="True"/>
+    <field name="translate">standard</field>
+  </record>
+  <record id="active_brand_8e68d35a-ac8e-4b2c-a0cb-4b2b7b0bdf2c" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">boolean</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Active</field>
+    <field name="model">x_brand</field>
+    <field name="model_id" ref="brand_a44add05-0049-429f-be04-b0228004478f"/>
+    <field name="name">x_active</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="sequence_brand_922bc3fc-ef20-494d-981b-6c4055f5e893" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">integer</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Sequence</field>
+    <field name="model">x_brand</field>
+    <field name="model_id" ref="brand_a44add05-0049-429f-be04-b0228004478f"/>
+    <field name="name">x_studio_sequence</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="description_models_7b87f458-d9d6-47f4-add1-9a5a51771702" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Model Name</field>
+    <field name="model">x_models</field>
+    <field name="model_id" ref="models_a6d6a78b-3f7f-40f5-a486-9a0f5f42c574"/>
+    <field name="name">x_name</field>
+    <field name="on_delete" eval="False"/>
+    <field name="required" eval="True"/>
+    <field name="tracking">1</field>
+    <field name="translate">standard</field>
+  </record>
+  <record id="active_models_2e3fadb7-f462-4231-8ebe-5bf46ee3d494" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">boolean</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Active</field>
+    <field name="model">x_models</field>
+    <field name="model_id" ref="models_a6d6a78b-3f7f-40f5-a486-9a0f5f42c574"/>
+    <field name="name">x_active</field>
+    <field name="on_delete" eval="False"/>
+    <field name="tracking">1</field>
+  </record>
+  <record id="image_models_2f13a942-84be-4b22-8906-3161c192e1f9" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">binary</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Image</field>
+    <field name="model">x_models</field>
+    <field name="model_id" ref="models_a6d6a78b-3f7f-40f5-a486-9a0f5f42c574"/>
+    <field name="name">x_studio_image</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="sequence_models_6db1a621-a050-42f3-a800-1b4631490d22" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">integer</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Sequence</field>
+    <field name="model">x_models</field>
+    <field name="model_id" ref="models_a6d6a78b-3f7f-40f5-a486-9a0f5f42c574"/>
+    <field name="name">x_studio_sequence</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_many2one_models_6ee8aa0f-6184-4667-ae63-956616d771b3" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Brand</field>
+    <field name="model">x_models</field>
+    <field name="model_id" ref="models_a6d6a78b-3f7f-40f5-a486-9a0f5f42c574"/>
+    <field name="name">x_studio_many2one_1</field>
+    <field name="relation">x_brand</field>
+  </record>
+  <record id="description_complain_a0738c19-e9ac-4a28-ad23-f742cddfc19a" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Complaint Type</field>
+    <field name="model">x_complaint_type</field>
+    <field name="model_id" ref="complaint_type_0daa4046-3e30-438e-a9f9-f918d0283de5"/>
+    <field name="name">x_name</field>
+    <field name="on_delete" eval="False"/>
+    <field name="required" eval="True"/>
+    <field name="translate">standard</field>
+  </record>
+  <record id="active_complaint_typ_d113d551-1243-4169-910c-9581a9d6c790" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">boolean</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Active</field>
+    <field name="model">x_complaint_type</field>
+    <field name="model_id" ref="complaint_type_0daa4046-3e30-438e-a9f9-f918d0283de5"/>
+    <field name="name">x_active</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="sequence_complaint_t_058cd2e3-0b76-4c93-a46e-3df3b333029a" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">integer</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Sequence</field>
+    <field name="model">x_complaint_type</field>
+    <field name="model_id" ref="complaint_type_0daa4046-3e30-438e-a9f9-f918d0283de5"/>
+    <field name="name">x_studio_sequence</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="description_complain_ec9bf41c-ad6f-4867-a7ac-c53a51265a7e" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Description</field>
+    <field name="model">x_complaint_template</field>
+    <field name="model_id" ref="complaint_template_88b492ee-b9ca-4b1c-8338-9935d882e7af"/>
+    <field name="name">x_name</field>
+    <field name="on_delete" eval="False"/>
+    <field name="tracking">1</field>
+    <field name="translate">standard</field>
+  </record>
+  <record id="active_complaint_tem_1aac4590-819e-4dc8-a901-05b0568b777f" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">boolean</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Active</field>
+    <field name="model">x_complaint_template</field>
+    <field name="model_id" ref="complaint_template_88b492ee-b9ca-4b1c-8338-9935d882e7af"/>
+    <field name="name">x_active</field>
+    <field name="on_delete" eval="False"/>
+    <field name="tracking">1</field>
+  </record>
+  <record id="sequence_complaint_t_872fb83c-1b0a-4dc9-b9c9-6f923e843771" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">integer</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Sequence</field>
+    <field name="model">x_complaint_template</field>
+    <field name="model_id" ref="complaint_template_88b492ee-b9ca-4b1c-8338-9935d882e7af"/>
+    <field name="name">x_studio_sequence</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_many2one_complai_0eeb9a2e-3b06-4eb6-a881-4f7122f6de97" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Complaint Type</field>
+    <field name="model">x_complaint_template</field>
+    <field name="model_id" ref="complaint_template_88b492ee-b9ca-4b1c-8338-9935d882e7af"/>
+    <field name="name">x_studio_complaint_type</field>
+    <field name="relation">x_complaint_type</field>
+  </record>
+  <record id="new_checkbox_product_e7654b8c-7bcb-4729-8254-ad4e783d5bd0" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">boolean</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Parts</field>
+    <field name="model">product.template</field>
+    <field name="model_id" ref="product.model_product_template"/>
+    <field name="name">x_studio_parts</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_checkbox_product_09125786-1c5b-4bef-a3fd-38e028e441fa" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">boolean</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Accessories</field>
+    <field name="model">product.template</field>
+    <field name="model_id" ref="product.model_product_template"/>
+    <field name="name">x_studio_accessories</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_many2one_product_6d4f93dd-60d7-44d1-97f0-fa0e1a1e6aa0" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Brand</field>
+    <field name="model">product.template</field>
+    <field name="model_id" ref="product.model_product_template"/>
+    <field name="name">x_studio_brand</field>
+    <field name="relation">x_brand</field>
+  </record>
+  <record id="new_many2one_product_0f73ca3b-40de-47fc-9944-31e3a9ef4fdb" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Model</field>
+    <field name="model">product.template</field>
+    <field name="model_id" ref="product.model_product_template"/>
+    <field name="name">x_studio_model</field>
+    <field name="relation">x_models</field>
+  </record>
+  <record id="new_text_product_b3b24177-d8dd-4e51-b46f-d3392f4aac5f" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Color</field>
+    <field name="model">product.template</field>
+    <field name="model_id" ref="product.model_product_template"/>
+    <field name="name">x_studio_color</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_text_product_86e648c2-82d9-41b0-a1c5-fd554b7bd816" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Note</field>
+    <field name="model">product.template</field>
+    <field name="model_id" ref="product.model_product_template"/>
+    <field name="name">x_studio_note</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_integer_repair_r_bd82c3ff-ba3a-4a70-a739-5cd59a00833b" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">integer</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">IMEI Number</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_imei_number</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_integer_repair_r_21a37821-d917-4ff4-b23f-22eaa0673a0b" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">integer</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Warranty No:</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_warranty_no</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_text_repair_requ_ec632dc5-e766-4a34-84c6-94d2ec9e19c6" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Internal Note</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_internal_note</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="sequence_repair_requ_ab137694-95ff-47ad-889b-406f14934a2f" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">integer</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Sequence</field>
+    <field name="model">x_repair_request_line_428b3</field>
+    <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
+    <field name="name">x_studio_sequence</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="description_repair_r_42d597cb-83cf-4593-bfc0-98f5376ca9d2" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Description</field>
+    <field name="model">x_repair_request_line_428b3</field>
+    <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
+    <field name="name">x_name</field>
+    <field name="on_delete" eval="False"/>
+    <field name="translate">standard</field>
+  </record>
+  <record id="repair_request_line_64625b2d-d6fd-4b2a-844e-aa448cafa727" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">X Repair Request</field>
+    <field name="model">x_repair_request_line_428b3</field>
+    <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
+    <field name="name">x_repair_request_id</field>
+    <field name="relation">x_repair_request</field>
+  </record>
+  <record id="new_lines_repair_req_f66fab20-3a2b-46f5-8879-0b5a5c2bcf2d" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">one2many</field>
+    <field name="field_description">New Lines</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_one2many_1</field>
+    <field name="on_delete" eval="False"/>
+    <field name="relation">x_repair_request_line_428b3</field>
+    <field name="relation_field">x_repair_request_id</field>
+  </record>
+  <record id="new_many2one_repair__17be71a4-84b6-4b04-85c4-892ff5cceffc" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Parts</field>
+    <field name="model">x_repair_request_line_428b3</field>
+    <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
+    <field name="name">x_studio_products_id</field>
+    <field name="relation">product.template</field>
+  </record>
+  <record id="new_decimal_repair_r_3fcb95e7-fe6a-47b2-b1e1-0fdb536b0dae" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">float</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Quantity</field>
+    <field name="model">x_repair_request_line_428b3</field>
+    <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
+    <field name="name">x_studio_quantity</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="currency_repair_requ_d0015dc8-5483-44a9-abdf-fadbf6196a7a" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Currency</field>
+    <field name="model">x_repair_request_line_428b3</field>
+    <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
+    <field name="name">x_studio_currency_id</field>
+    <field name="relation">res.currency</field>
+  </record>
+  <record id="products_copy_repair_ec1c6035-7583-40cd-86a5-c1ae52b770de" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="related">x_studio_products_id</field>
+    <field name="field_description">Products (Copy)</field>
+    <field name="model">x_repair_request_line_428b3</field>
+    <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
+    <field name="name">x_studio_related_x_studio_products_id_1</field>
+    <field name="readonly" eval="True"/>
+    <field name="relation">product.template</field>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="sales_price_repair_r_ae5b5d2b-e38e-42ef-aee7-16d686aebf3f" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">float</field>
+    <field name="related">x_studio_products_id.list_price</field>
+    <field name="field_description">Sales Price</field>
+    <field name="model">x_repair_request_line_428b3</field>
+    <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
+    <field name="name">x_studio_related_list_price_1</field>
+    <field name="on_delete" eval="False"/>
+    <field name="readonly" eval="True"/>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="brand_repair_request_246304e6-5d99-4c2f-a57a-2e33a96616a6" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="related">x_studio_products_id.x_studio_brand</field>
+    <field name="field_description">Brand</field>
+    <field name="model">x_repair_request_line_428b3</field>
+    <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
+    <field name="name">x_studio_related_x_studio_brand_1</field>
+    <field name="readonly" eval="True"/>
+    <field name="relation">x_brand</field>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="model_repair_request_6a3bf445-1ff0-43c0-9a75-a02a92c50070" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="related">x_studio_products_id.x_studio_model</field>
+    <field name="field_description">Model</field>
+    <field name="model">x_repair_request_line_428b3</field>
+    <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
+    <field name="name">x_studio_related_x_studio_model_1</field>
+    <field name="readonly" eval="True"/>
+    <field name="relation">x_models</field>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="new_decimal_repair_r_51d70943-078f-43a8-a7c2-bb03341e051c" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">float</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Sub Total</field>
+    <field name="model">x_repair_request_line_428b3</field>
+    <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
+    <field name="name">x_studio_sub_total</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_decimal_repair_r_d19551fc-6b28-4b68-955a-2ba299eaa883" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">float</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">parts_total</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_parts_total</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_selection_repair_e677b5fa-b875-4a89-a1b7-a5c7aada3dcf" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">selection</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">request state</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_selection_1</field>
+    <field name="on_delete" eval="False"/>
+    <field name="selection">[('Draft', 'Draft'), ('Confirm', 'Assigned'), ('Start', 'Start'), ('Completed', 'Completed')]</field>
+  </record>
+  <record id="sequence_repair_requ_97503ecb-07b8-4b05-af56-5c5873cd89c1" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">integer</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Sequence</field>
+    <field name="model">x_repair_request_line_d1167</field>
+    <field name="model_id" ref="repair_request_line_2f3bc908-65ae-460c-aa29-8b62ea9c5fc6"/>
+    <field name="name">x_studio_sequence</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="description_repair_r_85bfcfc0-ab93-49c2-b7cc-5124a0aed904" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Description</field>
+    <field name="model">x_repair_request_line_d1167</field>
+    <field name="model_id" ref="repair_request_line_2f3bc908-65ae-460c-aa29-8b62ea9c5fc6"/>
+    <field name="name">x_name</field>
+    <field name="on_delete" eval="False"/>
+    <field name="translate">standard</field>
+  </record>
+  <record id="repair_request_line_f9ae14ad-b930-439c-aa46-3818a6bcdb45" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">X Repair Request</field>
+    <field name="model">x_repair_request_line_d1167</field>
+    <field name="model_id" ref="repair_request_line_2f3bc908-65ae-460c-aa29-8b62ea9c5fc6"/>
+    <field name="name">x_repair_request_id</field>
+    <field name="relation">x_repair_request</field>
+  </record>
+  <record id="new_lines_repair_req_118f94ec-9c39-4f18-a741-1fa3054723dc" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">one2many</field>
+    <field name="field_description">New Lines</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_one2many_2</field>
+    <field name="on_delete" eval="False"/>
+    <field name="relation">x_repair_request_line_d1167</field>
+    <field name="relation_field">x_repair_request_id</field>
+  </record>
+  <record id="new_many2one_repair__56c549fc-7f06-43a0-949b-5977e5686a13" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Products</field>
+    <field name="model">x_repair_request_line_d1167</field>
+    <field name="model_id" ref="repair_request_line_2f3bc908-65ae-460c-aa29-8b62ea9c5fc6"/>
+    <field name="name">x_studio_products</field>
+    <field name="relation">product.template</field>
+  </record>
+  <record id="new_integer_repair_r_ed62bdf0-f738-494c-9db6-c9222fa78124" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">integer</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Quantity</field>
+    <field name="model">x_repair_request_line_d1167</field>
+    <field name="model_id" ref="repair_request_line_2f3bc908-65ae-460c-aa29-8b62ea9c5fc6"/>
+    <field name="name">x_studio_accessories_quantity</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="sales_price_repair_r_73e53cef-f3e2-48e8-bb14-ccdc65ce6269" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">float</field>
+    <field name="related">x_studio_products.list_price</field>
+    <field name="field_description">Sales Price</field>
+    <field name="model">x_repair_request_line_d1167</field>
+    <field name="model_id" ref="repair_request_line_2f3bc908-65ae-460c-aa29-8b62ea9c5fc6"/>
+    <field name="name">x_studio_related_accessories_list_price</field>
+    <field name="on_delete" eval="False"/>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="brand_repair_request_f6d85777-6a36-40d2-88e2-b4e7ef6806ca" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="related">x_studio_products.x_studio_brand</field>
+    <field name="field_description">Brand</field>
+    <field name="model">x_repair_request_line_d1167</field>
+    <field name="model_id" ref="repair_request_line_2f3bc908-65ae-460c-aa29-8b62ea9c5fc6"/>
+    <field name="name">x_studio_related_accessories_brand</field>
+    <field name="readonly" eval="True"/>
+    <field name="relation">x_brand</field>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="model_repair_request_69dc9b87-fa7c-4896-b8ab-44496a2730dc" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="related">x_studio_products.x_studio_model</field>
+    <field name="field_description">Model</field>
+    <field name="model">x_repair_request_line_d1167</field>
+    <field name="model_id" ref="repair_request_line_2f3bc908-65ae-460c-aa29-8b62ea9c5fc6"/>
+    <field name="name">x_studio_related_accessories_model</field>
+    <field name="readonly" eval="True"/>
+    <field name="relation">x_models</field>
+    <field name="store" eval="False"/>
+  </record>
+  <record id="new_decimal_repair_r_83cc7c3f-3cec-47c5-bb3d-d453b7b03579" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">float</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Sub Total</field>
+    <field name="model">x_repair_request_line_d1167</field>
+    <field name="model_id" ref="repair_request_line_2f3bc908-65ae-460c-aa29-8b62ea9c5fc6"/>
+    <field name="name">x_studio_accessories_sub_total</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_decimal_repair_r_b5f0ff83-9a3a-409c-bbe5-1b7f98140b87" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">float</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Total</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_total</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_decimal_repair_r_89192049-dc50-4a78-a7b1-54eedd3298ad" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">float</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Total</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_accessories_total</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_many2one_complai_d8fe5a0c-5657-40c3-874c-f401b0aeba82" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">repair_request_id</field>
+    <field name="model">x_complaint_template</field>
+    <field name="model_id" ref="complaint_template_88b492ee-b9ca-4b1c-8338-9935d882e7af"/>
+    <field name="name">x_studio_many2one_1</field>
+    <field name="relation">x_repair_request</field>
+  </record>
+  <record id="new_one2many_repair__90e56fc1-2606-4300-8e86-1512790d7d5d" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">one2many</field>
+    <field name="field_description">New One2Many</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_one2many_3</field>
+    <field name="on_delete" eval="False"/>
+    <field name="relation">x_complaint_template</field>
+    <field name="relation_field">x_studio_many2one_1</field>
+  </record>
+  <record id="sequence_repair_requ_e7d2e0aa-63f0-47c2-8556-2ef54772b5e5" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">integer</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Sequence</field>
+    <field name="model">x_repair_request_line_22882</field>
+    <field name="model_id" ref="repair_request_line_ea59b487-5b64-4c69-b36f-bf17ba9cf85e"/>
+    <field name="name">x_studio_sequence</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="description_repair_r_ba1cab02-64e5-477c-867a-66251882ad78" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Description</field>
+    <field name="model">x_repair_request_line_22882</field>
+    <field name="model_id" ref="repair_request_line_ea59b487-5b64-4c69-b36f-bf17ba9cf85e"/>
+    <field name="name">x_name</field>
+    <field name="on_delete" eval="False"/>
+    <field name="translate">standard</field>
+  </record>
+  <record id="repair_request_line_2192f3cb-1ccc-4621-a25a-b75c7f41e218" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">X Repair Request</field>
+    <field name="model">x_repair_request_line_22882</field>
+    <field name="model_id" ref="repair_request_line_ea59b487-5b64-4c69-b36f-bf17ba9cf85e"/>
+    <field name="name">x_repair_request_id</field>
+    <field name="relation">x_repair_request</field>
+  </record>
+  <record id="new_lines_repair_req_53c64341-b87c-4b4c-96a4-18dbdfa69f75" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">one2many</field>
+    <field name="field_description">New Lines</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_one2many_4</field>
+    <field name="on_delete" eval="False"/>
+    <field name="relation">x_repair_request_line_22882</field>
+    <field name="relation_field">x_repair_request_id</field>
+  </record>
+  <record id="new_many2one_repair__04d2371d-5f3c-470b-82f8-e9d42e373ac5" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Complaint Types</field>
+    <field name="model">x_repair_request_line_22882</field>
+    <field name="model_id" ref="repair_request_line_ea59b487-5b64-4c69-b36f-bf17ba9cf85e"/>
+    <field name="name">x_studio_complaint_type</field>
+    <field name="relation">x_complaint_type</field>
+  </record>
+  <record id="new_many2one_repair__8b6a5b05-63fc-46da-8659-07c807e4bd66" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Complaint Description</field>
+    <field name="model">x_repair_request_line_22882</field>
+    <field name="model_id" ref="repair_request_line_ea59b487-5b64-4c69-b36f-bf17ba9cf85e"/>
+    <field name="name">x_studio_complaint_description</field>
+    <field name="relation">x_complaint_template</field>
+  </record>
+  <record id="description_received_7e996c91-7442-4c5f-b3a2-e4fb8437bc84" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Name</field>
+    <field name="model">x_received_items</field>
+    <field name="model_id" ref="received_items_805d4124-9471-464e-9748-ab9380164c45"/>
+    <field name="name">x_name</field>
+    <field name="on_delete" eval="False"/>
+    <field name="required" eval="True"/>
+    <field name="translate">standard</field>
+  </record>
+  <record id="active_received_item_6fa43ad7-2614-4eeb-8475-6a1a2abf437d" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">boolean</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Active</field>
+    <field name="model">x_received_items</field>
+    <field name="model_id" ref="received_items_805d4124-9471-464e-9748-ab9380164c45"/>
+    <field name="name">x_active</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="sequence_received_it_eb0d100d-30c6-40ac-a283-03935ce8b6dc" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">integer</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Sequence</field>
+    <field name="model">x_received_items</field>
+    <field name="model_id" ref="received_items_805d4124-9471-464e-9748-ab9380164c45"/>
+    <field name="name">x_studio_sequence</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_image_received_i_8da9e959-c231-46c2-8c70-dd5a06b2afb5" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">binary</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Item Picture</field>
+    <field name="model">x_received_items</field>
+    <field name="model_id" ref="received_items_805d4124-9471-464e-9748-ab9380164c45"/>
+    <field name="name">x_studio_item_picture</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_many2many_repair_edcadf0f-c631-4f88-ba62-017fb86a671a" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2many</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">New Many2Many</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_many2many_1</field>
+    <field name="on_delete" eval="False"/>
+    <field name="relation">x_received_items</field>
+    <field name="relation_table">x_x_received_items_x_repair_request_rel</field>
+  </record>
+  <record id="new_date_repair_requ_38283242-3a66-4ef0-a834-6f567bdc5eb3" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">date</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Request Date</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_request_date</field>
+    <field name="on_delete" eval="False"/>
+    <field name="tracking">100</field>
+  </record>
+  <record id="new_date_repair_requ_35ca8e85-6c5b-4a57-95be-020074754b2b" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">date</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Return Date</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_return_date</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_many2one_repair__02182a84-b1a4-4499-b6e4-d4da118a2184" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Brand</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_brand</field>
+    <field name="relation">x_brand</field>
+  </record>
+  <record id="new_many2one_repair__e0ab73d3-a204-491b-bcf7-486f424c9fa3" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Model</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_model</field>
+    <field name="relation">x_models</field>
+  </record>
+</odoo>

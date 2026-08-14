@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="parts_sub_total_070cf693-99ae-474c-90ec-383aabe657c7" model="base.automation" context="{'studio': True}">
+    <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
+    <field name="action_server_ids" eval="[(6, 0, [ref('execute_code_9a0f42ba-378d-4dbe-bf60-c3d58a0ece3e')])]"/>
+    <field name="trigger">on_change</field>
+    <field name="name">parts sub total</field>
+    <field name="on_change_field_ids" eval="[(6, 0, [ref('new_decimal_repair_r_3fcb95e7-fe6a-47b2-b1e1-0fdb536b0dae'), ref('sales_price_repair_r_ae5b5d2b-e38e-42ef-aee7-16d686aebf3f')])]"/>
+  </record>
+  <record id="parts_total_calculat_e3441883-ec81-4e98-965b-0799fa439fc6" model="base.automation" context="{'studio': True}">
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="action_server_ids" eval="[(6, 0, [ref('execute_code_2346c0ce-d3cf-400c-b44b-e766af842694')])]"/>
+    <field name="trigger">on_change</field>
+    <field name="name">parts_total_calculation</field>
+    <field name="on_change_field_ids" eval="[(6, 0, [ref('new_lines_repair_req_f66fab20-3a2b-46f5-8879-0b5a5c2bcf2d')])]"/>
+  </record>
+  <record id="accessories_sub_tota_f78d1e23-1865-4261-9818-c7a65a6310b3" model="base.automation" context="{'studio': True}">
+    <field name="model_id" ref="repair_request_line_2f3bc908-65ae-460c-aa29-8b62ea9c5fc6"/>
+    <field name="action_server_ids" eval="[(6, 0, [ref('execute_code_a5c0a70c-d63c-4aee-9d2d-eacf2ba29f20')])]"/>
+    <field name="trigger">on_change</field>
+    <field name="name">Accessories sub total</field>
+    <field name="on_change_field_ids" eval="[(6, 0, [ref('new_integer_repair_r_ed62bdf0-f738-494c-9db6-c9222fa78124'), ref('sales_price_repair_r_73e53cef-f3e2-48e8-bb14-ccdc65ce6269')])]"/>
+  </record>
+  <record id="asseccories_total_745d55e5-ea97-482f-a6b5-4c0f15cee5c8" model="base.automation" context="{'studio': True}">
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="action_server_ids" eval="[(6, 0, [ref('execute_code_2f401601-80db-45ab-b9e5-7f9baed81385')])]"/>
+    <field name="trigger">on_change</field>
+    <field name="name">Asseccories_total</field>
+    <field name="on_change_field_ids" eval="[(6, 0, [ref('new_lines_repair_req_118f94ec-9c39-4f18-a741-1fa3054723dc')])]"/>
+  </record>
+  <record id="repair_sequence_gene_d0845b02-069e-462b-9692-db184db2779b" model="base.automation" context="{'studio': True}">
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="action_server_ids" eval="[(6, 0, [ref('execute_code_da0c93e3-b186-4113-ba65-9bc4c44caf4a')])]"/>
+    <field name="trigger">on_create</field>
+    <field name="name">repair sequence generation</field>
+  </record>
+</odoo>

@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo noupdate="1">
+  <record id="x_repair_request_11" model="x_repair_request">
+    <field name="x_studio_partner_id" ref="base.partner_admin"/>
+    <field name="x_name">RP/0001</field>
+    <field name="x_studio_request_date">2026-08-14</field>
+    <field name="x_studio_user_id" ref="base.user_admin"/>
+  </record>
+  <record id="x_repair_request_12" model="x_repair_request">
+    <field name="x_name">RP/0002</field>
+    <field name="x_studio_request_date">2026-08-14</field>
+    <field name="x_studio_user_id" ref="base.user_admin"/>
+  </record>
+  <record id="x_repair_request_13" model="x_repair_request">
+    <field name="x_studio_partner_id" ref="base.partner_admin"/>
+    <field name="x_name">RR\0003</field>
+    <field name="x_studio_selection_1">Completed</field>
+    <field name="x_studio_request_date">2026-08-14</field>
+    <field name="x_studio_return_date">2026-08-15</field>
+    <field name="x_studio_brand" ref="x_brand_1"/>
+    <field name="x_studio_user_id" ref="base.user_admin"/>
+    <field name="x_studio_model" ref="x_models_1"/>
+  </record>
+  <record id="x_repair_request_14" model="x_repair_request">
+    <field name="x_name">RR\0004</field>
+    <field name="x_studio_selection_1">Completed</field>
+    <field name="x_studio_request_date">2026-08-14</field>
+    <field name="x_studio_user_id" ref="base.user_admin"/>
+  </record>
+</odoo>

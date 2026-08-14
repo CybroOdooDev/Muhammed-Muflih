@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo noupdate="1">
+  <record id="x_repair_request_line_22882_2" model="x_repair_request_line_22882">
+    <field name="x_studio_complaint_description" ref="x_complaint_template_7"/>
+    <field name="x_studio_complaint_type" ref="x_complaint_type_1"/>
+  </record>
+  <record id="x_repair_request_line_22882_3" model="x_repair_request_line_22882">
+    <field name="x_studio_complaint_description" ref="x_complaint_template_3"/>
+    <field name="x_studio_complaint_type" ref="x_complaint_type_1"/>
+  </record>
+</odoo>

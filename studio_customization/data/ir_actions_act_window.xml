@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="repair_request_ac5f9b1c-ad5f-4e1a-9f17-2ae6a567dae4" model="ir.actions.act_window" context="{'studio': True}">
+    <field name="context">{'default_x_studio_request_date': context_today()}</field>
+    <field name="help"><![CDATA[<p class="o_view_nocontent_smiling_face">
+                    This is your new action.
+                </p>
+                <p>By default, it contains a list and a form view and possibly
+                    other view types depending on the options you chose for your model.
+                </p>
+                <p>
+                    You can start customizing these screens by clicking on the Studio icon on the
+                    top right corner (you can also customize this help message there).
+                </p>
+            ]]></field>
+    <field name="name">Repair Request</field>
+    <field name="res_model">x_repair_request</field>
+    <field name="view_mode">list,form,map</field>
+  </record>
+  <record id="brand_3d87cae9-48aa-403c-817e-a6cd65f075cd" model="ir.actions.act_window" context="{'studio': True}">
+    <field name="help"><![CDATA[<p class="o_view_nocontent_smiling_face">
+                    This is your new action.
+                </p>
+                <p>By default, it contains a list and a form view and possibly
+                    other view types depending on the options you chose for your model.
+                </p>
+                <p>
+                    You can start customizing these screens by clicking on the Studio icon on the
+                    top right corner (you can also customize this help message there).
+                </p>
+            ]]></field>
+    <field name="name">Brand</field>
+    <field name="res_model">x_brand</field>
+    <field name="view_mode">list</field>
+  </record>
+  <record id="models_43254792-26b7-44f6-ae98-484244677189" model="ir.actions.act_window" context="{'studio': True}">
+    <field name="help"><![CDATA[<p class="o_view_nocontent_smiling_face">
+                    This is your new action.
+                </p>
+                <p>By default, it contains a list and a form view and possibly
+                    other view types depending on the options you chose for your model.
+                </p>
+                <p>
+                    You can start customizing these screens by clicking on the Studio icon on the
+                    top right corner (you can also customize this help message there).
+                </p>
+            ]]></field>
+    <field name="name">Models</field>
+    <field name="res_model">x_models</field>
+    <field name="view_mode">kanban,list,form</field>
+  </record>
+  <record id="complaint_type_e5b66efc-e68a-4305-94f3-a33944cbcf44" model="ir.actions.act_window" context="{'studio': True}">
+    <field name="help"><![CDATA[<p class="o_view_nocontent_smiling_face">
+                    This is your new action.
+                </p>
+                <p>By default, it contains a list and a form view and possibly
+                    other view types depending on the options you chose for your model.
+                </p>
+                <p>
+                    You can start customizing these screens by clicking on the Studio icon on the
+                    top right corner (you can also customize this help message there).
+                </p>
+            ]]></field>
+    <field name="name">Complaint Type</field>
+    <field name="res_model">x_complaint_type</field>
+  </record>
+  <record id="complaint_template_99c0dfb9-156a-44b0-99d6-bffe493813c1" model="ir.actions.act_window" context="{'studio': True}">
+    <field name="help"><![CDATA[<p class="o_view_nocontent_smiling_face">
+                    This is your new action.
+                </p>
+                <p>By default, it contains a list and a form view and possibly
+                    other view types depending on the options you chose for your model.
+                </p>
+                <p>
+                    You can start customizing these screens by clicking on the Studio icon on the
+                    top right corner (you can also customize this help message there).
+                </p>
+            ]]></field>
+    <field name="name">Complaint  Template</field>
+    <field name="res_model">x_complaint_template</field>
+  </record>
+  <record id="parts_25483a02-bb3c-4bdb-933b-80a637655687" model="ir.actions.act_window" context="{'studio': True}">
+    <field name="help"><![CDATA[<p class="o_view_nocontent_smiling_face">
+                    This is your new action.
+                </p>
+                <p>By default, it contains a list and a form view and possibly
+                    other view types depending on the options you chose for your model.
+                </p>
+                <p>
+                    You can start customizing these screens by clicking on the Studio icon on the
+                    top right corner (you can also customize this help message there).
+                </p>
+            ]]></field>
+    <field name="name">Parts</field>
+    <field name="res_model">product.template</field>
+    <field name="view_mode">kanban,list,form,activity</field>
+  </record>
+  <record id="accessories_549f58b6-f5b3-4641-88e3-e8a2e228ca7b" model="ir.actions.act_window" context="{'studio': True}">
+    <field name="help"><![CDATA[<p class="o_view_nocontent_smiling_face">
+                    This is your new action.
+                </p>
+                <p>By default, it contains a list and a form view and possibly
+                    other view types depending on the options you chose for your model.
+                </p>
+                <p>
+                    You can start customizing these screens by clicking on the Studio icon on the
+                    top right corner (you can also customize this help message there).
+                </p>
+            ]]></field>
+    <field name="name">Accessories</field>
+    <field name="res_model">product.template</field>
+    <field name="view_mode">kanban,list,form,activity</field>
+  </record>
+  <record id="received_items_da43b579-854e-4761-8c7c-67436f59eb8b" model="ir.actions.act_window" context="{'studio': True}">
+    <field name="help"><![CDATA[<p class="o_view_nocontent_smiling_face">
+                    This is your new action.
+                </p>
+                <p>By default, it contains a list and a form view and possibly
+                    other view types depending on the options you chose for your model.
+                </p>
+                <p>
+                    You can start customizing these screens by clicking on the Studio icon on the
+                    top right corner (you can also customize this help message there).
+                </p>
+            ]]></field>
+    <field name="name">Received Items</field>
+    <field name="res_model">x_received_items</field>
+  </record>
+</odoo>

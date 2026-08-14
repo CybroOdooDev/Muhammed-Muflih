@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo noupdate="1">
+  <record id="x_models_1" model="x_models">
+    <field name="x_studio_image" type="bytes" file="studio_customization/static/src/binary/x_models/1-x_studio_image"/>
+    <field name="x_name">i phone 16</field>
+    <field name="x_studio_many2one_1" ref="x_brand_1"/>
+  </record>
+</odoo>

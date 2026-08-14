@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo noupdate="1">
+  <record id="repair_request_group_603af734-8fdc-4772-94e1-24220348a0dd" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_system"/>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">Repair Request group_system</field>
+    <field name="operation">crud</field>
+  </record>
+  <record id="repair_request_group_03314f2b-e6f9-46b3-b649-1f19bac1f485" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_user"/>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">Repair Request group_user</field>
+    <field name="operation">cru</field>
+  </record>
+  <record id="brand_group_system_2b7f803a-0b36-4343-8bd3-86b047d25f5b" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_system"/>
+    <field name="model_id" ref="brand_a44add05-0049-429f-be04-b0228004478f"/>
+    <field name="name">Brand group_system</field>
+    <field name="operation">crud</field>
+  </record>
+  <record id="brand_group_user_402118f9-c0ea-4c55-993d-e1b5d53127d2" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_user"/>
+    <field name="model_id" ref="brand_a44add05-0049-429f-be04-b0228004478f"/>
+    <field name="name">Brand group_user</field>
+    <field name="operation">cru</field>
+  </record>
+  <record id="models_group_system_efb618bb-4833-4122-b1fd-06f78dd92eec" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_system"/>
+    <field name="model_id" ref="models_a6d6a78b-3f7f-40f5-a486-9a0f5f42c574"/>
+    <field name="name">Models group_system</field>
+    <field name="operation">crud</field>
+  </record>
+  <record id="models_group_user_8ac5fd5c-585e-4352-b599-04b78c20d683" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_user"/>
+    <field name="model_id" ref="models_a6d6a78b-3f7f-40f5-a486-9a0f5f42c574"/>
+    <field name="name">Models group_user</field>
+    <field name="operation">cru</field>
+  </record>
+  <record id="complaint_type_group_bbd2c73c-f280-45e4-921d-ea7ce6cdaef0" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_system"/>
+    <field name="model_id" ref="complaint_type_0daa4046-3e30-438e-a9f9-f918d0283de5"/>
+    <field name="name">Complaint Type group_system</field>
+    <field name="operation">crud</field>
+  </record>
+  <record id="complaint_type_group_69790bc2-b344-4736-91d1-44c3cdb2f0b9" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_user"/>
+    <field name="model_id" ref="complaint_type_0daa4046-3e30-438e-a9f9-f918d0283de5"/>
+    <field name="name">Complaint Type group_user</field>
+    <field name="operation">cru</field>
+  </record>
+  <record id="complaint_template_g_c14c9786-7227-499b-867c-ce9736f81fb2" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_system"/>
+    <field name="model_id" ref="complaint_template_88b492ee-b9ca-4b1c-8338-9935d882e7af"/>
+    <field name="name">Complaint  Template group_system</field>
+    <field name="operation">crud</field>
+  </record>
+  <record id="complaint_template_g_20ccea2b-6b02-40c3-8c6a-c5e9109e7986" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_user"/>
+    <field name="model_id" ref="complaint_template_88b492ee-b9ca-4b1c-8338-9935d882e7af"/>
+    <field name="name">Complaint  Template group_user</field>
+    <field name="operation">cru</field>
+  </record>
+  <record id="repair_request_line__b883cabe-9547-47bc-811e-58ac0e358609" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_system"/>
+    <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
+    <field name="name">repair_request_line group_system</field>
+    <field name="operation">crud</field>
+  </record>
+  <record id="repair_request_line__a9d05b12-ab8e-4fc3-9630-930fade6b1e2" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_user"/>
+    <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
+    <field name="name">repair_request_line group_user</field>
+    <field name="operation">cru</field>
+  </record>
+  <record id="repair_request_line__c73448a9-0cca-466c-bf64-1fbf14aceed0" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_system"/>
+    <field name="model_id" ref="repair_request_line_2f3bc908-65ae-460c-aa29-8b62ea9c5fc6"/>
+    <field name="name">repair_request_line group_system</field>
+    <field name="operation">crud</field>
+  </record>
+  <record id="repair_request_line__0ca1e8c8-8ee8-4009-b630-02b082cc9850" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_user"/>
+    <field name="model_id" ref="repair_request_line_2f3bc908-65ae-460c-aa29-8b62ea9c5fc6"/>
+    <field name="name">repair_request_line group_user</field>
+    <field name="operation">cru</field>
+  </record>
+  <record id="repair_request_line__09310520-f000-4703-9f03-103e71a76156" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_system"/>
+    <field name="model_id" ref="repair_request_line_ea59b487-5b64-4c69-b36f-bf17ba9cf85e"/>
+    <field name="name">repair_request_line group_system</field>
+    <field name="operation">crud</field>
+  </record>
+  <record id="repair_request_line__c88de3a2-7916-49a3-928b-b0d2b31d0925" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_user"/>
+    <field name="model_id" ref="repair_request_line_ea59b487-5b64-4c69-b36f-bf17ba9cf85e"/>
+    <field name="name">repair_request_line group_user</field>
+    <field name="operation">cru</field>
+  </record>
+  <record id="received_items_group_463cd618-80a5-40c0-af02-d11319b11e56" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_system"/>
+    <field name="model_id" ref="received_items_805d4124-9471-464e-9748-ab9380164c45"/>
+    <field name="name">Received Items group_system</field>
+    <field name="operation">crud</field>
+  </record>
+  <record id="received_items_group_566e4406-3503-4a56-bb69-0faeeed9c3db" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="base.group_user"/>
+    <field name="model_id" ref="received_items_805d4124-9471-464e-9748-ab9380164c45"/>
+    <field name="name">Received Items group_user</field>
+    <field name="operation">cru</field>
+  </record>
+</odoo>

@@ -1,0 +1,110 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="execute_code_2346c0ce-d3cf-400c-b44b-e766af842694" model="ir.actions.server" context="{'studio': True}">
+    <field name="code"><![CDATA[total = sum(line.x_studio_sub_total for line in record.x_studio_one2many_1)
+record['x_studio_parts_total'] = total]]></field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="state">code</field>
+    <field name="name">Execute Code</field>
+    <field name="usage">base_automation</field>
+  </record>
+  <record id="confirm_repair_reque_1db460b1-97b6-49c0-86cb-86c4469e7bf8" model="ir.actions.server" context="{'studio': True}">
+    <field name="binding_model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="code"><![CDATA[if record.x_studio_selection_1 == 'draft':
+    record['x_studio_selection_1'] = 'confirm']]></field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="state">code</field>
+    <field name="name">confirm repair request</field>
+  </record>
+  <record id="execute_code_9a0f42ba-378d-4dbe-bf60-c3d58a0ece3e" model="ir.actions.server" context="{'studio': True}">
+    <field name="code"><![CDATA[qty = record.x_studio_quantity or 0.0
+price = record.x_studio_related_list_price_1 or 0.0
+    
+record['x_studio_sub_total'] = qty * price]]></field>
+    <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
+    <field name="state">code</field>
+    <field name="name">Execute Code</field>
+    <field name="usage">base_automation</field>
+  </record>
+  <record id="execute_code_a5c0a70c-d63c-4aee-9d2d-eacf2ba29f20" model="ir.actions.server" context="{'studio': True}">
+    <field name="code"><![CDATA[qty=record.x_studio_accessories_quantity or 0
+price=record.x_studio_related_accessories_list_price or 0
+record['x_studio_accessories_sub_total']=qty*price]]></field>
+    <field name="model_id" ref="repair_request_line_2f3bc908-65ae-460c-aa29-8b62ea9c5fc6"/>
+    <field name="state">code</field>
+    <field name="name">Execute Code</field>
+    <field name="usage">base_automation</field>
+  </record>
+  <record id="execute_code_2f401601-80db-45ab-b9e5-7f9baed81385" model="ir.actions.server" context="{'studio': True}">
+    <field name="code"><![CDATA[total = sum(line.x_studio_accessories_sub_total for line in record.x_studio_one2many_2)
+record['x_studio_accessories_total'] = total]]></field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="state">code</field>
+    <field name="name">Execute Code</field>
+    <field name="usage">base_automation</field>
+  </record>
+  <record id="assign_to_technician_dfc917ce-aa2e-4cf9-bdfb-35ef4a4109ab" model="ir.actions.server" context="{'studio': True}">
+    <field name="binding_model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="code"><![CDATA[if not record.x_studio_user_id:
+  raise UserError("Please select a Technician before assigning!")
+if record.x_studio_selection_1 == 'Draft':
+     record.write({'x_studio_selection_1': 'Confirm'})
+    ]]></field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="state">code</field>
+    <field name="name">Assign to Technician Stage</field>
+  </record>
+  <record id="start_repairing_1ade21b7-5346-4cfa-a81d-b8da5fa40413" model="ir.actions.server" context="{'studio': True}">
+    <field name="binding_model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="code"><![CDATA[if record.x_studio_selection_1 == 'Confirm':
+     record.write({'x_studio_selection_1': 'Start'})]]></field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="state">code</field>
+    <field name="name">Start repairing</field>
+  </record>
+  <record id="repair_completed_8f479551-6534-475f-9bc0-5a30bc8f7af4" model="ir.actions.server" context="{'studio': True}">
+    <field name="binding_model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="code"><![CDATA[if record.x_studio_selection_1 == 'Start':
+     record.write({'x_studio_selection_1': 'Completed'})]]></field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="state">code</field>
+    <field name="name">repair completed</field>
+  </record>
+  <record id="execute_code_da0c93e3-b186-4113-ba65-9bc4c44caf4a" model="ir.actions.server" context="{'studio': True}">
+    <field name="code"><![CDATA[for record in records:
+    if not record.x_name or  record.x_name=='New':
+        sequence_num=env['ir.sequence'].next_by_code('repair.request.sequence.code')or 'New'
+        record.write({'x_name':sequence_num})]]></field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="state">code</field>
+    <field name="name">Execute Code</field>
+    <field name="usage">base_automation</field>
+  </record>
+  <record id="create_invoice_9f7e496d-e2d8-4ab4-98cf-6e72cfb15c51" model="ir.actions.server" context="{'studio': True}">
+    <field name="binding_model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="code"><![CDATA[# Safely find the partner field using Odoo's safe_eval environment
+partner_id = False
+if 'x_studio_partner_id' in record._fields and record.x_studio_partner_id:
+    partner_id = record.x_studio_partner_id.id
+elif 'partner_id' in record._fields and record.partner_id:
+    partner_id = record.partner_id.id
+elif 'x_studio_contact' in record._fields and record.x_studio_contact:
+    partner_id = record.x_studio_contact.id
+
+action = {
+    'name': 'Customer Invoice',
+    'type': 'ir.actions.act_window',
+    'res_model': 'account.move',
+    'view_mode': 'form',
+    'views': [(False, 'form')],
+    'target': 'current',
+    'context': {
+        'default_move_type': 'out_invoice',
+        'default_partner_id': partner_id,
+    }
+}]]></field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="state">code</field>
+    <field name="name">create invoice</field>
+  </record>
+</odoo>

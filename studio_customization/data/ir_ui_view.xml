@@ -1,0 +1,831 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="default_list_view_fo_9495e97f-22ef-4474-a3e3-803158fa2f65" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <list>
+        <field name="x_studio_sequence" widget="handle"/>
+        <field name="x_name"/>
+        <field name="x_studio_partner_id"/>
+        <field name="x_studio_user_id" widget="many2one_avatar_user"/>
+      </list>
+    </field>
+    <field name="key">studio_customization.default_list_view_fo_9495e97f-22ef-4474-a3e3-803158fa2f65</field>
+    <field name="model">x_repair_request</field>
+    <field name="name">Default list view for x_repair_request</field>
+    <field name="type">list</field>
+  </record>
+  <record id="default_form_view_fo_734ce529-f19f-402e-b36e-fdce2001554f" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <form>
+        <header/>
+        <sheet string="Repair Request">
+          <widget name="web_ribbon" text="Archived" bg_color="text-bg-danger" invisible="x_active"/>
+          <field name="x_active" invisible="1"/>
+          <field class="oe_avatar" widget="image" name="x_studio_image"/>
+          <div class="oe_title">
+            <h1>
+              <field name="x_name" required="1" placeholder="Name..."/>
+            </h1>
+          </div>
+          <group name="studio_group_d81ca1">
+            <group name="studio_group_d81ca1_left">
+              <field name="x_studio_partner_id"/>
+              <field name="x_studio_partner_phone" widget="phone" options="{'enable_sms': True}"/>
+              <field name="x_studio_partner_email" widget="email"/>
+            </group>
+            <group name="studio_group_d81ca1_right">
+              <field name="x_studio_user_id" widget="many2one_avatar_user"/>
+            </group>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+    <field name="key">studio_customization.default_form_view_fo_734ce529-f19f-402e-b36e-fdce2001554f</field>
+    <field name="model">x_repair_request</field>
+    <field name="name">Default form view for x_repair_request</field>
+    <field name="type">form</field>
+  </record>
+  <record id="default_search_view__e4d78fbd-362e-4f46-8293-de603b2bcb4a" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <search>
+        <field name="x_name"/>
+        <field name="x_studio_partner_id" operator="child_of"/>
+        <field name="x_studio_user_id"/>
+        <filter invisible="1" string="My Activities" name="filter_activities_my" domain="[['activity_user_id', '=', uid]]"/>
+        <separator/>
+        <filter invisible="1" string="Late Activities" name="activities_overdue" domain="[('my_activity_date_deadline', '&lt;', 'today')]"/>
+        <filter invisible="1" string="Today Activities" name="activities_today" domain="[('my_activity_date_deadline', '=', 'today')]"/>
+        <filter invisible="1" string="Future Activities" name="activities_upcoming_all" domain="[('my_activity_date_deadline', '&gt;', 'today')]"/>
+        <separator/>
+        <filter string="My Repair Request" name="my_x_repair_request" domain="[['x_studio_user_id', '=', uid]]"/>
+        <separator/>
+        <filter string="Archived" name="archived_x_repair_request" domain="[['x_active', '=', False]]"/>
+        <separator/>
+        <filter name="groupby_x_partner" string="Partner" context="{'group_by': 'x_studio_partner_id'}" domain="[]"/>
+        <filter name="groupby_x_user" string="Responsible" context="{'group_by': 'x_studio_user_id'}" domain="[]"/>
+      </search>
+    </field>
+    <field name="key">studio_customization.default_search_view__e4d78fbd-362e-4f46-8293-de603b2bcb4a</field>
+    <field name="model">x_repair_request</field>
+    <field name="name">Default search view for x_repair_request</field>
+    <field name="type">search</field>
+  </record>
+  <record id="default_map_view_for_599aaf22-a371-47af-b357-a529a3bd5691" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <map res_partner="x_studio_partner_id">
+        <field name="x_studio_partner_id" string="Partner"/>
+      </map>
+    </field>
+    <field name="key">studio_customization.default_map_view_for_599aaf22-a371-47af-b357-a529a3bd5691</field>
+    <field name="model">x_repair_request</field>
+    <field name="name">Default map view for x_repair_request</field>
+    <field name="type">map</field>
+  </record>
+  <record id="default_list_view_fo_5e629301-13c1-4a26-b480-5f6f838c8e7a" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <list>
+        <field name="x_studio_sequence" widget="handle"/>
+        <field name="x_name"/>
+      </list>
+    </field>
+    <field name="key">studio_customization.default_list_view_fo_5e629301-13c1-4a26-b480-5f6f838c8e7a</field>
+    <field name="model">x_brand</field>
+    <field name="name">Default list view for x_brand</field>
+    <field name="type">list</field>
+  </record>
+  <record id="default_form_view_fo_b26fd696-7d32-41ae-8f30-1bfcd2783d76" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <form>
+        <header/>
+        <sheet string="Brand">
+          <widget name="web_ribbon" text="Archived" bg_color="text-bg-danger" invisible="x_active"/>
+          <field name="x_active" invisible="1"/>
+          <div class="oe_title">
+            <h1>
+              <field name="x_name" required="1" placeholder="Name..."/>
+            </h1>
+          </div>
+          <group name="studio_group_1d1bc8">
+            <group name="studio_group_1d1bc8_left"/>
+            <group name="studio_group_1d1bc8_right"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+    <field name="key">studio_customization.default_form_view_fo_b26fd696-7d32-41ae-8f30-1bfcd2783d76</field>
+    <field name="model">x_brand</field>
+    <field name="name">Default form view for x_brand</field>
+    <field name="type">form</field>
+  </record>
+  <record id="default_search_view__3ee68680-4e6a-48e0-9791-a18b7a2b6acb" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <search>
+        <field name="x_name"/>
+        <separator/>
+        <filter string="Archived" name="archived_x_brand" domain="[['x_active', '=', False]]"/>
+        <separator/>
+      </search>
+    </field>
+    <field name="key">studio_customization.default_search_view__3ee68680-4e6a-48e0-9791-a18b7a2b6acb</field>
+    <field name="model">x_brand</field>
+    <field name="name">Default search view for x_brand</field>
+    <field name="type">search</field>
+  </record>
+  <record id="default_list_view_fo_9dcf0e97-0dee-4379-a4b6-d070a13d390a" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <list>
+        <field name="x_studio_sequence" widget="handle"/>
+        <field name="x_name"/>
+      </list>
+    </field>
+    <field name="key">studio_customization.default_list_view_fo_9dcf0e97-0dee-4379-a4b6-d070a13d390a</field>
+    <field name="model">x_models</field>
+    <field name="name">Default list view for x_models</field>
+    <field name="type">list</field>
+  </record>
+  <record id="default_form_view_fo_9c9afc1f-5ffa-4792-80ec-7d2f90044666" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <form>
+        <header/>
+        <sheet string="Models">
+          <widget name="web_ribbon" text="Archived" bg_color="text-bg-danger" invisible="x_active"/>
+          <field name="x_active" invisible="1"/>
+          <field class="oe_avatar" widget="image" name="x_studio_image"/>
+          <div class="oe_title">
+            <h1>
+              <field name="x_name" required="1" placeholder="Name..."/>
+            </h1>
+          </div>
+          <group name="studio_group_144895">
+            <group name="studio_group_144895_left"/>
+            <group name="studio_group_144895_right"/>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+    <field name="key">studio_customization.default_form_view_fo_9c9afc1f-5ffa-4792-80ec-7d2f90044666</field>
+    <field name="model">x_models</field>
+    <field name="name">Default form view for x_models</field>
+    <field name="type">form</field>
+  </record>
+  <record id="default_search_view__afd57c81-c12e-4297-ac86-9cf1acde2d62" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <search>
+        <field name="x_name"/>
+        <filter invisible="1" string="My Activities" name="filter_activities_my" domain="[['activity_user_id', '=', uid]]"/>
+        <separator/>
+        <filter invisible="1" string="Late Activities" name="activities_overdue" domain="[('my_activity_date_deadline', '&lt;', 'today')]"/>
+        <filter invisible="1" string="Today Activities" name="activities_today" domain="[('my_activity_date_deadline', '=', 'today')]"/>
+        <filter invisible="1" string="Future Activities" name="activities_upcoming_all" domain="[('my_activity_date_deadline', '&gt;', 'today')]"/>
+        <separator/>
+        <separator/>
+        <filter string="Archived" name="archived_x_models" domain="[['x_active', '=', False]]"/>
+        <separator/>
+      </search>
+    </field>
+    <field name="key">studio_customization.default_search_view__afd57c81-c12e-4297-ac86-9cf1acde2d62</field>
+    <field name="model">x_models</field>
+    <field name="name">Default search view for x_models</field>
+    <field name="type">search</field>
+  </record>
+  <record id="odoo_studio_default__d8c005cf-b9f1-4032-a60d-209629b3c584" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="/form//field[@name='x_name']" position="attributes">
+          <attribute name="string">Model Name</attribute>
+        </xpath>
+        <xpath expr="/form//group[@name='studio_group_144895_left']" position="inside">
+          <field name="x_studio_many2one_1" options="{'create_name_field': 'x_name'}" required="True" string="Brand"/>
+        </xpath>
+      </data>
+    </field>
+    <field name="inherit_id" ref="default_form_view_fo_9c9afc1f-5ffa-4792-80ec-7d2f90044666"/>
+    <field name="key">studio_customization.odoo_studio_default__d8c005cf-b9f1-4032-a60d-209629b3c584</field>
+    <field name="mode">extension</field>
+    <field name="model">x_models</field>
+    <field name="name">Odoo Studio: Default form view for x_models customization</field>
+    <field name="priority">99</field>
+    <field name="type">form</field>
+  </record>
+  <record id="odoo_studio_default__7d55cd90-4ccf-42d9-b73a-8b0f797fa090" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="/kanban//field[@name='x_name']" position="after">
+          <field name="x_studio_image" display="full" widget="image" options="{&quot;size&quot;:[0,90],&quot;convert_to_webp&quot;:false,&quot;zoom&quot;:false}"/>
+          <field name="x_studio_many2one_1" display="full"/>
+        </xpath>
+      </data>
+    </field>
+    <field name="key">studio_customization.odoo_studio_default__7d55cd90-4ccf-42d9-b73a-8b0f797fa090</field>
+    <field name="mode">extension</field>
+    <field name="model">x_models</field>
+    <field name="name">Odoo Studio: Default kanban view for ir.model(1904,) customization</field>
+    <field name="priority">99</field>
+    <field name="type">kanban</field>
+  </record>
+  <record id="odoo_studio_default__ecf4682b-ba14-4744-bce0-85943f532bc1" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="/form/header" position="inside">
+          <field widget="statusbar" options="{'clickable': '1'}" name="x_studio_selection_1" string="request state"/>
+          <button string="Assign To technician" type="action" name="studio_customization.assign_to_technician_dfc917ce-aa2e-4cf9-bdfb-35ef4a4109ab" class="oe_highlight" invisible="x_studio_selection_1 != &quot;Draft&quot;"/>
+          <button string="Print Ticket" type="action" class="oe_highlight"/>
+          <button string="Completed" type="action" class="oe_highlight" name="studio_customization.repair_completed_8f479551-6534-475f-9bc0-5a30bc8f7af4" invisible="x_studio_selection_1 != &quot;Start&quot;"/>
+          <button string="Not Solved" type="action"/>
+          <button string="Return" type="action"/>
+          <button string="Start" type="action" class="oe_highlight" name="studio_customization.start_repairing_1ade21b7-5346-4cfa-a81d-b8da5fa40413" invisible="x_studio_selection_1 != &quot;Confirm&quot;"/>
+          <button string="Create Invoice" type="action" class="oe_highlight" name="studio_customization.create_invoice_9f7e496d-e2d8-4ab4-98cf-6e72cfb15c51"/>
+        </xpath>
+        <xpath expr="/form//group[@name='studio_group_d81ca1']" position="after">
+          <notebook name="studio_notebook_5n6_1jvt2ni48">
+            <page string="Device Details" name="studio_page_4ic_1jvt2patn">
+              <group name="studio_group_4ic">
+                <group name="studio_group_4ic_left">
+                  <field name="x_studio_imei_number"/>
+                  <field name="x_studio_warranty_no"/>
+                </group>
+                <group name="studio_group_4ic_right">
+                  <field name="x_studio_internal_note"/>
+                </group>
+              </group>
+            </page>
+            <page string="Parts " name="studio_page_1pk_1jvt6bogq">
+              <group name="studio_group_1pk">
+                <group name="studio_group_1pk_left">
+            </group>
+                <group name="studio_group_1pk_right"/>
+              </group>
+              <field name="x_studio_one2many_1">
+                <list default_order="x_studio_sequence asc,id desc" editable="bottom">
+                  <field name="x_studio_sequence" widget="handle"/>
+                  <field optional="show" name="x_studio_products_id" domain="[(&quot;x_studio_parts&quot;, &quot;!=&quot;, False)]" string="Parts"/>
+                  <field name="x_name" required="False"/>
+                  <field optional="show" name="x_studio_related_x_studio_brand_1" options="{'create_name_field': 'x_name'}"/>
+                  <field optional="show" name="x_studio_related_x_studio_model_1" options="{'create_name_field': 'x_name'}"/>
+                  <field optional="show" name="x_studio_quantity"/>
+                  <field optional="show" name="x_studio_related_list_price_1"/>
+                  <field optional="show" name="x_studio_sub_total"/>
+                </list>
+                <form>
+                  <header/>
+                  <sheet string="repair_request_line" name="studio_sheet_82f399">
+                    <div class="oe_title" name="studio_div_1c5886">
+                      <h1>
+                        <field name="x_name" required="1" placeholder="Name..."/>
+                      </h1>
+                    </div>
+                    <group name="studio_group_8434a9">
+                      <group name="studio_group_8434a9_left"/>
+                      <group name="studio_group_8434a9_right"/>
+                    </group>
+                  </sheet>
+                </form>
+              </field>
+              <field name="x_studio_parts_total"/>
+            </page>
+            <page string="Accessories" name="studio_page_55o_1jvv5atfu">
+              <group name="studio_group_55o">
+                <group name="studio_group_55o_left"/>
+                <group name="studio_group_55o_right"/>
+              </group>
+              <field name="x_studio_one2many_2">
+                <list default_order="x_studio_sequence asc,id desc" editable="bottom">
+                  <field name="x_studio_sequence" widget="handle"/>
+                  <field optional="show" name="x_studio_products" domain="[(&quot;x_studio_accessories&quot;, &quot;!=&quot;, False)]"/>
+                  <field name="x_name"/>
+                  <field optional="show" name="x_studio_related_accessories_brand" options="{'create_name_field': 'x_name'}"/>
+                  <field optional="show" name="x_studio_related_accessories_model" options="{'create_name_field': 'x_name'}"/>
+                  <field name="x_studio_accessories_quantity" optional="show"/>
+                  <field optional="show" name="x_studio_related_accessories_list_price"/>
+                  <field optional="show" name="x_studio_accessories_sub_total"/>
+                </list>
+              </field>
+              <field name="x_studio_accessories_total"/>
+            </page>
+            <page string="Complaints" name="studio_page_5pv_1jvvdhlkf">
+              <group name="studio_group_5pv">
+                <group name="studio_group_5pv_left"/>
+                <group name="studio_group_5pv_right"/>
+              </group>
+              <field name="x_studio_one2many_4">
+                <list default_order="x_studio_sequence asc,id desc" editable="bottom">
+                  <field name="x_studio_sequence" widget="handle"/>
+                  <field optional="show" name="x_studio_complaint_type" options="{'create_name_field': 'x_name'}"/>
+                  <field optional="show" name="x_studio_complaint_description" options="{'create_name_field': 'x_name'}"/>
+                  <field name="x_name" column_invisible="True"/>
+                </list>
+              </field>
+            </page>
+            <page string="Received Items" name="studio_page_94t_1jvvfc3ir">
+              <group name="studio_group_94t">
+                <group name="studio_group_94t_left"/>
+                <group name="studio_group_94t_right"/>
+              </group>
+              <field name="x_studio_many2many_1" widget="many2many_tags_color_dot">
+                <list>
+                  <field name="x_studio_sequence" widget="handle"/>
+                  <field name="x_name"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </xpath>
+        <xpath expr="/form/sheet/div/h1/field[@name='x_name']" position="attributes">
+          <attribute name="force_save">1</attribute>
+          <attribute name="readonly">True</attribute>
+          <attribute name="required">False</attribute>
+        </xpath>
+        <xpath expr="/form//field[@name='x_studio_user_id']" position="after">
+          <field name="x_studio_request_date" options="{&quot;warn_future&quot;:true}"/>
+          <field name="x_studio_return_date"/>
+          <field name="x_studio_brand" options="{'create_name_field': 'x_name'}"/>
+          <field name="x_studio_model" options="{'create_name_field': 'x_name'}"/>
+        </xpath>
+        <xpath expr="/form//field[@name='x_studio_user_id']" position="attributes">
+          <attribute name="string">Technician</attribute>
+        </xpath>
+      </data>
+    </field>
+    <field name="inherit_id" ref="default_form_view_fo_734ce529-f19f-402e-b36e-fdce2001554f"/>
+    <field name="key">studio_customization.odoo_studio_default__ecf4682b-ba14-4744-bce0-85943f532bc1</field>
+    <field name="mode">extension</field>
+    <field name="model">x_repair_request</field>
+    <field name="name">Odoo Studio: Default form view for x_repair_request customization</field>
+    <field name="priority">99</field>
+    <field name="type">form</field>
+  </record>
+  <record id="default_list_view_fo_09cc7f87-73a1-4915-a340-7a95350e8dc2" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <list>
+        <field name="x_studio_sequence" widget="handle"/>
+        <field name="x_name"/>
+      </list>
+    </field>
+    <field name="key">studio_customization.default_list_view_fo_09cc7f87-73a1-4915-a340-7a95350e8dc2</field>
+    <field name="model">x_complaint_type</field>
+    <field name="name">Default list view for x_complaint_type</field>
+    <field name="type">list</field>
+  </record>
+  <record id="default_form_view_fo_c1eae5e2-a6c0-46af-89ff-9954e4d2601a" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <form>
+        <header/>
+        <sheet string="Complaint Type">
+          <widget name="web_ribbon" text="Archived" bg_color="text-bg-danger" invisible="x_active"/>
+          <field name="x_active" invisible="1"/>
+          <div class="oe_title">
+            <h1>
+              <field name="x_name" required="1" placeholder="Name..."/>
+            </h1>
+          </div>
+          <group name="studio_group_ef7ff2">
+            <group name="studio_group_ef7ff2_left"/>
+            <group name="studio_group_ef7ff2_right"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+    <field name="key">studio_customization.default_form_view_fo_c1eae5e2-a6c0-46af-89ff-9954e4d2601a</field>
+    <field name="model">x_complaint_type</field>
+    <field name="name">Default form view for x_complaint_type</field>
+    <field name="type">form</field>
+  </record>
+  <record id="default_search_view__f7eadb9e-3873-444f-8a1f-c8c0c0b8d8cd" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <search>
+        <field name="x_name"/>
+        <separator/>
+        <filter string="Archived" name="archived_x_complaint_type" domain="[['x_active', '=', False]]"/>
+        <separator/>
+      </search>
+    </field>
+    <field name="key">studio_customization.default_search_view__f7eadb9e-3873-444f-8a1f-c8c0c0b8d8cd</field>
+    <field name="model">x_complaint_type</field>
+    <field name="name">Default search view for x_complaint_type</field>
+    <field name="type">search</field>
+  </record>
+  <record id="odoo_studio_default__87a0cda4-6947-4036-afae-2afaba176394" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="/form//field[@name='x_name']" position="attributes">
+          <attribute name="string">Complaint Type</attribute>
+        </xpath>
+      </data>
+    </field>
+    <field name="inherit_id" ref="default_form_view_fo_c1eae5e2-a6c0-46af-89ff-9954e4d2601a"/>
+    <field name="key">studio_customization.odoo_studio_default__87a0cda4-6947-4036-afae-2afaba176394</field>
+    <field name="mode">extension</field>
+    <field name="model">x_complaint_type</field>
+    <field name="name">Odoo Studio: Default form view for x_complaint_type customization</field>
+    <field name="priority">99</field>
+    <field name="type">form</field>
+  </record>
+  <record id="default_list_view_fo_f505a212-a2d5-437e-8631-a5fdd559e429" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <list>
+        <field name="x_studio_sequence" widget="handle"/>
+        <field name="x_name"/>
+      </list>
+    </field>
+    <field name="key">studio_customization.default_list_view_fo_f505a212-a2d5-437e-8631-a5fdd559e429</field>
+    <field name="model">x_complaint_template</field>
+    <field name="name">Default list view for x_complaint_template</field>
+    <field name="type">list</field>
+  </record>
+  <record id="default_form_view_fo_9c58a7e6-2f54-4f46-974c-5596a85edbd0" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <form>
+        <header/>
+        <sheet string="Complaint  Template">
+          <widget name="web_ribbon" text="Archived" bg_color="text-bg-danger" invisible="x_active"/>
+          <field name="x_active" invisible="1"/>
+          <div class="oe_title">
+            <h1>
+              <field name="x_name" required="1" placeholder="Name..."/>
+            </h1>
+          </div>
+          <group name="studio_group_169213">
+            <group name="studio_group_169213_left"/>
+            <group name="studio_group_169213_right"/>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+    <field name="key">studio_customization.default_form_view_fo_9c58a7e6-2f54-4f46-974c-5596a85edbd0</field>
+    <field name="model">x_complaint_template</field>
+    <field name="name">Default form view for x_complaint_template</field>
+    <field name="type">form</field>
+  </record>
+  <record id="default_search_view__e45c47e5-b7c1-4942-a2fe-7fa7fd228545" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <search>
+        <field name="x_name"/>
+        <filter invisible="1" string="My Activities" name="filter_activities_my" domain="[['activity_user_id', '=', uid]]"/>
+        <separator/>
+        <filter invisible="1" string="Late Activities" name="activities_overdue" domain="[('my_activity_date_deadline', '&lt;', 'today')]"/>
+        <filter invisible="1" string="Today Activities" name="activities_today" domain="[('my_activity_date_deadline', '=', 'today')]"/>
+        <filter invisible="1" string="Future Activities" name="activities_upcoming_all" domain="[('my_activity_date_deadline', '&gt;', 'today')]"/>
+        <separator/>
+        <separator/>
+        <filter string="Archived" name="archived_x_complaint_template" domain="[['x_active', '=', False]]"/>
+        <separator/>
+      </search>
+    </field>
+    <field name="key">studio_customization.default_search_view__e45c47e5-b7c1-4942-a2fe-7fa7fd228545</field>
+    <field name="model">x_complaint_template</field>
+    <field name="name">Default search view for x_complaint_template</field>
+    <field name="type">search</field>
+  </record>
+  <record id="odoo_studio_default__7bbf886c-52f2-400d-9839-6ceffb2a9682" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="/form//field[@name='x_name']" position="attributes">
+          <attribute name="placeholder"/>
+          <attribute name="required"/>
+        </xpath>
+        <xpath expr="/form//group[@name='studio_group_169213_left']" position="inside">
+          <field name="x_studio_complaint_type" options="{'create_name_field': 'x_name'}" required="True"/>
+        </xpath>
+        <xpath expr="/form//group[@name='studio_group_169213_right']" position="inside">
+          <field name="x_studio_many2one_1" options="{'create_name_field': 'x_name'}" invisible="True" string="repair_request_id"/>
+        </xpath>
+      </data>
+    </field>
+    <field name="inherit_id" ref="default_form_view_fo_9c58a7e6-2f54-4f46-974c-5596a85edbd0"/>
+    <field name="key">studio_customization.odoo_studio_default__7bbf886c-52f2-400d-9839-6ceffb2a9682</field>
+    <field name="mode">extension</field>
+    <field name="model">x_complaint_template</field>
+    <field name="name">Odoo Studio: Default form view for x_complaint_template customization</field>
+    <field name="priority">99</field>
+    <field name="type">form</field>
+  </record>
+  <record id="odoo_studio_product__e8c6a601-2944-436d-a1ee-3968d8369837" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="/form[@name='Product Template']//page[@name='invoicing']" position="after">
+          <page string="Details" name="studio_page_mk_1jvt4fn92" invisible="not x_studio_parts and not x_studio_accessories">
+            <group name="studio_group_mk">
+              <group name="studio_group_mk_left">
+                <field name="x_studio_brand" options="{'create_name_field': 'x_name'}"/>
+                <field name="x_studio_model" options="{'create_name_field': 'x_name'}"/>
+              </group>
+              <group name="studio_group_mk_right">
+                <field name="x_studio_color"/>
+                <field name="x_studio_note"/>
+              </group>
+            </group>
+          </page>
+        </xpath>
+        <xpath expr="/form[@name='Product Template']//field[@name='type']" position="after">
+          <field name="x_studio_parts"/>
+          <field name="x_studio_accessories"/>
+        </xpath>
+      </data>
+    </field>
+    <field name="inherit_id" ref="product.product_template_only_form_view"/>
+    <field name="key">studio_customization.odoo_studio_product__e8c6a601-2944-436d-a1ee-3968d8369837</field>
+    <field name="mode">extension</field>
+    <field name="model">product.template</field>
+    <field name="name">Odoo Studio: product.template.product.form customization</field>
+    <field name="priority">160</field>
+    <field name="type">form</field>
+  </record>
+  <record id="default_list_view_fo_8c141ea9-ba5d-48bd-b1fe-502fe6bcd70b" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <list default_order="x_studio_sequence asc,id desc">
+        <field name="x_studio_sequence" widget="handle"/>
+        <field name="x_name"/>
+      </list>
+    </field>
+    <field name="key">studio_customization.default_list_view_fo_8c141ea9-ba5d-48bd-b1fe-502fe6bcd70b</field>
+    <field name="model">x_repair_request_line_428b3</field>
+    <field name="name">Default list view for x_repair_request_line_428b3</field>
+    <field name="type">list</field>
+  </record>
+  <record id="default_form_view_fo_02049e95-ff42-4e52-a2d3-a7bc377e2a66" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <form>
+        <header/>
+        <sheet string="repair_request_line">
+          <div class="oe_title">
+            <h1>
+              <field name="x_name" required="1" placeholder="Name..."/>
+            </h1>
+          </div>
+          <group name="studio_group_8434a9">
+            <group name="studio_group_8434a9_left"/>
+            <group name="studio_group_8434a9_right"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+    <field name="key">studio_customization.default_form_view_fo_02049e95-ff42-4e52-a2d3-a7bc377e2a66</field>
+    <field name="model">x_repair_request_line_428b3</field>
+    <field name="name">Default form view for x_repair_request_line_428b3</field>
+    <field name="type">form</field>
+  </record>
+  <record id="default_search_view__861bcc7f-f5f0-4231-a927-0fbac45dfb49" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <search>
+        <field name="x_name"/>
+      </search>
+    </field>
+    <field name="key">studio_customization.default_search_view__861bcc7f-f5f0-4231-a927-0fbac45dfb49</field>
+    <field name="model">x_repair_request_line_428b3</field>
+    <field name="name">Default search view for x_repair_request_line_428b3</field>
+    <field name="type">search</field>
+  </record>
+  <record id="default_list_view_fo_00aed486-7434-4aa8-8708-7aea7b21df06" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <list default_order="x_studio_sequence asc,id desc">
+        <field name="x_studio_sequence" widget="handle"/>
+        <field name="x_name"/>
+      </list>
+    </field>
+    <field name="key">studio_customization.default_list_view_fo_00aed486-7434-4aa8-8708-7aea7b21df06</field>
+    <field name="model">x_repair_request_line_d1167</field>
+    <field name="name">Default list view for x_repair_request_line_d1167</field>
+    <field name="type">list</field>
+  </record>
+  <record id="default_form_view_fo_3a8a29c2-c98b-4be8-8bf3-ecc29a66c9c6" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <form>
+        <header/>
+        <sheet string="repair_request_line">
+          <div class="oe_title">
+            <h1>
+              <field name="x_name" required="1" placeholder="Name..."/>
+            </h1>
+          </div>
+          <group name="studio_group_c6f2f7">
+            <group name="studio_group_c6f2f7_left"/>
+            <group name="studio_group_c6f2f7_right"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+    <field name="key">studio_customization.default_form_view_fo_3a8a29c2-c98b-4be8-8bf3-ecc29a66c9c6</field>
+    <field name="model">x_repair_request_line_d1167</field>
+    <field name="name">Default form view for x_repair_request_line_d1167</field>
+    <field name="type">form</field>
+  </record>
+  <record id="default_search_view__785a2fbe-3f91-42f1-b9ad-10dd006b32f2" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <search>
+        <field name="x_name"/>
+      </search>
+    </field>
+    <field name="key">studio_customization.default_search_view__785a2fbe-3f91-42f1-b9ad-10dd006b32f2</field>
+    <field name="model">x_repair_request_line_d1167</field>
+    <field name="name">Default search view for x_repair_request_line_d1167</field>
+    <field name="type">search</field>
+  </record>
+  <record id="odoo_studio_default__805b2ab4-d2ce-461d-9c50-ea0cdbff2972" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="/list//field[@name='x_studio_sequence']" position="after">
+          <field name="x_studio_complaint_type" optional="show"/>
+        </xpath>
+      </data>
+    </field>
+    <field name="inherit_id" ref="default_list_view_fo_f505a212-a2d5-437e-8631-a5fdd559e429"/>
+    <field name="key">studio_customization.odoo_studio_default__805b2ab4-d2ce-461d-9c50-ea0cdbff2972</field>
+    <field name="mode">extension</field>
+    <field name="model">x_complaint_template</field>
+    <field name="name">Odoo Studio: Default list view for x_complaint_template customization</field>
+    <field name="priority">99</field>
+    <field name="type">list</field>
+  </record>
+  <record id="default_list_view_fo_bf3bb0ba-109f-4e9b-b6b4-2235e0a35c5e" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <list default_order="x_studio_sequence asc,id desc">
+        <field name="x_studio_sequence" widget="handle"/>
+        <field name="x_name"/>
+      </list>
+    </field>
+    <field name="key">studio_customization.default_list_view_fo_bf3bb0ba-109f-4e9b-b6b4-2235e0a35c5e</field>
+    <field name="model">x_repair_request_line_22882</field>
+    <field name="name">Default list view for x_repair_request_line_22882</field>
+    <field name="type">list</field>
+  </record>
+  <record id="default_form_view_fo_81a8ba28-1069-4271-a4af-36a6300cf079" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <form>
+        <header/>
+        <sheet string="repair_request_line">
+          <div class="oe_title">
+            <h1>
+              <field name="x_name" required="1" placeholder="Name..."/>
+            </h1>
+          </div>
+          <group name="studio_group_921d40">
+            <group name="studio_group_921d40_left"/>
+            <group name="studio_group_921d40_right"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+    <field name="key">studio_customization.default_form_view_fo_81a8ba28-1069-4271-a4af-36a6300cf079</field>
+    <field name="model">x_repair_request_line_22882</field>
+    <field name="name">Default form view for x_repair_request_line_22882</field>
+    <field name="type">form</field>
+  </record>
+  <record id="default_search_view__21ad8a03-52ee-4bac-a256-f733810e0b48" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <search>
+        <field name="x_name"/>
+      </search>
+    </field>
+    <field name="key">studio_customization.default_search_view__21ad8a03-52ee-4bac-a256-f733810e0b48</field>
+    <field name="model">x_repair_request_line_22882</field>
+    <field name="name">Default search view for x_repair_request_line_22882</field>
+    <field name="type">search</field>
+  </record>
+  <record id="default_list_view_fo_5320bfeb-8313-4122-b024-f3da7d5111f2" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <list>
+        <field name="x_studio_sequence" widget="handle"/>
+        <field name="x_name"/>
+      </list>
+    </field>
+    <field name="key">studio_customization.default_list_view_fo_5320bfeb-8313-4122-b024-f3da7d5111f2</field>
+    <field name="model">x_received_items</field>
+    <field name="name">Default list view for x_received_items</field>
+    <field name="type">list</field>
+  </record>
+  <record id="default_form_view_fo_76236932-c9f2-4405-a00a-80a59d566dc1" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <form>
+        <header/>
+        <sheet string="Received Items">
+          <widget name="web_ribbon" text="Archived" bg_color="text-bg-danger" invisible="x_active"/>
+          <field name="x_active" invisible="1"/>
+          <div class="oe_title">
+            <h1>
+              <field name="x_name" required="1" placeholder="Name..."/>
+            </h1>
+          </div>
+          <group name="studio_group_02ab1b">
+            <group name="studio_group_02ab1b_left"/>
+            <group name="studio_group_02ab1b_right"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+    <field name="key">studio_customization.default_form_view_fo_76236932-c9f2-4405-a00a-80a59d566dc1</field>
+    <field name="model">x_received_items</field>
+    <field name="name">Default form view for x_received_items</field>
+    <field name="type">form</field>
+  </record>
+  <record id="default_search_view__d22a349e-82c4-4742-88ad-f1074036aab2" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <search>
+        <field name="x_name"/>
+        <separator/>
+        <filter string="Archived" name="archived_x_received_items" domain="[['x_active', '=', False]]"/>
+        <separator/>
+      </search>
+    </field>
+    <field name="key">studio_customization.default_search_view__d22a349e-82c4-4742-88ad-f1074036aab2</field>
+    <field name="model">x_received_items</field>
+    <field name="name">Default search view for x_received_items</field>
+    <field name="type">search</field>
+  </record>
+  <record id="odoo_studio_default__8c108d03-6d46-44c4-8ed7-7da350a8e550" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="/form//field[@name='x_name']" position="attributes">
+          <attribute name="string">Name</attribute>
+        </xpath>
+        <xpath expr="/form//group[@name='studio_group_02ab1b_right']" position="inside">
+          <field widget="image" name="x_studio_item_picture" options="{&quot;size&quot;:[0,90]}"/>
+        </xpath>
+      </data>
+    </field>
+    <field name="inherit_id" ref="default_form_view_fo_76236932-c9f2-4405-a00a-80a59d566dc1"/>
+    <field name="key">studio_customization.odoo_studio_default__8c108d03-6d46-44c4-8ed7-7da350a8e550</field>
+    <field name="mode">extension</field>
+    <field name="model">x_received_items</field>
+    <field name="name">Odoo Studio: Default form view for x_received_items customization</field>
+    <field name="priority">99</field>
+    <field name="type">form</field>
+  </record>
+  <record id="studio_report_docume_1a4a060f-cffd-4a6c-b519-eff592e45d35" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <t t-name="studio_report_document">
+        <t t-set="address">
+          <address class="mb-0" t-field="doc.x_studio_partner_id" t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;], &quot;no_marker&quot;: True}"/>
+          <span t-if="doc.x_studio_partner_id.vat" t-field="doc.x_studio_partner_id.vat"/>
+        </t>
+        <t t-call="web.external_layout">
+          <div class="page">
+            <div class="oe_structure"/>
+          </div>
+        </t>
+      </t>
+    </field>
+    <field name="key">studio_customization.studio_report_docume_1a4a060f-cffd-4a6c-b519-eff592e45d35_document</field>
+    <field name="name">studio_customization.studio_report_docume_1a4a060f-cffd-4a6c-b519-eff592e45d35_document</field>
+    <field name="type">qweb</field>
+  </record>
+  <record id="studio_main_report_0a48ebe5-1dd8-416b-8e73-b93fbf15e58a" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <t t-name="studio_main_report">
+        <t t-call="web.html_container">
+          <t t-foreach="docs" t-as="doc">
+            <t t-call="studio_customization.studio_report_docume_1a4a060f-cffd-4a6c-b519-eff592e45d35_document"/>
+          </t>
+        </t>
+      </t>
+    </field>
+    <field name="key">studio_customization.studio_report_docume_1a4a060f-cffd-4a6c-b519-eff592e45d35</field>
+    <field name="name">studio_customization.studio_report_docume_1a4a060f-cffd-4a6c-b519-eff592e45d35</field>
+    <field name="type">qweb</field>
+  </record>
+  <record id="odoo_studio_external_982b6c21-bd5e-46ef-bc68-ca2017b0b5a0" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="/t[@t-name='web.external_layout_body']/div/h2" position="replace" meta-t-if="not hide_title" meta-t-out="layout_document_title"/>
+        <xpath expr="/t[@t-name='web.external_layout_body']/div/h3" position="after" meta-t-if="report_type == 'pdf'" meta-t-out="layout_document_title or ' '" meta-class="opacity-0 mb-0 h-0">Repair Request Ticket</xpath>
+      </data>
+    </field>
+    <field name="inherit_id" ref="web.external_layout_body"/>
+    <field name="key">web_studio.report_editor_customization_diff.view._web.external_layout_body</field>
+    <field name="mode">extension</field>
+    <field name="name">Odoo Studio: external_layout_body report customization</field>
+    <field name="priority">9999999</field>
+    <field name="type">qweb</field>
+  </record>
+  <record id="odoo_studio_studio_c_57cf2eca-19a2-45c6-8e89-fc0fbfc797a9" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="/t[@t-name='studio_report_document']//t[@t-call='web.external_layout']/div/div" position="after" meta-class="oe_structure">
+          <div class="oe_structure"><span t-field="doc.x_studio_partner_id" data-oe-demo="Contact"/>:</div>
+          <div class="oe_structure"><span t-field="doc.x_studio_partner_phone" data-oe-demo="Phone"/>:
+            </div>
+          <div class="oe_structure">
+            <br/>
+          </div>
+          <div class="oe_structure">
+            <br/>
+          </div>
+          <div class="oe_structure">
+            <br/>
+          </div>
+        </xpath>
+        <xpath expr="/t[@t-name='studio_report_document']//t[@t-call='web.external_layout']/div/div" position="inside" meta-class="oe_structure">
+          <br/>
+        </xpath>
+      </data>
+    </field>
+    <field name="inherit_id" ref="studio_report_docume_1a4a060f-cffd-4a6c-b519-eff592e45d35"/>
+    <field name="key">web_studio.report_editor_customization_diff.view._studio_customization.studio_report_docume_1a4a060f-cffd-4a6c-b519-eff592e45d35_document</field>
+    <field name="mode">extension</field>
+    <field name="name">Odoo Studio: studio_customization.studio_report_docume_1a4a060f-cffd-4a6c-b519-eff592e45d35_document report customization</field>
+    <field name="priority">9999999</field>
+    <field name="type">qweb</field>
+  </record>
+</odoo>

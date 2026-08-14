@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="active_repair_reques_e415ba9f-3e38-4a6b-b1ca-6dd3cb4cb457" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="active_repair_reques_476a1d56-05af-4344-a7a2-058113867083"/>
+    <field name="json_value">true</field>
+  </record>
+  <record id="sequence_repair_requ_21bb4325-6cdd-46da-9cec-ec2eb727d27a" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="sequence_repair_requ_6c7291ef-ce29-4f51-8699-ed571f6c63f6"/>
+    <field name="json_value">10</field>
+  </record>
+  <record id="active_brand_c2773c3f-e14c-477d-9334-6884446bdab8" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="active_brand_8e68d35a-ac8e-4b2c-a0cb-4b2b7b0bdf2c"/>
+    <field name="json_value">true</field>
+  </record>
+  <record id="sequence_brand_5cbfe0d0-8ff3-433c-94cb-ef8d0c3c2fd1" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="sequence_brand_922bc3fc-ef20-494d-981b-6c4055f5e893"/>
+    <field name="json_value">10</field>
+  </record>
+  <record id="active_models_ec9f059b-fd40-4982-acd6-bb39ef182315" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="active_models_2e3fadb7-f462-4231-8ebe-5bf46ee3d494"/>
+    <field name="json_value">true</field>
+  </record>
+  <record id="sequence_models_4162b106-3d66-43f4-a92e-093db11b3d53" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="sequence_models_6db1a621-a050-42f3-a800-1b4631490d22"/>
+    <field name="json_value">10</field>
+  </record>
+  <record id="active_complaint_typ_c2e15387-1cda-4a78-a0d7-7ce68c96665f" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="active_complaint_typ_d113d551-1243-4169-910c-9581a9d6c790"/>
+    <field name="json_value">true</field>
+  </record>
+  <record id="sequence_complaint_t_1fb078a4-171c-4dcd-81a4-4acfab462b32" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="sequence_complaint_t_058cd2e3-0b76-4c93-a46e-3df3b333029a"/>
+    <field name="json_value">10</field>
+  </record>
+  <record id="active_complaint_tem_99aac2fa-2a4b-4d5e-b933-8fe589a11ac1" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="active_complaint_tem_1aac4590-819e-4dc8-a901-05b0568b777f"/>
+    <field name="json_value">true</field>
+  </record>
+  <record id="sequence_complaint_t_dc6810cb-41d0-45e7-bd06-72c31c02f1d3" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="sequence_complaint_t_872fb83c-1b0a-4dc9-b9c9-6f923e843771"/>
+    <field name="json_value">10</field>
+  </record>
+  <record id="new_integer_repair_r_1ee80ea0-caf9-4c98-9e9d-b972ed0eb9db" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="new_integer_repair_r_bd82c3ff-ba3a-4a70-a739-5cd59a00833b"/>
+    <field name="json_value">"0"</field>
+  </record>
+  <record id="new_integer_repair_r_ef835aa7-11da-4184-b49f-83d2e0b94e14" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="new_integer_repair_r_21a37821-d917-4ff4-b23f-22eaa0673a0b"/>
+    <field name="json_value">"0"</field>
+  </record>
+  <record id="quantity_repair_requ_3becee4b-a156-457f-b164-b1fe09aa61f2" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="new_decimal_repair_r_3fcb95e7-fe6a-47b2-b1e1-0fdb536b0dae"/>
+    <field name="json_value">"1"</field>
+  </record>
+  <record id="new_selection_repair_9af7bfea-0180-4d49-9c67-23a71197a1ba" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="new_selection_repair_e677b5fa-b875-4a89-a1b7-a5c7aada3dcf"/>
+    <field name="json_value">"Draft"</field>
+  </record>
+  <record id="new_integer_repair_r_762f1c47-63a7-46de-8e48-2e3e0aaad3ab" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="new_integer_repair_r_ed62bdf0-f738-494c-9db6-c9222fa78124"/>
+    <field name="json_value">"1"</field>
+  </record>
+  <record id="active_received_item_717f15df-d8c6-413a-bd30-3266cb772cb2" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="active_received_item_6fa43ad7-2614-4eeb-8475-6a1a2abf437d"/>
+    <field name="json_value">true</field>
+  </record>
+  <record id="sequence_received_it_d57ed2eb-d246-458b-bb4d-3273535bc8dc" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="sequence_received_it_eb0d100d-30c6-40ac-a283-03935ce8b6dc"/>
+    <field name="json_value">10</field>
+  </record>
+  <record id="description_repair_r_6c7fbf58-b41e-4a50-97c5-dfb816001a3e" model="ir.default" context="{'studio': True}">
+    <field name="field_id" ref="description_repair_r_2f739560-c713-4c2b-89e7-e23e51954563"/>
+    <field name="json_value">"New"</field>
+  </record>
+</odoo>

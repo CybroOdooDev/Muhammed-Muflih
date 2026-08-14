@@ -1,0 +1,135 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6" model="ir.model" context="{'studio': True}">
+    <field name="info"><![CDATA[ Main super-class for regular database-persisted Odoo models.
+
+    Odoo models are created by inheriting from this class::
+
+        class ResUsers(Model):
+            ...
+
+    The system will later instantiate the class once per database (on
+    which the class' module is installed).
+    ]]></field>
+    <field name="is_mail_thread" eval="True"/>
+    <field name="is_mail_activity" eval="True"/>
+    <field name="model">x_repair_request</field>
+    <field name="name">Repair Request</field>
+  </record>
+  <record id="brand_a44add05-0049-429f-be04-b0228004478f" model="ir.model" context="{'studio': True}">
+    <field name="info"><![CDATA[ Main super-class for regular database-persisted Odoo models.
+
+    Odoo models are created by inheriting from this class::
+
+        class ResUsers(Model):
+            ...
+
+    The system will later instantiate the class once per database (on
+    which the class' module is installed).
+    ]]></field>
+    <field name="model">x_brand</field>
+    <field name="name">Brand</field>
+  </record>
+  <record id="models_a6d6a78b-3f7f-40f5-a486-9a0f5f42c574" model="ir.model" context="{'studio': True}">
+    <field name="info"><![CDATA[ Main super-class for regular database-persisted Odoo models.
+
+    Odoo models are created by inheriting from this class::
+
+        class ResUsers(Model):
+            ...
+
+    The system will later instantiate the class once per database (on
+    which the class' module is installed).
+    ]]></field>
+    <field name="is_mail_thread" eval="True"/>
+    <field name="is_mail_activity" eval="True"/>
+    <field name="model">x_models</field>
+    <field name="name">Models</field>
+  </record>
+  <record id="complaint_type_0daa4046-3e30-438e-a9f9-f918d0283de5" model="ir.model" context="{'studio': True}">
+    <field name="info"><![CDATA[ Main super-class for regular database-persisted Odoo models.
+
+    Odoo models are created by inheriting from this class::
+
+        class ResUsers(Model):
+            ...
+
+    The system will later instantiate the class once per database (on
+    which the class' module is installed).
+    ]]></field>
+    <field name="model">x_complaint_type</field>
+    <field name="name">Complaint Type</field>
+  </record>
+  <record id="complaint_template_88b492ee-b9ca-4b1c-8338-9935d882e7af" model="ir.model" context="{'studio': True}">
+    <field name="info"><![CDATA[ Main super-class for regular database-persisted Odoo models.
+
+    Odoo models are created by inheriting from this class::
+
+        class ResUsers(Model):
+            ...
+
+    The system will later instantiate the class once per database (on
+    which the class' module is installed).
+    ]]></field>
+    <field name="is_mail_thread" eval="True"/>
+    <field name="is_mail_activity" eval="True"/>
+    <field name="model">x_complaint_template</field>
+    <field name="name">Complaint  Template</field>
+  </record>
+  <record id="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292" model="ir.model" context="{'studio': True}">
+    <field name="info"><![CDATA[ Main super-class for regular database-persisted Odoo models.
+
+    Odoo models are created by inheriting from this class::
+
+        class ResUsers(Model):
+            ...
+
+    The system will later instantiate the class once per database (on
+    which the class' module is installed).
+    ]]></field>
+    <field name="model">x_repair_request_line_428b3</field>
+    <field name="name">repair_request_parts_line</field>
+  </record>
+  <record id="repair_request_line_2f3bc908-65ae-460c-aa29-8b62ea9c5fc6" model="ir.model" context="{'studio': True}">
+    <field name="info"><![CDATA[ Main super-class for regular database-persisted Odoo models.
+
+    Odoo models are created by inheriting from this class::
+
+        class ResUsers(Model):
+            ...
+
+    The system will later instantiate the class once per database (on
+    which the class' module is installed).
+    ]]></field>
+    <field name="model">x_repair_request_line_d1167</field>
+    <field name="name">repair_request_accessories_line</field>
+  </record>
+  <record id="repair_request_line_ea59b487-5b64-4c69-b36f-bf17ba9cf85e" model="ir.model" context="{'studio': True}">
+    <field name="info"><![CDATA[ Main super-class for regular database-persisted Odoo models.
+
+    Odoo models are created by inheriting from this class::
+
+        class ResUsers(Model):
+            ...
+
+    The system will later instantiate the class once per database (on
+    which the class' module is installed).
+    ]]></field>
+    <field name="model">x_repair_request_line_22882</field>
+    <field name="name">repair_request_line</field>
+  </record>
+  <record id="received_items_805d4124-9471-464e-9748-ab9380164c45" model="ir.model" context="{'studio': True}">
+    <field name="info"><![CDATA[ Main super-class for regular database-persisted Odoo models.
+
+    Odoo models are created by inheriting from this class::
+
+        class ResUsers(Model):
+            ...
+
+    The system will later instantiate the class once per database (on
+    which the class' module is installed).
+    ]]></field>
+    <field name="model">x_received_items</field>
+    <field name="name">Received Items</field>
+  </record>
+</odoo>

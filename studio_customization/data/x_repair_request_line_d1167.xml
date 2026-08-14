@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo noupdate="1">
+  <record id="x_repair_request_line_d1167_1" model="x_repair_request_line_d1167">
+    <field name="x_name">ww</field>
+    <field name="x_studio_accessories_quantity">2</field>
+    <field name="x_studio_products" ref="product_template_3"/>
+  </record>
+  <record id="x_repair_request_line_d1167_8" model="x_repair_request_line_d1167">
+    <field name="x_studio_accessories_sub_total">2.0</field>
+    <field name="x_studio_products" ref="product_template_3"/>
+  </record>
+  <record id="x_repair_request_line_d1167_9" model="x_repair_request_line_d1167">
+    <field name="x_studio_accessories_sub_total">12.0</field>
+    <field name="x_studio_sequence">1</field>
+    <field name="x_studio_accessories_quantity">3</field>
+    <field name="x_studio_products" ref="product_template_3"/>
+  </record>
+</odoo>

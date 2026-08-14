@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo noupdate="1">
+  <record id="product_product_3" model="product.product">
+    <field name="lst_price">4.0</field>
+    <field name="product_tmpl_id" ref="product_template_3"/>
+    <field name="name">aaaaaaaaa</field>
+    <field name="invoice_policy">order</field>
+  </record>
+  <record id="product_product_4" model="product.product">
+    <field name="lst_price">200.0</field>
+    <field name="product_tmpl_id" ref="product_template_4"/>
+    <field name="standard_price">100.0</field>
+    <field name="name">new prto</field>
+    <field name="invoice_policy">order</field>
+  </record>
+  <record id="product_product_1" model="product.product">
+    <field name="lst_price">1.0</field>
+    <field name="product_tmpl_id" ref="product_template_1"/>
+    <field name="name">sadsf</field>
+    <field name="invoice_policy">order</field>
+  </record>
+  <record id="product_product_2" model="product.product">
+    <field name="lst_price">1.0</field>
+    <field name="product_tmpl_id" ref="product_template_2"/>
+    <field name="name">sasac</field>
+    <field name="invoice_policy">order</field>
+  </record>
+</odoo>

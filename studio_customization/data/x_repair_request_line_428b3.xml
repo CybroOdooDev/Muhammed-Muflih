@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo noupdate="1">
+  <record id="x_repair_request_line_428b3_10" model="x_repair_request_line_428b3">
+    <field name="x_studio_products_id" ref="product_template_4"/>
+    <field name="x_studio_sub_total">200.0</field>
+  </record>
+  <record id="x_repair_request_line_428b3_11" model="x_repair_request_line_428b3">
+    <field name="x_studio_products_id" ref="product_template_2"/>
+    <field name="x_studio_sub_total">1.0</field>
+    <field name="x_studio_sequence">1</field>
+  </record>
+  <record id="x_repair_request_line_428b3_14" model="x_repair_request_line_428b3">
+    <field name="x_studio_products_id" ref="product_template_4"/>
+    <field name="x_studio_quantity">2.0</field>
+    <field name="x_studio_sub_total">400.0</field>
+  </record>
+  <record id="x_repair_request_line_428b3_15" model="x_repair_request_line_428b3">
+    <field name="x_studio_products_id" ref="product_template_2"/>
+    <field name="x_studio_sub_total">1.0</field>
+    <field name="x_studio_sequence">1</field>
+  </record>
+  <record id="x_repair_request_line_428b3_16" model="x_repair_request_line_428b3">
+    <field name="x_studio_products_id" ref="product_template_4"/>
+    <field name="x_studio_sub_total">200.0</field>
+    <field name="x_studio_sequence">2</field>
+  </record>
+  <record id="x_repair_request_line_428b3_17" model="x_repair_request_line_428b3">
+    <field name="x_studio_products_id" ref="product_template_4"/>
+    <field name="x_studio_sub_total">200.0</field>
+  </record>
+</odoo>

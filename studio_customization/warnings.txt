@@ -1,0 +1,32 @@
+The following relational data haven't been exported because they either refer
+to a model that Studio doesn't export, or have no XML id:
+
+Record: odoo_studio_default__7d55cd90-4ccf-42d9-b73a-8b0f797fa090,
+Model: ir.ui.view,
+Field: inherit_id,
+Type: many2one,
+Value: ir.ui.view(597,) ('Default kanban view for ir.model(1904,)')
+
+Record: parts_2cc43ccb-e90d-4829-ba63-459f4362d80f,
+Model: ir.filters,
+Field: action_id,
+Type: many2one,
+Value: ir.actions.actions(469,) ('Parts')
+
+Record: accessories_f8dd1698-6aa0-44bd-a8ae-d30d46c86ccc,
+Model: ir.filters,
+Field: action_id,
+Type: many2one,
+Value: ir.actions.actions(470,) ('Accessories')
+
+Record: x_repair_request_12,
+Model: x_repair_request,
+Field: x_studio_partner_id,
+Type: many2one,
+Value: res.partner(7,) ('amal')
+
+Record: x_repair_request_14,
+Model: x_repair_request,
+Field: x_studio_partner_id,
+Type: many2one,
+Value: res.partner(7,) ('amal')
