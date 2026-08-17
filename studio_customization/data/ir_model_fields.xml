@@ -40,7 +40,9 @@
     <field name="model">x_repair_request</field>
     <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
     <field name="name">x_studio_partner_id</field>
+    <field name="on_delete">restrict</field>
     <field name="relation">res.partner</field>
+    <field name="required" eval="True"/>
     <field name="tracking">1</field>
   </record>
   <record id="phone_repair_request_555ee6bd-2dcc-45c9-994b-a022b0cb1f4c" model="ir.model.fields" context="{'studio': True}">
@@ -281,15 +283,6 @@
     <field name="name">x_studio_note</field>
     <field name="on_delete" eval="False"/>
   </record>
-  <record id="new_integer_repair_r_bd82c3ff-ba3a-4a70-a739-5cd59a00833b" model="ir.model.fields" context="{'studio': True}">
-    <field name="ttype">integer</field>
-    <field name="copied" eval="True"/>
-    <field name="field_description">IMEI Number</field>
-    <field name="model">x_repair_request</field>
-    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
-    <field name="name">x_studio_imei_number</field>
-    <field name="on_delete" eval="False"/>
-  </record>
   <record id="new_integer_repair_r_21a37821-d917-4ff4-b23f-22eaa0673a0b" model="ir.model.fields" context="{'studio': True}">
     <field name="ttype">integer</field>
     <field name="copied" eval="True"/>
@@ -438,7 +431,7 @@
   <record id="new_selection_repair_e677b5fa-b875-4a89-a1b7-a5c7aada3dcf" model="ir.model.fields" context="{'studio': True}">
     <field name="ttype">selection</field>
     <field name="copied" eval="True"/>
-    <field name="field_description">request state</field>
+    <field name="field_description">Status</field>
     <field name="model">x_repair_request</field>
     <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
     <field name="name">x_studio_selection_1</field>
@@ -702,6 +695,7 @@
     <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
     <field name="name">x_studio_return_date</field>
     <field name="on_delete" eval="False"/>
+    <field name="required" eval="True"/>
   </record>
   <record id="new_many2one_repair__02182a84-b1a4-4499-b6e4-d4da118a2184" model="ir.model.fields" context="{'studio': True}">
     <field name="ttype">many2one</field>
@@ -720,5 +714,61 @@
     <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
     <field name="name">x_studio_model</field>
     <field name="relation">x_models</field>
+  </record>
+  <record id="new_checkbox_repair__803bb1af-f288-4da3-bd11-bc718f02fa51" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">boolean</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Warranty</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_warranty</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_date_repair_requ_83e7be05-d23d-483c-8ea6-b8c444b6b9e3" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">date</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Purchase Date</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_purchase_date</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_date_repair_requ_de93f903-21b8-4c13-b4c2-6792d7a16cef" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">date</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Warranty End Date</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_warranty_end_date</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="new_selection_repair_16a22a64-a1b2-4519-9616-c6bafa117f7f" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">selection</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Warranty Type</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_warranty_type</field>
+    <field name="on_delete" eval="False"/>
+    <field name="selection">[('Manufacturer Warranty', 'Manufacturer'), ('seller', 'Seller')]</field>
+  </record>
+  <record id="new_selection_repair_bc94f75d-d1fe-48f3-ac2e-283692178469" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">selection</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Warranty Status</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_warranty_status</field>
+    <field name="on_delete" eval="False"/>
+    <field name="selection">[('Active', 'Active'), ('Expired', 'Expired')]</field>
+  </record>
+  <record id="new_text_repair_requ_38d805a1-1e96-4df9-ac36-23893ee61320" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">IMEI Number</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_device_imei_number</field>
+    <field name="on_delete" eval="False"/>
   </record>
 </odoo>

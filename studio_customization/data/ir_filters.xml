@@ -1,13 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <odoo>
   <record id="parts_2cc43ccb-e90d-4829-ba63-459f4362d80f" model="ir.filters" context="{'studio': True}">
-    <field name="domain"><![CDATA[[("x_studio_parts", "!=", False)]]]></field>
+    <field name="action_id" ref="parts_25483a02-bb3c-4bdb-933b-80a637655687"/>
+    <field name="domain"><![CDATA[[("x_studio_parts", "=", True)]]]></field>
     <field name="is_default" eval="True"/>
     <field name="model_id">product.template</field>
     <field name="name">Parts</field>
   </record>
   <record id="accessories_f8dd1698-6aa0-44bd-a8ae-d30d46c86ccc" model="ir.filters" context="{'studio': True}">
-    <field name="domain"><![CDATA[[("x_studio_accessories", "!=", False)]]]></field>
+    <field name="action_id" ref="accessories_549f58b6-f5b3-4641-88e3-e8a2e228ca7b"/>
+    <field name="domain"><![CDATA[[("x_studio_accessories", "=", True)]]]></field>
     <field name="is_default" eval="True"/>
     <field name="model_id">product.template</field>
     <field name="name">Accessories</field>

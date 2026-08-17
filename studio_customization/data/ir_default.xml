@@ -40,10 +40,6 @@
     <field name="field_id" ref="sequence_complaint_t_872fb83c-1b0a-4dc9-b9c9-6f923e843771"/>
     <field name="json_value">10</field>
   </record>
-  <record id="new_integer_repair_r_1ee80ea0-caf9-4c98-9e9d-b972ed0eb9db" model="ir.default" context="{'studio': True}">
-    <field name="field_id" ref="new_integer_repair_r_bd82c3ff-ba3a-4a70-a739-5cd59a00833b"/>
-    <field name="json_value">"0"</field>
-  </record>
   <record id="new_integer_repair_r_ef835aa7-11da-4184-b49f-83d2e0b94e14" model="ir.default" context="{'studio': True}">
     <field name="field_id" ref="new_integer_repair_r_21a37821-d917-4ff4-b23f-22eaa0673a0b"/>
     <field name="json_value">"0"</field>

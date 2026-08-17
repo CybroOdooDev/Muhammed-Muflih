@@ -18,15 +18,3 @@ Model: ir.filters,
 Field: action_id,
 Type: many2one,
 Value: ir.actions.actions(470,) ('Accessories')
-
-Record: x_repair_request_12,
-Model: x_repair_request,
-Field: x_studio_partner_id,
-Type: many2one,
-Value: res.partner(7,) ('amal')
-
-Record: x_repair_request_14,
-Model: x_repair_request,
-Field: x_studio_partner_id,
-Type: many2one,
-Value: res.partner(7,) ('amal')

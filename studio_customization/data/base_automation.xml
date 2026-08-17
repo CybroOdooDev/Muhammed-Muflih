@@ -31,7 +31,14 @@
   <record id="repair_sequence_gene_d0845b02-069e-462b-9692-db184db2779b" model="base.automation" context="{'studio': True}">
     <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
     <field name="action_server_ids" eval="[(6, 0, [ref('execute_code_da0c93e3-b186-4113-ba65-9bc4c44caf4a')])]"/>
-    <field name="trigger">on_create</field>
+    <field name="trigger">on_create_or_write</field>
     <field name="name">repair sequence generation</field>
+  </record>
+  <record id="warranty_check_cb6df9d9-7c7b-4369-a92a-5ce7de659c0a" model="base.automation" context="{'studio': True}">
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="action_server_ids" eval="[(6, 0, [ref('warrantry_checkk_0c7fcb01-f3e8-4fb6-9635-32e69f1d3231')])]"/>
+    <field name="trigger">on_change</field>
+    <field name="name">warranty check</field>
+    <field name="on_change_field_ids" eval="[(6, 0, [ref('new_date_repair_requ_83e7be05-d23d-483c-8ea6-b8c444b6b9e3'), ref('new_date_repair_requ_de93f903-21b8-4c13-b4c2-6792d7a16cef')])]"/>
   </record>
 </odoo>

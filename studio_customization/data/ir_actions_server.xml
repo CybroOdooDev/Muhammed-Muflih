@@ -8,14 +8,6 @@ record['x_studio_parts_total'] = total]]></field>
     <field name="name">Execute Code</field>
     <field name="usage">base_automation</field>
   </record>
-  <record id="confirm_repair_reque_1db460b1-97b6-49c0-86cb-86c4469e7bf8" model="ir.actions.server" context="{'studio': True}">
-    <field name="binding_model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
-    <field name="code"><![CDATA[if record.x_studio_selection_1 == 'draft':
-    record['x_studio_selection_1'] = 'confirm']]></field>
-    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
-    <field name="state">code</field>
-    <field name="name">confirm repair request</field>
-  </record>
   <record id="execute_code_9a0f42ba-378d-4dbe-bf60-c3d58a0ece3e" model="ir.actions.server" context="{'studio': True}">
     <field name="code"><![CDATA[qty = record.x_studio_quantity or 0.0
 price = record.x_studio_related_list_price_1 or 0.0
@@ -46,10 +38,26 @@ record['x_studio_accessories_total'] = total]]></field>
   <record id="assign_to_technician_dfc917ce-aa2e-4cf9-bdfb-35ef4a4109ab" model="ir.actions.server" context="{'studio': True}">
     <field name="binding_model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
     <field name="code"><![CDATA[if not record.x_studio_user_id:
-  raise UserError("Please select a Technician before assigning!")
+    raise UserError("Please select a Technician before assigning!")
+
 if record.x_studio_selection_1 == 'Draft':
-     record.write({'x_studio_selection_1': 'Confirm'})
-    ]]></field>
+    record.write({'x_studio_selection_1': 'Confirm'})
+
+template = env.ref('studio_customization.mail_template_repair_request_assigned', raise_if_not_found=False)
+if not template:
+    template = env['mail.template'].search([('name', '=', 'Repair Request: Assigned to Technician')], limit=1)
+
+if template:
+    template.send_mail(record.id, force_send=True)
+    partner = record.x_studio_partner_id
+    if partner:
+        record.message_post(
+            body=template._render_field('body_html', [record.id])[record.id],
+            subject=template._render_field('subject', [record.id])[record.id],
+            partner_ids=[partner.id],
+            message_type='comment',
+            subtype_xmlid='mail.mt_comment',
+        )]]></field>
     <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
     <field name="state">code</field>
     <field name="name">Assign to Technician Stage</field>
@@ -71,10 +79,11 @@ if record.x_studio_selection_1 == 'Draft':
     <field name="name">repair completed</field>
   </record>
   <record id="execute_code_da0c93e3-b186-4113-ba65-9bc4c44caf4a" model="ir.actions.server" context="{'studio': True}">
-    <field name="code"><![CDATA[for record in records:
-    if not record.x_name or  record.x_name=='New':
-        sequence_num=env['ir.sequence'].next_by_code('repair.request.sequence.code')or 'New'
-        record.write({'x_name':sequence_num})]]></field>
+    <field name="code"><![CDATA[for rec in (records or [record]):
+    if not rec.x_name or rec.x_name in ('/', 'New', ''):
+        seq = env['ir.sequence'].next_by_code('repair.request.sequence.code')
+        if seq:
+            rec.write({'x_name': seq})]]></field>
     <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
     <field name="state">code</field>
     <field name="name">Execute Code</field>
@@ -90,6 +99,12 @@ elif 'partner_id' in record._fields and record.partner_id:
     partner_id = record.partner_id.id
 elif 'x_studio_contact' in record._fields and record.x_studio_contact:
     partner_id = record.x_studio_contact.id
+<!--invoice_lines=[]-->
+<!--if record.x_studio_warranty == 'True':-->
+<!--    if record.x_studio_warranty_status =='Active':-->
+<!--        invoice_lines=(0,0{-->
+<!--        'product':})-->
+
 
 action = {
     'name': 'Customer Invoice',
@@ -106,5 +121,16 @@ action = {
     <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
     <field name="state">code</field>
     <field name="name">create invoice</field>
+  </record>
+  <record id="warrantry_checkk_0c7fcb01-f3e8-4fb6-9635-32e69f1d3231" model="ir.actions.server" context="{'studio': True}">
+    <field name="code"><![CDATA[if record.x_studio_request_date and record.x_studio_warranty_end_date:
+    if record.x_studio_request_date <= record.x_studio_warranty_end_date:
+        record.write({'x_studio_warranty_status': 'Active'})
+    else:
+        record.write({'x_studio_warranty_status': 'Expired'})]]></field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="state">code</field>
+    <field name="name">warrantry checkk</field>
+    <field name="usage">base_automation</field>
   </record>
 </odoo>

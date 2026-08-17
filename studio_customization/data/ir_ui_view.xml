@@ -29,7 +29,7 @@
           </div>
           <group name="studio_group_d81ca1">
             <group name="studio_group_d81ca1_left">
-              <field name="x_studio_partner_id"/>
+              <field name="x_studio_partner_id" required="True"/>
               <field name="x_studio_partner_phone" widget="phone" options="{'enable_sms': True}"/>
               <field name="x_studio_partner_email" widget="email"/>
             </group>
@@ -144,6 +144,7 @@
     <field name="name">Default list view for x_models</field>
     <field name="type">list</field>
   </record>
+
   <record id="default_form_view_fo_9c9afc1f-5ffa-4792-80ec-7d2f90044666" model="ir.ui.view" context="{'studio': True}">
     <field name="arch" type="xml">
       <form>
@@ -209,45 +210,31 @@
     <field name="priority">99</field>
     <field name="type">form</field>
   </record>
-  <record id="odoo_studio_default__7d55cd90-4ccf-42d9-b73a-8b0f797fa090" model="ir.ui.view" context="{'studio': True}">
-    <field name="arch" type="xml">
-      <data>
-        <xpath expr="/kanban//field[@name='x_name']" position="after">
-          <field name="x_studio_image" display="full" widget="image" options="{&quot;size&quot;:[0,90],&quot;convert_to_webp&quot;:false,&quot;zoom&quot;:false}"/>
-          <field name="x_studio_many2one_1" display="full"/>
-        </xpath>
-      </data>
-    </field>
-    <field name="key">studio_customization.odoo_studio_default__7d55cd90-4ccf-42d9-b73a-8b0f797fa090</field>
-    <field name="mode">extension</field>
-    <field name="model">x_models</field>
-    <field name="name">Odoo Studio: Default kanban view for ir.model(1904,) customization</field>
-    <field name="priority">99</field>
-    <field name="type">kanban</field>
-  </record>
   <record id="odoo_studio_default__ecf4682b-ba14-4744-bce0-85943f532bc1" model="ir.ui.view" context="{'studio': True}">
     <field name="arch" type="xml">
       <data>
         <xpath expr="/form/header" position="inside">
-          <field widget="statusbar" options="{'clickable': '1'}" name="x_studio_selection_1" string="request state"/>
+          <field widget="statusbar" name="x_studio_selection_1" string="request state"/>
           <button string="Assign To technician" type="action" name="studio_customization.assign_to_technician_dfc917ce-aa2e-4cf9-bdfb-35ef4a4109ab" class="oe_highlight" invisible="x_studio_selection_1 != &quot;Draft&quot;"/>
-          <button string="Print Ticket" type="action" class="oe_highlight"/>
+          <button string="Print Ticket" type="action" class="oe_highlight" name="studio_customization.repair_request_repor_8ed50e29-0268-4641-b8c1-05c7c5d4fc48" invisible="x_studio_selection_1 == &quot;Draft&quot;"/>
           <button string="Completed" type="action" class="oe_highlight" name="studio_customization.repair_completed_8f479551-6534-475f-9bc0-5a30bc8f7af4" invisible="x_studio_selection_1 != &quot;Start&quot;"/>
-          <button string="Not Solved" type="action"/>
+          <button string="Not Solved" type="object"/>
           <button string="Return" type="action"/>
           <button string="Start" type="action" class="oe_highlight" name="studio_customization.start_repairing_1ade21b7-5346-4cfa-a81d-b8da5fa40413" invisible="x_studio_selection_1 != &quot;Confirm&quot;"/>
           <button string="Create Invoice" type="action" class="oe_highlight" name="studio_customization.create_invoice_9f7e496d-e2d8-4ab4-98cf-6e72cfb15c51"/>
         </xpath>
         <xpath expr="/form//group[@name='studio_group_d81ca1']" position="after">
           <notebook name="studio_notebook_5n6_1jvt2ni48">
-            <page string="Device Details" name="studio_page_4ic_1jvt2patn">
+            <page string="Warranty Details" name="studio_page_4ic_1jvt2patn" invisible="not x_studio_warranty">
               <group name="studio_group_4ic">
                 <group name="studio_group_4ic_left">
-                  <field name="x_studio_imei_number"/>
-                  <field name="x_studio_warranty_no"/>
+                  <field name="x_studio_purchase_date" required="x_studio_warranty"/>
+                  <field name="x_studio_warranty_end_date" required="x_studio_warranty"/>
+                  <field name="x_studio_warranty_type"/>
                 </group>
                 <group name="studio_group_4ic_right">
                   <field name="x_studio_internal_note"/>
+                  <field name="x_studio_warranty_status"/>
                 </group>
               </group>
             </page>
@@ -337,9 +324,15 @@
           <attribute name="readonly">True</attribute>
           <attribute name="required">False</attribute>
         </xpath>
+        <xpath expr="/form//field[@name='x_studio_partner_id']" position="before">
+          <field name="x_studio_warranty"/>
+        </xpath>
+        <xpath expr="/form//field[@name='x_studio_partner_email']" position="after">
+          <field name="x_studio_device_imei_number"/>
+        </xpath>
         <xpath expr="/form//field[@name='x_studio_user_id']" position="after">
           <field name="x_studio_request_date" options="{&quot;warn_future&quot;:true}"/>
-          <field name="x_studio_return_date"/>
+          <field name="x_studio_return_date" required="True"/>
           <field name="x_studio_brand" options="{'create_name_field': 'x_name'}"/>
           <field name="x_studio_model" options="{'create_name_field': 'x_name'}"/>
         </xpath>
@@ -756,13 +749,100 @@
   <record id="studio_report_docume_1a4a060f-cffd-4a6c-b519-eff592e45d35" model="ir.ui.view" context="{'studio': True}">
     <field name="arch" type="xml">
       <t t-name="studio_report_document">
-        <t t-set="address">
-          <address class="mb-0" t-field="doc.x_studio_partner_id" t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;], &quot;no_marker&quot;: True}"/>
-          <span t-if="doc.x_studio_partner_id.vat" t-field="doc.x_studio_partner_id.vat"/>
-        </t>
         <t t-call="web.external_layout">
-          <div class="page">
-            <div class="oe_structure"/>
+          <div class="page" style="font-family: Arial, sans-serif; font-size: 13px; color: #212529;">
+            
+            <!-- Document Title -->
+            <div class="text-center my-3" style="border-bottom: 2px solid #0d6efd; padding-bottom: 10px;">
+              <h2 style="font-weight: bold; color: #0d6efd; margin: 0; letter-spacing: 1px; text-transform: uppercase;">REQUEST TICKET</h2>
+              <h5 class="text-muted mt-1">Ticket Number: <span t-field="doc.x_name"/></h5>
+            </div>
+
+            <!-- Customer & Ticket Summary Box -->
+            <div class="card mb-4" style="border: 1px solid #dee2e6; border-radius: 6px;">
+              <div class="card-header font-weight-bold" style="background-color: #f8f9fa; border-bottom: 1px solid #dee2e6; color: #0d6efd; padding: 8px 15px;">
+                Customer &amp; Ticket Information
+              </div>
+              <div class="card-body" style="padding: 12px 15px;">
+                <div class="row">
+                  <div class="col-6">
+                    <p class="mb-1"><strong>Customer Name:</strong> <span t-field="doc.x_studio_partner_id.name"/></p>
+                    <p class="mb-1"><strong>Phone:</strong> <span t-field="doc.x_studio_partner_phone"/></p>
+                    <p class="mb-1"><strong>Email:</strong> <span t-field="doc.x_studio_partner_email"/></p>
+                  </div>
+                  <div class="col-6">
+                    <p class="mb-1"><strong>Sequence No:</strong> <span t-field="doc.x_name"/></p>
+                    <p class="mb-1"><strong>Request Date:</strong> <span t-field="doc.x_studio_request_date"/></p>
+                    <p class="mb-1"><strong>Return Date:</strong> <span t-field="doc.x_studio_return_date"/></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Device Details & Complaints Table -->
+            <h5 class="font-weight-bold mb-2" style="color: #0d6efd;">Device Details &amp; Complaints</h5>
+            <table class="table table-bordered mb-4" style="border-color: #dee2e6; width: 100%;">
+              <thead style="background-color: #f8f9fa; color: #212529;">
+                <tr>
+                  <th style="padding: 8px; width: 20%;">Brand</th>
+                  <th style="padding: 8px; width: 25%;">Model</th>
+                  <th style="padding: 8px; width: 25%;">IMEI / Serial No</th>
+                  <th style="padding: 8px; width: 30%;">Complaints</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding: 8px;"><span t-field="doc.x_studio_brand.x_name"/></td>
+                  <td style="padding: 8px;"><span t-field="doc.x_studio_model.x_name"/></td>
+                  <td style="padding: 8px;"><span t-field="doc.x_studio_device_imei_number"/></td>
+                  <td style="padding: 8px;">
+                    <t t-if="doc.x_studio_one2many_4">
+                      <ul style="margin: 0; padding-left: 16px;">
+                        <t t-foreach="doc.x_studio_one2many_4" t-as="comp">
+                          <li>
+                            <span t-field="comp.x_studio_complaint_type.x_name"/>
+                            <t t-if="comp.x_studio_complaint_description">
+                              - <span t-field="comp.x_studio_complaint_description.x_name"/>
+                            </t>
+                          </li>
+                        </t>
+                      </ul>
+                    </t>
+                    <t t-else="">
+                      <span class="text-muted">N/A</span>
+                    </t>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Received Items Box -->
+            <t t-if="doc.x_studio_many2many_1">
+              <div class="card mb-4" style="border: 1px solid #b6d4fe; border-radius: 6px;">
+                <div class="card-header font-weight-bold" style="background-color: #e7f1ff; border-bottom: 1px solid #b6d4fe; color: #084298; padding: 8px 15px;">
+                  Received Items
+                </div>
+                <div class="card-body" style="padding: 12px 15px;">
+                  <table class="table table-sm table-striped mb-0">
+                    <thead>
+                      <tr>
+                        <th style="width: 10%;">#</th>
+                        <th>Item Name</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <t t-foreach="doc.x_studio_many2many_1" t-as="item">
+                        <tr>
+                          <td><t t-out="item_index + 1"/></td>
+                          <td><strong><span t-field="item.x_name"/></strong></td>
+                        </tr>
+                      </t>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </t>
+
           </div>
         </t>
       </t>
@@ -801,25 +881,7 @@
   </record>
   <record id="odoo_studio_studio_c_57cf2eca-19a2-45c6-8e89-fc0fbfc797a9" model="ir.ui.view" context="{'studio': True}">
     <field name="arch" type="xml">
-      <data>
-        <xpath expr="/t[@t-name='studio_report_document']//t[@t-call='web.external_layout']/div/div" position="after" meta-class="oe_structure">
-          <div class="oe_structure"><span t-field="doc.x_studio_partner_id" data-oe-demo="Contact"/>:</div>
-          <div class="oe_structure"><span t-field="doc.x_studio_partner_phone" data-oe-demo="Phone"/>:
-            </div>
-          <div class="oe_structure">
-            <br/>
-          </div>
-          <div class="oe_structure">
-            <br/>
-          </div>
-          <div class="oe_structure">
-            <br/>
-          </div>
-        </xpath>
-        <xpath expr="/t[@t-name='studio_report_document']//t[@t-call='web.external_layout']/div/div" position="inside" meta-class="oe_structure">
-          <br/>
-        </xpath>
-      </data>
+      <data/>
     </field>
     <field name="inherit_id" ref="studio_report_docume_1a4a060f-cffd-4a6c-b519-eff592e45d35"/>
     <field name="key">web_studio.report_editor_customization_diff.view._studio_customization.studio_report_docume_1a4a060f-cffd-4a6c-b519-eff592e45d35_document</field>
@@ -827,5 +889,21 @@
     <field name="name">Odoo Studio: studio_customization.studio_report_docume_1a4a060f-cffd-4a6c-b519-eff592e45d35_document report customization</field>
     <field name="priority">9999999</field>
     <field name="type">qweb</field>
+  </record>
+  <record id="odoo_studio_default__739dcf1a-101c-472d-a338-82268018dfa8" model="ir.ui.view" context="{'studio': True}">
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="/list//field[@name='x_studio_user_id']" position="after">
+          <field name="x_studio_selection_1" optional="show" string="Status"/>
+        </xpath>
+      </data>
+    </field>
+    <field name="inherit_id" ref="default_list_view_fo_9495e97f-22ef-4474-a3e3-803158fa2f65"/>
+    <field name="key">studio_customization.odoo_studio_default__739dcf1a-101c-472d-a338-82268018dfa8</field>
+    <field name="mode">extension</field>
+    <field name="model">x_repair_request</field>
+    <field name="name">Odoo Studio: Default list view for x_repair_request customization</field>
+    <field name="priority">99</field>
+    <field name="type">list</field>
   </record>
 </odoo>

@@ -1,9 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<odoo noupdate="1">
-  <record id="x_complaint_type_1" model="x_complaint_type">
-    <field name="x_name">Display</field>
-  </record>
-  <record id="x_complaint_type_2" model="x_complaint_type">
-    <field name="x_name">Battery</field>
-  </record>
-</odoo>

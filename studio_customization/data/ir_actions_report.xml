@@ -3,7 +3,7 @@
   <record id="repair_request_repor_8ed50e29-0268-4641-b8c1-05c7c5d4fc48" model="ir.actions.report" context="{'studio': True}">
     <field name="binding_model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
     <field name="model">x_repair_request</field>
-    <field name="name">Repair Request Ticket</field>
+    <field name="name">Repair Ticket</field>
     <field name="report_name">studio_customization.studio_report_docume_1a4a060f-cffd-4a6c-b519-eff592e45d35</field>
   </record>
 </odoo>
