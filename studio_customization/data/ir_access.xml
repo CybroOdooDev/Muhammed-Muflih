@@ -12,6 +12,18 @@
     <field name="name">Repair Request group_user</field>
     <field name="operation">cru</field>
   </record>
+  <record id="repair_request_group_technician_custom" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="group_mobile_service_technician"/>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">Repair Request group_mobile_service_technician</field>
+    <field name="operation">cru</field>
+  </record>
+  <record id="repair_request_group_manager_custom" model="ir.access" context="{'studio': True}">
+    <field name="group_id" ref="group_mobile_service_manager"/>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">Repair Request group_mobile_service_manager</field>
+    <field name="operation">crud</field>
+  </record>
   <record id="brand_group_system_2b7f803a-0b36-4343-8bd3-86b047d25f5b" model="ir.access" context="{'studio': True}">
     <field name="group_id" ref="base.group_system"/>
     <field name="model_id" ref="brand_a44add05-0049-429f-be04-b0228004478f"/>

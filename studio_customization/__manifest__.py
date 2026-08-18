@@ -22,6 +22,7 @@
     'data/ir_ui_menu.xml',
     'data/ir_filters.xml',
     'data/base_automation.xml',
+    'data/res_groups.xml',
     'data/ir_access.xml',
     'data/ir_default.xml',
 ],

@@ -40,8 +40,18 @@ record['x_studio_accessories_total'] = total]]></field>
     <field name="code"><![CDATA[if not record.x_studio_user_id:
     raise UserError("Please select a Technician before assigning!")
 
+vals = {}
 if record.x_studio_selection_1 == 'Draft':
-    record.write({'x_studio_selection_1': 'Confirm'})
+    vals['x_studio_selection_1'] = 'Confirm'
+
+if record.x_studio_request_date and record.x_studio_warranty_end_date:
+    if record.x_studio_request_date <= record.x_studio_warranty_end_date:
+        vals['x_studio_warranty_status'] = 'Active'
+    else:
+        vals['x_studio_warranty_status'] = 'Expired'
+
+if vals:
+    record.write(vals)
 
 template = env.ref('studio_customization.mail_template_repair_request_assigned', raise_if_not_found=False)
 if not template:
@@ -78,6 +88,84 @@ if template:
     <field name="state">code</field>
     <field name="name">repair completed</field>
   </record>
+  <record id="repair_not_solved_c1a34b22-871d-4876-b60d-9653bc02148d" model="ir.actions.server" context="{'studio': True}">
+    <field name="binding_model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="code"><![CDATA[if record.x_studio_selection_1 == 'Start':
+     record.write({'x_studio_selection_1': 'not solved'})]]></field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="state">code</field>
+    <field name="name">Not Solved</field>
+  </record>
+  <record id="repair_returned_8a391f1a-5b12-4c28-98e9-4e789a0b1c2d" model="ir.actions.server" context="{'studio': True}">
+    <field name="binding_model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="code"><![CDATA[if record.x_studio_selection_1 == 'not solved':
+    if not record.x_studio_not_solved_reason or not record.x_studio_not_solved_reason.strip():
+        raise UserError("Please fill in the Not Solved Reason before returning.")
+    record.write({'x_studio_selection_1': 'returned'})]]></field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="state">code</field>
+    <field name="name">Return Repair Request</field>
+  </record>
+  <record id="repair_done_action_9b8a7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d" model="ir.actions.server" context="{'studio': True}">
+    <field name="binding_model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="code"><![CDATA[if not record.x_studio_invoice_id:
+    raise UserError("Please create an invoice before completing the request.")
+if record.x_studio_invoice_id.state != 'posted':
+    raise UserError("Please confirm the invoice before marking as Done.")
+record.write({'x_studio_selection_1': 'done'})]]></field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="state">code</field>
+    <field name="name">Done Repair Request</field>
+  </record>
+  <record id="send_not_solved_mail_a38f9021-992e-4efb-88a4-39f2824b01d3" model="ir.actions.server" context="{'studio': True}">
+    <field name="binding_model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="code"><![CDATA[if not record.x_studio_partner_id:
+    raise UserError("Please select a customer before sending mail.")
+
+template = env.ref('studio_customization.mail_template_repair_not_solved', raise_if_not_found=False)
+if not template:
+    template = env['mail.template'].search([('name', '=', 'Repair Request: Not Solved')], limit=1)
+
+if template:
+    template.send_mail(record.id, force_send=True)
+    partner = record.x_studio_partner_id
+    if partner:
+        record.message_post(
+            body=template._render_field('body_html', [record.id])[record.id],
+            subject=template._render_field('subject', [record.id])[record.id],
+            partner_ids=[partner.id],
+            message_type='comment',
+            subtype_xmlid='mail.mt_comment',
+        )]]></field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="state">code</field>
+    <field name="name">Send Not Solved Mail</field>
+  </record>
+  <record id="send_completed_mail_7b8a9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d" model="ir.actions.server" context="{'studio': True}">
+    <field name="binding_model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="code"><![CDATA[if not record.x_studio_partner_id:
+    raise UserError("Please select a customer before sending mail.")
+
+template = env.ref('studio_customization.mail_template_repair_completed', raise_if_not_found=False)
+if not template:
+    template = env['mail.template'].search([('name', '=', 'Repair Request: Completed')], limit=1)
+
+if template:
+    template.send_mail(record.id, force_send=True)
+    partner = record.x_studio_partner_id
+    if partner:
+        record.message_post(
+            body=template._render_field('body_html', [record.id])[record.id],
+            subject=template._render_field('subject', [record.id])[record.id],
+            partner_ids=[partner.id],
+            message_type='comment',
+            subtype_xmlid='mail.mt_comment',
+        )]]></field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="state">code</field>
+    <field name="name">Send Completed Mail</field>
+  </record>
+  
   <record id="execute_code_da0c93e3-b186-4113-ba65-9bc4c44caf4a" model="ir.actions.server" context="{'studio': True}">
     <field name="code"><![CDATA[for rec in (records or [record]):
     if not rec.x_name or rec.x_name in ('/', 'New', ''):
@@ -91,36 +179,95 @@ if template:
   </record>
   <record id="create_invoice_9f7e496d-e2d8-4ab4-98cf-6e72cfb15c51" model="ir.actions.server" context="{'studio': True}">
     <field name="binding_model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
-    <field name="code"><![CDATA[# Safely find the partner field using Odoo's safe_eval environment
-partner_id = False
-if 'x_studio_partner_id' in record._fields and record.x_studio_partner_id:
-    partner_id = record.x_studio_partner_id.id
-elif 'partner_id' in record._fields and record.partner_id:
-    partner_id = record.partner_id.id
-elif 'x_studio_contact' in record._fields and record.x_studio_contact:
-    partner_id = record.x_studio_contact.id
-<!--invoice_lines=[]-->
-<!--if record.x_studio_warranty == 'True':-->
-<!--    if record.x_studio_warranty_status =='Active':-->
-<!--        invoice_lines=(0,0{-->
-<!--        'product':})-->
-
-
-action = {
-    'name': 'Customer Invoice',
-    'type': 'ir.actions.act_window',
-    'res_model': 'account.move',
-    'view_mode': 'form',
-    'views': [(False, 'form')],
-    'target': 'current',
-    'context': {
-        'default_move_type': 'out_invoice',
-        'default_partner_id': partner_id,
+    <field name="code"><![CDATA[if record.x_studio_invoice_id:
+    action = {
+        'name': 'Customer Invoice',
+        'type': 'ir.actions.act_window',
+        'res_model': 'account.move',
+        'res_id': record.x_studio_invoice_id.id,
+        'view_mode': 'form',
+        'views': [(False, 'form')],
+        'target': 'current',
     }
-}]]></field>
+else:
+    # 1. Safely find Customer Partner ID
+    partner_id = False
+    if 'x_studio_partner_id' in record._fields and record.x_studio_partner_id:
+        partner_id = record.x_studio_partner_id.id
+    elif 'partner_id' in record._fields and record.partner_id:
+        partner_id = record.partner_id.id
+    elif 'x_studio_contact' in record._fields and record.x_studio_contact:
+        partner_id = record.x_studio_contact.id
+
+    if not partner_id:
+        raise UserError("Please select a customer on this record before creating an invoice.")
+
+    invoice_lines = []
+
+    # Check if warranty is active
+    is_under_warranty = (str(record.x_studio_warranty) == 'True') and (record.x_studio_warranty_status == 'Active')
+
+    # 2. Add Repair Parts
+    for rec in record.x_studio_one2many_1:
+        if rec.x_studio_products_id:
+            # Price is 0 if under active warranty, otherwise use standard list price
+            unit_price = 0.0 if is_under_warranty else rec.x_studio_related_list_price_1
+            product = rec.x_studio_products_id.product_variant_id or rec.x_studio_products_id
+
+            invoice_lines.append((0, 0, {
+                'product_id': product.id,
+                'quantity': rec.x_studio_quantity or 1.0,
+                'price_unit': unit_price,
+            }))
+
+    # 3. Add Accessories (always billed regardless of warranty)
+    for rec in record.x_studio_one2many_2:
+        if rec.x_studio_products:
+            product = rec.x_studio_products.product_variant_id or rec.x_studio_products
+            invoice_lines.append((0, 0, {
+                'product_id': product.id,
+                'quantity': rec.x_studio_accessories_quantity or 1.0,
+                'price_unit': rec.x_studio_related_accessories_list_price,
+            }))
+
+    # 4. Create Invoice Record
+    invoice = env['account.move'].create({
+        'move_type': 'out_invoice',
+        'partner_id': partner_id,
+        'invoice_line_ids': invoice_lines,
+    })
+    record.write({'x_studio_invoice_id': invoice.id})
+
+    # 5. Return Action to Display Invoice
+    action = {
+        'name': 'Customer Invoice',
+        'type': 'ir.actions.act_window',
+        'res_model': 'account.move',
+        'res_id': invoice.id,
+        'view_mode': 'form',
+        'views': [(False, 'form')],
+        'target': 'current',
+    }
+]]></field>
     <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
     <field name="state">code</field>
     <field name="name">create invoice</field>
+  </record>
+  <record id="open_invoice_494c92a1-778e-4a6c-9411-b0e6e73cb12a" model="ir.actions.server" context="{'studio': True}">
+    <field name="binding_model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="code"><![CDATA[if record.x_studio_invoice_id:
+    action = {
+        'name': 'Customer Invoice',
+        'type': 'ir.actions.act_window',
+        'res_model': 'account.move',
+        'res_id': record.x_studio_invoice_id.id,
+        'view_mode': 'form',
+        'views': [(False, 'form')],
+        'target': 'current',
+    }]]></field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="state">code</field>
+    <field name="name">Open Invoice</field>
   </record>
   <record id="warrantry_checkk_0c7fcb01-f3e8-4fb6-9635-32e69f1d3231" model="ir.actions.server" context="{'studio': True}">
     <field name="code"><![CDATA[if record.x_studio_request_date and record.x_studio_warranty_end_date:

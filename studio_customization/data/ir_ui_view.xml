@@ -31,6 +31,7 @@
             <group name="studio_group_d81ca1_left">
               <field name="x_studio_partner_id" required="True"/>
               <field name="x_studio_partner_phone" widget="phone" options="{'enable_sms': True}"/>
+              <field name="x_studio_alternate_number" widget="phone" options="{'enable_sms': True}"/>
               <field name="x_studio_partner_email" widget="email"/>
             </group>
             <group name="studio_group_d81ca1_right">
@@ -59,11 +60,15 @@
         <filter invisible="1" string="Future Activities" name="activities_upcoming_all" domain="[('my_activity_date_deadline', '&gt;', 'today')]"/>
         <separator/>
         <filter string="My Repair Request" name="my_x_repair_request" domain="[['x_studio_user_id', '=', uid]]"/>
+        <filter string="Today" name="filter_request_date_today" domain="[('x_studio_request_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+        <filter string="Request Date" name="filter_request_date" date="x_studio_request_date"/>
         <separator/>
         <filter string="Archived" name="archived_x_repair_request" domain="[['x_active', '=', False]]"/>
         <separator/>
         <filter name="groupby_x_partner" string="Partner" context="{'group_by': 'x_studio_partner_id'}" domain="[]"/>
         <filter name="groupby_x_user" string="Responsible" context="{'group_by': 'x_studio_user_id'}" domain="[]"/>
+        <filter name="groupby_x_state" string="Status" context="{'group_by': 'x_studio_selection_1'}" domain="[]"/>
+        <filter name="groupby_x_request_date" string="Request Date" context="{'group_by': 'x_studio_request_date:day'}" domain="[]"/>
       </search>
     </field>
     <field name="key">studio_customization.default_search_view__e4d78fbd-362e-4f46-8293-de603b2bcb4a</field>
@@ -216,25 +221,37 @@
         <xpath expr="/form/header" position="inside">
           <field widget="statusbar" name="x_studio_selection_1" string="request state"/>
           <button string="Assign To technician" type="action" name="studio_customization.assign_to_technician_dfc917ce-aa2e-4cf9-bdfb-35ef4a4109ab" class="oe_highlight" invisible="x_studio_selection_1 != &quot;Draft&quot;"/>
-          <button string="Print Ticket" type="action" class="oe_highlight" name="studio_customization.repair_request_repor_8ed50e29-0268-4641-b8c1-05c7c5d4fc48" invisible="x_studio_selection_1 == &quot;Draft&quot;"/>
+          <button string="Print Ticket" type="action" class="oe_highlight" name="studio_customization.repair_request_repor_8ed50e29-0268-4641-b8c1-05c7c5d4fc48" invisible="x_studio_selection_1 in ('Draft','not solved','returned','done')"/>
           <button string="Completed" type="action" class="oe_highlight" name="studio_customization.repair_completed_8f479551-6534-475f-9bc0-5a30bc8f7af4" invisible="x_studio_selection_1 != &quot;Start&quot;"/>
-          <button string="Not Solved" type="object"/>
-          <button string="Return" type="action"/>
+          <button string="Not Solved" type="action" name="studio_customization.repair_not_solved_c1a34b22-871d-4876-b60d-9653bc02148d" invisible="x_studio_selection_1 != &quot;Start&quot;"/>
+          <button string="Send Mail" type="action" class="oe_highlight" name="studio_customization.send_not_solved_mail_a38f9021-992e-4efb-88a4-39f2824b01d3" invisible="x_studio_selection_1 != &quot;not solved&quot;"/>
+          <button string="Return" type="action" class="oe_highlight" name="studio_customization.repair_returned_8a391f1a-5b12-4c28-98e9-4e789a0b1c2d" invisible="x_studio_selection_1 != &quot;not solved&quot;"/>
           <button string="Start" type="action" class="oe_highlight" name="studio_customization.start_repairing_1ade21b7-5346-4cfa-a81d-b8da5fa40413" invisible="x_studio_selection_1 != &quot;Confirm&quot;"/>
-          <button string="Create Invoice" type="action" class="oe_highlight" name="studio_customization.create_invoice_9f7e496d-e2d8-4ab4-98cf-6e72cfb15c51"/>
+          <button string="Create Invoice" type="action" class="oe_highlight" name="studio_customization.create_invoice_9f7e496d-e2d8-4ab4-98cf-6e72cfb15c51" invisible="x_studio_invoice_id or x_studio_selection_1 != 'Completed'  "/>
+          <button string="Send Mail" type="action" class="oe_highlight" name="studio_customization.send_completed_mail_7b8a9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d" invisible="x_studio_selection_1 != &quot;Completed&quot;"/>
+          <button string="Done" type="action" class="oe_highlight" name="studio_customization.repair_done_action_9b8a7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d" invisible="x_studio_invoice_state != &quot;posted&quot; or x_studio_selection_1 == &quot;done&quot;"/>
+        </xpath>
+        <xpath expr="/form/sheet/widget[@name='web_ribbon']" position="before">
+          <div class="oe_button_box" name="button_box">
+            <button name="studio_customization.open_invoice_494c92a1-778e-4a6c-9411-b0e6e73cb12a" type="action" class="oe_stat_button" icon="fa-pencil-square-o" invisible="not x_studio_invoice_id">
+              <field name="x_studio_invoice_id" widget="statinfo" string="Invoice"/>
+            </button>
+          </div>
+          <field name="x_studio_invoice_id" invisible="1"/>
+          <field name="x_studio_invoice_state" invisible="1"/>
         </xpath>
         <xpath expr="/form//group[@name='studio_group_d81ca1']" position="after">
           <notebook name="studio_notebook_5n6_1jvt2ni48">
             <page string="Warranty Details" name="studio_page_4ic_1jvt2patn" invisible="not x_studio_warranty">
               <group name="studio_group_4ic">
                 <group name="studio_group_4ic_left">
-                  <field name="x_studio_purchase_date" required="x_studio_warranty"/>
-                  <field name="x_studio_warranty_end_date" required="x_studio_warranty"/>
-                  <field name="x_studio_warranty_type"/>
+                  <field name="x_studio_purchase_date" required="x_studio_warranty" readonly="x_studio_selection_1 in ('returned', 'done')"/>
+                  <field name="x_studio_warranty_end_date" required="x_studio_warranty" readonly="x_studio_selection_1 in ('returned', 'done')"/>
+                  <field name="x_studio_warranty_type" readonly="x_studio_selection_1 in ('returned', 'done')"/>
                 </group>
                 <group name="studio_group_4ic_right">
-                  <field name="x_studio_internal_note"/>
-                  <field name="x_studio_warranty_status"/>
+                  <field name="x_studio_internal_note" readonly="x_studio_selection_1 in ('returned', 'done')"/>
+                  <field name="x_studio_warranty_status" widget="badge" decoration-success="x_studio_warranty_status == 'Active'" decoration-danger="x_studio_warranty_status == 'Expired'" readonly="1"/>
                 </group>
               </group>
             </page>
@@ -244,7 +261,7 @@
             </group>
                 <group name="studio_group_1pk_right"/>
               </group>
-              <field name="x_studio_one2many_1">
+              <field name="x_studio_one2many_1" readonly="x_studio_selection_1 in ('returned', 'done')">
                 <list default_order="x_studio_sequence asc,id desc" editable="bottom">
                   <field name="x_studio_sequence" widget="handle"/>
                   <field optional="show" name="x_studio_products_id" domain="[(&quot;x_studio_parts&quot;, &quot;!=&quot;, False)]" string="Parts"/>
@@ -252,7 +269,7 @@
                   <field optional="show" name="x_studio_related_x_studio_brand_1" options="{'create_name_field': 'x_name'}"/>
                   <field optional="show" name="x_studio_related_x_studio_model_1" options="{'create_name_field': 'x_name'}"/>
                   <field optional="show" name="x_studio_quantity"/>
-                  <field optional="show" name="x_studio_related_list_price_1"/>
+                  <field optional="show" name="x_studio_related_list_price_1" readonly="False"/>
                   <field optional="show" name="x_studio_sub_total"/>
                 </list>
                 <form>
@@ -277,7 +294,7 @@
                 <group name="studio_group_55o_left"/>
                 <group name="studio_group_55o_right"/>
               </group>
-              <field name="x_studio_one2many_2">
+              <field name="x_studio_one2many_2" readonly="x_studio_selection_1 in ('returned', 'done')">
                 <list default_order="x_studio_sequence asc,id desc" editable="bottom">
                   <field name="x_studio_sequence" widget="handle"/>
                   <field optional="show" name="x_studio_products" domain="[(&quot;x_studio_accessories&quot;, &quot;!=&quot;, False)]"/>
@@ -285,7 +302,7 @@
                   <field optional="show" name="x_studio_related_accessories_brand" options="{'create_name_field': 'x_name'}"/>
                   <field optional="show" name="x_studio_related_accessories_model" options="{'create_name_field': 'x_name'}"/>
                   <field name="x_studio_accessories_quantity" optional="show"/>
-                  <field optional="show" name="x_studio_related_accessories_list_price"/>
+                  <field optional="show" name="x_studio_related_accessories_list_price" readonly="False"/>
                   <field optional="show" name="x_studio_accessories_sub_total"/>
                 </list>
               </field>
@@ -296,7 +313,7 @@
                 <group name="studio_group_5pv_left"/>
                 <group name="studio_group_5pv_right"/>
               </group>
-              <field name="x_studio_one2many_4">
+              <field name="x_studio_one2many_4" readonly="x_studio_selection_1 in ('returned', 'done')">
                 <list default_order="x_studio_sequence asc,id desc" editable="bottom">
                   <field name="x_studio_sequence" widget="handle"/>
                   <field optional="show" name="x_studio_complaint_type" options="{'create_name_field': 'x_name'}"/>
@@ -310,7 +327,7 @@
                 <group name="studio_group_94t_left"/>
                 <group name="studio_group_94t_right"/>
               </group>
-              <field name="x_studio_many2many_1" widget="many2many_tags_color_dot">
+              <field name="x_studio_many2many_1" widget="many2many_tags_color_dot" readonly="x_studio_selection_1 in ('returned', 'done')">
                 <list>
                   <field name="x_studio_sequence" widget="handle"/>
                   <field name="x_name"/>
@@ -325,19 +342,36 @@
           <attribute name="required">False</attribute>
         </xpath>
         <xpath expr="/form//field[@name='x_studio_partner_id']" position="before">
-          <field name="x_studio_warranty"/>
+          <field name="x_studio_warranty" readonly="x_studio_selection_1 in ('returned', 'done')"/>
         </xpath>
         <xpath expr="/form//field[@name='x_studio_partner_email']" position="after">
-          <field name="x_studio_device_imei_number"/>
+          <field name="x_studio_device_imei_number" readonly="x_studio_selection_1 in ('returned', 'done')"/>
         </xpath>
         <xpath expr="/form//field[@name='x_studio_user_id']" position="after">
-          <field name="x_studio_request_date" options="{&quot;warn_future&quot;:true}"/>
-          <field name="x_studio_return_date" required="True"/>
-          <field name="x_studio_brand" options="{'create_name_field': 'x_name'}"/>
-          <field name="x_studio_model" options="{'create_name_field': 'x_name'}"/>
+          <field name="x_studio_request_date" options="{&quot;warn_future&quot;:true}" readonly="x_studio_selection_1 in ('returned', 'done')"/>
+          <field name="x_studio_return_date" required="True" readonly="x_studio_selection_1 in ('returned', 'done')"/>
+          <field name="x_studio_brand" options="{'create_name_field': 'x_name'}" readonly="x_studio_selection_1 in ('returned', 'done')"/>
+          <field name="x_studio_model" options="{'create_name_field': 'x_name'}" domain="[('x_studio_many2one_1', '=', x_studio_brand)]" readonly="x_studio_selection_1 in ('returned', 'done')"/>
+          <field name="x_studio_not_solved_reason" invisible="x_studio_selection_1 not in ('not solved', 'returned')" placeholder="Enter reason for not solved..." readonly="x_studio_selection_1 in ('returned', 'done')"/>
+        </xpath>
+        <xpath expr="/form//field[@name='x_studio_partner_id']" position="attributes">
+          <attribute name="readonly">x_studio_selection_1 in ('returned', 'done')</attribute>
+        </xpath>
+        <xpath expr="/form//field[@name='x_studio_partner_phone']" position="attributes">
+          <attribute name="readonly">x_studio_selection_1 in ('returned', 'done')</attribute>
+        </xpath>
+        <xpath expr="/form//field[@name='x_studio_alternate_number']" position="attributes">
+          <attribute name="readonly">x_studio_selection_1 in ('returned', 'done')</attribute>
+        </xpath>
+        <xpath expr="/form//field[@name='x_studio_partner_email']" position="attributes">
+          <attribute name="readonly">x_studio_selection_1 in ('returned', 'done')</attribute>
         </xpath>
         <xpath expr="/form//field[@name='x_studio_user_id']" position="attributes">
           <attribute name="string">Technician</attribute>
+          <attribute name="readonly">x_studio_selection_1 in ('returned', 'done')</attribute>
+        </xpath>
+        <xpath expr="/form//field[@name='x_studio_image']" position="attributes">
+          <attribute name="readonly">x_studio_selection_1 in ('returned', 'done')</attribute>
         </xpath>
       </data>
     </field>
@@ -512,9 +546,15 @@
             </group>
           </page>
         </xpath>
-        <xpath expr="/form[@name='Product Template']//field[@name='type']" position="after">
-          <field name="x_studio_parts"/>
-          <field name="x_studio_accessories"/>
+        <xpath expr="//span[@name='purchase_option']" position="after">
+          <span name="parts_option" class="d-inline-flex">
+            <field name="x_studio_parts" widget="boolean_checkbox" class="w-auto"/>
+            <label for="x_studio_parts"/>
+          </span>
+          <span name="accessories_option" class="d-inline-flex">
+            <field name="x_studio_accessories" widget="boolean_checkbox" class="w-auto"/>
+            <label for="x_studio_accessories"/>
+          </span>
         </xpath>
       </data>
     </field>
@@ -768,6 +808,7 @@
                   <div class="col-6">
                     <p class="mb-1"><strong>Customer Name:</strong> <span t-field="doc.x_studio_partner_id.name"/></p>
                     <p class="mb-1"><strong>Phone:</strong> <span t-field="doc.x_studio_partner_phone"/></p>
+                    <p t-if="doc.x_studio_alternate_number" class="mb-1"><strong>Alternate Number:</strong> <span t-field="doc.x_studio_alternate_number"/></p>
                     <p class="mb-1"><strong>Email:</strong> <span t-field="doc.x_studio_partner_email"/></p>
                   </div>
                   <div class="col-6">

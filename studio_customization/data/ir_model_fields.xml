@@ -55,6 +55,16 @@
     <field name="on_delete" eval="False"/>
     <field name="tracking">2</field>
   </record>
+  <record id="alternate_number_repair_request_custom" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">char</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Alternate Number</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_alternate_number</field>
+    <field name="on_delete" eval="False"/>
+    <field name="tracking">2</field>
+  </record>
   <record id="email_repair_request_2116d791-75a4-4f2b-9df3-e1b8eea60f53" model="ir.model.fields" context="{'studio': True}">
     <field name="ttype">char</field>
     <field name="related">x_studio_partner_id.email</field>
@@ -385,7 +395,7 @@
     <field name="model_id" ref="repair_request_line_58ec3f3c-1790-46a6-8493-de5aa436d292"/>
     <field name="name">x_studio_related_list_price_1</field>
     <field name="on_delete" eval="False"/>
-    <field name="readonly" eval="True"/>
+    <field name="readonly" eval="False"/>
     <field name="store" eval="False"/>
   </record>
   <record id="brand_repair_request_246304e6-5d99-4c2f-a57a-2e33a96616a6" model="ir.model.fields" context="{'studio': True}">
@@ -436,7 +446,16 @@
     <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
     <field name="name">x_studio_selection_1</field>
     <field name="on_delete" eval="False"/>
-    <field name="selection">[('Draft', 'Draft'), ('Confirm', 'Assigned'), ('Start', 'Start'), ('Completed', 'Completed')]</field>
+    <field name="selection">[('Draft', 'Draft'), ('Confirm', 'Assigned'), ('Start', 'Start'), ('Completed', 'Completed'),('not solved','Not Solved'),('returned','Returned'),('done','Done')]</field>
+  </record>
+  <record id="not_solved_reason_repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">text</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Not Solved Reason</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_not_solved_reason</field>
+    <field name="on_delete" eval="False"/>
   </record>
   <record id="sequence_repair_requ_97503ecb-07b8-4b05-af56-5c5873cd89c1" model="ir.model.fields" context="{'studio': True}">
     <field name="ttype">integer</field>
@@ -502,6 +521,7 @@
     <field name="model_id" ref="repair_request_line_2f3bc908-65ae-460c-aa29-8b62ea9c5fc6"/>
     <field name="name">x_studio_related_accessories_list_price</field>
     <field name="on_delete" eval="False"/>
+    <field name="readonly" eval="False"/>
     <field name="store" eval="False"/>
   </record>
   <record id="brand_repair_request_f6d85777-6a36-40d2-88e2-b4e7ef6806ca" model="ir.model.fields" context="{'studio': True}">
@@ -769,6 +789,26 @@
     <field name="model">x_repair_request</field>
     <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
     <field name="name">x_studio_device_imei_number</field>
+    <field name="on_delete" eval="False"/>
+  </record>
+  <record id="invoice_repair_request_1f89a2bc-33b6-4f40-84bf-3818e6a1005a" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">many2one</field>
+    <field name="copied" eval="True"/>
+    <field name="field_description">Invoice</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_invoice_id</field>
+    <field name="on_delete">set null</field>
+    <field name="relation">account.move</field>
+  </record>
+  <record id="invoice_state_repair_request_8f471a2b-39d0-4e11-b0a1-7c912e345678" model="ir.model.fields" context="{'studio': True}">
+    <field name="ttype">selection</field>
+    <field name="related">x_studio_invoice_id.state</field>
+    <field name="field_description">Invoice State</field>
+    <field name="model">x_repair_request</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="name">x_studio_invoice_state</field>
+    <field name="selection">[('draft', 'Draft'), ('posted', 'Posted'), ('cancel', 'Cancelled')]</field>
     <field name="on_delete" eval="False"/>
   </record>
 </odoo>

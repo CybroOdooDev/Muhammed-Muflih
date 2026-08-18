@@ -19,4 +19,38 @@
       <p>We will notify you as soon as the status updates.</p>
     </field>
   </record>
+  <record id="mail_template_repair_not_solved" model="mail.template">
+    <field name="name">Repair Request: Not Solved</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="subject">Update: Device Not Solved - {{ object.x_name or '' }}</field>
+    <field name="email_to">{{ object.x_studio_partner_id.email }}</field>
+    <field name="partner_to">{{ object.x_studio_partner_id.id }}</field>
+    <field name="body_html" type="html">
+      <p>Dear <t t-out="object.x_studio_partner_id.name or ''"/>,</p>
+      <p>Your repair request could not be solved. Please collect your device from our service center.</p>
+      <br/>
+      <p><b>Ticket Reference: </b><t t-out="object.x_name or ''"/></p>
+      <p><b>Device: </b><t t-out="object.x_studio_model.x_name if object.x_studio_model else ''"/></p>
+      <p><b>IMEI / Serial Number: </b><t t-out="object.x_studio_device_imei_number or ''"/></p>
+      <br/>
+      <p>Thank you!</p>
+    </field>
+  </record>
+  <record id="mail_template_repair_completed" model="mail.template">
+    <field name="name">Repair Request: Completed</field>
+    <field name="model_id" ref="repair_request_2836934e-e26c-4d06-9b49-ed55c7dfbbf6"/>
+    <field name="subject">Update: Repair Request Completed - {{ object.x_name or '' }}</field>
+    <field name="email_to">{{ object.x_studio_partner_id.email }}</field>
+    <field name="partner_to">{{ object.x_studio_partner_id.id }}</field>
+    <field name="body_html" type="html">
+      <p>Dear <t t-out="object.x_studio_partner_id.name or ''"/>,</p>
+      <p>Your repair request has been completed successfully!</p>
+      <br/>
+      <p><b>Ticket Reference: </b><t t-out="object.x_name or ''"/></p>
+      <p><b>Device: </b><t t-out="object.x_studio_model.x_name if object.x_studio_model else ''"/></p>
+      <p><b>IMEI / Serial Number: </b><t t-out="object.x_studio_device_imei_number or ''"/></p>
+      <br/>
+      <p>Thank you for choosing our service!</p>
+    </field>
+  </record>
 </odoo>
