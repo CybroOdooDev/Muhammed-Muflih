@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo noupdate="1">
+    <record id="cancel_internal_transfers" model="ir.cron">
+        <field name="name">Cancel Internal Transfers</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="state">code</field>
+        <field name="code">model.cancel_internal_transfer()</field>
+    </record>
+</odoo>
