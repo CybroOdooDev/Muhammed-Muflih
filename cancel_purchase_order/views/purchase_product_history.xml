@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="purchase_cost_history_view_tree"
+            model="ir.ui.view">
+        <field name="name">purchase.product.history.view.list</field>
+        <field name="model">purchase.product.history</field>
+        <field name="arch" type="xml">
+            <list create="0">
+                <field name="name" readonly="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="purchase_cost_history_view_form"
+            model="ir.ui.view">
+        <field name="name">purchase.product.history.view.from</field>
+        <field name="model">purchase.product.history</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <sheet>
+                    <group>
+                        <field name="name" readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Order Line">
+                            <field name="line_ids">
+                                <list create="0">
+                                    <field name="product_id"/>
+                                    <field name="standard_cost"/>
+                                    <field name="qty"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="purchase_cost_history_action" model="ir.actions.act_window">
+        <field name="name">Cost History</field>
+        <field name="res_model">purchase.product.history</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+<!--    <menuitem-->
+<!--        id="purchase_cost_history_menu_item"-->
+<!--        name="Cost History"-->
+<!--        parent="purchase.menu_purchase_config"-->
+<!--        action="purchase_cost_history_action"-->
+<!--        sequence="185"/>-->
+</odoo>
