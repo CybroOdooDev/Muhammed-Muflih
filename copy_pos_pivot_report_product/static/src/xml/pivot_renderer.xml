@@ -1,0 +1,33 @@
+<templates id="template" xml:space="preserve">
+    <t t-inherit="web.PivotRenderer" t-inherit-mode="extension">
+        <xpath expr="//t[@t-foreach='row.subGroupMeasurements']" position="replace">
+            <t t-foreach="row.subGroupMeasurements" t-as="cell" t-key="'row_cell_' + cell_index">
+                <td class="o_pivot_cell_value bg-100 text-end" t-att-class="{
+                        o_empty: cell.value === undefined,
+                        'cursor-pointer': cell.value !== undefined and !model.metaData.disableLinking,
+                        'fw-bold': cell.isBold,
+                        'text-danger': cell.value &lt; 0,
+                    }" t-custom-click.synthetic="(ev, isMiddleClick) => this.onOpenView(cell, isMiddleClick)"
+                       t-on-mouseover="onMouseEnter" t-on-mouseout="onMouseLeave">
+                    <t t-if="cell.value !== undefined">
+                        <div t-if="model.metaData.measures[cell.measure].type === 'boolean'" class="o_value">
+                            <CheckBox disabled="true" value="cell.value" />
+                        </div>
+                        <div t-else="" class="o_value">
+                            <t t-set="formattedValue" t-value="getFormattedValue(cell)"/>
+                            <span t-att-data-tooltip="formattedValue.help">
+                                <t t-esc="formattedValue.value"/>
+                                <sup
+                                    t-if="formattedValue.currencies"
+                                    class="p-1 fw-bolder text-info"
+                                    t-on-mouseover.stop="(ev) => this.openMultiCurrencyPopover(ev, formattedValue.rawValue, formattedValue.currencies)"
+                                    t-on-touchstart.stop="(ev) => this.openMultiCurrencyPopover(ev, formattedValue.rawValue, formattedValue.currencies)"
+                                >?</sup>
+                            </span>
+                        </div>
+                    </t>
+                </td>
+            </t>
+        </xpath>
+    </t>
+</templates>

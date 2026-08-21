@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="web.TagsList" t-inherit-mode="extension">
+        <xpath expr="//a[hasclass('o_delete')]" position="after">
+            <a tabIndex="-1" t-if="props.displayText and tag.onCopy and tag.showCopy" t-on-click.stop.prevent="(ev) => tag.onCopy and tag.onCopy(tag.text)" href="#" class="fa fa-clipboard o_delete" title="Copy" aria-label="Copy"></a>
+        </xpath>
+    </t>
+</templates>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Inherit pos.session form view to add 'Change Point of Sale' header button -->
+    <record id="view_pos_session_form" model="ir.ui.view">
+        <field name="name">pos.session.inherit.form.view</field>
+        <field name="model">pos.session</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_session_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button type="object" name="action_update_config"
+                        groups="base.group_no_one,base.group_erp_manager"
+                        invisible="state!='closed'"
+                        string="Change Point of Sale"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Form view for Change POS Wizard -->
+    <record id="change_pos_wizard_view_form" model="ir.ui.view">
+        <field name="name">change.pos.wizard.view.from</field>
+        <field name="model">change.pos.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="config_id" options="{'no_create': True}"/>
+                </group>
+                <footer>
+                    <button string="Update" class="oe_highlight" type="object" name="action_update_config" data-hotkey="q"/>
+                     <button special="cancel" data-hotkey="z" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action to open Change POS Wizard -->
+    <record id="action_change_pos_wizard" model="ir.actions.act_window">
+            <field name="name">Change POS</field>
+            <field name="res_model">change.pos.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+    </record>
+</odoo>
