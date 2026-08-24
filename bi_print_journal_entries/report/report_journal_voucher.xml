@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--Journal Voucher PDF Report Templates-->
+<odoo>
+    <template id="journal_voucher_report_template">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="web.external_layout">
+                <main>
+                    <div class="page">
+                        <table class="table" width="100%" style="background: #d3d3d3;">
+                        <tr>
+                            <th style="font-size: x-large;font-family: serif;padding:3;">
+                                <t t-if="o.name.startswith('MISC')">
+                                    Voucher
+                                </t>
+                                <t t-elif="o.name.startswith('IN')">
+                                    Receipt Voucher Cash
+                                </t>
+                                <t t-elif="o.name.startswith('OUT')">
+                                    Payment Voucher
+                                </t>
+                                <t t-else="">
+                                    Journal Voucher
+                                </t>
+                            </th>
+                            <th style="text-transform: capitalize;width: 10%;font-weight: 100;">
+                                <t t-out="o.state"/>
+                            </th>
+                        </tr>
+                    </table>
+                    <table class="table" width="100%">
+                        <tr>
+                            <td class="text-end">
+                                <span>Number</span>
+                            </td>
+                            <td class="text-center">
+                                <t t-out="o.name"/>
+                                </td>
+                            <td class="text-end">Date</td>
+                            <td class="text-center">
+                                <t t-out="o.date"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-end">Narration</td>
+                            <td colspan="3" class="text-center">
+                                <t t-out="o.ref"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-end">Type</td>
+                                <td class="text-center">
+                                    Journal
+                                </td>
+                            <td class="text-end">Reference</td>
+                                <td class="text-center">
+                                    <t t-out="o.name"/>
+                                </td>
+                        </tr>
+                        <table class="table" width="100%">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" colspan="3" style="background-color: #d3d3d3; padding: 3px;width: 50%;">
+                                        Account
+                                    </th>
+                                    <th style="background-color: #d3d3d3; padding: 3px;" colspan="2">
+                                        Main Currency
+                                    </th>
+                                    <th style="background-color: #d3d3d3; padding: 3px;" colspan="3">
+                                        Foreign Currency
+                                    </th>
+                                    <th rowspan="2" style="background-color: #d3d3d3; padding: 3px;">
+                                        Reference
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th style="background-color: #d3d3d3; padding: 3px;">
+                                        Debit
+                                    </th>
+                                    <th style="background-color: #d3d3d3; padding: 3px;">
+                                        Credit
+                                    </th>
+                                    <th style="background-color: #d3d3d3; padding: 3px;">
+                                        Rate
+                                    </th>
+                                    <th style="background-color: #d3d3d3; padding: 3px;">
+                                        Debit
+                                    </th>
+                                    <th style="background-color: #d3d3d3; padding: 3px;">
+                                        Credit
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="count" t-value="1"/>
+                                <t t-set="total" t-value="0.0"/>
+                                <t t-set="total1" t-value="0.0"/>
+                                <t t-foreach="o.line_ids" t-as="line">
+                                    <tr>
+                                        <td><t t-out="count"/></td>
+                                        <td><t t-out="line.account_id.code"/></td>
+                                        <td rowspan="2"><t t-out="line.account_id.name"/></td>
+                                        <td><t t-if="line.debit"><t t-out="round(line.debit,3)"/></t></td>
+                                        <td><t t-if="line.credit"><t t-out="round(line.credit,3)"/></t></td>
+                                        <td><t t-out="line.currency_rate"/></td>
+                                        <td/>
+                                        <td/>
+                                        <td rowspan="2"/>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="text-end">
+                                            <t t-if="line.analytic_distribution">
+                                                <t t-set="keys" t-value="[]"/>
+                                                <t t-foreach="line.analytic_distribution.keys()" t-as="key">
+                                                    <t t-set="keys" t-value="key"/>
+                                                </t>
+                                                <t t-set="analytic" t-value="o.env['account.analytic.account'].sudo().browse(int(keys))"/>
+                                                <t t-out="analytic.name"/>
+                                            </t>
+                                        </td>
+                                        <td colspan="5"><t t-out="line.name"/></td>
+                                    </tr>
+                                    <t t-set="total" t-value="total + line.debit"/>
+                                    <t t-set="total1" t-value="total1 + line.credit"/>
+                                    <t t-set="count" t-value="count+1"/>
+                                </t>
+                                <tr>
+                                    <td style="background-color: #d3d3d3; padding: 3px;" colspan="3"/>
+                                    <td style="background-color: #d3d3d3; padding: 3px;"><t t-out="round(total,3)"/></td>
+                                    <td style="background-color: #d3d3d3; padding: 3px;"><t t-out="round(total1,3)"/></td>
+                                    <td style="background-color: #d3d3d3; padding: 3px;" colspan="4"/>
+                                </tr>
+                                <tr>
+                                    <td style="background-color: #d3d3d3; padding: 3px;" colspan="9">
+                                        <t t-out="o.currency_id.amount_to_text(round(o.amount_total, 3))"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </table>
+                        <table style="width:100%;margin:0px auto;background:white;border:5px 5px solid #e1e1e1;"
+					   class="table table-condensed">
+					<tbody>
+						<tr>
+							<td style="font-size: 13px;padding: 20px; vertical-align: middle;">
+								<strong>Received By :</strong>
+							</td>
+							<td style="font-size: 13px;padding: 20px; vertical-align: middle;">
+								<strong>Approved By :</strong>
+							</td>
+						</tr>
+						<tr>
+						</tr>
+						<tr>
+							<td style="font-size: 13px;padding: 20px; vertical-align: middle;">
+								<strong>Audited By :</strong>
+							</td>
+							<td style="font-size: 13px; padding: 20px; vertical-align: middle;">
+								<strong>Manager :</strong>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+                </div>
+                </main>
+            </t>
+        </t>
+    </template>
+</odoo>

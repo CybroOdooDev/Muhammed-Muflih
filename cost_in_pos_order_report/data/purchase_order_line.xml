@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--inherited the account.move model and added the field move_type_id -->
+    <record id="purchase_history_tree" model="ir.ui.view">
+        <field name="name">purchase.history.tree</field>
+        <field name="model">purchase.order.line</field>
+        <field name="inherit_id" ref="purchase.purchase_history_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price_unit_product_uom']" position="attributes">
+                <attribute name="groups">
+                    inventory_stock_report_extends.can_print_inventory_report
+                </attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

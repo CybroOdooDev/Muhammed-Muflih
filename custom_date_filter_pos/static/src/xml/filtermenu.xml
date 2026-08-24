@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="web.SearchBarMenu" t-inherit-mode="extension">
+    <xpath expr="//DropdownItem" position="before">
+        <sapn class="dropdown-item o_menu_item" t-on-click="this.onClickToday">
+            Today
+        </sapn>
+        <span class="dropdown-item o_menu_item" t-on-click="this.onClickYesterday">
+            Yesterday
+        </span>
+        <div class="accordion-item dropdown-item o_menu_item" style="background: none;">
+      <p type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+        Custom Date
+      </p>
+    <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+      <div class="accordion-body" style="padding:0px;">
+          <input type="date" class="o_datepicker_input o_input datetimepicker-input" style="margin-bottom: 5px;" t-model="DateFilter.from_date"/><br/>
+          <input type="date" class="o_datepicker_input o_input datetimepicker-input" style="margin-bottom: 5px;" t-model="DateFilter.to_date"/><br/>
+          <t t-if="DateFilter.error_note">
+              <p t-esc="DateFilter.error_note" style="color:red;margin:0px;"/>
+          </t>
+          <button class="btn btn-primary o_apply_filter me-2" t-on-click="this.onClickCustomDate">Apply</button>
+      </div>
+    </div>
+  </div>
+    </xpath>
+</t>
+</templates>

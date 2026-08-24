@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Point of Sale Order Form View to add Bank Fee and Real Margin line items -->
+    <record id="view_pos_pos_form" model="ir.ui.view">
+        <field name="name">pos.order.form.inherit.cost.report</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='lines']/list/field[@name='margin']" position="after">
+                <field name="amount_payment_bank_fee" optional="show" widget="monetary"/>
+                <field name="real_margin" optional="show" widget="monetary"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

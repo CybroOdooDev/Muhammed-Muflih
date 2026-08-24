@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Inherited List View for POS Order Lines -->
+    <record id="view_pos_order_tree_all_sales_lines" model="ir.ui.view">
+            <field name="name">pos.order.line.all.sales.list</field>
+            <field name="model">pos.order.line</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_order_tree_all_sales_lines"/>
+            <field name="arch" type="xml">
+                <xpath expr="//list" position="inside">
+                    <field name="order_date"/>
+                    <field name="order_reference"/>
+                    <field name="categ_id"/>
+                    <field name="product_id"/>
+                    <field name="product_ref"/>
+                    <field name="product_list_price"/>
+                    <field name="qty"/>
+                    <field name="price_unit"/>
+                    <field name="margin"/>
+                </xpath>
+            </field>
+    </record>
+
+    <!-- Wizard Form View for POS Order Line Export -->
+    <record id="view_pos_orderline_export_wizard" model="ir.ui.view">
+            <field name="name">pos.orderline.export.wizard.form</field>
+            <field name="model">pos.orderline.export.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <field name="line_ids" invisible="1"/>
+                    <div class="alert alert-success" role="alert" style="width:450px;">
+                        Click Confirm to print the report
+                    </div>
+                    <footer>
+                        <button name="button_print_all" string="Print All Records" type="object" class="btn-primary" data-hotkey="q"/>
+                        <button name="button_print_serial" string="Print With Serial" type="object" class="btn-primary" data-hotkey="m"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="z" />
+                    </footer>
+                </form>
+            </field>
+    </record>
+
+</odoo>

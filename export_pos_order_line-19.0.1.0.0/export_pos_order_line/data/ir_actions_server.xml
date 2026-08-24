@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Action on POS Order list view to open related order lines -->
+    <record id="pos_order_line_import" model="ir.actions.act_window">
+            <field name="name">Export Order Line</field>
+            <field name="res_model">pos.order.line</field>
+            <field name="view_mode">list</field>
+            <field name="domain">[('order_id', 'in', active_ids)]</field>
+            <field name="context">{'create': False}</field>
+            <field name="target">current</field>
+            <field name="binding_model_id" ref="point_of_sale.model_pos_order" />
+            <field name="binding_view_types">list</field>
+    </record>
+
+    <!-- Action on POS Order Line list view to launch Export Wizard -->
+    <record id="action_pos_orderline_export_wizard" model="ir.actions.act_window">
+            <field name="name">Export Order Line</field>
+            <field name="res_model">pos.orderline.export.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="point_of_sale.model_pos_order_line" />
+            <field name="binding_view_types">list</field>
+    </record>
+
+</odoo>

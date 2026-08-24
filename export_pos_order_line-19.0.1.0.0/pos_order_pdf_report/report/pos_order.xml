@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="update_pos_order_status" model="ir.actions.server">
+       <field name="name">Update Status</field>
+       <field name="state">code</field>
+        <field name="model_id" ref="point_of_sale.model_pos_order" />
+        <field name="binding_model_id" ref="point_of_sale.model_pos_order"/>
+        <field name="binding_view_types">list</field>
+        <field name="code">model.update_refund_status()</field>
+    </record>
+
+    <record id="view_pos_order_filter" model="ir.ui.view">
+        <field name="name">pos.order.inherited.view.search</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='pos_reference']" position="after">
+                <field name="payment_ids" string="Payment Method" filter_domain="[('payment_ids.payment_method_id.name', 'ilike', self)]"/>
+            </xpath>
+            <xpath expr="//filter[@name='posted']" position="after">
+                <filter name="valid_orders" string="Valid Orders" domain="[('is_refunded_or_refund_order', '=' , False)]"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

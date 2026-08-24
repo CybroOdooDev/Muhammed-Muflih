@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <function model="ir.actions.act_window" name="write">
+        <value eval="[ref('sale.action_order_report_all')]"/>
+        <value eval="{'context': {'search_default_Sales':1, 'group_by_no_leaf':1, 'group_by':[], 'search_default_order_month': 1}}"/>
+    </function>
+
+    <function model="ir.actions.act_window" name="write">
+        <value eval="[ref('point_of_sale.action_report_pos_order_all')]"/>
+        <value eval="{'context': {'group_by_no_leaf':1,'group_by':[], 'search_default_order_month': 1} }"/>
+    </function>
+
+    <record id="pos_order_report" model="ir.actions.report">
+        <field name="name">Order Report</field>
+        <field name="model">pos.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">pos_order_pdf_report.pos_order_report_template</field>
+        <field name="report_file">pos_order_pdf_report.pos_order_report_template</field>
+        <field name="binding_type">report</field>
+        <field name="binding_model_id" ref="point_of_sale.model_pos_order"/>
+    </record>
+
+    <record id="view_pos_report_order_filter" model="ir.ui.view">
+        <field name="name">pos.order.inherited.view.search</field>
+        <field name="model">report.pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_report_pos_order_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='config_id']" position="after">
+                <field name="order_id" string="Payment Method" filter_domain="[('order_id.payment_ids.payment_method_id.name', 'ilike', self)]"/>
+            </xpath>
+            <xpath expr="//filter[@name='order_month']" position="attributes">
+                <attribute name="default_period">this_month</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

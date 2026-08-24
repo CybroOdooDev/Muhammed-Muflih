@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Inherit Point of Sale Order Report Tree View to add price_total column -->
+    <record id="report_pos_order_view_tree" model="ir.ui.view">
+        <field name="name">report.pos.order.view.tree</field>
+        <field name="model">report.pos.order</field>
+        <field name="inherit_id"
+               ref="point_of_sale.report_pos_order_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="price_total"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
