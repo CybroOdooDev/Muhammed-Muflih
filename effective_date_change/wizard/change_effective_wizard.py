@@ -4,8 +4,6 @@ from datetime import datetime
 
 
 class ChangeEffectiveWizard(models.TransientModel):
-    """Transient model wizard allowing authorized users to modify the effective date
-    of completed inventory transfers and update related records."""
     _name = "change.effective.wizard"
     _description = "Change Effective Date"
 
@@ -13,14 +11,6 @@ class ChangeEffectiveWizard(models.TransientModel):
     effective_date = fields.Datetime(string="Effective Date", help="Date at which the transfer is processed")
 
     def update_effective_date(self):
-        """Update effective date on active stock pickings and cascade updates to connected records.
-
-        Validates against fiscal lock dates, updates picking date_done, stock moves,
-        move lines, and account moves. Recalculates foreign currency valuations for
-        incoming PO transfers and updates journal entry sequence names if period changes.
-
-        :raises UserError: If selected effective_date is prior to company fiscalyear_lock_date.
-        """
         if self.effective_date.date() and self.env.company.fiscalyear_lock_date:
             if self.effective_date.date() < self.env.company.fiscalyear_lock_date:
                 raise UserError(_(f"The date is being set prior to the user lock date {self.env.company.fiscalyear_lock_date}. You can't change the date like this"))

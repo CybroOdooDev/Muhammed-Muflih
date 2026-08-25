@@ -1,0 +1,35 @@
+/* Global font-size overrides for all PDF/HTML reports */
+.o_report_layout_standard,
+.o_report_layout_boxed,
+.o_report_layout_bold {
+    font-size: 12px !important; /* was 11px */
+}
+
+.o_report_layout_standard h2,
+.o_report_layout_boxed h2,
+.o_report_layout_bold h2 {
+    font-size: 19px !important; /* was 18px */
+}
+
+.o_main_table thead th {
+    font-size: 11px !important; /* was 10px */
+}
+
+.o_main_table tbody td,
+.o_main_table tbody td span {
+    font-size: 11.5px !important; /* was 10.5px */
+}
+
+.o_total_table td,
+.o_total_table td span,
+.o_total_table td strong {
+    font-size: 11.5px !important; /* was 10.5px */
+}
+
+/* Remove the postal-envelope gap globally too */
+.o_snail_mail .address,
+div.address.row {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 4px !important;
+}

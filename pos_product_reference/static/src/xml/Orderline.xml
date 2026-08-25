@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="point_of_sale.Orderline" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('product-name')]" position="attributes">
+            <attribute name="style">width:55mm;</attribute>
+        </xpath>
+        <xpath expr="//t[@t-esc='vals.name']" position="before">
+            <t t-if="line.product_id?.default_code || line.product_id?.product_tmpl_id?.default_code">
+                [<t t-esc="line.product_id?.default_code || line.product_id?.product_tmpl_id?.default_code"/>] 
+            </t>
+        </xpath>
+    </t>
+</templates>

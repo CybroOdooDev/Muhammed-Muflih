@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="point_of_sale.ProductCard" t-inherit-mode="extension">
+
+        <xpath expr="//div[hasclass('product-content')]" position="attributes">
+            <attribute name="class" add="flex-column" separator=" "/>
+        </xpath>
+
+        <xpath expr="//div[hasclass('product-name')]" position="before">
+            <div t-if="props.product?.default_code || props.product?.product_tmpl_id?.default_code" class="product-code text-muted fw-bold">
+                [<t t-esc="props.product?.default_code || props.product?.product_tmpl_id?.default_code"/>]
+            </div>
+        </xpath>
+
+    </t>
+</templates>

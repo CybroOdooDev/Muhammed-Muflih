@@ -5,16 +5,12 @@ from datetime import datetime
 
 
 class UpdateEffective(models.Model):
-    """Extends stock.picking to allow setting custom effective dates and updating
-    associated stock moves and accounting entries."""
     _inherit = "stock.picking"
 
     date_of_transfer = fields.Datetime(string="Effective Date", default=False)
 
     def wiz_open(self):
         """Open the wizard form view for changing effective date.
-
-        :return: Window action dictionary targeting 'change.effective.wizard'.
         """
         return {
             'type': 'ir.actions.act_window',
@@ -27,11 +23,6 @@ class UpdateEffective(models.Model):
     # Yang memungkinkan untuk mengganti tanggal effective date
     def button_validate(self):
         """Override picking validation to set effective dates and update stock moves and accounting entries.
-
-        Updates date_done, stock moves, stock move lines, and account moves when a custom date_of_transfer is set.
-        Also recalculates foreign currency valuation and updates journal entry sequence names if the period changes.
-
-        :return: Result of super button_validate() execution.
         """
         res = super(UpdateEffective, self).button_validate()
 
@@ -157,9 +148,6 @@ class UpdateEffective(models.Model):
 
                 def update_journal_name(selected_prefix, picking_name):
                     """Update sequence prefix, sequence number, and entry name for matching account moves.
-
-                    :param selected_prefix: Sequence prefix based on journal code and new date period.
-                    :param picking_name: Reference name of the current stock picking.
                     """
                     already_created_sequence_prefix = self.env['account.move'].search([('sequence_prefix', '=', str(selected_prefix))])
                     seq_numbers = [account_move.sequence_number for account_move in already_created_sequence_prefix]

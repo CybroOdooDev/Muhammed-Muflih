@@ -1,0 +1,26 @@
+/*rtl:ignore*/
+.pos .product-content {
+    .product-code {
+        direction: ltr !important;
+        text-align: left !important;
+        unicode-bidi: plaintext !important;
+        font-size: 0.85rem !important;   // bumped up from 0.72rem
+        font-weight: 500;
+    }
+
+    .product-name {
+        direction: ltr !important;
+        text-align: left !important;
+        unicode-bidi: plaintext !important;
+        white-space: normal !important;   // allow wrapping instead of clipping
+        overflow: visible !important;
+        text-overflow: unset !important;
+        font-size: 0.85rem !important;
+        line-height: 1.25 !important;
+        word-break: break-word;
+    }
+
+    .product-price {
+        font-size: 0.85rem !important;
+    }
+}
