@@ -1,0 +1,11 @@
+.warning {
+    background-color: #ffdf00;
+}
+.info {
+    background-color: #002D62;
+    color: white;
+}
+.alert {
+    background-color: #BA0021;
+    color: white;
+}

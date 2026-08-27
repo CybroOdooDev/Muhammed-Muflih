@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- Copyright (c) 2016-Present Webkul Software Pvt. Ltd. (<https://webkul.com/>) -->
+<!-- See LICENSE file for full copyright and licensing details. -->
+<!-- License URL : <https://store.webkul.com/license.html/> -->
+<odoo>
+    <data noupdate="1">
+        <record id="pos_custom_message_demo_1" model="pos.custom.message">
+            <field name="message_type">alert</field>
+            <field name="title">Break Time</field>
+            <field name="message">This is lunch time, Now you can go for lunch and come back to work after 30 minutes</field>
+            <field name="hours">02</field>
+            <field name="minutes">30</field>
+            <field name="period">PM</field>
+            <field name="point_of_sale_ids" eval="[(6,0,[ref('point_of_sale.pos_config_main')])]"/>
+        </record>
+    </data>
+</odoo>
