@@ -33,9 +33,9 @@ class RouteReport(models.TransientModel):
     _name = 'route.report'
     _description = 'Route Report'
 
-    route_ids = fields.Many2many('delivery.route', string='Route')
-    payment = fields.Boolean(string='Show Due Amount')
-    consolidated = fields.Boolean(string='Total Due only')
+    route_ids = fields.Many2many('delivery.route', string='Route',help="delivery route")
+    payment = fields.Boolean(string='Show Due Amount',help="Show Due Amount boolean")
+    consolidated = fields.Boolean(string='Total Due only',help="Show Due Only boolean")
 
     def print_route_details(self):
         """Action on button to print pdf report"""

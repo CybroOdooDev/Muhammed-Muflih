@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="product_product_report" model="ir.actions.report">
+        <field name="name">Product Quantity</field>
+        <field name="model">product.product</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">inventory_stock_report_extends.report_stock_info</field>
+        <field name="report_file">inventory_stock_report_extends.report_stock_info</field>
+        <field name="paperformat_id" ref="inventory_stock_report_extends.paperformat_product_report"/>
+        <field name="binding_type">report</field>
+        <field name="binding_model_id" ref="model_product_product"/>
+    </record>
+    <record id="product_product_report_with_cost" model="ir.actions.report">
+        <field name="name">Product Quantity with Cost</field>
+        <field name="model">product.product</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">inventory_stock_report_extends.stock_info_with_cost</field>
+        <field name="report_file">inventory_stock_report_extends.stock_info_with_cost</field>
+         <field name="group_ids" eval="[(4, ref('inventory_stock_report_extends.can_print_inventory_report'))]"/>
+        <field name="paperformat_id" ref="inventory_stock_report_extends.paperformat_product_report"/>
+        <field name="binding_type">report</field>
+        <field name="binding_model_id" ref="model_product_product"/>
+    </record>
+    <record id="product_product_report_with_serial" model="ir.actions.report">
+        <field name="name">Product Quantity with Serial</field>
+        <field name="model">product.product</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">inventory_stock_report_extends.info_with_serial</field>
+        <field name="report_file">inventory_stock_report_extends.info_with_serial</field>
+        <field name="paperformat_id" ref="inventory_stock_report_extends.paperformat_product_report"/>
+        <field name="binding_type">report</field>
+        <field name="binding_model_id" ref="model_product_product"/>
+    </record>
+    <record id="product_product_report_with_cost_serial" model="ir.actions.report">
+        <field name="name">Quantity with Cost &amp; Serial</field>
+        <field name="model">product.product</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">inventory_stock_report_extends.info_cost_serial</field>
+        <field name="report_file">inventory_stock_report_extends.info_cost_serial</field>
+        <field name="group_ids" eval="[(4, ref('inventory_stock_report_extends.can_print_inventory_report'))]"/>
+        <field name="paperformat_id" ref="inventory_stock_report_extends.paperformat_product_report"/>
+        <field name="binding_type">report</field>
+        <field name="binding_model_id" ref="model_product_product"/>
+    </record>
+     <record id="report_available_device" model="ir.actions.report">
+        <field name="name">Available Device</field>
+        <field name="model">product.product</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">inventory_stock_report_extends.available_device</field>
+        <field name="report_file">inventory_stock_report_extends.available_device</field>
+        <field name="paperformat_id" ref="inventory_stock_report_extends.paperformat_product_report"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="point_of_sale.OrderReceipt"
+       t-inherit="point_of_sale.OrderReceipt"
+       t-inherit-mode="extension"
+       owl="1">
+
+        <xpath expr="//ReceiptHeader" position="replace">
+            <t t-if="IsWhiteLabelReceipt">
+
+                <t t-if="isBranchSpecificReceipt">
+                    <!-- BRANCH MODE: customer logo → branch logo + details → details only -->
+                    <t t-if="customerLogoSrc">
+                        <img t-att-src="customerLogoSrc" alt="Customer Logo"
+                             style="max-width:150px;max-height:80px;object-fit:contain;display:block;margin:8px auto;"/>
+                    </t>
+                    <t t-else="">
+                        <t t-if="branchLogoSrc">
+                            <img t-att-src="branchLogoSrc" alt="Branch Logo"
+                                 style="max-width:150px;max-height:80px;object-fit:contain;display:block;margin:8px auto;"/>
+                        </t>
+                        <div class="branch-info"
+                             style="text-align:center;font-size:12px;margin-bottom:6px;">
+                            <t t-if="branchDetails.address"><div t-esc="branchDetails.address"/></t>
+                            <t t-if="branchDetails.tel"><div>Tel: <t t-esc="branchDetails.tel"/></div></t>
+                            <t t-if="branchDetails.email"><div>Email: <t t-esc="branchDetails.email"/></div></t>
+                            <t t-if="branchDetails.website"><div>Web: <t t-esc="branchDetails.website"/></div></t>
+                        </div>
+                    </t>
+                </t>
+
+                <t t-else="">
+                    <!-- NORMAL MODE: customer logo → branch logo → company header -->
+                    <t t-if="customerLogoSrc">
+                        <img t-att-src="customerLogoSrc" alt="Customer Logo"
+                             style="max-width:150px;max-height:80px;object-fit:contain;display:block;margin:8px auto;"/>
+                    </t>
+                    <t t-elif="branchLogoSrc">
+                        <img t-att-src="branchLogoSrc" alt="Branch Logo"
+                             style="max-width:150px;max-height:80px;object-fit:contain;display:block;margin:8px auto;"/>
+                    </t>
+                    <t t-else="">
+                        <ReceiptHeader order="props.order"/>
+                    </t>
+                </t>
+            </t>
+
+            <!-- white_label_receipt OFF → always company header -->
+            <t t-else="">
+                <ReceiptHeader order="props.order"/>
+            </t>
+        </xpath>
+
+        <xpath expr="//div[contains(@class, 'footer-powered-by')]" position="replace">
+            <t t-if="!IsWhiteLabelReceipt">
+                <div class="pos-receipt-order-data text-center pt-3 footer-powered-by">
+                    <span>Powered by <b> Odoo </b></span>
+                </div>
+            </t>
+        </xpath>
+
+        <xpath expr="//div[contains(@class, 'pos-receipt-qr')]" position="replace">
+            <t t-if="!IsWhiteLabelReceipt">
+                <div t-if="props.order.company.point_of_sale_use_ticket_qr_code and props.order.finalized" class="pos-receipt-qr gap-2 d-flex flex-row pt-3" style="font-size: 75%;">
+                    <div t-if="['qr_code', 'qr_code_and_url'].includes(props.header?.company?.point_of_sale_ticket_portal_url_display_mode)" class="pt-1">
+                        <img id="posqrcode" t-att-src="this.qrCode" class="m-0"/>
+                    </div>
+                    <div class="w-100 ms-1">
+                        <div class="fw-bolder">
+                            Need an invoice?
+                        </div>
+                        <div t-if="['url', 'qr_code_and_url'].includes(props.header?.company?.point_of_sale_ticket_portal_url_display_mode)" class="portal-url text-break">
+                            <t t-out="getPortalURL()"/>
+                        </div>
+                        <div class="unique-code">
+                            Code: <t t-out="props.order.ticket_code"/>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </t>
+</templates>

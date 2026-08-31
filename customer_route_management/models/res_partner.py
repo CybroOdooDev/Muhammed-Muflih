@@ -32,7 +32,8 @@ class ResPartner(models.Model):
         string='Location',
         domain="[('company_id', 'in', [False, current_company_id])]",
         help="Location of route. Filtered by the currently active company.")
-    sequence = fields.Integer(default=10)
+    sequence = fields.Integer(default=10,help="Sequence number")
+    company_id = fields.Many2one( 'res.company',help="Company to which this partner belongs")
 
     def get_all_dues(self, company_id=None):
         """This function gives all the dues and invoices details

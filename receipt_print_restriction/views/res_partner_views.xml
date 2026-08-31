@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_pos_logo_form" model="ir.ui.view">
+        <field name="name">res.partner.pos.logo.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Add POS Logo section inside the Sales & Purchase tab,
+                 or create a new tab if preferred -->
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="pos_show_logo_on_receipt"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

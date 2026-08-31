@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="can_print_inventory_report" model="res.groups">
+        <field name="name">Show Cost</field>
+        <field name="privilege_id" eval="False"/>
+    </record>
+</odoo>

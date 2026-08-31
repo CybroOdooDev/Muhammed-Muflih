@@ -35,7 +35,7 @@ class RouteLines(models.Model):
                                               " route line.")
     company_id = fields.Many2one(
         comodel_name='res.company',
-        string='Company', default=lambda self: self.env.company)
+        string='Company', default=lambda self: self.env.company,help="Company to which this route line belongs")
 
     delivery_route_link_id = fields.Many2one('delivery.route',
                                              help="Delivery route of "
