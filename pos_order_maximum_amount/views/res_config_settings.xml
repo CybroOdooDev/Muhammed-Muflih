@@ -1,0 +1,27 @@
+<odoo>
+    <!-- res.config.settings from view-->
+    <record id="view_pos_disable_configuration_form" model="ir.ui.view">
+        <field name="name">pos.config.form.view.inherited</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id"
+               ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@id='pos_accounting_section']"
+                   position="inside">
+                <div class="col-12 col-lg-6 o_setting_box">
+                    <div class="o_setting_right_pane">
+                        <label string="Order Maximum Total"
+                               for="pos_order_limit"/>
+                        <br/>
+                        <field name="pos_order_limit"/>
+                        <br/>
+                        <div class="text-muted">
+                            User can't create a order grater than the limit
+                            amount
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
