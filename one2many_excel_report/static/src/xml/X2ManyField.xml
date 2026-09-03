@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Widget template-->
+<templates id="template" xml:space="preserve">
+    <t t-name="one2many_excel_report.One2manyExcel" t-inherit="web.X2ManyField" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_x2m_control_panel')]" position="inside">
+            <div class="o_cp_buttons d-flex align-items-center mb-2 me-2">
+                <button type="button" class="btn btn-primary d-inline-flex align-items-center justify-content-center" t-on-click="this.Print_excel_report" title="Export Excel" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px;">
+                    <i class="oi oi-fw fa fa-download" data-icon="download"></i>
+                </button>
+                <t t-if="this.props.readonly">
+                    <span class="oe_form_char_content ms-2"/>
+                </t>
+            </div>
+        </xpath>
+    </t>
+</templates>
