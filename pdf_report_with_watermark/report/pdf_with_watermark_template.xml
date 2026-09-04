@@ -2,28 +2,26 @@
 <!--Apply the watermark to the pdf report with mentioned specifications-->
 <odoo>
     <template id="pdf_watermark_report"
-              inherit_id="web.external_layout_standard">
-        <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="after">
+              inherit_id="web.external_layout_body">
+        <xpath expr="//div[contains(@t-attf-class, 'article')]" position="inside">
             <t t-if="company.watermark">
-                <div class="row"
-                     style="height:200px; width:300px;margin-left:30%;margin-top:50%;">
-                    <div class="col-6" name="watermark">
-                        <span t-attf-style="-webkit-transform:rotate(-{{company.rotating_angle}}deg);color:{{company.color_picker}};font-size:{{company.font_size}}px;text-align:center;position:absolute;text-align:center;opacity:0.25;">
-                            <t t-if="company.watermark_type == 'text'">
-                                <t t-esc="company.content_text"/>
-                            </t>
-                            <t t-if="company.watermark_type == 'image'">
-                                <img t-if="company.background_image"
-                                     t-att-src="image_data_uri(company.background_image)"
-                                     style="position:absolute;height:200px; width:300px; opacity: 1;"/>
-                            </t>
-                            <t t-if="company.watermark_type == 'logo'">
-                                <img t-if="company.logo"
-                                     t-att-src="image_data_uri(company.logo)"
-                                     style="position:absolute;height:200px; width:300px; opacity: 1;"/>
-                            </t>
+                <div class="watermark"
+                     t-attf-style="position: absolute; top: 380px; left: 50%; transform: translate(-50%, -50%) rotate(-{{company.rotating_angle or 0}}deg); -webkit-transform: translate(-50%, -50%) rotate(-{{company.rotating_angle or 0}}deg); opacity: 0.25; z-index: -1000; text-align: center; width: 100%; pointer-events: none; overflow: visible;">
+                    <t t-if="company.watermark_type == 'text'">
+                        <span t-attf-style="color: {{company.color_picker or '#000000'}}; font-size: {{company.font_size or 20}}px; font-weight: bold; display: inline-block; white-space: nowrap; line-height: 1.2;">
+                            <t t-out="company.content_text"/>
                         </span>
-                    </div>
+                    </t>
+                    <t t-if="company.watermark_type == 'image'">
+                        <img t-if="company.background_image"
+                             t-att-src="image_data_uri(company.background_image)"
+                             style="max-height: 400px; max-width: 500px; object-fit: contain;"/>
+                    </t>
+                    <t t-if="company.watermark_type == 'logo'">
+                        <img t-if="company.logo"
+                             t-att-src="image_data_uri(company.logo)"
+                             style="max-height: 400px; max-width: 500px; object-fit: contain;"/>
+                    </t>
                 </div>
             </t>
         </xpath>

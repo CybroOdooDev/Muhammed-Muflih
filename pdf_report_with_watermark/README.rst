@@ -23,7 +23,8 @@ Company
 Credits
 -------
 * Developer:(v18) Saneen K,
-            (v19) Anupriya Ashok
+            (v19) Anupriya Ashok,
+            (v20) Muhammed Muflih c
 
 Contact: odoo@cybrosys.com
 
