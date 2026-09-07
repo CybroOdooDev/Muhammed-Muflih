@@ -1,0 +1,162 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <template id="custom_report_layout">
+            <div t-attf-class="header o_company_#{company.id}_layout alvina-header">
+                <div class="alvina-title">
+                    <t t-if="report_title" t-out="report_title"/>
+                </div>
+                <div class="row alvina-client-info">
+                    <div class ="col">
+                        <t t-if="o and o.partner_id">
+                            <div t-field="o and o.partner_id" t-options='{"widget": "contact", "fields": ["name","address"], "no_marker": True}'/>
+<!--                            <t t-esc="o.partner_id.arabic_name"/>-->
+                        </t>
+                    </div>
+                </div>
+                <div class="row alvina-doc-info">
+                    <div class="col" style="margin-top: 58px;text-align: center;font-weight: bold;
+    font-size: 16px;
+    padding-left: 1px;">
+                        <t t-if="doc_num" t-out="doc_num"/>
+                    </div>
+                    <div class="col alvina-date" style="margin-top: 58px;text-align: center;font-weight: bold;
+    font-size: 16px;
+    padding-left: 1px;">
+                        <t t-if="date" t-out="date"/>
+                    </div>
+                    <div class="col  alvina-ref-num" style="margin-top: 58px;text-align: center;font-weight: bold;
+    font-size: 14px;
+    padding-left: 1px;">
+                        <t t-if="sale_order" t-out="sale_order"/>
+                    </div>
+                    <div class="col alvina-payment-term" style="margin-top: 54px;text-align: center;font-weight: bold;
+    font-size: 12px;
+    padding-left: 1px;">
+                        <t t-if="payment_term" t-out="payment_term"/>
+                        <t t-else="" t-out="'Immediate Payment'"/>
+                    </div>
+                    <div class="col" style="margin-top: 58px;text-align: center;font-weight: bold;
+    font-size: 16px;
+    padding-left: 1px;">
+                        <t t-if="sales_executive" t-out="sales_executive"/>
+                    </div>
+
+                </div>
+            </div>
+            <div t-attf-class="article o_report_layout_standard o_table_standard o_company_#{company.id}_layout o_snail_mail"
+                        t-att-data-oe-model="o and o._name"
+                        t-att-data-oe-id="o and o.id"
+                        t-att-data-oe-lang="o and o.env.context.get('lang')">
+                <h2 t-if="layout_document_title" t-out="layout_document_title"/>
+                <t t-out="0" />
+            </div>
+
+            <div t-attf-class="footer o_company_#{company.id}_layout {{report_type != 'pdf' and 'mt-auto'}} ">
+                <div class="alvina-footer" >
+                    <div class="discount">
+                            <t t-if="total_discount" t-out="'%.2f' % total_discount"/>
+                            <t t-else="" t-out="'%.2f' % 0.0"/>
+                    </div>
+
+                    <div class="total">
+                        <span class="alvina-custom">
+                        <t t-if="total_quantity">
+                            <t t-out="'%.2f' % total_quantity"/> <span> </span>
+                        </t>
+                        </span>
+                        <t t-if="total_amount">
+                            <span t-out="'{:,.2f}'.format(total_amount)"/>
+                        </t>
+                    </div>
+                    <div class="total-text text-start">
+                        <t t-if="total_amount_text">
+                            <t t-out="total_amount_text"/>
+<!--                            <br/>-->
+<!--                            <t t-esc="o.amount_in_arabic"/>-->
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </template>
+<!--        Arabic Layout-->
+        <template id="custom_report_layout_arabic">
+            <div t-attf-class="header o_company_#{company.id}_layout alvina-header">
+                <div class="alvina-title">
+                    <t t-if="report_title" t-out="report_title"/>
+                </div>
+                <div class="row alvina-client-info">
+                    <div class ="col">
+                        <t t-if="o and o.partner_id">
+                            <div t-field="o and o.partner_id" t-options='{"widget": "contact", "fields": ["name","address"], "no_marker": True}'/>
+<!--                            <t t-esc="o.partner_id.arabic_name"/>-->
+                        </t>
+                    </div>
+                </div>
+                <div class="row alvina-doc-info">
+                    <div class="col" style="margin-top: 58px;text-align: center;font-weight: bold;
+    font-size: 16px;
+    padding-left: 1px;">
+                        <t t-if="doc_num" t-out="doc_num"/>
+                    </div>
+                    <div class="col alvina-date" style="margin-top: 58px;text-align: center;font-weight: bold;
+    font-size: 16px;
+    padding-left: 1px;">
+                        <t t-if="date" t-out="date"/>
+                    </div>
+                    <div class="col  alvina-ref-num" style="margin-top: 58px;text-align: center;font-weight: bold;
+    font-size: 14px;
+    padding-left: 1px;">
+                        <t t-if="sale_order" t-out="sale_order"/>
+                    </div>
+                    <div class="col alvina-payment-term" style="margin-top: 54px;text-align: center;font-weight: bold;
+    font-size: 12px;
+    padding-left: 1px;">
+                        <t t-if="payment_term" t-out="payment_term"/>
+                        <t t-else="" t-out="'Immediate Payment'"/>
+                    </div>
+                    <div class="col" style="margin-top: 58px;text-align: center;font-weight: bold;
+    font-size: 16px;
+    padding-left: 1px;">
+                        <t t-if="sales_executive" t-out="sales_executive"/>
+                    </div>
+
+                </div>
+            </div>
+            <div t-attf-class="article o_report_layout_standard o_table_standard o_company_#{company.id}_layout o_snail_mail"
+                        t-att-data-oe-model="o and o._name"
+                        t-att-data-oe-id="o and o.id"
+                        t-att-data-oe-lang="o and o.env.context.get('lang')">
+                <h2 t-if="layout_document_title" t-out="layout_document_title"/>
+                <t t-out="0" />
+            </div>
+
+            <div t-attf-class="footer o_company_#{company.id}_layout {{report_type != 'pdf' and 'mt-auto'}} ">
+                <div class="alvina-footer" >
+                    <div class="discount">
+                            <t t-if="total_discount" t-out="'%.2f' % total_discount"/>
+                            <t t-else="" t-out="'%.2f' % 0.0"/>
+                    </div>
+
+                    <div class="total">
+                        <span class="alvina-custom">
+                        <t t-if="total_quantity">
+                            <t t-out="'%.2f' % total_quantity"/> <span> </span>
+                        </t>
+                        </span>
+                        <t t-if="total_amount">
+                            <span t-out="'{:,.2f}'.format(total_amount)"/>
+                        </t>
+                    </div>
+                    <div class="total-text text-start">
+                        <t t-if="total_amount_text">
+                            <t t-out="total_amount_text"/>
+                            <br/>
+                            <t t-esc="o.amount_in_arabic"/>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </data>
+</odoo>

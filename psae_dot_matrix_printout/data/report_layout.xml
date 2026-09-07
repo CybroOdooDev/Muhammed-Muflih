@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+         <record id="report_layout_printout" model="report.layout">
+            <field name="name">Custom Layout</field>
+            <field name="view_id" ref="psae_dot_matrix_printout.custom_report_layout"/>
+        </record>
+    </data>
+</odoo>

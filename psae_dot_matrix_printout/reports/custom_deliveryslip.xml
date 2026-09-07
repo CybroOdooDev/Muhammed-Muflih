@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_delivery_slip_custom_document">
+            <!-- Header Info-->
+            <t t-set="report_title" t-value="'Delivery Note'"/>   
+            <t t-set="doc_num" t-value="o.name"/>
+            <t t-set="date" t-value="o.date.date()"/>
+            <t t-set="sale_order" t-value="o.sale_id.client_order_ref"/>
+            <t t-set="sales_person" t-value="o.sale_id.user_id.name"/>
+            <!--Footer Info-->
+            <t t-set="total_quantity" t-value="0"/>
+
+            <t t-call="psae_dot_matrix_printout.custom_report_layout">
+                <div class=" page alvina-body">
+                    <table class="alvina-table">
+                        <tbody>
+                            <t t-set="current_sequence" t-value="0"/>
+                            <t t-foreach="o.move_ids" t-as="line">
+                                <t t-set="current_sequence" t-value="current_sequence + 1"/>
+                                <t t-set="total_quantity" t-value="total_quantity+line.quantity"/>
+                                <tr>
+                                    <td><t t-out="current_sequence"/></td>
+                                    <td><span t-field="line.product_id.default_code"/></td>
+                                    <td class="alvina-product-name"><span t-field="line.product_id.name"/></td>
+                                    <td><span t-field="line.picking_id.sale_id.warehouse_id.code" /></td>
+                                    <td>
+                                        <span t-field="line.quantity"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="line.product_uom.name"/>
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </template>
+
+
+        <template id="report_delivery_slip_custom">
+            <t t-call="web.html_container">
+                <t t-set="company" t-value="docs.env.company"/>
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="psae_dot_matrix_printout.report_delivery_slip_custom_document" t-lang="o.partner_id.lang" />
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

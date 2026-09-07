@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_invoice_custom_document_arabic">
+            <!-- Header Info-->
+            <t t-if="o.pos_order_ids">
+                <t t-set="report_title" t-value="'Cash Invoice'"/>
+            </t>
+            <t t-else="">
+                <t t-set="report_title" t-value="'Sales Invoice'"/>
+            </t>
+            <t t-if="o.move_type == 'out_refund'">
+                <t t-set="report_title" t-value="'Sales Return'"/>
+            </t>
+            <t t-set="doc_num" t-value="o.name"/>
+            <t t-set="date" t-value="o.date"/>
+            <t t-set="sale_order" t-value="o.ref"/>
+            <t t-set="payment_term" t-value="o.invoice_payment_term_id.name"/>
+            <t t-set="sales_executive" t-value="o.x_studio_sales_executive.name"/>
+            <!--Footer Info-->
+            <t t-set="total_discount" t-value="0.0"/>
+            <t t-set="total_quantity" t-value="0"/>
+            <t t-set="total_amount" t-value="o.amount_total"/>
+            <t t-set="total_amount_text" t-value="o.currency_id.amount_to_text(total_amount)"/>
+
+            <t t-call="psae_dot_matrix_printout.custom_report_layout_arabic">
+                <div class=" page alvina-body">
+                    <table class="alvina-table">
+                        <tbody>
+                            <t t-set="current_sequence" t-value="0"/>
+                            <t t-foreach="o.invoice_line_ids" t-as="line">
+                                <t t-set="current_sequence" t-value="current_sequence + 1"/>
+                                <t t-set="total_quantity" t-value="total_quantity+line.quantity"/>
+                                <tr>
+                                    <td><t t-out="current_sequence"/></td>
+                                    <td class="alvina-default-code"><span t-field="line.product_id.default_code"/></td>
+                                    <td  class="alvina-product-name"><span t-field="line.product_id.name"/>
+                                        <br/>
+                                    <span
+                                            t-esc="line.product_id.product_tmpl_id.name_arabic"/></td>
+                                    <td><span
+                                            t-field="line.sale_line_ids[0].order_id.warehouse_id.code"  t-if="line.sale_line_ids"/></td>
+                                    <td>
+                                        <span t-field="line.quantity"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="line.product_uom_id.name"/>
+
+                                    </td>
+                                    <td>
+                                        <span
+                                                t-esc="'%.2f' % line.price_unit" />
+                                    </td>
+                                    <td>
+                                         <span
+                                                t-esc="'%.2f' % line.price_subtotal" />
+                                    </td>
+                                </tr>
+                                <t t-if="line.discount > 0"> <t t-set="line_discount" t-value="(line.price_unit * line.quantity * line.discount) / 100.0"/>
+                                    <t t-set="total_discount" t-value="total_discount + line_discount"/>
+                                </t>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </template>
+
+        <template id="report_invoice_custom_arabic">
+            <t t-call="web.html_container">
+                <t t-set="company" t-value="docs.env.company"/>
+                <t t-foreach="docs" t-as="o">
+                    <t
+                            t-call="psae_dot_matrix_printout.report_invoice_custom_document_arabic" t-lang="o.partner_id.lang" />
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

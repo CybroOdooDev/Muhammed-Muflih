@@ -1,0 +1,173 @@
+.page {
+    margin-left: 2px;
+}
+
+.alvina-title{
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    width:100%;
+    padding-top: 0px;
+    margin-top: -13px;
+}
+
+.alvina-client-info{
+    width: 50%;
+    display: flex;
+    min-height: 100px;
+    justify-content: left;
+    text-align: left;
+    margin-top: 40px;
+    padding-left: 45px;
+    font-size: 16px;
+}
+
+.alvina-date{
+    margin-right: 70px
+}
+
+.alvina-ref-num{
+    margin-right: 30px
+}
+
+.alvina-payment-term{
+    margin-right: 30px
+}
+
+// .alvina-doc-info{
+//     margin-top: 56px;
+//     text-align: center;
+//     font-weight: bold;
+//     font-size: 12px;
+//     padding-left: 1px;
+// }
+
+.alvina-body{
+    margin-right:20px;
+    padding-left: 7px;
+}
+
+.alvina-location{
+    font-size: 10px;
+}
+
+.alvina-product-name{
+    text-align: left !important;
+    padding-left: 40px !important;
+}
+
+.alvina-table{
+    width: 100%;
+    table-layout: fixed;
+    $total-weight: 1 + 2 + 8.7 + 1.1 + 1.4 + 1.2 + 1.4 + 1.7;
+     margin-left: 12px;
+
+    tbody {
+        width: 100%;
+        border: none;
+        tr {
+            width: 100%;
+            border: none;
+            td {
+                padding: 0px 4px;
+                text-align: center;
+                border:none;
+
+
+                &:nth-child(1) {
+                width: percentage(1 / $total-weight);
+                }
+                &:nth-child(2) {
+                width: percentage(2 / $total-weight);
+                }
+                &:nth-child(3) {
+                width: percentage(8.7 / $total-weight);
+                }
+                &:nth-child(4) {
+                width: percentage(1.1 / $total-weight);
+                }
+                &:nth-child(5) {
+                width: percentage(1.4 / $total-weight);
+                }
+                &:nth-child(6) {
+                width: percentage(1.2 / $total-weight);
+                }
+                &:nth-child(7) {
+                width: percentage(1.4 / $total-weight);
+                }
+                &:nth-child(8) {
+                width: percentage(1.7 / $total-weight);
+                }
+            }
+        }
+    }
+
+}
+
+
+
+.alvina-footer{
+    width: 100%;
+    text-align: right;
+    padding-left: 3px;
+    margin-top: 15px;
+
+
+
+.alvina-footer {
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-right: 5px;
+}
+
+.alvina-footer .discount {
+    font-weight: bold;
+    font-size: 16px;
+    margin: 0;
+    padding-bottom: 10px;
+    text-align: right;
+    min-height: 20px;
+}
+
+
+
+.total{
+    font-weight: bold;
+    font-size: 18px;
+    margin-top: 6px;
+    margin-right: 50px;
+
+    .alvina-custom{
+            padding-right:130px;
+    }
+}
+
+.total-text{
+    width: 580px;
+    margin-left: 280px;
+    font-weight: bold;
+    font-size: 18px;
+    margin-top: 13px;
+}
+}
+.alvina-table tbody tr td:nth-child(2) {
+    font-size: 14px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

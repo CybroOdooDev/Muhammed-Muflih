@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="invoice_delivery_paperformat" model="report.paperformat">
+            <field name="name">A4 - Invoice and DeliverySlip</field>
+            <field name="default" eval="True" />
+            <field name="format">custom</field>
+            <field name="page_height">280</field>
+            <field name="page_width">242</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">104</field>
+            <field name="margin_bottom">55</field>
+            <field name="margin_left">0</field>
+            <field name="margin_right">15</field>
+            <field name="header_line" eval="False" />
+            <field name="header_spacing">72</field>
+            <field name="dpi">90</field>
+        </record>
+
+        <record id="account_invoices_custom" model="ir.actions.report">
+            <field name="name">Custom Invoice</field>
+            <field name="model">account.move</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="paperformat_id" ref="psae_dot_matrix_printout.invoice_delivery_paperformat"/>
+            <field name="report_name">psae_dot_matrix_printout.report_invoice_custom</field>
+            <field name="report_file">psae_dot_matrix_printout.report_invoice_custom</field>
+            <field name="print_report_name">(object._get_report_base_filename())</field>
+            <field name="binding_model_id" ref="account.model_account_move" />
+            <field name="binding_type">report</field>
+            <!-- <field name="domain">[('move_type', '=', 'out_invoice'), ('invoice_origin', '!=', False)]</field> -->
+        </record>
+        <record id="account_invoices_custom_arabic" model="ir.actions.report">
+            <field name="name">Custom Invoice - Arabic</field>
+            <field name="model">account.move</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="paperformat_id" ref="psae_dot_matrix_printout.invoice_delivery_paperformat"/>
+            <field name="report_name">psae_dot_matrix_printout.report_invoice_custom_arabic</field>
+            <field name="report_file">psae_dot_matrix_printout.report_invoice_custom_arabic</field>
+            <field name="print_report_name">(object._get_report_base_filename())</field>
+            <field name="binding_model_id" ref="account.model_account_move" />
+            <field name="binding_type">report</field>
+            <!-- <field name="domain">[('move_type', '=', 'out_invoice'), ('invoice_origin', '!=', False)]</field> -->
+        </record>
+
+        <record id="delivery_slip_custom" model="ir.actions.report">
+            <field name="name">Custom Delivery Slip</field>
+            <field name="model">stock.picking</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="paperformat_id" ref="psae_dot_matrix_printout.invoice_delivery_paperformat"/>
+            <field name="report_name">psae_dot_matrix_printout.report_delivery_slip_custom</field>
+            <field name="report_file">psae_dot_matrix_printout.report_delivery_slip_custom</field>
+            <field name="print_report_name">'Delivery Slip - %s - %s' % (object.partner_id.name or '', object.name)</field>
+            <field name="binding_model_id" ref="stock.model_stock_picking" />
+            <field name="binding_type">report</field>
+        </record>
+    </data>
+    
+
+</odoo>

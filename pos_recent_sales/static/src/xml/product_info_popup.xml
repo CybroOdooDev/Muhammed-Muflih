@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_recent_sales.ProductInfoPopup" t-inherit="point_of_sale.ProductInfoPopup" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('section-supplier')]" position="after">
+            <div class="section-recent-pos-sales mt-3 mb-4 pb-4 border-bottom text-start">
+                <h3 class="section-title">Recent Sales Price</h3>
+                <div class="section-recent-pos-sales-body">
+                    <t t-if="props.info.productInfo.recent_pos_sales and props.info.productInfo.recent_pos_sales.length > 0">
+                        <table class="table table-borderless table-sm mb-0 w-100">
+                            <thead>
+                                <tr class="text-muted border-bottom">
+                                    <th>Order Ref</th>
+                                    <th>Date</th>
+                                    <th>Customer</th>
+                                    <th class="text-end">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="props.info.productInfo.recent_pos_sales" t-as="sale" t-key="sale.id">
+                                    <td><span t-esc="sale.order_name"/></td>
+                                    <td><span t-esc="sale.date"/></td>
+                                    <td><span t-esc="sale.customer"/></td>
+                                    <td class="text-end"><span t-esc="env.utils.formatCurrency(sale.price_unit)"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+                    <t t-else="">
+                        <div class="text-muted fst-italic">No recent POS sales for this product.</div>
+                    </t>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>
