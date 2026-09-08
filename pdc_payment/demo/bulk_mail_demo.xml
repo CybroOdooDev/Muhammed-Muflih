@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="bulk_mail_customer_demo" model="bulk.mail">
+            <field name="name">Customer Bulk Mail</field>
+            <field name="type">customer</field>
+        </record>
+
+        <record id="bulk_mail_vendor_demo" model="bulk.mail">
+            <field name="name">Vendor Bulk Mail</field>
+            <field name="type">vendor</field>
+        </record>
+    </data>
+</odoo>

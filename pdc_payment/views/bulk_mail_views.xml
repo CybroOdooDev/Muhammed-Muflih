@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--Form view for model 'bulk.mail'-->
+    <record id="bulk_mail_view_form" model="ir.ui.view">
+        <field name="name">bulk.mail.view.form</field>
+        <field name="model">bulk.mail</field>
+        <field name="arch" type="xml">
+            <form string="Bulk Mail" delete="true">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="type"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Customers" name="customers" invisible="type != 'customer'">
+                            <field name="partner_line_ids">
+                                <list editable="bottom">
+                                    <control>
+                                        <create name="add_line_control" string="Add a line"/>
+                                        <button name="action_add_multiple_partners" string="Add Multiple Partners" type="object" class="btn-link" context="{'bulk_mail_id': parent.id}"/>
+                                    </control>
+                                    <field name="partner_id" domain="[('customer_rank', '>', 0)]"/>
+                                    <field name="email"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Vendors" name="vendors" invisible="type != 'vendor'">
+                            <field name="partner_line_ids">
+                                <list editable="bottom">
+                                    <control>
+                                        <create name="add_line_control" string="Add a line"/>
+                                        <button name="action_add_multiple_partners" string="Add Multiple Partners" type="object" class="btn-link" context="{'bulk_mail_id': parent.id}"/>
+                                    </control>
+                                    <field name="partner_id" domain="[('supplier_rank', '>', 0)]"/>
+                                    <field name="email"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Form view for model 'bulk.mail.partner.wizard' -->
+    <record id="bulk_mail_partner_wizard_view_form" model="ir.ui.view">
+        <field name="name">bulk.mail.partner.wizard.view.form</field>
+        <field name="model">bulk.mail.partner.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Add Multiple Partners">
+                <header>
+                    <button name="action_select_all" string="Select All" type="object" class="btn-secondary"/>
+                    <button name="action_deselect_all" string="Deselect All" type="object" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <field name="line_ids">
+                        <list editable="bottom" create="false" delete="false">
+                            <field name="selected"/>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="email" readonly="1"/>
+                        </list>
+                    </field>
+                </sheet>
+                <footer>
+                    <button name="action_add_partners" string="Select" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!--List view for model 'bulk.mail'-->
+    <record id="bulk_mail_view_list" model="ir.ui.view">
+        <field name="name">bulk.mail.view.list</field>
+        <field name="model">bulk.mail</field>
+        <field name="arch" type="xml">
+            <list string="Bulk Mail" delete="true">
+                <field name="name"/>
+                <field name="type"/>
+            </list>
+        </field>
+    </record>
+
+    <!--Action for Customers Bulk Mail-->
+    <record id="bulk_mail_action_customer" model="ir.actions.act_window">
+        <field name="name">Bulk Mail</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">bulk.mail</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('type', '=', 'customer')]</field>
+        <field name="context">{'default_type': 'customer'}</field>
+    </record>
+
+    <!--Action for Vendors Bulk Mail-->
+    <record id="bulk_mail_action_vendor" model="ir.actions.act_window">
+        <field name="name">Bulk Mail</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">bulk.mail</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('type', '=', 'vendor')]</field>
+        <field name="context">{'default_type': 'vendor'}</field>
+    </record>
+
+    <!--Menu Item under Customers (Accounting)-->
+    <menuitem id="bulk_mail_menu_customer"
+              name="Bulk Mail"
+              action="bulk_mail_action_customer"
+              parent="account.menu_finance_receivables"
+              sequence="120"/>
+
+    <!--Menu Item under Vendors (Accounting)-->
+    <menuitem id="bulk_mail_menu_vendor"
+              name="Bulk Mail"
+              action="bulk_mail_action_vendor"
+              parent="account.menu_finance_payables"
+              sequence="210"/>
+</odoo>

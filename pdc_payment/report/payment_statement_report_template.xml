@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- PDF Report Action -->
+    <record id="action_report_payment_statement" model="ir.actions.report">
+        <field name="name">Payment Statement</field>
+        <field name="model">payment.statement</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">pdc_payment.report_payment_statement</field>
+        <field name="report_file">pdc_payment.report_payment_statement</field>
+        <field name="print_report_name">'Payment Statement'</field>
+    </record>
+
+    <!-- HTML View Report Action -->
+    <record id="action_report_payment_statement_html" model="ir.actions.report">
+        <field name="name">Payment Statement</field>
+        <field name="model">payment.statement</field>
+        <field name="report_type">qweb-html</field>
+        <field name="report_name">pdc_payment.report_payment_statement</field>
+        <field name="report_file">pdc_payment.report_payment_statement</field>
+        <field name="print_report_name">'Payment Statement'</field>
+    </record>
+
+    <!-- Report Template -->
+    <template id="report_payment_statement">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <style>
+                        .statement-header {
+                            background-color: #E6E6FA;
+                            padding: 8px;
+                            text-align: center;
+                            font-weight: bold;
+                            font-size: 18px;
+                            border-radius: 4px;
+                        }
+                        .partner-heading {
+                            font-weight: bold;
+                            font-size: 15px;
+                            margin-top: 15px;
+                            color: #2c3e50;
+                        }
+                        .partner-address {
+                            font-size: 12px;
+                            color: #555;
+                            margin-bottom: 10px;
+                        }
+                        .table-statement th {
+                            background-color: #f2f2f2 !important;
+                            font-weight: bold;
+                            text-align: center;
+                            vertical-align: middle;
+                            border: 1px solid #dee2e6;
+                        }
+                        .table-statement td {
+                            border: 1px solid #dee2e6;
+                            vertical-align: middle;
+                        }
+                        .table-statement .total-row td {
+                            font-weight: bold;
+                            background-color: #f9f9f9;
+                        }
+                    </style>
+
+                    <div class="statement-header mb-3">
+                        <t t-if="data.get('statement_type') == 'vendor'">Vendor Statement</t>
+                        <t t-else="">Customer Statement</t>
+                    </div>
+
+                    <div class="row mb-3" style="font-size: 13px;">
+                        <div class="col-6">
+                            <strong>As on Date: </strong>
+                            <span t-out="data.get('date_to')"/>
+                        </div>
+                    </div>
+
+                    <t t-foreach="data.get('partners', [])" t-as="partner">
+                        <div class="partner-block mb-4" style="page-break-inside: avoid;">
+                            <div class="partner-heading">
+                                <t t-if="data.get('statement_type') == 'vendor'">Vendor : </t>
+                                <t t-else="">Customer : </t>
+                                <span t-out="partner.get('partner')"/>
+                            </div>
+                            <t t-if="partner.get('partner_address')">
+                                <div class="partner-address">
+                                    <span t-out="partner.get('partner_address')"/>
+                                </div>
+                            </t>
+
+                            <!-- Invoices Table -->
+                            <table class="table table-sm table-statement mb-3" style="font-size: 12px;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 6%;">Sl No</th>
+                                        <th style="width: 12%;">Invoice Date</th>
+                                        <th style="width: 16%;">Invoice No</th>
+                                        <th style="width: 16%;">
+                                            <t t-if="data.get('statement_type') == 'vendor'">Bill Reference</t>
+                                            <t t-else="">Customer Ref</t>
+                                        </th>
+                                        <th style="width: 12.5%;" class="text-end">Invoice Amount</th>
+                                        <th style="width: 12.5%;" class="text-end">PDC Amount</th>
+                                        <th style="width: 12.5%;" class="text-end">Balance</th>
+                                        <th style="width: 12.5%;" class="text-end">Cumulative Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="cum_balance" t-value="0.0"/>
+                                    <t t-foreach="partner.get('invoices', [])" t-as="inv">
+                                        <t t-set="cum_balance" t-value="cum_balance + inv.get('balance', 0.0)"/>
+                                        <tr>
+                                            <td class="text-center"><span t-out="inv_index + 1"/></td>
+                                            <td class="text-center"><span t-out="inv.get('invoice_date')"/></td>
+                                            <td><span t-out="inv.get('invoice_no')"/></td>
+                                            <td><span t-out="inv.get('ref')"/></td>
+                                            <td class="text-end"><span t-out="'{:,.2f}'.format(inv.get('invoice_amount', 0.0))"/></td>
+                                            <td class="text-end"><span t-out="'{:,.2f}'.format(inv.get('pdc_amount', 0.0))"/></td>
+                                            <td class="text-end"><span t-out="'{:,.2f}'.format(inv.get('balance', 0.0))"/></td>
+                                            <td class="text-end"><span t-out="'{:,.2f}'.format(cum_balance)"/></td>
+                                        </tr>
+                                    </t>
+                                    <tr class="total-row">
+                                        <td colspan="3"></td>
+                                        <td class="text-center">Total</td>
+                                        <td class="text-end"><span t-out="'{:,.2f}'.format(partner.get('invoice_total', 0.0))"/></td>
+                                        <td class="text-end"><span t-out="'{:,.2f}'.format(partner.get('pdc_total', 0.0))"/></td>
+                                        <td class="text-end"><span t-out="'{:,.2f}'.format(partner.get('balance_total', 0.0))"/></td>
+                                        <td class="text-end"><span t-out="'{:,.2f}'.format(partner.get('balance_total', 0.0))"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- Payments Table -->
+                            <t t-if="partner.get('payments')">
+                                <table class="table table-sm table-statement mb-3" style="font-size: 12px;">
+                                    <thead>
+                                        <t t-if="partner.get('has_cheque_data')">
+                                            <tr>
+                                                <th style="width: 6%;">Sl No</th>
+                                                <th style="width: 14%;">Payment Date</th>
+                                                <th style="width: 24%;">Payment No</th>
+                                                <th style="width: 20%;">Cheque Number</th>
+                                                <th style="width: 16%;">Cheque Date</th>
+                                                <th style="width: 20%;" class="text-end">Payment Amount</th>
+                                            </tr>
+                                        </t>
+                                        <t t-else="">
+                                            <tr>
+                                                <th style="width: 8%;">Sl No</th>
+                                                <th style="width: 22%;">Payment Date</th>
+                                                <th style="width: 45%;">Payment No</th>
+                                                <th style="width: 25%;" class="text-end">Payment Amount</th>
+                                            </tr>
+                                        </t>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="partner.get('payments', [])" t-as="p">
+                                            <tr>
+                                                <td class="text-center"><span t-out="p_index + 1"/></td>
+                                                <td class="text-center"><span t-out="p.get('payment_date')"/></td>
+                                                <td><span t-out="p.get('payment')"/></td>
+                                                <t t-if="partner.get('has_cheque_data')">
+                                                    <td><span t-out="p.get('cheque_no')"/></td>
+                                                    <td class="text-center"><span t-out="p.get('maturity_date')"/></td>
+                                                </t>
+                                                <td class="text-end"><span t-out="'{:,.2f}'.format(p.get('amount', 0.0))"/></td>
+                                            </tr>
+                                        </t>
+                                        <tr class="total-row">
+                                            <t t-if="partner.get('has_cheque_data')">
+                                                <td colspan="4"></td>
+                                                <td class="text-center">Total</td>
+                                            </t>
+                                            <t t-else="">
+                                                <td colspan="2"></td>
+                                                <td class="text-center">Total</td>
+                                            </t>
+                                            <td class="text-end"><span t-out="'{:,.2f}'.format(partner.get('payment_total', 0.0))"/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </t>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_account_reconciled_user,access_account_reconciled,model_account_reconciled,base.group_user,1,1,1,1
+access_payment_statement_user,access.payment.statement.user,model_payment_statement,base.group_user,1,1,1,1
+access_bulk_mail_user,access.bulk.mail.user,model_bulk_mail,base.group_user,1,1,1,1
+access_mail_partner_line_user,access.mail.partner.line.user,model_mail_partner_line,base.group_user,1,1,1,1
+access_payment_statement_partner_line_user,access.payment.statement.partner.line.user,model_payment_statement_partner_line,base.group_user,1,1,1,1
+access_bulk_mail_partner_wizard_user,access.bulk.mail.partner.wizard.user,model_bulk_mail_partner_wizard,base.group_user,1,1,1,1
+access_bulk_mail_partner_wizard_line_user,access.bulk.mail.partner.wizard.line.user,model_bulk_mail_partner_wizard_line,base.group_user,1,1,1,1

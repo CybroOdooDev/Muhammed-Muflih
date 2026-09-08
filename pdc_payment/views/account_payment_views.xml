@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Form View -->
+    <record id="view_account_payment_form" model="ir.ui.view">
+        <field name="name">account.payment.view.form.inherit.pdc.payment</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='journal_id']" position="after">
+                <field name="bank_account_id"/>
+            </xpath>
+            <xpath expr="//button[@name='action_draft']" position="before">
+<!--                <button type="object" name="action_reconcile" invisible="not reconcile_button"-->
+<!--                        string="Reconcile" class="oe_highlight"/>-->
+<!--                invisible="not reconcile_button"-->
+            </xpath>
+            <xpath expr="//field[@name='partner_bank_id']" position="after">
+                <field name="pdc_payment"/>
+                <field name="maturity_date" invisible="not pdc_payment"/>
+                <field name="cheque_no" invisible="not pdc_payment"/>
+                <field name="bank_name" invisible="not pdc_payment"/>
+                <field name="reconciled_entry_ids" invisible="1"
+                       widget="many2many_tags"/>
+<!--                <field name="is_reconciled_line" invisible="0"/>-->
+                <field name="already_paying" invisible="1"/>
+                <field name="remaining_reconciled" invisible="1"/>
+                <field name="reconcile_button" invisible="1"/>
+                <field name="custom_payment" invisible="1"/>
+
+            </xpath>
+            <xpath expr="//button[@name='button_open_journal_entry']"
+                   position="after">
+                <button name="action_reconciled_entry"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-bars">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Reconciled Items</span>
+                    </div>
+                </button>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <field name="is_reconcile_line" invisible="1"/>
+
+                <notebook>
+                    <page string="Journal Items">
+                        <label for="new_reference" string="New Reference" />
+                        <field
+                                name="new_reference"
+                                />
+                        <button name="action_fifo_payment_assignment"
+                                type="object"
+                                string="FIFO Auto-Assign"
+                                class="oe_highlight"
+                                invisible="move_line_ids == []"/>
+                        <field name="move_line_ids">
+                            <list editable="bottom" default_order="date asc, id">
+                                <field name="date"/>
+                                <field name="move_name"/>
+<!--                                <field name="is_split_reconciliation" />-->
+                                <!--                                <field name="invoice_date"/>-->
+                                <!--                                <field name="name"/>-->
+<!--                                <field name=""/>-->
+                                <field name="credit"
+                                       sum="Total"  string="Bill Amount"
+                                       column_invisible="parent.payment_type == 'inbound'"/>
+                                <field name="debit" string="Invoice Amount"
+                                       sum="Total"
+                                       column_invisible="parent.payment_type == 'outbound'"/>
+                                <!--                                <field name="amount_total"-->
+                                <!--                                       string="Total Amount"/>-->
+                                <field name="amount_residual"
+                                       string="Amount Due" />
+                                <field name="adjusted_amount_residual"
+                                       string="Paying" sum="Total" column_invisible="1"/>
+                                <field
+                                        name="adjusted_amount_residual_currency" string="Paying Amount" sum="Total"/>
+                                <!--                                <field name="ref"/>-->
+                                <!--                                <field name="vendor_invoice_number"-->
+                                <!--                                       string="Customer Invoice Number"/>-->
+                            </list>
+                        </field>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+</odoo>
