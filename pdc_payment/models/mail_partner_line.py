@@ -18,7 +18,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 class MailPartnerLine(models.Model):
     _name = "mail.partner.line"
@@ -26,12 +27,35 @@ class MailPartnerLine(models.Model):
 
     bulk_mail_id = fields.Many2one('bulk.mail', string="Bulk Mail", ondelete="cascade")
     partner_id = fields.Many2one('res.partner', string="Partner", required=True)
-    email = fields.Char(string="Email", required=True)
+    email = fields.Char(string="Email", compute="_compute_email", store=True, readonly=False, precompute=True, required=True)
+    sale_executive_id = fields.Many2one('hr.employee', string="Sales Executive", related="partner_id.x_studio_sales_executive", store=True)
+    sale_excutive_mail = fields.Char(string="Sales Executive Mail", compute="_compute_sale_excutive_mail", store=True, readonly=False, precompute=True, required=True)
+
+    @api.depends('partner_id', 'partner_id.email')
+    def _compute_email(self):
+        for line in self:
+            line.email = line.partner_id.email if line.partner_id else False
+
+    @api.depends('partner_id', 'partner_id.x_studio_sales_executive', 'partner_id.x_studio_sales_executive.work_email')
+    def _compute_sale_excutive_mail(self):
+        for line in self:
+            if line.partner_id and line.partner_id.x_studio_sales_executive:
+                line.sale_excutive_mail = line.partner_id.x_studio_sales_executive.work_email
+            else:
+                line.sale_excutive_mail = False
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
         if self.partner_id:
+            if not self.partner_id.email:
+                raise UserError(_("Selected partner '%s' does not have an email address. Please add an email address to this partner.") % self.partner_id.name)
+            if not (self.partner_id.x_studio_sales_executive and self.partner_id.x_studio_sales_executive.work_email):
+                raise UserError(_("Selected partner '%s' does not have a Sales Executive email address. Please add an executive email address to this partner.") % self.partner_id.name)
             self.email = self.partner_id.email
+            self.sale_excutive_mail = self.partner_id.x_studio_sales_executive.work_email
+        else:
+            self.email = False
+            self.sale_excutive_mail = False
 
     def action_add_multiple_partners(self):
         bulk_mail_id = self.env.context.get('bulk_mail_id') or self.bulk_mail_id.id

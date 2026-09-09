@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Demo Customer Statement Email Template -->
+        <record id="email_template_customer_statement" model="mail.template">
+            <field name="name">Customer Statement Template</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="subject">Customer Statement - {{ object.name }}</field>
+            <field name="email_from">{{ (object.company_id.email or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.email }}</field>
+            <field name="description">Template for sending account statements to customers</field>
+            <field name="body_html" type="html">
+                <div>
+                    <p>Dear <t t-out="object.name or ''"/>,</p>
+                    <p>Please find attached your detailed Customer Account Statement.</p>
+                    <p>Should you have any questions or require further details regarding your statement, please feel free to contact us.</p>
+                    <br/>
+                    <p>Best regards,</p>
+                    <p><t t-out="user.company_id.name or ''"/></p>
+                </div>
+            </field>
+        </record>
+
+        <!-- Demo Vendor Statement Email Template -->
+        <record id="email_template_vendor_statement" model="mail.template">
+            <field name="name">Vendor Statement Template</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="subject">Vendor Statement - {{ object.name }}</field>
+            <field name="email_from">{{ (object.company_id.email or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.email }}</field>
+            <field name="description">Template for sending account statements to vendors</field>
+            <field name="body_html" type="html">
+                <div>
+                    <p>Dear <t t-out="object.name or ''"/>,</p>
+                    <p>Please find attached our latest Vendor Account Statement for your review.</p>
+                    <p>If you have any questions regarding pending payments or line items, please do not hesitate to contact our finance department.</p>
+                    <br/>
+                    <p>Best regards,</p>
+                    <p><t t-out="user.company_id.name or ''"/></p>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>

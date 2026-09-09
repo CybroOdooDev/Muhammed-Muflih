@@ -22,6 +22,7 @@
                            invisible="statement_type != 'customer' or bulk_mail == True" domain="[('customer_rank','>', 0)]"/>
                     <field name="pdc_payment"/>
                     <field name="bulk_mail" invisible="statement_type not in ('vendor', 'customer')"/>
+                    <field name="bulk_mail_id" invisible="not bulk_mail" domain="[('type', '=', statement_type)]" options="{'no_create': True}"/>
                     <field name="partner_line_ids" invisible="not bulk_mail">
                         <list editable="bottom">
                             <field name="partner_id"/>

@@ -19,7 +19,7 @@
 #
 #############################################################################
 from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError
 
 class BulkMail(models.Model):
     _name = "bulk.mail"
@@ -28,14 +28,17 @@ class BulkMail(models.Model):
     name = fields.Char(string="Name", required=True)
     type = fields.Selection([('customer', 'Customer'), ('vendor', 'Vendor')], string="Type", default='customer')
     partner_line_ids = fields.One2many('mail.partner.line', 'bulk_mail_id', string="Partner Lines")
+    sales_manager_id=fields.Many2one('res.users', string="Sales Manager")
+    email_template_id=fields.Many2one('mail.template', string="Email Template",required=True)
 
-    @api.constrains('type')
-    def _check_unique_type(self):
-        for record in self:
-            if record.type:
-                existing = self.search_count([('type', '=', record.type), ('id', '!=', record.id)])
-                if existing > 0:
-                    raise ValidationError(_("A Bulk Mail record of type '%s' already exists. You cannot create a new one.") % (dict(self._fields['type'].selection).get(record.type)))
+
+    @api.onchange('sales_manager_id')
+    def onchange_sales_manager_id(self):
+        if self.sales_manager_id:
+            email = self.sales_manager_id.email or self.sales_manager_id.partner_id.email or getattr(self.sales_manager_id, 'work_email', False)
+            if not email:
+                raise UserError(
+                    _("Selected Sales Manager '%s' does not have an email address. Please add an email address to this Manager.") % self.sales_manager_id.name)
 
     def action_add_multiple_partners(self):
         self.ensure_one()

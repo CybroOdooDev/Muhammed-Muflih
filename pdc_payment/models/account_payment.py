@@ -1,4 +1,4 @@
-    # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import json
 from odoo import api, fields, models, Command
 from odoo.exceptions import ValidationError, UserError

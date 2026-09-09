@@ -12,6 +12,7 @@
     'depends': ['base', 'account_accountant','sales_extends'],
     'data': [
         'security/ir.model.access.csv',
+        'data/mail_template_data.xml',
         'demo/bulk_mail_demo.xml',
         'views/bulk_mail_views.xml',
         # 'views/views.xml',
@@ -19,6 +20,7 @@
 
         'views/account_reconciliated_views.xml',
 		'wizard/payment_statement_views.xml',
+        'wizard/bulk_mail_partner_wizard_views.xml',
 		'report/payment_statement_report_template.xml',
 		'views/account_payment_new_views.xml',
 		'views/account_payment_menu_views.xml',

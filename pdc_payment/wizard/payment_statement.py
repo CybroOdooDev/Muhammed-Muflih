@@ -22,31 +22,42 @@ class PaymentStatement(models.TransientModel):
     date_to = fields.Date(string="As On Date",default=lambda self: fields.date.today(), required=True, )
     pdc_payment = fields.Boolean(string="Cheque Payment")
     bulk_mail = fields.Boolean(string="Bulk Mail")
+    bulk_mail_id = fields.Many2one('bulk.mail', string="Bulk Mail Group")
     partner_line_ids = fields.One2many(
         'payment.statement.partner.line',
         'statement_id',
         string="Partner Lines"
     )
 
-    @api.onchange('statement_type', 'bulk_mail')
+    @api.onchange('statement_type', 'bulk_mail', 'bulk_mail_id')
     def _onchange_statement_type(self):
         for rec in self:
-            rec.customer_ids = [(5, 0, 0)]
-            rec.vendor_ids = [(5, 0, 0)]
+            if not rec.bulk_mail:
+                rec.bulk_mail_id = False
+                rec.customer_ids = [(5, 0, 0)]
+                rec.vendor_ids = [(5, 0, 0)]
+                rec.partner_line_ids = [(5, 0, 0)]
+                continue
+
+            if rec.bulk_mail_id and rec.bulk_mail_id.type != rec.statement_type:
+                rec.bulk_mail_id = False
+
             lines = [(5, 0, 0)]
-            if rec.bulk_mail and rec.statement_type:
-                bulk_mail_rec = self.env['bulk.mail'].search([('type', '=', rec.statement_type)])
-                if bulk_mail_rec:
-                    partners = bulk_mail_rec.partner_line_ids.mapped('partner_id')
-                    for p in partners:
-                        lines.append((0, 0, {
-                            'partner_id': p.id,
-                        }))
-                    if rec.statement_type == 'customer':
-                        rec.customer_ids = [(6, 0, partners.ids)]
-                    elif rec.statement_type == 'vendor':
-                        rec.vendor_ids = [(6, 0, partners.ids)]
-            rec.partner_line_ids = lines
+            if rec.bulk_mail and rec.bulk_mail_id:
+                partners = rec.bulk_mail_id.partner_line_ids.mapped('partner_id')
+                for p in partners:
+                    lines.append((0, 0, {
+                        'partner_id': p.id,
+                    }))
+                if rec.statement_type == 'customer':
+                    rec.customer_ids = [(6, 0, partners.ids)]
+                elif rec.statement_type == 'vendor':
+                    rec.vendor_ids = [(6, 0, partners.ids)]
+                rec.partner_line_ids = lines
+            elif rec.bulk_mail and not rec.bulk_mail_id:
+                rec.customer_ids = [(5, 0, 0)]
+                rec.vendor_ids = [(5, 0, 0)]
+                rec.partner_line_ids = [(5, 0, 0)]
 
     @api.onchange('partner_line_ids')
     def _onchange_partner_line_ids(self):
@@ -827,6 +838,14 @@ class PaymentStatement(models.TransientModel):
         elif self.statement_type == 'vendor' and self.vendor_ids:
             selected_partner_ids = set(self.vendor_ids.ids)
 
+        manager_email = False
+        if self.bulk_mail and self.bulk_mail_id and self.bulk_mail_id.sales_manager_id:
+            manager_email = (
+                self.bulk_mail_id.sales_manager_id.email or 
+                self.bulk_mail_id.sales_manager_id.partner_id.email or 
+                self.bulk_mail_id.sales_manager_id.login
+            )
+
         sent_count = 0
         for partner_dict in partners_data:
             pid = partner_dict.get('partner_id')
@@ -837,33 +856,84 @@ class PaymentStatement(models.TransientModel):
             if not partner_obj.email:
                 continue
 
-            xlsx_bytes = self._generate_partner_xlsx_bytes(partner_dict)
-            file_name = f"{self.statement_type.capitalize()}_Statement_{(partner_dict['partner'] or '').replace('/', '_')}.xlsx"
+            # Collect CC emails (Sales Manager + customer-specific Sales Executive)
+            cc_list = []
+            if manager_email and manager_email.strip():
+                cc_list.append(manager_email.strip())
+
+            exec_email = False
+            if self.bulk_mail_id:
+                line = self.bulk_mail_id.partner_line_ids.filtered(lambda l: l.partner_id.id == partner_obj.id)
+                if line:
+                    exec_email = line[0].sale_excutive_mail or (line[0].sale_executive_id.work_email if line[0].sale_executive_id else False)
+
+            if not exec_email and partner_obj.x_studio_sales_executive:
+                exec_email = partner_obj.x_studio_sales_executive.work_email
+
+            if exec_email and exec_email.strip():
+                if exec_email.strip() not in cc_list:
+                    cc_list.append(exec_email.strip())
+
+            email_cc_str = ", ".join(cc_list) if cc_list else False
+
+            partner_report_data = {
+                'model_id': self.id,
+                'date_to': self.date_to.strftime('%d/%m/%Y'),
+                'statement_type': self.statement_type,
+                'partners': [partner_dict],
+            }
+
+            pdf_bytes, _ = self.env['ir.actions.report'].sudo()._render_qweb_pdf(
+                'pdc_payment.action_report_payment_statement', [self.id], data=partner_report_data
+            )
+            file_name = f"{self.statement_type.capitalize()}_Statement_{(partner_dict['partner'] or '').replace('/', '_')}.pdf"
 
             attachment = self.env['ir.attachment'].create({
                 'name': file_name,
-                'datas': base64.b64encode(xlsx_bytes),
+                'datas': base64.b64encode(pdf_bytes),
                 'res_model': 'payment.statement',
                 'res_id': self.id,
                 'type': 'binary',
-                'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'mimetype': 'application/pdf',
             })
 
-            subject = f"{'Vendor' if self.statement_type == 'vendor' else 'Customer'} Statement - {partner_dict['partner']}"
-            body_html = f"""
-                <p>Dear {partner_dict['partner']},</p>
-                <p>Please find attached your statement as of <b>{report_data.get('date_to', '')}</b>.</p>
-                <p>Thank you,</p>
-                <p><b>{self.env.company.name}</b></p>
-            """
-
-            mail_values = {
-                'subject': subject,
-                'body_html': body_html,
+            email_values = {
                 'email_to': partner_obj.email,
                 'attachment_ids': [(6, 0, [attachment.id])],
             }
-            self.env['mail.mail'].sudo().create(mail_values).send()
+            if email_cc_str:
+                email_values['email_cc'] = email_cc_str
+
+            if self.bulk_mail_id and self.bulk_mail_id.email_template_id:
+                template = self.bulk_mail_id.email_template_id
+                target_model = template.model or 'res.partner'
+                res_id = partner_obj.id
+
+                if target_model == 'payment.statement':
+                    res_id = self.id
+                elif target_model == 'bulk.mail':
+                    res_id = self.bulk_mail_id.id
+                elif target_model and target_model != 'res.partner':
+                    if target_model in self.env and 'partner_id' in self.env[target_model]._fields:
+                        rec = self.env[target_model].search([('partner_id', '=', partner_obj.id)], limit=1)
+                        if rec:
+                            res_id = rec.id
+
+                template.sudo().send_mail(res_id, force_send=True, email_values=email_values)
+            else:
+                subject = f"{'Vendor' if self.statement_type == 'vendor' else 'Customer'} Statement - {partner_dict['partner']}"
+                body_html = f"""
+                    <p>Dear {partner_dict['partner']},</p>
+                    <p>Please find attached your statement as of <b>{report_data.get('date_to', '')}</b>.</p>
+                    <p>Thank you,</p>
+                    <p><b>{self.env.company.name}</b></p>
+                """
+                mail_values = {
+                    'subject': subject,
+                    'body_html': body_html,
+                    **email_values,
+                }
+                self.env['mail.mail'].sudo().create(mail_values).send()
             sent_count += 1
 
         return {

@@ -47,7 +47,8 @@
                         }
                         .table-statement th {
                             background-color: #f2f2f2 !important;
-                            font-weight: bold;
+                            color: #000000 !important;
+                            font-weight: bold !important;
                             text-align: center;
                             vertical-align: middle;
                             border: 1px solid #dee2e6;

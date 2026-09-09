@@ -4,11 +4,13 @@
         <record id="bulk_mail_customer_demo" model="bulk.mail">
             <field name="name">Customer Bulk Mail</field>
             <field name="type">customer</field>
+            <field name="email_template_id" ref="pdc_payment.email_template_customer_statement"/>
         </record>
 
         <record id="bulk_mail_vendor_demo" model="bulk.mail">
             <field name="name">Vendor Bulk Mail</field>
             <field name="type">vendor</field>
+            <field name="email_template_id" ref="pdc_payment.email_template_vendor_statement"/>
         </record>
     </data>
 </odoo>
