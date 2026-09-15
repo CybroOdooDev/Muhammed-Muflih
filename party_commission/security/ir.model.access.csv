@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_booking_provsion,access.booking.provsion,model_booking_provsion,base.group_user,1,1,1,1
+access_booking_provsion_manager,access.booking.provsion.manager,model_booking_provsion,party_commission.group_party_commission_manager,1,1,1,1
+access_booking_provsion_line,access.booking.provsion.line,model_booking_provsion_line,base.group_user,1,1,1,1
+access_booking_provsion_line_manager,access.booking.provsion.line.manager,model_booking_provsion_line,party_commission.group_party_commission_manager,1,1,1,1
+access_booking_provsion_journal_line,access.booking.provsion.journal.line,model_booking_provsion_journal_line,base.group_user,1,1,1,1
+access_booking_provsion_journal_line_manager,access.booking.provsion.journal.line.manager,model_booking_provsion_journal_line,party_commission.group_party_commission_manager,1,1,1,1
+access_party_commission,access.party.commission,model_party_commission,base.group_user,1,1,1,1
+access_party_commission_manager,access.party.commission.manager,model_party_commission,party_commission.group_party_commission_manager,1,1,1,1

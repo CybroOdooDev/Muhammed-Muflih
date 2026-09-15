@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View -->
+    <record id="party_commission_view_form" model="ir.ui.view">
+        <field name="name">party.commission.view.form</field>
+        <field name="model">party.commission</field>
+        <field name="arch" type="xml">
+            <form string="Party Commission ">
+                <group>
+                    <field name="customer_ids" widget="many2many_tags"/>
+                    <field name="from_date"/>
+                    <field name="to_date"/>
+                </group>
+                <footer>
+                    <button name="confirm_action" string="Confirm" type="object" class="btn-primary"/>
+                    <button name="action_cancel" string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <!-- Actions -->
+    <record id="party_commission_action" model="ir.actions.act_window">
+        <field name="name">Party Commission</field>
+        <field name="res_model">party.commission</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="party_commission_menu"
+              name="Party Commission"
+              action="party_commission_action"
+              parent="sale.menu_sale_invoicing"
+              sequence="20"/>
+</odoo>
