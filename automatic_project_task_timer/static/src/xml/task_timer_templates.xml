@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Template for getting the timer widget.-->
+<templates id="template" xml:space="preserve">
+    <t t-name="TaskTimerTemplate">
+        <span t-if="this.props.readonly" t-out="this.durationFormatted"/>
+        <input t-else="" t-att-id="this.props.id" t-ref="this.numpadDecimalRef" t-att-placeholder="this.props.placeholder" inputmode="numeric" class="o_input" />
+    </t>
+</templates>
