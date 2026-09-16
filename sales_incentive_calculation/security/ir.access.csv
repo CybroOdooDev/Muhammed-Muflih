@@ -1,0 +1,10 @@
+id,name,model_id,group_id/id,operation,domain
+access_sales_incentive_user,access.sales.incentive.user,sales.incentive,account.group_account_user,crud,
+access_sales_incentive_manager,access.sales.incentive.manager,sales.incentive,sales_team.group_sale_manager,crud,
+access_select_incentive_user,access.select.incentive.user,select.incentive,account.group_account_user,crud,
+access_select_incentive_manager,access.select.incentive.manager,select.incentive,sales_team.group_sale_manager,crud,
+access_calculate_incentive_user,access.calculate.incentive.user,calculate.incentive,account.group_account_user,crud,
+access_calculate_incentive_manager,access.calculate.incentive.manager,calculate.incentive,sales_team.group_sale_manager,crud,
+access_approve_incentive_user,access.approve.incentive.user,approve.incentive,account.group_account_user,crud,
+access_approve_incentive_account_manager,access.approve.incentive.account.manager,approve.incentive,account.group_account_manager,crud,
+access_approve_incentive_sales_manager,access.approve.incentive.sales.manager,approve.incentive,sales_team.group_sale_manager,crud,
