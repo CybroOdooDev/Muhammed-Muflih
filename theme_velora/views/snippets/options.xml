@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-    <!-- ============================================================
-         Register Velora snippets into the Website Builder panel.
-         Uses the correct Odoo 18 t-snippet / <snippets> format.
-    ============================================================ -->
     <template id="velora_snippets_options"
               inherit_id="website.snippets"
               name="Velora Snippets">
@@ -12,7 +7,7 @@
         <!-- 1. Register the custom "Velora" category group in the snippets panel -->
         <xpath expr="//snippets[@id='snippet_groups']" position="inside">
             <t t-snippet="website.s_snippet_group"
-               t-thumbnail="/theme_velora/static/src/img/hero.webp"
+               t-thumbnail="/website/static/src/img/snippets_thumbs/s_media_list.svg"
                string="Velora"
                snippet-group="velora_snippets"/>
         </xpath>
@@ -22,7 +17,7 @@
             <t t-snippet="theme_velora.s_velora_bestsellers_banner"
                string="Bestsellers Banner"
                group="velora_snippets"
-               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+               t-thumbnail="/website/static/src/img/snippets_thumbs/s_banner.svg"/>
             <t t-snippet="theme_velora.s_velora_hero"
                string="Velora Hero"
                group="velora_snippets"
@@ -62,39 +57,39 @@
             <t t-snippet="theme_velora.s_velora_contact_banner"
                string="Contact Banner"
                group="velora_snippets"
-               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+               t-thumbnail="/website/static/src/img/snippets_thumbs/s_banner.svg"/>
             <t t-snippet="theme_velora.s_velora_contact_section"
                string="Contact Info &amp; Form"
                group="velora_snippets"
-               t-thumbnail="/theme_velora/static/src/img/img1.jpg"/>
+               t-thumbnail="/website/static/src/img/snippets_thumbs/s_website_form.svg"/>
             <t t-snippet="theme_velora.s_velora_contact_map"
                string="Contact Map"
                group="velora_snippets"
-               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+               t-thumbnail="/website/static/src/img/snippets_thumbs/s_map.svg"/>
             <t t-snippet="theme_velora.s_velora_about_banner"
                string="About Banner"
                group="velora_snippets"
-               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+               t-thumbnail="/website/static/src/img/snippets_thumbs/s_banner.svg"/>
             <t t-snippet="theme_velora.s_velora_about_stats"
                string="About Stats"
                group="velora_snippets"
-               t-thumbnail="/theme_velora/static/src/img/img2.jpg"/>
+               t-thumbnail="/website/static/src/img/snippets_thumbs/s_numbers_showcase.svg"/>
             <t t-snippet="theme_velora.s_velora_collections_banner"
                string="Collections Banner"
                group="velora_snippets"
-               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+               t-thumbnail="/website/static/src/img/snippets_thumbs/s_banner.svg"/>
             <t t-snippet="theme_velora.s_velora_collections_grid"
                string="Collections Grid"
                group="velora_snippets"
-               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+               t-thumbnail="/website/static/src/img/snippets_thumbs/s_masonry_block.svg"/>
             <t t-snippet="theme_velora.s_velora_about_philosophy"
                string="Brand Philosophy"
                group="velora_snippets"
-               t-thumbnail="/theme_velora/static/src/img/img1.jpg"/>
+               t-thumbnail="/website/static/src/img/snippets_thumbs/s_text_image.svg"/>
             <t t-snippet="theme_velora.s_velora_confirmation"
                string="Order Confirmation"
                group="velora_snippets"
-               t-thumbnail="/theme_velora/static/src/img/hero.webp"/>
+               t-thumbnail="/website/static/src/img/snippets_thumbs/s_banner.svg"/>
         </xpath>
 
     </template>

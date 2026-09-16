@@ -40,7 +40,16 @@
 
                         <table class="table table-sm table-bordered mt-3">
                             <thead class="bg-light text-center">
-                                <tr>
+                                <tr t-if="o.partner_type == 'customer'">
+                                    <th style="width: 6%;">SL NO</th>
+                                    <th style="width: 12%;">DATE</th>
+                                    <th style="width: 20%;">VOUCHER NO</th>
+                                    <th style="width: 18%;">PAYMENT NO</th>
+                                    <th style="width: 14%;" class="text-end">AMOUNT</th>
+                                    <th style="width: 15%;">CUSTOMER</th>
+                                    <th style="width: 15%;">SALES EXECUTIVE</th>
+                                </tr>
+                                <tr t-else="">
                                     <th style="width: 8%;">SL NO</th>
                                     <th style="width: 15%;">DATE</th>
                                     <th style="width: 32%;">VOUCHER NO</th>
@@ -53,7 +62,16 @@
                                 <t t-set="sl_no" t-value="1"/>
                                 <t t-set="total_amount" t-value="0.0"/>
                                 <t t-foreach="lines_data" t-as="line">
-                                    <tr>
+                                    <tr t-if="o.partner_type == 'customer'">
+                                        <td class="text-center" t-out="sl_no"/>
+                                        <td class="text-center" t-out="line['date']"/>
+                                        <td t-out="line['voucher_no']"/>
+                                        <td t-out="line['payment_no']"/>
+                                        <td class="text-end" t-out="line['amount']" t-options='{"widget": "monetary", "display_currency": o.env.company.currency_id}'/>
+                                        <td t-out="line['customer']"/>
+                                        <td t-out="line['sales_executive']"/>
+                                    </tr>
+                                    <tr t-else="">
                                         <td class="text-center" t-out="sl_no"/>
                                         <td class="text-center" t-out="line['date']"/>
                                         <td t-out="line['voucher_no']"/>
@@ -65,7 +83,14 @@
                                 </t>
                             </tbody>
                             <tfoot class="border-top border-dark">
-                                <tr>
+                                <tr t-if="o.partner_type == 'customer'">
+                                    <td colspan="4" class="text-end fw-bold">Total:</td>
+                                    <td class="text-end fw-bold">
+                                        <span t-out="total_amount" t-options='{"widget": "monetary", "display_currency": o.env.company.currency_id}'/>
+                                    </td>
+                                    <td colspan="2"></td>
+                                </tr>
+                                <tr t-else="">
                                     <td colspan="4" class="text-end fw-bold">Total:</td>
                                     <td class="text-end fw-bold">
                                         <span t-out="total_amount" t-options='{"widget": "monetary", "display_currency": o.env.company.currency_id}'/>

@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <!-- ============================================================
-         NEW HOMEPAGE SNIPPETS (Aligned with theme_velorav19)
+         Snippet: Velora Hero
     ============================================================ -->
-
     <template id="s_velora_hero" name="Velora Hero">
         <section class="hero section s_velora_hero" id="hero" data-snippet="s_velora_hero" data-name="Velora Hero">
             <div class="oe_structure"/>
@@ -44,6 +42,9 @@
         </section>
     </template>
 
+    <!-- ============================================================
+         Snippet: Velora Collections
+    ============================================================ -->
     <template id="s_velora_collections" name="Velora Collections">
         <section class="collections section s_velora_collections" id="velora_collections"
                  style="background-color: var(--color-bg-light, #FAF9F6);" data-snippet="s_velora_collections" data-name="Velora Collections">
@@ -128,6 +129,9 @@
         </section>
     </template>
 
+    <!-- ============================================================
+         Snippet: Velora Bestsellers
+    ============================================================ -->
     <template id="s_velora_bestsellers" name="Velora Bestsellers">
         <section class="bestsellers section s_velora_bestsellers" id="velora_bestsellers" data-snippet="s_velora_bestsellers" data-name="Velora Bestsellers">
             <div class="oe_structure"/>
@@ -211,6 +215,9 @@
         </section>
     </template>
 
+    <!-- ============================================================
+         Snippet: Velora Categories
+    ============================================================ -->
     <template id="s_velora_categories" name="Velora Categories">
         <section class="categories section s_velora_categories" id="velora_categories" data-snippet="s_velora_categories" data-name="Velora Categories">
             <div class="oe_structure"/>
@@ -269,6 +276,9 @@
         </section>
     </template>
 
+    <!-- ============================================================
+         Snippet: Velora About Story
+    ============================================================ -->
     <template id="s_velora_about_story" name="Velora About Story">
         <section class="about section s_velora_about_story" id="velora_about_story"
                  style="background-color: var(--color-bg-light, #FAF9F6);" data-snippet="s_velora_about_story" data-name="Velora About Story">
@@ -324,6 +334,9 @@
         </section>
     </template>
 
+    <!-- ============================================================
+         Snippet: Velora Why Us
+    ============================================================ -->
     <template id="s_velora_why_us" name="Velora Why Us">
         <section class="why-us section s_velora_why_us" data-snippet="s_velora_why_us" data-name="Velora Why Us">
             <div class="oe_structure"/>
@@ -383,6 +396,9 @@
         </section>
     </template>
 
+    <!-- ============================================================
+         Snippet: Velora Testimonials
+    ============================================================ -->
     <template id="s_velora_testimonials" name="Velora Testimonials">
         <section class="testimonials section s_velora_testimonials" id="velora_testimonials" data-snippet="s_velora_testimonials" data-name="Velora Testimonials">
             <div class="oe_structure"/>
@@ -482,6 +498,9 @@
         </section>
     </template>
 
+    <!-- ============================================================
+         Snippet: Velora FAQ
+    ============================================================ -->
     <template id="s_velora_faq" name="Velora FAQ">
         <section class="faq section s_velora_faq" id="velora_faq" data-snippet="s_velora_faq" data-name="Velora FAQ">
             <div class="oe_structure"/>
@@ -533,6 +552,9 @@
         </section>
     </template>
 
+    <!-- ============================================================
+         Snippet: Velora Newsletter
+    ============================================================ -->
     <template id="s_velora_newsletter" name="Velora Newsletter">
         <section class="newsletter section s_velora_newsletter" id="velora_newsletter" data-snippet="s_velora_newsletter" data-name="Velora Newsletter">
             <div class="oe_structure"/>
@@ -567,8 +589,7 @@
     ============================================================ -->
 
     <!-- ============================================================
-         SNIPPET 1: CONTACT PAGE BANNER
-         Page hero with eyebrow, "Get In Touch" title, breadcrumb
+         Snippet: Contact Banner
     ============================================================ -->
     <template id="s_velora_contact_banner" name="Velora Contact Banner">
         <section class="page-banner s_velora o_colored_level"
@@ -594,8 +615,7 @@
     </template>
 
     <!-- ============================================================
-         SNIPPET 2: CONTACT INFO + FORM (2-column layout)
-         Left: info list + socials | Right: contact form
+         Snippet: Contact Info & Form
     ============================================================ -->
     <template id="s_velora_contact_section" name="Velora Contact Section">
         <section class="contact-section section s_velora o_colored_level"
@@ -724,7 +744,7 @@
     </template>
 
     <!-- ============================================================
-         SNIPPET 3: CONTACT MAP (full-width iframe)
+         Snippet: Contact Map
     ============================================================ -->
     <template id="s_velora_contact_map" name="Velora Contact Map">
         <section class="map-section s_velora o_colored_level"
@@ -742,7 +762,7 @@
     </template>
 
     <!-- ============================================================
-         SNIPPET 4: ABOUT BANNER
+         Snippet: About Banner
     ============================================================ -->
     <template id="s_velora_about_banner" name="Velora About Banner">
         <section class="page-banner s_velora o_colored_level"
@@ -768,7 +788,7 @@
     </template>
 
     <!-- ============================================================
-         SNIPPET 5: ABOUT STATS
+         Snippet: About Stats
     ============================================================ -->
     <template id="s_velora_about_stats" name="Velora About Stats">
         <section class="about-stats s_velora o_colored_level"
@@ -806,7 +826,7 @@
     </template>
 
     <!-- ============================================================
-         SNIPPET 6: BRAND PHILOSOPHY
+         Snippet: Brand Philosophy
     ============================================================ -->
     <template id="s_velora_about_philosophy" name="Velora About Philosophy">
         <section class="brand-philosophy section s_velora o_colored_level"
@@ -843,7 +863,7 @@
     </template>
 
     <!-- ============================================================
-         SNIPPET: COLLECTIONS BANNER
+         Snippet: Collections Banner
     ============================================================ -->
     <template id="s_velora_collections_banner" name="Velora Collections Banner">
         <section class="page-banner s_velora o_colored_level"
@@ -863,7 +883,7 @@
     </template>
 
     <!-- ============================================================
-         SNIPPET: COLLECTIONS GRID
+         Snippet: Collections Grid
     ============================================================ -->
     <template id="s_velora_collections_grid" name="Velora Collections Grid">
         <section class="collections-page-section s_velora o_colored_level"
@@ -937,7 +957,7 @@
     </template>
 
     <!-- ============================================================
-         SNIPPET: BESTSELLERS BANNER
+         Snippet: Bestsellers Banner
     ============================================================ -->
     <template id="s_velora_bestsellers_banner" name="Velora Bestsellers Banner">
         <section class="page-banner s_velora o_colored_level"
@@ -963,7 +983,8 @@
     </template>
 
     <!-- ============================================================
-         SNIPPET: ORDER CONFIRMATION
+         Snippet: Order Confirmation
+         ID: s_velora_confirmation
     ============================================================ -->
     <template id="s_velora_confirmation" name="Velora Confirmation">
         <section class="page-banner s_velora s_velora_confirmation o_colored_level"

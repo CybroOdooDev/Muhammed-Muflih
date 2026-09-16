@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <!-- ============================================================
          VELORA CONTACT PAGE
-         Inherits website.contactus and replaces the #wrap with:
-           Snippet 1: s_velora_contact_banner  – hero / page banner
-           Snippet 2: s_velora_contact_section – info + form (2 cols)
-           Snippet 3: s_velora_contact_map     – full-width map
-         All three are pre-rendered via t-snippet-call so they are
-         visible to visitors by default, and also draggable/editable
-         in the Website Builder.
     ============================================================ -->
     <template id="velora_contactus"
               name="Velora Contact Us"

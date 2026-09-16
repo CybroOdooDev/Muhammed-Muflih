@@ -22,10 +22,25 @@
 import base64
 import io
 import logging
+from datetime import datetime, time
 from odoo import api, fields, models
 import xlsxwriter
 
 _logger = logging.getLogger(__name__)
+
+
+def _get_sales_executive_name(record):
+    """Helper to safely fetch sales executive name from move or partner."""
+    if not record or not hasattr(record, 'x_studio_sales_executive'):
+        return ''
+    sales_exec = record.x_studio_sales_executive
+    if not sales_exec:
+        return ''
+    if hasattr(sales_exec, 'name') and sales_exec.name:
+        return sales_exec.name
+    elif hasattr(sales_exec, 'display_name') and sales_exec.display_name:
+        return sales_exec.display_name
+    return str(sales_exec)
 
 
 class ReceiptPaymentReportWizard(models.TransientModel):
@@ -51,71 +66,118 @@ class ReceiptPaymentReportWizard(models.TransientModel):
         return {'domain': {'partner_id': []}}
 
     def _get_report_lines(self):
-        """Fetch reconciled receipt/payment items data for XLSX and HTML QWeb reports."""
-        domain = [
-            ('date', '>=', self.from_date),
-            ('date', '<=', self.to_date),
-            ('move_id.move_type', 'not in', ('out_invoice', 'in_invoice', 'out_refund', 'in_refund')),
-            '|', '|',
-            ('reconciled', '=', True),
-            ('full_reconcile_id', '!=', False),
-            ('matching_number', '!=', False),
-        ]
+        """Fetch reconciled receipt/payment items data for XLSX and HTML QWeb reports based on Voucher Reconciliation Date."""
+        from_datetime = datetime.combine(self.from_date, time.min)
+        to_datetime = datetime.combine(self.to_date, time.max)
+
+        # Use sudo() to avoid record rule AccessErrors on cross-company move lines
+        allowed_company_ids = self.env.companies.ids
+        partials = self.env['account.partial.reconcile'].sudo().search([
+            ('company_id', 'in', allowed_company_ids),
+            '|',
+            '&', ('max_date', '>=', self.from_date), ('max_date', '<=', self.to_date),
+            '&', ('create_date', '>=', from_datetime), ('create_date', '<=', to_datetime),
+        ])
+
+        candidate_lines = (partials.debit_move_id | partials.credit_move_id).sudo()
 
         if self.partner_id:
-            domain.append(('partner_id', '=', self.partner_id.id))
+            candidate_lines = candidate_lines.filtered(
+                lambda l: l.partner_id == self.partner_id or l.move_id.partner_id == self.partner_id
+            )
         elif self.partner_type == 'customer':
-            domain.append(('partner_id.customer_rank', '>', 0))
+            candidate_lines = candidate_lines.filtered(
+                lambda l: (l.partner_id and l.partner_id.customer_rank > 0) or (l.move_id.partner_id and l.move_id.partner_id.customer_rank > 0)
+            )
         elif self.partner_type == 'vendor':
-            domain.append(('partner_id.supplier_rank', '>', 0))
+            candidate_lines = candidate_lines.filtered(
+                lambda l: (l.partner_id and l.partner_id.supplier_rank > 0) or (l.move_id.partner_id and l.move_id.supplier_rank > 0)
+            )
 
-        reconciled_lines = self.env['account.move.line'].search(domain, order='date desc, id desc')
-
-        processed_move_ids = set()
+        processed_line_ids = set()
         lines_data = []
 
-        for line in reconciled_lines:
-            if line.move_id.id in processed_move_ids:
+        for line in candidate_lines:
+            if line.id in processed_line_ids:
                 continue
 
-            matched = line._all_reconciled_lines().filtered(
+            matched = line.sudo()._all_reconciled_lines().filtered(
                 lambda l: l.matched_debit_ids or l.matched_credit_ids or l.reconciled
             )
             if not matched:
                 matched = line
 
-            for m in matched:
-                if m.move_id:
-                    processed_move_ids.add(m.move_id.id)
-            processed_move_ids.add(line.move_id.id)
-
-            voucher_names = []
-            payment_names = []
+            voucher_moves = []
+            item_lines = []
 
             for m in matched:
                 if m.move_id.move_type in ('out_invoice', 'in_invoice', 'out_refund', 'in_refund'):
-                    continue
-
-                payment = m.payment_id or m.move_id.origin_payment_id
-                if payment:
-                    pay_name = payment.name or m.move_id.name
-                    if pay_name and pay_name not in payment_names:
-                        payment_names.append(pay_name)
+                    item_lines.append(m)
                 else:
-                    move_name = m.move_id.name
-                    if move_name and move_name not in voucher_names:
-                        voucher_names.append(move_name)
+                    payment = m.payment_id or m.move_id.origin_payment_id
+                    if payment:
+                        item_lines.append(m)
+                    else:
+                        voucher_moves.append(m.move_id)
 
-            voucher_no = ', '.join(voucher_names) if voucher_names else ''
-            payment_no = ', '.join(payment_names) if payment_names else ''
-            line_amount = max(line.debit, line.credit)
+            if not voucher_moves:
+                continue
 
-            lines_data.append({
-                'date': line.date,
-                'voucher_no': voucher_no,
-                'payment_no': payment_no,
-                'amount': line_amount,
-            })
+            voucher_names = list(set(v.name for v in voucher_moves if v.name))
+            voucher_dates = [v.date for v in voucher_moves if v.date]
+
+            if not voucher_names or not voucher_dates:
+                continue
+
+            reconciliation_date = max(voucher_dates)
+
+            if not (self.from_date <= reconciliation_date <= self.to_date):
+                continue
+
+            # Mark matched lines as processed to avoid duplicates
+            for m in matched:
+                processed_line_ids.add(m.id)
+
+            voucher_no_str = ', '.join(voucher_names)
+
+            if item_lines:
+                processed_item_moves = set()
+                for item in item_lines:
+                    if item.move_id.id in processed_item_moves:
+                        continue
+                    processed_item_moves.add(item.move_id.id)
+
+                    payment = item.payment_id or item.move_id.origin_payment_id
+                    if payment:
+                        pay_no = payment.name or item.move_id.name
+                    else:
+                        # Direct invoice reconciliation without payment object -> leave Payment No empty
+                        pay_no = ''
+
+                    line_amount = max(item.debit, item.credit)
+                    if line_amount <= 0:
+                        continue
+
+                    partner = item.partner_id or item.move_id.partner_id or line.partner_id or line.move_id.partner_id
+                    customer_name = partner.name if partner else ''
+
+                    sales_exec_name = _get_sales_executive_name(item.move_id)
+                    if not sales_exec_name:
+                        for vm in voucher_moves:
+                            sales_exec_name = _get_sales_executive_name(vm)
+                            if sales_exec_name:
+                                break
+                    if not sales_exec_name and partner:
+                        sales_exec_name = _get_sales_executive_name(partner)
+
+                    lines_data.append({
+                        'date': reconciliation_date,
+                        'customer': customer_name,
+                        'sales_executive': sales_exec_name,
+                        'voucher_no': voucher_no_str,
+                        'payment_no': pay_no,
+                        'amount': line_amount,
+                    })
 
         return lines_data
 
@@ -126,6 +188,7 @@ class ReceiptPaymentReportWizard(models.TransientModel):
     def action_print_report_xlsx(self):
         """Generate Excel (XLSX) Report for Reconciled Receipt/Payment Items."""
         lines_data = self._get_report_lines()
+        is_receipt = (self.partner_type == 'customer')
 
         # Create in-memory Excel file
         output = io.BytesIO()
@@ -167,70 +230,132 @@ class ReceiptPaymentReportWizard(models.TransientModel):
             'bottom': 6,
         })
 
-        # Set Column Widths
-        sheet.set_column('A:A', 15)
-        sheet.set_column('B:B', 28)
-        sheet.set_column('C:C', 28)
-        sheet.set_column('D:D', 20)
+        if is_receipt:
+            # Set Column Widths for Receipt Report (6 columns)
+            sheet.set_column('A:A', 15)  # Date
+            sheet.set_column('B:B', 28)  # Voucher No
+            sheet.set_column('C:C', 28)  # Payment No
+            sheet.set_column('D:D', 20)  # Amount
+            sheet.set_column('E:E', 25)  # Customer
+            sheet.set_column('F:F', 25)  # Sales Executive
 
-        # Dynamic Title (RECEIPT REPORT vs PAYMENT REPORT)
-        report_title = "RECEIPT REPORT" if self.partner_type == 'customer' else "PAYMENT REPORT"
-        sheet.merge_range('A1:D1', report_title, title_format)
-        sheet.set_row(0, 30)
+            # Dynamic Title
+            report_title = "RECEIPT REPORT"
+            sheet.merge_range('A1:F1', report_title, title_format)
+            sheet.set_row(0, 30)
 
-        # Header Metadata
-        partner_name = self.partner_id.name if self.partner_id else f"All {self.partner_type.title() if self.partner_type else 'Partner'}s"
-        if self.partner_type == 'customer':
+            # Header Metadata
+            partner_name = self.partner_id.name if self.partner_id else "All Customers"
             sheet.write('A3', 'Customer:', label_bold)
+            sheet.write('B3', partner_name, label_normal)
+
+            sheet.write('A4', 'From Date:', label_bold)
+            sheet.write('B4', str(self.from_date), label_normal)
+            sheet.write('C4', 'To Date:', label_bold)
+            sheet.write('D4', str(self.to_date), label_normal)
+
+            # Column Headers
+            sheet.write('A6', 'Date', header_format)
+            sheet.write('B6', 'Voucher No', header_format)
+            sheet.write('C6', 'Payment No', header_format)
+            sheet.write('D6', 'Amount', header_format)
+            sheet.write('E6', 'Customer', header_format)
+            sheet.write('F6', 'Sales Executive', header_format)
+            sheet.set_row(5, 22)
+
+            row_idx = 6  # 0-indexed row 6 is Excel row 7
+            total_sum = 0.0
+
+            for line_data in lines_data:
+                line_amount = line_data['amount']
+                total_sum += line_amount
+
+                sheet.write(row_idx, 0, str(line_data['date']), date_format)
+                sheet.write(row_idx, 1, line_data['voucher_no'], cell_format)
+                sheet.write(row_idx, 2, line_data['payment_no'], cell_format)
+                sheet.write(row_idx, 3, line_amount, amount_format)
+                sheet.write(row_idx, 4, line_data['customer'], cell_format)
+                sheet.write(row_idx, 5, line_data['sales_executive'], cell_format)
+                row_idx += 1
+
+            # Total Row
+            first_excel_row = 7                  # 1-indexed Excel row 7 (start of data)
+            last_excel_row = row_idx             # 1-indexed Excel row for last written data line
+
+            sheet.write(row_idx, 0, '', total_label_format)
+            sheet.write(row_idx, 1, '', total_label_format)
+            sheet.write(row_idx, 2, 'Total:', total_label_format)
+
+            if last_excel_row >= first_excel_row:
+                formula = f'=SUM(D{first_excel_row}:D{last_excel_row})'
+                sheet.write_formula(row_idx, 3, formula, total_amount_format, total_sum)
+            else:
+                sheet.write(row_idx, 3, 0.00, total_amount_format)
+
+            sheet.write(row_idx, 4, '', total_label_format)
+            sheet.write(row_idx, 5, '', total_label_format)
         else:
+            # Set Column Widths for Payment Report (4 columns)
+            sheet.set_column('A:A', 15)
+            sheet.set_column('B:B', 28)
+            sheet.set_column('C:C', 28)
+            sheet.set_column('D:D', 20)
+
+            # Dynamic Title
+            report_title = "PAYMENT REPORT"
+            sheet.merge_range('A1:D1', report_title, title_format)
+            sheet.set_row(0, 30)
+
+            # Header Metadata
+            partner_name = self.partner_id.name if self.partner_id else f"All {self.partner_type.title() if self.partner_type else 'Partner'}s"
             sheet.write('A3', 'Vendor:', label_bold)
-        sheet.write('B3', partner_name, label_normal)
+            sheet.write('B3', partner_name, label_normal)
 
-        sheet.write('A4', 'From Date:', label_bold)
-        sheet.write('B4', str(self.from_date), label_normal)
-        sheet.write('C4', 'To Date:', label_bold)
-        sheet.write('D4', str(self.to_date), label_normal)
+            sheet.write('A4', 'From Date:', label_bold)
+            sheet.write('B4', str(self.from_date), label_normal)
+            sheet.write('C4', 'To Date:', label_bold)
+            sheet.write('D4', str(self.to_date), label_normal)
 
-        # Column Headers
-        sheet.write('A6', 'Date', header_format)
-        sheet.write('B6', 'Voucher No', header_format)
-        sheet.write('C6', 'Payment No', header_format)
-        sheet.write('D6', 'Amount', header_format)
-        sheet.set_row(5, 22)
+            # Column Headers
+            sheet.write('A6', 'Date', header_format)
+            sheet.write('B6', 'Voucher No', header_format)
+            sheet.write('C6', 'Payment No', header_format)
+            sheet.write('D6', 'Amount', header_format)
+            sheet.set_row(5, 22)
 
-        row_idx = 6  # 0-indexed row 6 is Excel row 7
-        total_sum = 0.0
+            row_idx = 6  # 0-indexed row 6 is Excel row 7
+            total_sum = 0.0
 
-        for line_data in lines_data:
-            line_amount = line_data['amount']
-            total_sum += line_amount
+            for line_data in lines_data:
+                line_amount = line_data['amount']
+                total_sum += line_amount
 
-            sheet.write(row_idx, 0, str(line_data['date']), date_format)
-            sheet.write(row_idx, 1, line_data['voucher_no'], cell_format)
-            sheet.write(row_idx, 2, line_data['payment_no'], cell_format)
-            sheet.write(row_idx, 3, line_amount, amount_format)
-            row_idx += 1
+                sheet.write(row_idx, 0, str(line_data['date']), date_format)
+                sheet.write(row_idx, 1, line_data['voucher_no'], cell_format)
+                sheet.write(row_idx, 2, line_data['payment_no'], cell_format)
+                sheet.write(row_idx, 3, line_amount, amount_format)
+                row_idx += 1
 
-        # Total Row
-        first_excel_row = 7                  # 1-indexed Excel row 7 (start of data)
-        last_excel_row = row_idx             # 1-indexed Excel row for last written data line
+            # Total Row
+            first_excel_row = 7                  # 1-indexed Excel row 7 (start of data)
+            last_excel_row = row_idx             # 1-indexed Excel row for last written data line
 
-        sheet.write(row_idx, 0, '', total_label_format)
-        sheet.write(row_idx, 1, '', total_label_format)
-        sheet.write(row_idx, 2, 'Total:', total_label_format)
+            sheet.write(row_idx, 0, '', total_label_format)
+            sheet.write(row_idx, 1, '', total_label_format)
+            sheet.write(row_idx, 2, 'Total:', total_label_format)
 
-        if last_excel_row >= first_excel_row:
-            formula = f'=SUM(D{first_excel_row}:D{last_excel_row})'
-            sheet.write_formula(row_idx, 3, formula, total_amount_format, total_sum)
-        else:
-            sheet.write(row_idx, 3, 0.00, total_amount_format)
+            if last_excel_row >= first_excel_row:
+                formula = f'=SUM(D{first_excel_row}:D{last_excel_row})'
+                sheet.write_formula(row_idx, 3, formula, total_amount_format, total_sum)
+            else:
+                sheet.write(row_idx, 3, 0.00, total_amount_format)
 
         workbook.close()
         output.seek(0)
         file_data = output.read()
         output.close()
 
-        report_name = "Receipt_Report" if self.partner_type == 'customer' else "Payment_Report"
+        report_name = "Receipt_Report" if is_receipt else "Payment_Report"
         filename = f"{report_name}_{self.from_date}_to_{self.to_date}.xlsx"
         attachment = self.env['ir.attachment'].create({
             'name': filename,

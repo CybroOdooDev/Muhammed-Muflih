@@ -41,9 +41,12 @@ class ThemeVeloraCart(http.Controller):
                 'price': line._get_cart_display_price(),
                 'image_url': f'/web/image/product.product/{line.product_id.id}/image_128',
             })
-        cart_total = request.env['ir.ui.view']._render_template(
-            'website_sale.total', {'website_sale_order': order}
-        )
+        try:
+            cart_total = request.env['ir.ui.view']._render_template(
+                'website_sale.total', {'website_sale_order': order}
+            )
+        except Exception:
+            cart_total = ''
         return {
             'lines': lines,
             'website_sale.total': cart_total,

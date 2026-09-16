@@ -1,4 +1,4 @@
-Theme Flynova
+Theme Velora
 ==============
 
 Theme Velora is an Odoo Website theme designed for modern eCommerce and business websites.It features stylish

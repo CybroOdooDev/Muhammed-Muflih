@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- product categories-->
     <data noupdate="1">
         <record id="theme_velora_category_mens" model="product.public.category">
             <field name="name">Men</field>

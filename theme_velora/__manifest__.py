@@ -9,7 +9,7 @@
     "company": "Cybrosys Techno Solutions",
     "maintainer": "Cybrosys Techno Solutions",
     "website": "https://www.cybrosys.com",
-    "depends": ["website", "website_sale", "website_sale_wishlist"],
+    "depends": ["website", "website_sale", "website_sale_wishlist", "sale"],
     "data": [
         "data/categories.xml",
         "data/website_menu.xml",
@@ -35,7 +35,8 @@
             "theme_velora/static/src/css/style.css"
         ]
     },
-    "images": ["static/description/banner.webp"],
+"images": ["static/description/banner.jpg",
+                "static/description/theme_screenshot.jpg"],
     "license": "LGPL-3",
     "installable": True,
     "application": False,

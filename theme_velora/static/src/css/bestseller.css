@@ -225,39 +225,92 @@
 
 /* ---- Responsive ---- */
 @media (max-width: 992px) {
-    .product-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 25px;
+    #wrapwrap .bestsellers .product-grid,
+    .bestsellers .product-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 20px !important;
     }
 
-    .best-sellers {
-        padding: 80px 0;
+    .best-sellers,
+    .bestsellers {
+        padding: 60px 0 !important;
     }
 
-    .product-media {
-        height: 320px;
+    #wrapwrap .bestsellers .product-media,
+    .bestsellers .product-media {
+        height: 260px !important;
+        max-height: 260px !important;
     }
 }
 
 @media (max-width: 768px) {
-    .product-grid {
-        grid-template-columns: 1fr;
-        gap: 25px;
+    #wrapwrap .bestsellers .product-grid,
+    .bestsellers .product-grid,
+    .best-sellers .product-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+        padding: 0 10px !important;
     }
 
-    .best-sellers {
-        padding: 60px 0;
+    .best-sellers,
+    .bestsellers {
+        padding: 40px 0 !important;
     }
 
-    .product-media {
-        height: 350px;
+    #wrapwrap .bestsellers .product-card,
+    .bestsellers .product-card,
+    .best-sellers .product-card {
+        border-radius: 20px !important;
+        overflow: hidden !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06) !important;
     }
 
-    .product-name {
-        font-size: 1.4rem;
+    #wrapwrap .bestsellers .product-media,
+    .bestsellers .product-media,
+    .best-sellers .product-media,
+    .s_velora_bestsellers .product-media {
+        position: relative !important;
+        width: 100% !important;
+        height: 230px !important;
+        max-height: 230px !important;
+        min-height: 230px !important;
+        aspect-ratio: unset !important;
+        background: #f7f5f2 !important;
+        overflow: hidden !important;
     }
 
-    .best-sellers .section-header {
-        margin-bottom: 50px;
+    #wrapwrap .bestsellers .product-media img,
+    .bestsellers .product-media img,
+    .best-sellers .product-media img,
+    .s_velora_bestsellers .product-media img {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 230px !important;
+        max-height: 230px !important;
+        object-fit: contain !important;
+        padding: 12px !important;
+    }
+
+    #wrapwrap .bestsellers .product-info,
+    .bestsellers .product-info,
+    .best-sellers .product-info,
+    .s_velora_bestsellers .product-info {
+        padding: 16px 18px !important;
+        font-size: initial !important;
+    }
+
+    #wrapwrap .bestsellers .product-name,
+    .bestsellers .product-name,
+    .best-sellers .product-name,
+    .s_velora_bestsellers .product-name {
+        font-size: 1.1rem !important;
+        margin-bottom: 6px !important;
+        line-height: 1.25 !important;
+    }
+
+    .best-sellers .section-header,
+    .bestsellers .section-head {
+        margin-bottom: 30px !important;
     }
 }

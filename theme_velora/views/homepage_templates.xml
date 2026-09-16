@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- home page -->
     <template id="theme_velora_homepage" inherit_id="website.homepage"
               name="Homepage">
         <xpath expr="//div[@id='wrap']" position="replace">
@@ -31,7 +32,7 @@
                         leave a lasting impression.
                     </p>
                     <div class="hero-actions reveal">
-                        <a href="/shop" class="btn btn-primary">
+                        <a href="/bestsellers" class="btn btn-primary">
                             <span>Shop Best Sellers</span>
                         </a>
                         <a href="/about-us" class="btn btn-outline-light">
