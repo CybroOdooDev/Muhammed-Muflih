@@ -43,6 +43,30 @@ def _get_sales_executive_name(record):
     return str(sales_exec)
 
 
+def _get_reconciled_cluster(initial_lines):
+    """Recursively expand account.move.lines through all partial reconciliation links and non-bank move lines."""
+    cluster = set(initial_lines)
+    added = True
+    while added:
+        added = False
+        current = list(cluster)
+        for line in current:
+            rec = line.sudo()._all_reconciled_lines()
+            for r in rec:
+                if r not in cluster:
+                    cluster.add(r)
+                    added = True
+            if line.move_id and line.move_id.journal_id.type not in ('bank', 'cash'):
+                for ml in line.move_id.line_ids:
+                    if ml.reconciled or ml.matched_debit_ids or ml.matched_credit_ids:
+                        rec_ml = ml.sudo()._all_reconciled_lines()
+                        for r in rec_ml:
+                            if r not in cluster:
+                                cluster.add(r)
+                                added = True
+    return list(cluster)
+
+
 class ReceiptPaymentReportWizard(models.TransientModel):
     _name = 'receipt.payment.report.wizard'
     _description = 'Receipt Payment Report Wizard'
@@ -70,29 +94,41 @@ class ReceiptPaymentReportWizard(models.TransientModel):
         from_datetime = datetime.combine(self.from_date, time.min)
         to_datetime = datetime.combine(self.to_date, time.max)
 
-        # Use sudo() to avoid record rule AccessErrors on cross-company move lines
         allowed_company_ids = self.env.companies.ids
-        partials = self.env['account.partial.reconcile'].sudo().search([
-            ('company_id', 'in', allowed_company_ids),
-            '|',
-            '&', ('max_date', '>=', self.from_date), ('max_date', '<=', self.to_date),
-            '&', ('create_date', '>=', from_datetime), ('create_date', '<=', to_datetime),
-        ])
 
-        candidate_lines = (partials.debit_move_id | partials.credit_move_id).sudo()
+        # Build SQL search domain with date and partner filters applied directly in DB query
+        base_domain = [
+            ('company_id', 'in', allowed_company_ids),
+            ('move_id.state', '=', 'posted'),
+            ('date', '>=', self.from_date),
+            ('date', '<=', self.to_date),
+        ]
 
         if self.partner_id:
-            candidate_lines = candidate_lines.filtered(
-                lambda l: l.partner_id == self.partner_id or l.move_id.partner_id == self.partner_id
-            )
+            partner_domain = ['|', ('partner_id', '=', self.partner_id.id), ('move_id.partner_id', '=', self.partner_id.id)]
         elif self.partner_type == 'customer':
-            candidate_lines = candidate_lines.filtered(
-                lambda l: (l.partner_id and l.partner_id.customer_rank > 0) or (l.move_id.partner_id and l.move_id.partner_id.customer_rank > 0)
-            )
+            partner_domain = ['|', ('partner_id.customer_rank', '>', 0), ('move_id.partner_id.customer_rank', '>', 0)]
         elif self.partner_type == 'vendor':
-            candidate_lines = candidate_lines.filtered(
-                lambda l: (l.partner_id and l.partner_id.supplier_rank > 0) or (l.move_id.partner_id and l.move_id.supplier_rank > 0)
-            )
+            partner_domain = ['|', ('partner_id.supplier_rank', '>', 0), ('move_id.partner_id.supplier_rank', '>', 0)]
+        else:
+            partner_domain = []
+
+        candidate_domain = base_domain + partner_domain + [
+            '|',
+            '&', ('account_id.account_type', 'in', ('asset_receivable', 'liability_payable')), ('reconciled', '=', True),
+            ('move_id.journal_id.type', 'in', ('bank', 'cash')),
+        ]
+
+        candidate_lines = self.env['account.move.line'].sudo().search(candidate_domain)
+
+        # Identify discount account by XML ID or Code '325030004' to exclude write-off/discount entries
+        discount_account_ids = set()
+        discount_account_ref = self.env.ref('__export__.account_account_3516_948713fc', raise_if_not_found=False)
+        if discount_account_ref:
+            discount_account_ids.add(discount_account_ref.id)
+        code_accounts = self.env['account.account'].sudo().search([('code', '=', '325030004')])
+        if code_accounts:
+            discount_account_ids.update(code_accounts.ids)
 
         processed_line_ids = set()
         lines_data = []
@@ -101,11 +137,26 @@ class ReceiptPaymentReportWizard(models.TransientModel):
             if line.id in processed_line_ids:
                 continue
 
-            matched = line.sudo()._all_reconciled_lines().filtered(
-                lambda l: l.matched_debit_ids or l.matched_credit_ids or l.reconciled
-            )
+            # Skip unreconciled bank/cash header lines if the move contains reconciled Outstanding Receipts/Payments lines
+            if line.move_id and line.move_id.journal_id.type in ('bank', 'cash') and not line.reconciled and not line.matched_debit_ids and not line.matched_credit_ids:
+                if any(l.reconciled or l.matched_debit_ids or l.matched_credit_ids for l in line.move_id.line_ids):
+                    continue
+
+            matched = _get_reconciled_cluster([line])
             if not matched:
-                matched = line
+                matched = line.move_id.line_ids.sudo() if line.move_id else line
+
+            # Mark matched move lines and non-bank parent move lines as processed
+            for m in matched:
+                processed_line_ids.add(m.id)
+                if m.move_id:
+                    if m.move_id.journal_id.type not in ('bank', 'cash'):
+                        for l_sub in m.move_id.line_ids:
+                            processed_line_ids.add(l_sub.id)
+                    else:
+                        if not any(l.reconciled or l.matched_debit_ids or l.matched_credit_ids for l in m.move_id.line_ids):
+                            for l_sub in m.move_id.line_ids:
+                                processed_line_ids.add(l_sub.id)
 
             voucher_moves = []
             item_lines = []
@@ -117,6 +168,15 @@ class ReceiptPaymentReportWizard(models.TransientModel):
                     payment = m.payment_id or m.move_id.origin_payment_id
                     if payment:
                         item_lines.append(m)
+                        # Check if this payment move has linked bank/cash statement entries on its non-receivable lines
+                        for l in m.move_id.line_ids:
+                            if l.account_id.account_type not in ('asset_receivable', 'liability_payable'):
+                                st_lines = l.sudo()._all_reconciled_lines()
+                                for st_m in st_lines:
+                                    if st_m.move_id != m.move_id and st_m.move_id.journal_id.type in ('bank', 'cash'):
+                                        voucher_moves.append(st_m.move_id)
+                        if not voucher_moves:
+                            voucher_moves.append(m.move_id)
                     else:
                         voucher_moves.append(m.move_id)
 
@@ -129,54 +189,117 @@ class ReceiptPaymentReportWizard(models.TransientModel):
             if not voucher_names or not voucher_dates:
                 continue
 
-            reconciliation_date = max(voucher_dates)
-
-            if not (self.from_date <= reconciliation_date <= self.to_date):
+            valid_dates = [d for d in voucher_dates if self.from_date <= d <= self.to_date]
+            if not valid_dates:
                 continue
 
-            # Mark matched lines as processed to avoid duplicates
-            for m in matched:
-                processed_line_ids.add(m.id)
+            reconciliation_date = max(valid_dates)
 
-            voucher_no_str = ', '.join(voucher_names)
+            # Deduplicate unique voucher moves while preserving order
+            unique_voucher_moves = []
+            for vm in voucher_moves:
+                if vm not in unique_voucher_moves:
+                    # Filter out voucher moves using the discount account
+                    if discount_account_ids and any(l.account_id.id in discount_account_ids for l in vm.line_ids):
+                        continue
+                    unique_voucher_moves.append(vm)
+
+            if not unique_voucher_moves:
+                continue
 
             if item_lines:
-                processed_item_moves = set()
+                partner = line.partner_id or line.move_id.partner_id
                 for item in item_lines:
-                    if item.move_id.id in processed_item_moves:
-                        continue
-                    processed_item_moves.add(item.move_id.id)
+                    if not partner:
+                        partner = item.partner_id or item.move_id.partner_id
+                customer_name = partner.name if partner else ''
 
-                    payment = item.payment_id or item.move_id.origin_payment_id
-                    if payment:
-                        pay_no = payment.name or item.move_id.name
+                base_sales_exec_name = ''
+                for item in item_lines:
+                    base_sales_exec_name = _get_sales_executive_name(item.move_id)
+                    if base_sales_exec_name:
+                        break
+                if not base_sales_exec_name and partner:
+                    base_sales_exec_name = _get_sales_executive_name(partner)
+
+                pay_nos = list(set(
+                    (item.payment_id.name or item.move_id.name) if (item.payment_id or item.move_id.origin_payment_id) else ''
+                    for item in item_lines
+                ))
+                pay_nos = [p for p in pay_nos if p]
+                pay_no_str = ', '.join(pay_nos)
+
+                for vm in unique_voucher_moves:
+                    vm_lines = [m for m in matched if m.move_id == vm]
+                    rec_lines = [m for m in vm_lines if m.account_id.account_type in ('asset_receivable', 'liability_payable') or m.account_id.reconcile]
+                    if rec_lines:
+                        vm_amount = sum(max(m.debit, m.credit) for m in rec_lines)
+                    elif vm_lines:
+                        vm_amount = sum(max(m.debit, m.credit) for m in vm_lines)
                     else:
-                        # Direct invoice reconciliation without payment object -> leave Payment No empty
-                        pay_no = ''
+                        vm_amount = 0.0
 
-                    line_amount = max(item.debit, item.credit)
-                    if line_amount <= 0:
+                    if vm_amount <= 0 and item_lines:
+                        item_sum = sum(max(item.debit, item.credit) for item in item_lines)
+                        vm_amount = item_sum / len(unique_voucher_moves) if unique_voucher_moves else item_sum
+
+                    sales_exec_name = _get_sales_executive_name(vm) or base_sales_exec_name
+                    vm_date = vm.date if (vm.date and self.from_date <= vm.date <= self.to_date) else reconciliation_date
+
+                    lines_data.append({
+                        'date': vm_date,
+                        'customer': customer_name,
+                        'sales_executive': sales_exec_name,
+                        'voucher_no': vm.name or '',
+                        'payment_no': pay_no_str,
+                        'amount': vm_amount,
+                    })
+            else:
+                # Direct reconciliation between move lines without invoice or account.payment object
+                for vm in unique_voucher_moves:
+                    vm_lines = [m for m in matched if m.move_id == vm]
+                    rec_lines = [m for m in vm_lines if m.account_id.account_type in ('asset_receivable', 'liability_payable') or m.account_id.reconcile]
+                    if rec_lines:
+                        vm_amount = sum(max(m.debit, m.credit) for m in rec_lines)
+                    elif vm_lines:
+                        vm_amount = max(max(m.debit, m.credit) for m in vm_lines)
+                    else:
+                        vm_amount = 0.0
+
+                    if vm_amount <= 0:
                         continue
 
-                    partner = item.partner_id or item.move_id.partner_id or line.partner_id or line.move_id.partner_id
+                    partner = False
+                    for m in matched:
+                        if m.partner_id:
+                            partner = m.partner_id
+                            break
+                        elif m.move_id.partner_id:
+                            partner = m.move_id.partner_id
+                            break
+                    if not partner:
+                        partner = line.partner_id or line.move_id.partner_id
+
                     customer_name = partner.name if partner else ''
 
-                    sales_exec_name = _get_sales_executive_name(item.move_id)
+                    sales_exec_name = _get_sales_executive_name(vm)
                     if not sales_exec_name:
-                        for vm in voucher_moves:
-                            sales_exec_name = _get_sales_executive_name(vm)
+                        for m in matched:
+                            sales_exec_name = _get_sales_executive_name(m.move_id)
                             if sales_exec_name:
                                 break
                     if not sales_exec_name and partner:
                         sales_exec_name = _get_sales_executive_name(partner)
 
+                    vm_date = vm.date if (vm.date and self.from_date <= vm.date <= self.to_date) else reconciliation_date
+
                     lines_data.append({
-                        'date': reconciliation_date,
+                        'date': vm_date,
                         'customer': customer_name,
                         'sales_executive': sales_exec_name,
-                        'voucher_no': voucher_no_str,
-                        'payment_no': pay_no,
-                        'amount': line_amount,
+                        'voucher_no': vm.name or '',
+                        'payment_no': '',
+                        'amount': vm_amount,
                     })
 
         return lines_data
