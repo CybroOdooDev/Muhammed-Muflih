@@ -14,14 +14,10 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    (LGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
 #############################################################################
 {
     'name': "Done Quantity Auto Fill",
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Warehouse',
     'summary': 'Add Done quantity automatically for the transfer of '
                'the products',

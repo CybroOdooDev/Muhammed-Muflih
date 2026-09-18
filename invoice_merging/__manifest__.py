@@ -21,7 +21,7 @@
 ###############################################################################
 {
     'name': 'Merge Invoices',
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Accounting',
     'summary': """Merge different Account moves.""",
     'description': """This module allows users to merge customer invoices,

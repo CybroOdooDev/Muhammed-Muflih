@@ -21,7 +21,7 @@
 #############################################################################
 {
     'name': 'Reports With Watermark',
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Extra Tools',
     'summary':"""Print the PDF reports with watermark""",
     'description':"""This module allows you to add watermarks to PDF reports

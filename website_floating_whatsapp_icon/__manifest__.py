@@ -21,7 +21,7 @@
 #############################################################################
 {
     'name': "WhatsApp Floating Icon in Website",
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Extra Tools',
     'summary': """Adds a WhatsApp Floating Icon in Website to connect with
     WhatsApp web.""",
