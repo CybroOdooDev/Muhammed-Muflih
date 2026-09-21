@@ -21,7 +21,7 @@
 ###########################################################################
 {
     "name": "Profit And Loss PDF Report",
-    "version": "19.5.1.0.0",
+    "version": "20.0.1.0.0",
     "category": "Accounting",
     "summary": """Profit and Loss PDF Report in community""",
     "description": """This app, designed for use within the community edition,

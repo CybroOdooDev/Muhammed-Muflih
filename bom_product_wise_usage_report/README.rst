@@ -50,18 +50,6 @@ Contacts
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
 
-Credits
-=======
-* Developer: (V16) RAHUL C K ,
-             (V17) SWATHY K S ,
-             (V18) Arshad Ali Pottengal ,
-             (V19) Arshad Ali Pottengal ,
-Contact: odoo@cybrosys.com,
-
-
-Bug Tracker
-===========
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
 
 Maintainer
 ==========
@@ -72,6 +60,3 @@ This module is maintained by Cybrosys Technologies.
 
 For support and more information, please visit https://www.cybrosys.com.
 
-Further information
-===================
-HTML Description: `<static/description/index.html>`__

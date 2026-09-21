@@ -21,7 +21,7 @@
 ################################################################################
 {
     'name': 'BOM Product Wise Usage Report',
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Manufacturing',
     'summary': """Generate PDF report of Products used in Bill of materials""",
     'description': """ This module generates a detailed PDF report of 

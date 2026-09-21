@@ -1,12 +1,8 @@
 ## Module <activity_reminder>
 
-#### 30.04.2026
-#### Version 19.0.1.0.0
+#### 21.09.2026
+#### Version 20.0.1.0.0
 #### ADD
 
 - Initial Commit For Activity Reminder
 
-#### 16.06.2026
-#### Version 19.0.1.0.1
-##### UPDT
-- Added test cases

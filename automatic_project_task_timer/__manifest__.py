@@ -17,7 +17,7 @@
 #############################################################################
 {
     'name': 'Automatic Project Task Timer',
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Project',
     'summary': 'Automatic Running Timer for Project Tasks',
     'description': "This module helps you to track time sheet in project "
