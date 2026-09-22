@@ -1,0 +1,9 @@
+<odoo>
+    <record id="action_creating_journal" model="ir.actions.server">
+        <field name="name">Create Journal</field>
+        <field name="model_id" ref="model_booking_provsion"/>
+        <field name="state">code</field>
+        <field name="code">action = records.create_journal_entry()</field>
+        <field name="binding_model_id" ref="party_commission.model_booking_provsion" />
+    </record>
+</odoo>

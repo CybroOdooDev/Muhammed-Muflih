@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_profit_report_wizard_form" model="ir.ui.view">
+        <field name="name">profit.report.wizard.form</field>
+        <field name="model">profit.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Profit Report">
+                <group>
+                    <group>
+                        <field name="from_date"/>
+                        <field name="to_date"/>
+                    </group>
+                    <group>
+                        <field name="sales_executive_id"/>
+                    </group>
+                </group>
+                <group>
+                    <field name="customer_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                </group>
+                <footer>
+                    <button name="action_print_report" string="Print Report" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_profit_report_wizard" model="ir.actions.act_window">
+        <field name="name">Profit Report</field>
+        <field name="res_model">profit.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_profit_report_wizard"
+              name="Profit Report"
+              parent="account.menu_finance_receivables"
+              action="action_profit_report_wizard"
+              sequence="120"/>
+
+
+</odoo>

@@ -1,4 +1,4 @@
-# -- coding: utf-8 --
+# -*- coding: utf-8 -*-
 #############################################################################
 #    Cybrosys Technologies Pvt. Ltd.
 #
@@ -18,5 +18,25 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import models
-from . import wizard
+{
+    'name': 'Profit Report',
+    'version': '18.0.1.0.0',
+    'category': 'Accounting',
+    'summary': 'Profit Report Wizard',
+    'description': """
+        Profit Report Wizard under Accounting > Customers.
+    """,
+    'author': 'Cybrosys Techno Solutions',
+    'company': 'Cybrosys Techno Solutions',
+    'maintainer': 'Cybrosys Techno Solutions',
+    'website': 'https://www.cybrosys.com',
+    'depends': ['base', 'account', 'sale', 'stock', 'hr'],
+    'data': [
+        'security/ir.model.access.csv',
+        'wizard/profit_report_wizard_views.xml',
+        'wizard/report_result_view.xml',
+    ],
+    'license': 'AGPL-3',
+    'installable': True,
+    'application': False,
+}

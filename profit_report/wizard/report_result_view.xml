@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Report Result Views -->
+    <record id="view_report_result_list" model="ir.ui.view">
+        <field name="name">report.result.list</field>
+        <field name="model">report.result</field>
+        <field name="arch" type="xml">
+            <list string="Report Result">
+                <field name="date"/>
+                <field name="voucher"/>
+                <field name="customer_id"/>
+                <field name="product_id"/>
+                <field name="salesman_id"/>
+                <field name="qty"/>
+                <field name="rate"/>
+                <field name="net_sales"/>
+                <field name="cogs"/>
+                <field name="printing_charges"/>
+                <field name="party_commission"/>
+                <field name="profit"/>
+                <field name="profit_percentage"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="report_result_view_search" model="ir.ui.view">
+        <field name="name">report.result.view.search</field>
+        <field name="model">report.result</field>
+        <field name="arch" type="xml">
+            <search string="Report Result Search">
+                <field name="date"/>
+                <field name="customer_id"/>
+                <field name="voucher"/>
+                <field name="product_id"/>
+                <field name="salesman_id"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_date" string="Date" context="{'group_by': 'date'}"/>
+                    <filter name="group_customer_id" string="Customer" context="{'group_by': 'customer_id'}"/>
+                    <filter name="group_voucher" string="Voucher" context="{'group_by': 'voucher'}"/>
+                    <filter name="group_product_id" string="Product" context="{'group_by': 'product_id'}"/>
+                    <filter name="group_salesman_id" string="Sales Man" context="{'group_by': 'salesman_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_report_result" model="ir.actions.act_window">
+        <field name="name">Report Result</field>
+        <field name="res_model">report.result</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="report_result_view_search"/>
+    </record>
+
+</odoo>

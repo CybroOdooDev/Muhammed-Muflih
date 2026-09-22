@@ -90,217 +90,143 @@ class ReceiptPaymentReportWizard(models.TransientModel):
         return {'domain': {'partner_id': []}}
 
     def _get_report_lines(self):
-        """Fetch reconciled receipt/payment items data for XLSX and HTML QWeb reports based on Voucher Reconciliation Date."""
-        from_datetime = datetime.combine(self.from_date, time.min)
-        to_datetime = datetime.combine(self.to_date, time.max)
-
+        """Fetch reconciled receipt/payment items data for XLSX and HTML QWeb reports using fast SQL query."""
         allowed_company_ids = self.env.companies.ids
 
-        # Build SQL search domain with date and partner filters applied directly in DB query
-        base_domain = [
-            ('company_id', 'in', allowed_company_ids),
-            ('move_id.state', '=', 'posted'),
-            ('date', '>=', self.from_date),
-            ('date', '<=', self.to_date),
-        ]
-
-        if self.partner_id:
-            partner_domain = ['|', ('partner_id', '=', self.partner_id.id), ('move_id.partner_id', '=', self.partner_id.id)]
-        elif self.partner_type == 'customer':
-            partner_domain = ['|', ('partner_id.customer_rank', '>', 0), ('move_id.partner_id.customer_rank', '>', 0)]
-        elif self.partner_type == 'vendor':
-            partner_domain = ['|', ('partner_id.supplier_rank', '>', 0), ('move_id.partner_id.supplier_rank', '>', 0)]
-        else:
-            partner_domain = []
-
-        candidate_domain = base_domain + partner_domain + [
-            '|',
-            '&', ('account_id.account_type', 'in', ('asset_receivable', 'liability_payable')), ('reconciled', '=', True),
-            ('move_id.journal_id.type', 'in', ('bank', 'cash')),
-        ]
-
-        candidate_lines = self.env['account.move.line'].sudo().search(candidate_domain)
-
-        # Identify discount account by XML ID or Code '325030004' to exclude write-off/discount entries
-        discount_account_ids = set()
+        # Fetch discount account IDs to exclude moves with write-offs/discounts if applicable
+        discount_account_ids = []
         discount_account_ref = self.env.ref('__export__.account_account_3516_948713fc', raise_if_not_found=False)
         if discount_account_ref:
-            discount_account_ids.add(discount_account_ref.id)
+            discount_account_ids.append(discount_account_ref.id)
         code_accounts = self.env['account.account'].sudo().search([('code', '=', '325030004')])
         if code_accounts:
-            discount_account_ids.update(code_accounts.ids)
+            discount_account_ids.extend(code_accounts.ids)
+        discount_account_ids = list(set(discount_account_ids))
 
-        processed_line_ids = set()
+        # Check if x_studio_sales_executive field exists on models
+        has_move_exec = 'x_studio_sales_executive' in self.env['account.move']._fields
+        has_partner_exec = 'x_studio_sales_executive' in self.env['res.partner']._fields
+
+        move_exec_select = "pm.x_studio_sales_executive" if has_move_exec else "NULL"
+        bank_exec_select = "bm.x_studio_sales_executive" if has_move_exec else "NULL"
+        part_p_exec_select = "part_p.x_studio_sales_executive" if has_partner_exec else "NULL"
+        part_b_exec_select = "part_b.x_studio_sales_executive" if has_partner_exec else "NULL"
+        part_unrec_exec_select = "part.x_studio_sales_executive" if has_partner_exec else "NULL"
+
+        partner_id_val = self.partner_id.id if self.partner_id else None
+        partner_type_val = self.partner_type or 'customer'
+
+        params = [
+            allowed_company_ids,
+            self.from_date,
+            self.to_date,
+            partner_type_val,
+            partner_type_val,
+            partner_id_val,
+            partner_id_val,
+            discount_account_ids or [0],
+        ]
+
+        query = f'''
+            WITH bank_statement_recons AS (
+                -- 1. Partial reconciliations between Bank/Cash Statement lines and separate Payment/Invoice moves
+                SELECT 
+                    pr.id AS pr_id,
+                    pr.amount AS amount,
+                    bm.date AS date,
+                    bm.name AS voucher_no,
+                    CASE 
+                        WHEN pp.id IS NOT NULL THEN pm.name
+                        WHEN pm.move_type IN ('out_invoice', 'in_invoice', 'out_refund', 'in_refund') THEN pm.name
+                        ELSE COALESCE(NULLIF(pm.ref, ''), pm.name)
+                    END AS payment_no,
+                    COALESCE(pl.partner_id, bl.partner_id, pm.partner_id, bm.partner_id) AS partner_id,
+                    COALESCE(part_p.name, part_b.name) AS customer_name,
+                    COALESCE({move_exec_select}, {bank_exec_select}, {part_p_exec_select}, {part_b_exec_select}) AS sales_exec_id,
+                    bm.id AS b_move_id,
+                    pm.id AS p_move_id,
+                    bm.company_id AS company_id,
+                    pp.partner_type AS payment_partner_type,
+                    NULL::varchar AS line_account_type
+                FROM account_partial_reconcile pr
+                JOIN account_move_line bl ON bl.id IN (pr.debit_move_id, pr.credit_move_id)
+                JOIN account_bank_statement_line st ON st.move_id = bl.move_id
+                JOIN account_move bm ON bm.id = bl.move_id
+                JOIN account_move_line pl ON pl.id = CASE WHEN bl.id = pr.debit_move_id THEN pr.credit_move_id ELSE pr.debit_move_id END
+                JOIN account_move pm ON pm.id = pl.move_id AND pm.id != bm.id
+                LEFT JOIN account_payment pp ON pp.move_id = pm.id
+                LEFT JOIN res_partner part_p ON part_p.id = COALESCE(pl.partner_id, pm.partner_id)
+                LEFT JOIN res_partner part_b ON part_b.id = COALESCE(bl.partner_id, bm.partner_id)
+                WHERE bm.state = 'posted' AND pm.state = 'posted'
+            ),
+            direct_bank_statement_moves AS (
+                -- 2. Bank Statement moves with counterpart receivable/payable lines in SAME move (manual operation / open balance)
+                SELECT 
+                    0 AS pr_id,
+                    GREATEST(l.credit, l.debit) AS amount,
+                    bm.date AS date,
+                    bm.name AS voucher_no,
+                    COALESCE(NULLIF(l.name, ''), NULLIF(bm.ref, ''), '') AS payment_no,
+                    COALESCE(l.partner_id, bm.partner_id) AS partner_id,
+                    part.name AS customer_name,
+                    COALESCE({bank_exec_select}, {part_unrec_exec_select}) AS sales_exec_id,
+                    bm.id AS b_move_id,
+                    bm.id AS p_move_id,
+                    bm.company_id AS company_id,
+                    NULL::varchar AS payment_partner_type,
+                    acc.account_type::varchar AS line_account_type
+                FROM account_bank_statement_line st
+                JOIN account_move bm ON bm.id = st.move_id
+                JOIN account_move_line l ON l.move_id = bm.id
+                JOIN account_account acc ON acc.id = l.account_id
+                LEFT JOIN res_partner part ON part.id = COALESCE(l.partner_id, bm.partner_id)
+                WHERE bm.state = 'posted'
+                  AND acc.account_type IN ('asset_receivable', 'liability_payable')
+                  AND bm.id NOT IN (SELECT b_move_id FROM bank_statement_recons)
+            ),
+            combined AS (
+                SELECT * FROM bank_statement_recons
+                UNION ALL
+                SELECT * FROM direct_bank_statement_moves
+            )
+            SELECT 
+                c.date,
+                c.voucher_no,
+                c.payment_no,
+                c.amount,
+                c.customer_name AS customer,
+                emp.name AS sales_executive
+            FROM combined c
+            LEFT JOIN res_partner partner ON partner.id = c.partner_id
+            LEFT JOIN hr_employee emp ON emp.id = c.sales_exec_id
+            WHERE c.company_id = ANY(%s)
+              AND c.date >= %s AND c.date <= %s
+              AND (
+                (%s = 'customer' AND (c.payment_partner_type = 'customer' OR partner.customer_rank > 0 OR c.line_account_type = 'asset_receivable' OR partner.id IS NULL))
+                OR
+                (%s = 'vendor' AND (c.payment_partner_type = 'supplier' OR partner.supplier_rank > 0 OR c.line_account_type = 'liability_payable' OR partner.id IS NULL))
+              )
+              AND (%s::int IS NULL OR c.partner_id = %s)
+              AND NOT EXISTS (
+                  SELECT 1 FROM account_move_line d_aml 
+                  WHERE d_aml.move_id IN (c.b_move_id, c.p_move_id) 
+                    AND d_aml.account_id = ANY(%s)
+              )
+            ORDER BY c.date DESC, c.voucher_no, c.payment_no
+        '''
+        self.env.cr.execute(query, params)
+        rows = self.env.cr.dictfetchall()
+
         lines_data = []
-
-        for line in candidate_lines:
-            if line.id in processed_line_ids:
-                continue
-
-            # Skip unreconciled bank/cash header lines if the move contains reconciled Outstanding Receipts/Payments lines
-            if line.move_id and line.move_id.journal_id.type in ('bank', 'cash') and not line.reconciled and not line.matched_debit_ids and not line.matched_credit_ids:
-                if any(l.reconciled or l.matched_debit_ids or l.matched_credit_ids for l in line.move_id.line_ids):
-                    continue
-
-            matched = _get_reconciled_cluster([line])
-            if not matched:
-                matched = line.move_id.line_ids.sudo() if line.move_id else line
-
-            # Mark matched move lines and non-bank parent move lines as processed
-            for m in matched:
-                processed_line_ids.add(m.id)
-                if m.move_id:
-                    if m.move_id.journal_id.type not in ('bank', 'cash'):
-                        for l_sub in m.move_id.line_ids:
-                            processed_line_ids.add(l_sub.id)
-                    else:
-                        if not any(l.reconciled or l.matched_debit_ids or l.matched_credit_ids for l in m.move_id.line_ids):
-                            for l_sub in m.move_id.line_ids:
-                                processed_line_ids.add(l_sub.id)
-
-            voucher_moves = []
-            item_lines = []
-
-            for m in matched:
-                if m.move_id.move_type in ('out_invoice', 'in_invoice', 'out_refund', 'in_refund'):
-                    item_lines.append(m)
-                else:
-                    payment = m.payment_id or m.move_id.origin_payment_id
-                    if payment:
-                        item_lines.append(m)
-                        # Check if this payment move has linked bank/cash statement entries on its non-receivable lines
-                        for l in m.move_id.line_ids:
-                            if l.account_id.account_type not in ('asset_receivable', 'liability_payable'):
-                                st_lines = l.sudo()._all_reconciled_lines()
-                                for st_m in st_lines:
-                                    if st_m.move_id != m.move_id and st_m.move_id.journal_id.type in ('bank', 'cash'):
-                                        voucher_moves.append(st_m.move_id)
-                        if not voucher_moves:
-                            voucher_moves.append(m.move_id)
-                    else:
-                        voucher_moves.append(m.move_id)
-
-            if not voucher_moves:
-                continue
-
-            voucher_names = list(set(v.name for v in voucher_moves if v.name))
-            voucher_dates = [v.date for v in voucher_moves if v.date]
-
-            if not voucher_names or not voucher_dates:
-                continue
-
-            valid_dates = [d for d in voucher_dates if self.from_date <= d <= self.to_date]
-            if not valid_dates:
-                continue
-
-            reconciliation_date = max(valid_dates)
-
-            # Deduplicate unique voucher moves while preserving order
-            unique_voucher_moves = []
-            for vm in voucher_moves:
-                if vm not in unique_voucher_moves:
-                    # Filter out voucher moves using the discount account
-                    if discount_account_ids and any(l.account_id.id in discount_account_ids for l in vm.line_ids):
-                        continue
-                    unique_voucher_moves.append(vm)
-
-            if not unique_voucher_moves:
-                continue
-
-            if item_lines:
-                partner = line.partner_id or line.move_id.partner_id
-                for item in item_lines:
-                    if not partner:
-                        partner = item.partner_id or item.move_id.partner_id
-                customer_name = partner.name if partner else ''
-
-                base_sales_exec_name = ''
-                for item in item_lines:
-                    base_sales_exec_name = _get_sales_executive_name(item.move_id)
-                    if base_sales_exec_name:
-                        break
-                if not base_sales_exec_name and partner:
-                    base_sales_exec_name = _get_sales_executive_name(partner)
-
-                pay_nos = list(set(
-                    (item.payment_id.name or item.move_id.name) if (item.payment_id or item.move_id.origin_payment_id) else ''
-                    for item in item_lines
-                ))
-                pay_nos = [p for p in pay_nos if p]
-                pay_no_str = ', '.join(pay_nos)
-
-                for vm in unique_voucher_moves:
-                    vm_lines = [m for m in matched if m.move_id == vm]
-                    rec_lines = [m for m in vm_lines if m.account_id.account_type in ('asset_receivable', 'liability_payable') or m.account_id.reconcile]
-                    if rec_lines:
-                        vm_amount = sum(max(m.debit, m.credit) for m in rec_lines)
-                    elif vm_lines:
-                        vm_amount = sum(max(m.debit, m.credit) for m in vm_lines)
-                    else:
-                        vm_amount = 0.0
-
-                    if vm_amount <= 0 and item_lines:
-                        item_sum = sum(max(item.debit, item.credit) for item in item_lines)
-                        vm_amount = item_sum / len(unique_voucher_moves) if unique_voucher_moves else item_sum
-
-                    sales_exec_name = _get_sales_executive_name(vm) or base_sales_exec_name
-                    vm_date = vm.date if (vm.date and self.from_date <= vm.date <= self.to_date) else reconciliation_date
-
-                    lines_data.append({
-                        'date': vm_date,
-                        'customer': customer_name,
-                        'sales_executive': sales_exec_name,
-                        'voucher_no': vm.name or '',
-                        'payment_no': pay_no_str,
-                        'amount': vm_amount,
-                    })
-            else:
-                # Direct reconciliation between move lines without invoice or account.payment object
-                for vm in unique_voucher_moves:
-                    vm_lines = [m for m in matched if m.move_id == vm]
-                    rec_lines = [m for m in vm_lines if m.account_id.account_type in ('asset_receivable', 'liability_payable') or m.account_id.reconcile]
-                    if rec_lines:
-                        vm_amount = sum(max(m.debit, m.credit) for m in rec_lines)
-                    elif vm_lines:
-                        vm_amount = max(max(m.debit, m.credit) for m in vm_lines)
-                    else:
-                        vm_amount = 0.0
-
-                    if vm_amount <= 0:
-                        continue
-
-                    partner = False
-                    for m in matched:
-                        if m.partner_id:
-                            partner = m.partner_id
-                            break
-                        elif m.move_id.partner_id:
-                            partner = m.move_id.partner_id
-                            break
-                    if not partner:
-                        partner = line.partner_id or line.move_id.partner_id
-
-                    customer_name = partner.name if partner else ''
-
-                    sales_exec_name = _get_sales_executive_name(vm)
-                    if not sales_exec_name:
-                        for m in matched:
-                            sales_exec_name = _get_sales_executive_name(m.move_id)
-                            if sales_exec_name:
-                                break
-                    if not sales_exec_name and partner:
-                        sales_exec_name = _get_sales_executive_name(partner)
-
-                    vm_date = vm.date if (vm.date and self.from_date <= vm.date <= self.to_date) else reconciliation_date
-
-                    lines_data.append({
-                        'date': vm_date,
-                        'customer': customer_name,
-                        'sales_executive': sales_exec_name,
-                        'voucher_no': vm.name or '',
-                        'payment_no': '',
-                        'amount': vm_amount,
-                    })
+        for r in rows:
+            lines_data.append({
+                'date': r['date'],
+                'voucher_no': r['voucher_no'] or '',
+                'payment_no': r['payment_no'] or '',
+                'amount': float(r['amount'] or 0.0),
+                'customer': r['customer'] or '',
+                'sales_executive': r['sales_executive'] or '',
+            })
 
         return lines_data
 

@@ -1,3 +1,23 @@
+# -- coding: utf-8 --
+#############################################################################
+#    Cybrosys Technologies Pvt. Ltd.
+#
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
+#
+#    You can modify it under the terms of the GNU AFFERO
+#    GENERAL PUBLIC LICENSE (AGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU AFFERO GENERAL PUBLIC LICENSE (AGPL v3) for more details.
+#
+#    You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
+#    (AGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
 
@@ -26,28 +46,40 @@ class BookingProvsionLine(models.Model):
     is_commission_readonly = fields.Boolean(
         compute='_compute_is_commission_readonly'
     )
+    is_printing_charges_readonly = fields.Boolean(
+        compute='_compute_is_printing_charges_readonly'
+    )
 
     @api.depends('booking_provision_id.state')
     def _compute_is_commission_readonly(self):
+        for rec in self:
+            state = rec.booking_provision_id.state or 'draft'
+            rec.is_commission_readonly = (state != 'draft')
+
+    @api.depends('booking_provision_id.state')
+    def _compute_is_printing_charges_readonly(self):
         is_manager = self.env.user.has_group('party_commission.group_party_commission_manager')
         for rec in self:
             state = rec.booking_provision_id.state or 'draft'
-            if state == 'draft':
-                rec.is_commission_readonly = False
-            elif state == 'to_review':
-                rec.is_commission_readonly = not is_manager
+            if state == 'to_review':
+                rec.is_printing_charges_readonly = not is_manager
             else:
-                rec.is_commission_readonly = True
+                rec.is_printing_charges_readonly = True
 
     def write(self, vals):
-        if any(field in vals for field in ('commission_percentage', 'commission_value', 'printing_charges')):
-            is_manager = self.env.user.has_group('party_commission.group_party_commission_manager')
+        is_manager = self.env.user.has_group('party_commission.group_party_commission_manager')
+        if any(field in vals for field in ('commission_percentage', 'commission_value')):
             for rec in self:
                 state = rec.booking_provision_id.state or 'draft'
-                if state == 'confirmed':
-                    raise UserError(_("You cannot edit commission fields in Confirmed state."))
-                elif state == 'to_review' and not is_manager:
-                    raise UserError(_("Only a Party Commission Manager can edit commission fields in To Review state."))
+                if state != 'draft':
+                    raise UserError(_("Commission fields cannot be modified in To Review or Confirmed state."))
+
+        if 'printing_charges' in vals:
+            for rec in self:
+                state = rec.booking_provision_id.state or 'draft'
+                if state != 'to_review' or not is_manager:
+                    raise UserError(_("Printing charges can only be modified by a Party Commission Manager when in To Review state."))
+
         return super().write(vals)
 
     @api.onchange('commission_percentage', 'commission_value')
@@ -61,12 +93,10 @@ class BookingProvsionLine(models.Model):
             if line.commission_percentage and line.commission_value:
                 raise ValidationError(_("A record can contain only Commission % or Commission Value, not both."))
 
-    @api.depends('qty','price')
+    @api.depends('qty', 'price')
     def _compute_total(self):
         for rec in self:
             rec.total = rec.qty * rec.price
-        else:
-            rec.total = 0.0
 
     @api.depends('qty', 'commission_percentage', 'commission_value', 'net_sales')
     def _compute_net_commission(self):

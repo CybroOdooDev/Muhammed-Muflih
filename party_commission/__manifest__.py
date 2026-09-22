@@ -1,9 +1,8 @@
 # -- coding: utf-8 --
 #############################################################################
-#
 #    Cybrosys Technologies Pvt. Ltd.
 #
-#    Copyright (C) 2026-TODAY Cybrosys Technologies (<https://www.cybrosys.com>)
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
 #    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
 #    You can modify it under the terms of the GNU AFFERO
@@ -31,11 +30,12 @@
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['base', 'sale', 'stock', 'account', 'mail'],
+    'depends': ['base', 'sale', 'stock', 'account', 'mail', 'hr'],
     'data': [
         'security/party_commission_security.xml',
         'security/ir.model.access.csv',
         'data/sequence_data.xml',
+        'data/booking_provsion_action.xml',
         'views/booking_provsion_view.xml',
         'views/account_move_views.xml',
         'wizard/party_commission_view.xml',

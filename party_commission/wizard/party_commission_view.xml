@@ -11,6 +11,9 @@
                     <field name="from_date"/>
                     <field name="to_date"/>
                 </group>
+                <group>
+                    <field name="sales_excutive_id"/>
+                </group>
                 <footer>
                     <button name="confirm_action" string="Confirm" type="object" class="btn-primary"/>
                     <button name="action_cancel" string="Cancel"
