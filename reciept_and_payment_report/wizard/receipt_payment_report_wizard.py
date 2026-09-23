@@ -122,6 +122,8 @@ class ReceiptPaymentReportWizard(models.TransientModel):
             self.to_date,
             partner_type_val,
             partner_type_val,
+            partner_type_val,
+            partner_type_val,
             partner_id_val,
             partner_id_val,
             discount_account_ids or [0],
@@ -133,7 +135,11 @@ class ReceiptPaymentReportWizard(models.TransientModel):
                 SELECT 
                     pr.id AS pr_id,
                     pr.amount AS amount,
-                    bm.date AS date,
+                    CASE 
+                        WHEN EXISTS (SELECT 1 FROM account_bank_statement_line st2 WHERE st2.move_id = pm.id)
+                        THEN GREATEST(bm.date, pm.date)
+                        ELSE bm.date
+                    END AS date,
                     bm.name AS voucher_no,
                     CASE 
                         WHEN pp.id IS NOT NULL THEN pm.name
@@ -147,7 +153,8 @@ class ReceiptPaymentReportWizard(models.TransientModel):
                     pm.id AS p_move_id,
                     bm.company_id AS company_id,
                     pp.partner_type AS payment_partner_type,
-                    NULL::varchar AS line_account_type
+                    NULL::varchar AS line_account_type,
+                    CASE WHEN st.amount > 0 THEN 'inbound' ELSE 'outbound' END AS direction
                 FROM account_partial_reconcile pr
                 JOIN account_move_line bl ON bl.id IN (pr.debit_move_id, pr.credit_move_id)
                 JOIN account_bank_statement_line st ON st.move_id = bl.move_id
@@ -158,6 +165,18 @@ class ReceiptPaymentReportWizard(models.TransientModel):
                 LEFT JOIN res_partner part_p ON part_p.id = COALESCE(pl.partner_id, pm.partner_id)
                 LEFT JOIN res_partner part_b ON part_b.id = COALESCE(bl.partner_id, bm.partner_id)
                 WHERE bm.state = 'posted' AND pm.state = 'posted'
+                  AND (
+                      -- Normal case: partner move is NOT a bank statement → keep the row
+                      NOT EXISTS (SELECT 1 FROM account_bank_statement_line st2 WHERE st2.move_id = pm.id)
+                      OR
+                      -- Both sides are bank statements → keep only one direction to avoid swap-duplicate
+                      bm.id < pm.id
+                  )
+                  AND NOT (
+                      -- Exclude POS cash in/out liquidity transfers by their label pattern
+                      st.pos_session_id IS NOT NULL
+                      AND (st.payment_ref LIKE '%%-in-%%' OR st.payment_ref LIKE '%%-out-%%')
+                  )
             ),
             direct_bank_statement_moves AS (
                 -- 2. Bank Statement moves with counterpart receivable/payable lines in SAME move (manual operation / open balance)
@@ -174,7 +193,8 @@ class ReceiptPaymentReportWizard(models.TransientModel):
                     bm.id AS p_move_id,
                     bm.company_id AS company_id,
                     NULL::varchar AS payment_partner_type,
-                    acc.account_type::varchar AS line_account_type
+                    acc.account_type::varchar AS line_account_type,
+                    CASE WHEN st.amount > 0 THEN 'inbound' ELSE 'outbound' END AS direction
                 FROM account_bank_statement_line st
                 JOIN account_move bm ON bm.id = st.move_id
                 JOIN account_move_line l ON l.move_id = bm.id
@@ -182,7 +202,11 @@ class ReceiptPaymentReportWizard(models.TransientModel):
                 LEFT JOIN res_partner part ON part.id = COALESCE(l.partner_id, bm.partner_id)
                 WHERE bm.state = 'posted'
                   AND acc.account_type IN ('asset_receivable', 'liability_payable')
-                  AND bm.id NOT IN (SELECT b_move_id FROM bank_statement_recons)
+                  AND NOT EXISTS (
+                      -- Exclude only lines that are already captured via partial reconciliation in CTE 1
+                      SELECT 1 FROM account_partial_reconcile apr
+                      WHERE l.id IN (apr.debit_move_id, apr.credit_move_id)
+                  )
             ),
             combined AS (
                 SELECT * FROM bank_statement_recons
@@ -205,6 +229,11 @@ class ReceiptPaymentReportWizard(models.TransientModel):
                 (%s = 'customer' AND (c.payment_partner_type = 'customer' OR partner.customer_rank > 0 OR c.line_account_type = 'asset_receivable' OR partner.id IS NULL))
                 OR
                 (%s = 'vendor' AND (c.payment_partner_type = 'supplier' OR partner.supplier_rank > 0 OR c.line_account_type = 'liability_payable' OR partner.id IS NULL))
+              )
+              AND (
+                (%s = 'customer' AND c.direction = 'inbound')
+                OR
+                (%s = 'vendor' AND c.direction = 'outbound')
               )
               AND (%s::int IS NULL OR c.partner_id = %s)
               AND NOT EXISTS (
