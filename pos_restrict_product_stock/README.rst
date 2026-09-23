@@ -28,7 +28,7 @@ Key Features
 
 Installation
 ------------
-List out if any external dependencies are required for the module to work. If not, write "No external dependencies."
+No external dependencies.
 
 Configuration
 =============
