@@ -19,6 +19,8 @@
 #
 #############################################################################
 from odoo import api, fields, models, _
+from odoo.exceptions import UserError
+
 class BookingProvsionJournalLine(models.Model):
     _name = 'booking.provsion.journal.line'
     _description = 'Booking Provision Journal Line'
@@ -34,15 +36,18 @@ class BookingProvsionJournalLine(models.Model):
         for vals in vals_list:
             if vals.get('booking_provision_id'):
                 prov = self.env['booking.provsion'].browse(vals['booking_provision_id'])
-                if prov.state == 'confirmed':
+                if prov.all_party_confirmed and not self.env.su:
                     raise UserError(_("You cannot add journal lines to a confirmed Booking Provision."))
         return super().create(vals_list)
 
     def write(self, vals):
         for line in self:
-            if line.booking_provision_id.state == 'confirmed' and not self.env.su:
+            if line.booking_provision_id.all_party_confirmed and not self.env.su:
                 raise UserError(_("You cannot edit journal lines of a confirmed Booking Provision."))
         return super().write(vals)
 
     def unlink(self):
+        for line in self:
+            if line.booking_provision_id.all_party_confirmed and not self.env.su:
+                raise UserError(_("You cannot delete journal lines of a confirmed Booking Provision."))
         return super().unlink()

@@ -33,6 +33,7 @@
                         <group>
                             <field name="customer_ids" widget="many2many_tags" readonly="1"/>
                             <field name="party_records" widget="many2many_tags" invisible="1"/>
+                            <field name="all_party_confirmed" invisible="1"/>
                         </group>
                         <group>
                             <field name="from_date" readonly="1"/>
@@ -53,15 +54,15 @@
                                     <field name="total" sum="Total Amount" readonly="1"/>
                                     <field name="discount" readonly="1"/>
                                     <field name="net_sales" sum="Total Net Sales" readonly="1"/>
-                                    <field name="cogs" sum="Total COGS" readonly="1"/>
+                                    <field name="cogs" sum="Total COGS" readonly="1" groups="party_commission.group_party_commission_manager"/>
                                     <field name="is_commission_readonly" column_invisible="1"/>
                                     <field name="is_printing_charges_readonly" column_invisible="1"/>
                                     <field name="printing_charges" sum="Total Printing Charges" readonly="is_printing_charges_readonly"/>
                                     <field name="commission_percentage" readonly="is_commission_readonly"/>
                                     <field name="commission_value" sum="Total Commission Value" readonly="is_commission_readonly"/>
                                     <field name="net_commission" sum="Total Net Commission" readonly="1"/>
-                                    <field name="profit" sum="Total Profit" readonly="1"/>
-                                    <field name="profit_percentage" readonly="1"/>
+                                    <field name="profit" sum="Total Profit" readonly="1" groups="party_commission.group_party_commission_manager"/>
+                                    <field name="profit_percentage" readonly="1" groups="party_commission.group_party_commission_manager"/>
                                 </list>
                             </field>
                             <group class="oe_subtotal_footer oe_right">
@@ -71,12 +72,12 @@
                         <page string="Journal Entry" name="journal_entry" invisible="state == 'draft'">
                             <group>
                                 <group>
-                                    <field name="date" readonly="state == 'confirmed'"/>
-                                    <field name="journal_id" readonly="state == 'confirmed'" required="state in ('to_review', 'confirmed')"/>
+                                    <field name="date" readonly="all_party_confirmed"/>
+                                    <field name="journal_id" readonly="all_party_confirmed" required="state in ('to_review', 'confirmed')"/>
                                     <field name="allowed_partner_ids" invisible="1"/>
                                 </group>
                             </group>
-                            <field name="journal_line_ids" readonly="state == 'confirmed'">
+                            <field name="journal_line_ids" readonly="all_party_confirmed">
                                 <list editable="bottom">
                                     <field name="account_id"/>
                                     <field name="partner_id" domain="[('id', 'in', parent.allowed_partner_ids)]"/>
@@ -107,6 +108,7 @@
                 <field name="date"/>
                 <field name="from_date"/>
                 <field name="to_date"/>
+                <field name="state"/>
             </list>
         </field>
     </record>
@@ -123,6 +125,9 @@
                 <field name="journal_id"/>
                 <group expand="0" string="Group By">
                     <filter string="Reference" name="group_by_name" context="{'group_by': 'name'}"/>
+                    <filter string="Customer" name="group_by_customer_id" context="{'group_by': 'customer_ids'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'date'}"/>
+                    <filter string="Journal" name="group_by_journal_id" context="{'group_by': 'journal_id'}"/>
                 </group>
             </search>
         </field>

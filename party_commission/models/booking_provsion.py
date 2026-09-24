@@ -53,6 +53,10 @@ class BookingProvsion(models.Model):
         store=True
     )
     state = fields.Selection([('draft', 'Draft'),('to_review', 'To Review'),('confirmed', 'Confirmed'),], default='draft', tracking=True)
+    all_party_confirmed = fields.Boolean(
+        string='All Linked Records Confirmed',
+        compute='_compute_all_party_confirmed'
+    )
 
     currency_id = fields.Many2one('res.currency', string='Currency', default=lambda self: self.env.company.currency_id)
     date = fields.Date(string='Journal Date', default=fields.Date.context_today)
@@ -63,6 +67,12 @@ class BookingProvsion(models.Model):
         default=lambda self: self._default_journal_id()
     )
     move_id = fields.Many2one('account.move', string='Journal Entry', copy=False, readonly=True)
+
+    @api.depends('state', 'party_records.state')
+    def _compute_all_party_confirmed(self):
+        for rec in self:
+            records = rec.party_records or rec
+            rec.all_party_confirmed = all(r.state == 'confirmed' for r in records)
 
     @api.model
     def _default_journal_id(self):
@@ -122,7 +132,9 @@ class BookingProvsion(models.Model):
     def write(self, vals):
         if not self.env.su:
             for rec in self:
-                if rec.state == 'confirmed' and any(k != 'state' for k in vals.keys()):
+                records = rec.party_records or rec
+                all_confirmed = all(r.state == 'confirmed' for r in records)
+                if all_confirmed and any(k != 'state' for k in vals.keys()):
                     raise UserError(_("You cannot modify a confirmed Booking Provision record."))
 
         res = super().write(vals)
