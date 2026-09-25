@@ -20,7 +20,7 @@
 #############################################################################
 {
     'name': 'Sticky Pivot View',
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Extra Tools',
     'summary': """Helps to stick the pivot view (Row and Column)""",
     'description': """Helps ensuring persistent row and column summaries for 

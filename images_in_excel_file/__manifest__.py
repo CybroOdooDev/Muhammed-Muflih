@@ -17,7 +17,7 @@
 #############################################################################
 {
     'name': 'Image in Excel',
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Tools',
     'summary': 'Export Odoo images as actual thumbnails in Excel instead of Base64 strings',
     'description': """
