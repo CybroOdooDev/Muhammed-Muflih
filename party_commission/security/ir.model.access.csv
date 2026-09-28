@@ -7,3 +7,5 @@ access_booking_provsion_journal_line,access.booking.provsion.journal.line,model_
 access_booking_provsion_journal_line_manager,access.booking.provsion.journal.line.manager,model_booking_provsion_journal_line,party_commission.group_party_commission_manager,1,1,1,1
 access_party_commission,access.party.commission,model_party_commission,base.group_user,1,1,1,1
 access_party_commission_manager,access.party.commission.manager,model_party_commission,party_commission.group_party_commission_manager,1,1,1,1
+access_create_journal_wizard,access.create.journal.wizard,model_create_journal_wizard,base.group_user,1,1,1,1
+access_create_journal_wizard_line,access.create.journal.wizard.line,model_create_journal_wizard_line,base.group_user,1,1,1,1

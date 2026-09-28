@@ -30,24 +30,56 @@ class BookingProvsionJournalLine(models.Model):
     partner_id = fields.Many2one('res.partner', string='Partner')
     debit = fields.Float(string='Debit')
     credit = fields.Float(string='Credit')
+    analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account')
+
+    def _sync_to_related(self):
+        if self.env.context.get('skip_party_records_sync'):
+            return
+        provisions = self.mapped('booking_provision_id')
+        for prov in provisions:
+            related = prov.party_records - prov
+            if related:
+                lines_copy = [(0, 0, {
+                    'account_id': line.account_id.id,
+                    'partner_id': line.partner_id.id if line.partner_id else False,
+                    'analytic_account_id': line.analytic_account_id.id if line.analytic_account_id else False,
+                    'debit': line.debit or 0.0,
+                    'credit': line.credit or 0.0,
+                }) for line in prov.journal_line_ids]
+                related.with_context(skip_party_records_sync=True).sudo().write({
+                    'journal_line_ids': [(5, 0, 0)] + lines_copy
+                })
 
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('booking_provision_id'):
                 prov = self.env['booking.provsion'].browse(vals['booking_provision_id'])
-                if prov.all_party_confirmed and not self.env.su:
+                if prov.move_id and not self.env.su:
                     raise UserError(_("You cannot add journal lines to a confirmed Booking Provision."))
-        return super().create(vals_list)
+                if not self.env.user.has_group('account.group_account_invoice') and not self.env.su:
+                    raise UserError(_("Only users with Accounting: Invoicing rights can add journal lines."))
+        res = super().create(vals_list)
+        res._sync_to_related()
+        return res
 
     def write(self, vals):
         for line in self:
-            if line.booking_provision_id.all_party_confirmed and not self.env.su:
+            if line.booking_provision_id.move_id and not self.env.su:
                 raise UserError(_("You cannot edit journal lines of a confirmed Booking Provision."))
-        return super().write(vals)
+            if not self.env.user.has_group('account.group_account_invoice') and not self.env.su:
+                raise UserError(_("Only users with Accounting: Invoicing rights can edit journal lines."))
+        res = super().write(vals)
+        self._sync_to_related()
+        return res
 
     def unlink(self):
         for line in self:
-            if line.booking_provision_id.all_party_confirmed and not self.env.su:
+            if line.booking_provision_id.move_id and not self.env.su:
                 raise UserError(_("You cannot delete journal lines of a confirmed Booking Provision."))
-        return super().unlink()
+            if not self.env.user.has_group('account.group_account_invoice') and not self.env.su:
+                raise UserError(_("Only users with Accounting: Invoicing rights can delete journal lines."))
+        provisions = self.mapped('booking_provision_id')
+        res = super().unlink()
+        provisions.mapped('journal_line_ids')._sync_to_related()
+        return res

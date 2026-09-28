@@ -39,6 +39,7 @@
         'views/booking_provsion_view.xml',
         'views/account_move_views.xml',
         'wizard/party_commission_view.xml',
+        'wizard/create_journal_wizard_view.xml',
     ],
     'license': 'AGPL-3',
     'installable': True,

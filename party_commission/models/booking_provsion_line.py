@@ -43,6 +43,7 @@ class BookingProvsionLine(models.Model):
     net_commission = fields.Float(string='Net Commission', compute='_compute_net_commission', store=True)
     profit = fields.Float(string='Profit', compute='_compute_profit')
     profit_percentage = fields.Float(string='Profit %', compute='_compute_profit_percentage')
+    # analytic_account_id=fields.Many2one('account.analytic.account', string='Analytic Account')
     is_commission_readonly = fields.Boolean(
         compute='_compute_is_commission_readonly'
     )
@@ -51,12 +52,20 @@ class BookingProvsionLine(models.Model):
     )
 
     @api.depends('booking_provision_id.state')
+    @api.depends_context('uid')
     def _compute_is_commission_readonly(self):
+        is_manager = self.env.user.has_group('party_commission.group_party_commission_manager')
         for rec in self:
             state = rec.booking_provision_id.state or 'draft'
-            rec.is_commission_readonly = (state != 'draft')
+            if state == 'draft':
+                rec.is_commission_readonly = False
+            elif state == 'to_review':
+                rec.is_commission_readonly = not is_manager
+            else:
+                rec.is_commission_readonly = True
 
     @api.depends('booking_provision_id.state')
+    @api.depends_context('uid')
     def _compute_is_printing_charges_readonly(self):
         is_manager = self.env.user.has_group('party_commission.group_party_commission_manager')
         for rec in self:
@@ -66,32 +75,13 @@ class BookingProvsionLine(models.Model):
             else:
                 rec.is_printing_charges_readonly = True
 
-    def write(self, vals):
-        is_manager = self.env.user.has_group('party_commission.group_party_commission_manager')
-        if any(field in vals for field in ('commission_percentage', 'commission_value')):
-            for rec in self:
-                state = rec.booking_provision_id.state or 'draft'
-                if state != 'draft':
-                    raise UserError(_("Commission fields cannot be modified in To Review or Confirmed state."))
-
-        if 'printing_charges' in vals:
-            for rec in self:
-                state = rec.booking_provision_id.state or 'draft'
-                if state != 'to_review' or not is_manager:
-                    raise UserError(_("Printing charges can only be modified by a Party Commission Manager when in To Review state."))
-
-        return super().write(vals)
-
-    @api.onchange('commission_percentage', 'commission_value')
-    def commission_check(self):
-        if self.commission_percentage and self.commission_value:
-            raise ValidationError(_("A record can contain only Commission % or Commission Value, not both."))
-
-    @api.constrains('commission_percentage', 'commission_value')
-    def _check_commission_fields(self):
+    @api.onchange('commission_percentage')
+    def _onchange_commission_percentage(self):
         for line in self:
-            if line.commission_percentage and line.commission_value:
-                raise ValidationError(_("A record can contain only Commission % or Commission Value, not both."))
+            if line.commission_percentage and line.net_sales:
+                line.commission_value = line.net_sales * (line.commission_percentage / 100.0)
+            elif not line.commission_percentage:
+                line.commission_value = 0.0
 
     @api.depends('qty', 'price')
     def _compute_total(self):
@@ -101,10 +91,10 @@ class BookingProvsionLine(models.Model):
     @api.depends('qty', 'commission_percentage', 'commission_value', 'net_sales')
     def _compute_net_commission(self):
         for rec in self:
-            if rec.commission_percentage:
-                rec.net_commission = rec.net_sales * (rec.commission_percentage / 100.0)
-            elif rec.commission_value:
+            if rec.commission_value:
                 rec.net_commission = rec.qty * rec.commission_value
+            elif rec.commission_percentage:
+                rec.net_commission = rec.net_sales * (rec.commission_percentage / 100.0)
             else:
                 rec.net_commission = 0.0
 
