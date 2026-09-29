@@ -1,10 +1,16 @@
 /** @odoo-module **/
-import { SaleOrderLineOne2Many, saleOrderLineOne2Many } from "@sale/js/sale_order_line_field/sale_order_line_field";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
 
-// Extends SaleOrderLineOne2Many to create widget for sale order line & one2many fields
-export class ExcelX2ManyField extends SaleOrderLineOne2Many {
+// Dynamically resolve parent field definition (sol_o2m -> section_and_note_one2many -> x2ManyField)
+const baseFieldDef = registry.category("fields").get("sol_o2m")
+    || registry.category("fields").get("section_and_note_one2many")
+    || x2ManyField;
+
+const BaseComponent = baseFieldDef.component || X2ManyField;
+
+export class ExcelX2ManyField extends BaseComponent {
     setup() {
         super.setup();
         this.actionService = useService("action");
@@ -15,9 +21,9 @@ export class ExcelX2ManyField extends SaleOrderLineOne2Many {
             await this.props.record.save();
         }
         var order = this.props.record ? this.props.record.resId : false;
-        var fieldObj = this.field || (this.props.record && this.props.record.fields[this.props.name]);
+        var fieldObj = this.field || (this.props.record && this.props.record.fields && this.props.record.fields[this.props.name]);
         var relation = fieldObj ? fieldObj.relation : false;
-        var related_field = fieldObj ? fieldObj.relation_field : false;
+        var related_field = fieldObj ? (fieldObj.relation_field || fieldObj.inverse_fname) : false;
         var action = {
             type: "ir.actions.report",
             report_type: "xlsx",
@@ -32,9 +38,11 @@ export class ExcelX2ManyField extends SaleOrderLineOne2Many {
 ExcelX2ManyField.template = "one2many_excel_report.One2manyExcel";
 
 export const excelX2ManyField = {
-    ...saleOrderLineOne2Many,
+    ...baseFieldDef,
     component: ExcelX2ManyField,
 };
 
 registry.category("fields").add("one2many_excel", excelX2ManyField);
+
+
 
