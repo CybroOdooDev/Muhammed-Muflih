@@ -14,8 +14,9 @@
                 </group>
                 <field name="line_ids">
                     <list editable="bottom">
-                        <field name="account_id"/>
+                        <field name="account_id" required="1"/>
                         <field name="partner_id" domain="[('id', 'in', parent.allowed_partner_ids)]"/>
+                        <field name="label"/>
                         <field name="analytic_account_id"/>
                         <field name="debit" sum="Total Debit"/>
                         <field name="credit" sum="Total Credit"/>

@@ -57,13 +57,19 @@ class CreateJournalWizard(models.TransientModel):
             raise UserError(_("Cannot confirm: Total Debit (%.2f) does not equal Total Credit (%.2f).") % (total_debit, total_credit))
 
         move_lines = []
+        ref_name = records[0].name or ''
         for line in self.line_ids:
+            if line.label:
+                label_val = f"{ref_name} - {line.label}" if ref_name and not line.label.startswith(ref_name) else line.label
+            else:
+                label_val = ref_name
+
             line_vals = {
                 'account_id': line.account_id.id,
                 'partner_id': line.partner_id.id if line.partner_id else False,
                 'debit': line.debit or 0.0,
                 'credit': line.credit or 0.0,
-                'name': records[0].name,
+                'name': label_val,
             }
             if line.analytic_account_id:
                 line_vals['analytic_distribution'] = {str(line.analytic_account_id.id): 100}
@@ -80,13 +86,20 @@ class CreateJournalWizard(models.TransientModel):
 
         # Update booking provision records with move_id and sync journal lines
         for rec in records:
-            jlines = [(0, 0, {
-                'account_id': line.account_id.id,
-                'partner_id': line.partner_id.id if line.partner_id else False,
-                'analytic_account_id': line.analytic_account_id.id if line.analytic_account_id else False,
-                'debit': line.debit or 0.0,
-                'credit': line.credit or 0.0,
-            }) for line in self.line_ids]
+            jlines = []
+            for line in self.line_ids:
+                if line.label:
+                    label_val = f"{rec.name} - {line.label}" if rec.name and not line.label.startswith(rec.name) else line.label
+                else:
+                    label_val = rec.name or ''
+                jlines.append((0, 0, {
+                    'account_id': line.account_id.id,
+                    'partner_id': line.partner_id.id if line.partner_id else False,
+                    'label': label_val,
+                    'analytic_account_id': line.analytic_account_id.id if line.analytic_account_id else False,
+                    'debit': line.debit or 0.0,
+                    'credit': line.credit or 0.0,
+                }))
             rec.sudo().write({
                 'move_id': move.id,
                 'state': 'done',
@@ -122,8 +135,9 @@ class CreateJournalWizardLine(models.TransientModel):
     _description = 'Create Journal Entry Wizard Line'
 
     wizard_id = fields.Many2one('create.journal.wizard', ondelete='cascade')
-    account_id = fields.Many2one('account.account', string='Account', required=True)
+    account_id = fields.Many2one('account.account', string='Account')
     partner_id = fields.Many2one('res.partner', string='Partner')
+    label = fields.Char(string='Label')
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account')
     debit = fields.Float(string='Debit')
     credit = fields.Float(string='Credit')

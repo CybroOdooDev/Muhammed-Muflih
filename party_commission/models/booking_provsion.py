@@ -105,7 +105,7 @@ class BookingProvsion(models.Model):
                 if rec.commission_percentage:
                     raise UserError(_("Commission percentage is already set"))
                 if self.commission_percentage:
-                  rec.commission_value=rec.net_sales*(self.commission_percentage/100)
+                  rec.commission_value=0
                   rec.commission_percentage=self.commission_percentage
 
     is_journal_readonly = fields.Boolean(
@@ -158,6 +158,7 @@ class BookingProvsion(models.Model):
                             lines_copy = [(0, 0, {
                                 'account_id': line.account_id.id,
                                 'partner_id': line.partner_id.id if line.partner_id else False,
+                                'label': line.label,
                                 'analytic_account_id': line.analytic_account_id.id if line.analytic_account_id else False,
                                 'debit': line.debit,
                                 'credit': line.credit,
@@ -239,17 +240,50 @@ class BookingProvsion(models.Model):
         allowed_partners = records.mapped('customer_ids') | records.mapped('line_ids.customer_id')
 
         # Check if selected records already have journal lines on the record
-        existing_jlines = records[0].journal_line_ids if records else False
+        existing_jlines = records.filtered('journal_line_ids')[:1].journal_line_ids if records else False
         line_vals = []
         if existing_jlines:
             for jline in existing_jlines:
                 line_vals.append((0, 0, {
                     'account_id': jline.account_id.id,
                     'partner_id': jline.partner_id.id if jline.partner_id else False,
+                    'label': getattr(jline, 'label', False),
                     'analytic_account_id': jline.analytic_account_id.id if jline.analytic_account_id else False,
                     'debit': jline.debit or 0.0,
                     'credit': jline.credit or 0.0,
                 }))
+        else:
+            # Prefill from each record's customer party_commission_account_id and net_commission
+            for rec in records:
+                partners = rec.customer_ids or rec.line_ids.mapped('customer_id')
+                if partners:
+                    for partner in partners:
+                        partner_lines = rec.line_ids.filtered(lambda l: l.customer_id == partner)
+                        net_comm = sum(partner_lines.mapped('net_commission')) if partner_lines else sum(rec.line_ids.mapped('net_commission'))
+                        currency = rec.currency_id or self.env.company.currency_id
+                        credit_val = currency.round(net_comm) if currency else round(net_comm, 2)
+                        account = partner.party_commission_account_id
+                        line_vals.append((0, 0, {
+                            'account_id': account.id if account else False,
+                            'partner_id': partner.id,
+                            'label': f"Party Commission - {partner.name}" if partner.name else (rec.name or ''),
+                            'analytic_account_id': False,
+                            'debit': 0.0,
+                            'credit': credit_val,
+                        }))
+                else:
+                    net_comm = sum(rec.line_ids.mapped('net_commission'))
+                    if net_comm:
+                        currency = rec.currency_id or self.env.company.currency_id
+                        credit_val = currency.round(net_comm) if currency else round(net_comm, 2)
+                        line_vals.append((0, 0, {
+                            'account_id': False,
+                            'partner_id': False,
+                            'label': rec.name or '',
+                            'analytic_account_id': False,
+                            'debit': 0.0,
+                            'credit': credit_val,
+                        }))
 
         wizard = self.env['create.journal.wizard'].create({
             'booking_provision_ids': [(6, 0, records.ids)],

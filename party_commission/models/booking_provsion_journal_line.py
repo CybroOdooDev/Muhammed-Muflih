@@ -31,6 +31,7 @@ class BookingProvsionJournalLine(models.Model):
     debit = fields.Float(string='Debit')
     credit = fields.Float(string='Credit')
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account')
+    label=fields.Char(string='Label')
 
     def _sync_to_related(self):
         if self.env.context.get('skip_party_records_sync'):
@@ -42,6 +43,7 @@ class BookingProvsionJournalLine(models.Model):
                 lines_copy = [(0, 0, {
                     'account_id': line.account_id.id,
                     'partner_id': line.partner_id.id if line.partner_id else False,
+                    'label': line.label,
                     'analytic_account_id': line.analytic_account_id.id if line.analytic_account_id else False,
                     'debit': line.debit or 0.0,
                     'credit': line.credit or 0.0,

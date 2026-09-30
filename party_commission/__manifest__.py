@@ -37,6 +37,8 @@
         'data/sequence_data.xml',
         'data/booking_provsion_action.xml',
         'views/booking_provsion_view.xml',
+        'views/party_commission_payout_views.xml',
+        'views/res_partner_views.xml',
         'views/account_move_views.xml',
         'wizard/party_commission_view.xml',
         'wizard/create_journal_wizard_view.xml',

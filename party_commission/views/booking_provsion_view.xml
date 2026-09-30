@@ -85,6 +85,7 @@
                                 <list editable="bottom">
                                     <field name="account_id" readonly="parent.is_journal_readonly"/>
                                     <field name="partner_id" domain="[('id', 'in', parent.allowed_partner_ids)]" readonly="parent.is_journal_readonly"/>
+                                    <field name="label" readonly="parent.is_journal_readonly"/>
                                     <field name="analytic_account_id" readonly="parent.is_journal_readonly"/>
                                     <field name="debit" sum="Total Debit" readonly="parent.is_journal_readonly"/>
                                     <field name="credit" sum="Total Credit" readonly="parent.is_journal_readonly"/>
@@ -126,14 +127,26 @@
         <field name="arch" type="xml">
             <search string="Booking Provision Search">
                 <field name="name" string="Reference"/>
-                <field name="customer_ids"/>
-                <field name="date"/>
-                <field name="journal_id"/>
+                <field name="customer_ids" string="Customer"/>
+                <field name="date" string="Date"/>
+                <field name="journal_id" string="Journal"/>
+                <field name="sales_excutive_id" string="Sales Executive"/>
+                <field name="state" string="Status"/>
+
+                <filter string="Draft" name="state_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="To Review" name="state_to_review" domain="[('state', '=', 'to_review')]"/>
+                <filter string="Confirmed" name="state_confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Done" name="state_done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter string="Date" name="filter_date" date="date"/>
+
                 <group expand="0" string="Group By">
                     <filter string="Reference" name="group_by_name" context="{'group_by': 'name'}"/>
                     <filter string="Customer" name="group_by_customer_id" context="{'group_by': 'customer_ids'}"/>
                     <filter string="Date" name="group_by_date" context="{'group_by': 'date'}"/>
                     <filter string="Journal" name="group_by_journal_id" context="{'group_by': 'journal_id'}"/>
+                    <filter string="Sales executive" name="group_by_sales_excutive_id" context="{'group_by':'sales_excutive_id'}"/>
+                    <filter string="Status" name="group_by_state" context="{'group_by': 'state'}"/>
                 </group>
             </search>
         </field>
@@ -156,6 +169,5 @@
               action="booking_provsion_action"
               parent="sale.menu_sale_invoicing"
               sequence="30"/>
-
 
 </odoo>

@@ -25,6 +25,8 @@ from odoo.exceptions import ValidationError, UserError
 class BookingProvsionLine(models.Model):
     _name = 'booking.provsion.line'
     _description = 'Booking Provision Line'
+    _rec_name = 'invoice_number'
+    _order = 'date desc, id desc'
 
     booking_provision_id = fields.Many2one('booking.provsion', string='Booking Provision', ondelete='cascade')
     customer_id = fields.Many2one('res.partner', string='Customer')
@@ -43,6 +45,8 @@ class BookingProvsionLine(models.Model):
     net_commission = fields.Float(string='Net Commission', compute='_compute_net_commission', store=True)
     profit = fields.Float(string='Profit', compute='_compute_profit')
     profit_percentage = fields.Float(string='Profit %', compute='_compute_profit_percentage')
+    paid=fields.Float(string='Paid')
+    difference=fields.Float(string='Difference',compute='_compute_difference')
     # analytic_account_id=fields.Many2one('account.analytic.account', string='Analytic Account')
     is_commission_readonly = fields.Boolean(
         compute='_compute_is_commission_readonly'
@@ -75,13 +79,46 @@ class BookingProvsionLine(models.Model):
             else:
                 rec.is_printing_charges_readonly = True
 
+    @api.constrains('commission_percentage', 'commission_value')
+    def _check_commission_exclusive(self):
+        for rec in self:
+            if rec.commission_percentage and rec.commission_value:
+                raise ValidationError(_("Only one commission type is allowed at a time (Commission Percentage or Commission Value)."))
+
     @api.onchange('commission_percentage')
     def _onchange_commission_percentage(self):
         for line in self:
-            if line.commission_percentage and line.net_sales:
-                line.commission_value = line.net_sales * (line.commission_percentage / 100.0)
-            elif not line.commission_percentage:
-                line.commission_value = 0.0
+            if line.commission_percentage and line.commission_value:
+                line.commission_percentage=0
+                return {
+                    'warning': {
+                        'title': _("Validation Warning"),
+                        'message': _("Only one commission type is allowed at a time. Please clear Commission Value before entering Commission Percentage."),
+                        'type': 'dialog',
+                    }
+                }
+
+    @api.onchange('commission_value')
+    def _onchange_commission_value(self):
+        for line in self:
+            if line.commission_value and line.commission_percentage:
+                line.commission_value=0
+                return {
+                    'warning': {
+                        'title': _("Validation Warning"),
+                        'message': _("Only one commission type is allowed at a time. Please clear Commission Percentage before entering Commission Value."),
+                        'type': 'dialog',
+                    }
+                }
+
+    # @api.depends('paid')
+    # def _compute_difference(self):
+    #  for rec in self:
+    #     if rec.paid:
+    #         rec.difference=net_commission-paid
+    #     else:
+    #         rec.difference=0
+
 
     @api.depends('qty', 'price')
     def _compute_total(self):
@@ -91,10 +128,10 @@ class BookingProvsionLine(models.Model):
     @api.depends('qty', 'commission_percentage', 'commission_value', 'net_sales')
     def _compute_net_commission(self):
         for rec in self:
-            if rec.commission_value:
-                rec.net_commission = rec.qty * rec.commission_value
-            elif rec.commission_percentage:
+            if rec.commission_percentage:
                 rec.net_commission = rec.net_sales * (rec.commission_percentage / 100.0)
+            elif rec.commission_value:
+                rec.net_commission = rec.qty * rec.commission_value
             else:
                 rec.net_commission = 0.0
 
