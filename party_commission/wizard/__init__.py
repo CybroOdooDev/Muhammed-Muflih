@@ -20,3 +20,4 @@
 #############################################################################
 from . import party_commission
 from . import create_journal_wizard
+from . import commission_payout_wizard

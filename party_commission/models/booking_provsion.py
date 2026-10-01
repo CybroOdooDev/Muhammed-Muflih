@@ -57,7 +57,7 @@ class BookingProvsion(models.Model):
         compute='_compute_total_profit_percentage',
         store=True
     )
-    state = fields.Selection([('draft', 'Draft'),('to_review', 'To Review'),('confirmed', 'Confirmed'),('done','Done')], default='draft', tracking=True)
+    state = fields.Selection([('draft', 'Draft'),('to_review', 'To Review'),('confirmed', 'Confirmed'),('done','Done'),('payout','Payout')], default='draft', tracking=True)
     all_party_confirmed = fields.Boolean(
         string='All Linked Records Confirmed',
         compute='_compute_all_party_confirmed'
@@ -72,6 +72,22 @@ class BookingProvsion(models.Model):
         default=lambda self: self._default_journal_id()
     )
     move_id = fields.Many2one('account.move', string='Journal Entry', copy=False, readonly=True)
+    move_ids = fields.Many2many(
+        'account.move',
+        'booking_provsion_account_move_rel',
+        'provision_id',
+        'move_id',
+        string='Journal Entries',
+        copy=False
+    )
+    move_count = fields.Integer(string='Journal Entries Count', compute='_compute_move_count')
+
+    @api.depends('move_id', 'move_ids')
+    def _compute_move_count(self):
+        for rec in self:
+            all_moves = rec.move_id | rec.move_ids
+            rec.move_count = len(all_moves)
+
     commission_percentage = fields.Float(string='Commission Percentage')
 
     @api.depends('state', 'party_records.state')
@@ -128,14 +144,14 @@ class BookingProvsion(models.Model):
             rec.write({'state': 'to_review'})
 
     def write(self, vals):
-        if not self.env.su:
+        if not self.env.su and not set(vals.keys()).issubset({'move_id', 'move_ids', 'state'}):
             is_invoicing = self.env.user.has_group('account.group_account_invoice')
-            allowed_confirmed_keys = {'journal_id', 'date', 'journal_line_ids', 'state'}
+            allowed_confirmed_keys = {'journal_id', 'date', 'journal_line_ids', 'state', 'move_id', 'move_ids'}
             for rec in self:
-                if rec.state == 'done':
-                    raise UserError(_("You cannot modify a Booking Provision record that is in 'Done' state."))
+                if rec.state in ('done', 'payout'):
+                    raise UserError(_("You cannot modify a Booking Provision record that is in '%s' state.") % (rec.state.capitalize()))
                 if rec.state == 'confirmed':
-                    if rec.move_id:
+                    if rec.move_id and not set(vals.keys()).issubset(allowed_confirmed_keys):
                         raise UserError(_("You cannot modify a confirmed Booking Provision record."))
                     if not is_invoicing:
                         raise UserError(_("Only users with Accounting: Invoicing rights can edit journal details in Confirmed state."))
@@ -156,24 +172,133 @@ class BookingProvsion(models.Model):
                             sync_vals['date'] = rec.date
                         if 'journal_line_ids' in vals:
                             lines_copy = [(0, 0, {
-                                'account_id': line.account_id.id,
+                                'account_id': line.account_id.id if line.account_id else False,
                                 'partner_id': line.partner_id.id if line.partner_id else False,
                                 'label': line.label,
                                 'analytic_account_id': line.analytic_account_id.id if line.analytic_account_id else False,
-                                'debit': line.debit,
-                                'credit': line.credit,
+                                'debit': line.debit or 0.0,
+                                'credit': line.credit or 0.0,
                             }) for line in rec.journal_line_ids]
                             sync_vals['journal_line_ids'] = [(5, 0, 0)] + lines_copy
 
                         if sync_vals:
-                            related.with_context(skip_party_records_sync=True).write(sync_vals)
+                            related.filtered(lambda r: r.state not in ('done', 'payout') and not r.move_id).with_context(skip_party_records_sync=True).sudo().write(sync_vals)
         return res
 
     def unlink(self):
         raise UserError(_("Deleting Booking Provision records is not allowed."))
 
+    def _sync_journal_lines_to_party_records(self):
+        for rec in self:
+            all_records = rec.party_records or rec
+            all_jlines = all_records.mapped('journal_line_ids')
+            if not all_jlines:
+                continue
+
+            unique_line_vals = []
+            seen = set()
+            for line in all_jlines:
+                key = (
+                    line.account_id.id if line.account_id else False,
+                    line.partner_id.id if line.partner_id else False,
+                    line.label or '',
+                    line.analytic_account_id.id if line.analytic_account_id else False,
+                    round(line.debit or 0.0, 2),
+                    round(line.credit or 0.0, 2),
+                )
+                if key not in seen:
+                    seen.add(key)
+                    unique_line_vals.append({
+                        'account_id': line.account_id.id if line.account_id else False,
+                        'partner_id': line.partner_id.id if line.partner_id else False,
+                        'label': line.label,
+                        'analytic_account_id': line.analytic_account_id.id if line.analytic_account_id else False,
+                        'debit': line.debit or 0.0,
+                        'credit': line.credit or 0.0,
+                    })
+
+            for target_rec in all_records.filtered(lambda r: r.state not in ('done', 'payout') and not r.move_id):
+                target_keys = set(
+                    (
+                        l.account_id.id if l.account_id else False,
+                        l.partner_id.id if l.partner_id else False,
+                        l.label or '',
+                        l.analytic_account_id.id if l.analytic_account_id else False,
+                        round(l.debit or 0.0, 2),
+                        round(l.credit or 0.0, 2),
+                    ) for l in target_rec.journal_line_ids
+                )
+                if target_keys != seen:
+                    lines_cmd = [(5, 0, 0)] + [(0, 0, dict(val)) for val in unique_line_vals]
+                    target_rec.with_context(skip_party_records_sync=True).sudo().write({
+                        'journal_line_ids': lines_cmd
+                    })
+
+    def _get_default_journal_line_vals(self):
+        self.ensure_one()
+        line_vals = []
+        partners = self.customer_ids or self.line_ids.mapped('customer_id')
+        currency = self.currency_id or self.env.company.currency_id
+        if partners:
+            for partner in partners:
+                partner_lines = self.line_ids.filtered(lambda l: l.customer_id == partner)
+                net_comm = sum(partner_lines.mapped('net_commission')) if partner_lines else sum(self.line_ids.mapped('net_commission'))
+                credit_val = currency.round(net_comm) if currency else round(net_comm, 2)
+                account = partner.party_commission_account_id
+                line_vals.append((0, 0, {
+                    'account_id': account.id if account else False,
+                    'partner_id': partner.id,
+                    'label': f"Party Commission - {partner.name}" if partner.name else (self.name or ''),
+                    'analytic_account_id': False,
+                    'debit': 0.0,
+                    'credit': credit_val,
+                }))
+        else:
+            net_comm = sum(self.line_ids.mapped('net_commission'))
+            if net_comm:
+                credit_val = currency.round(net_comm) if currency else round(net_comm, 2)
+                line_vals.append((0, 0, {
+                    'account_id': False,
+                    'partner_id': False,
+                    'label': self.name or '',
+                    'analytic_account_id': False,
+                    'debit': 0.0,
+                    'credit': credit_val,
+                }))
+        return line_vals
+
     def action_confirm(self):
-        self.write({'state': 'confirmed'})
+        for rec in self:
+            rec.sudo().write({'state': 'confirmed'})
+            all_records = rec.party_records or rec
+            existing_lines = all_records.mapped('journal_line_ids')
+
+            default_tuples = rec._get_default_journal_line_vals()
+            existing_partner_ids = existing_lines.filtered(
+                lambda l: not l.debit or l.debit == 0.0
+            ).mapped('partner_id.id')
+
+            lines_to_add = []
+            for item in default_tuples:
+                dline = item[2] if isinstance(item, tuple) and len(item) == 3 else item
+                p_id = dline.get('partner_id')
+                if p_id and p_id in existing_partner_ids:
+                    matching_line = existing_lines.filtered(
+                        lambda l: l.partner_id.id == p_id and (not l.debit or l.debit == 0.0)
+                    )
+                    if matching_line and round(matching_line[0].credit or 0.0, 2) != round(dline.get('credit') or 0.0, 2):
+                        matching_line[0].with_context(skip_party_records_sync=True).sudo().write({
+                            'credit': dline.get('credit') or 0.0
+                        })
+                else:
+                    lines_to_add.append((0, 0, dline))
+
+            if lines_to_add:
+                rec.with_context(skip_party_records_sync=True).sudo().write({
+                    'journal_line_ids': lines_to_add
+                })
+
+            rec._sync_journal_lines_to_party_records()
 
     def action_draft(self):
         for rec in self:
@@ -181,13 +306,26 @@ class BookingProvsion(models.Model):
 
     def action_view_journal_entry(self):
         self.ensure_one()
+        all_moves = self.move_id | self.move_ids
+        if not all_moves:
+            raise UserError(_("No Journal Entry found."))
+        if len(all_moves) == 1:
+            return {
+                'name': _('Journal Entry'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'account.move',
+                'views': [(False, 'form')],
+                'view_mode': 'form',
+                'res_id': all_moves.id,
+                'target': 'current',
+            }
         return {
-            'name': _('Journal Entry'),
+            'name': _('Journal Entries'),
             'type': 'ir.actions.act_window',
             'res_model': 'account.move',
-            'views': [(False, 'form')],
-            'view_mode': 'form',
-            'res_id': self.move_id.id,
+            'domain': [('id', 'in', all_moves.ids)],
+            'views': [(False, 'list'), (False, 'form')],
+            'view_mode': 'list,form',
             'target': 'current',
         }
 
@@ -239,51 +377,35 @@ class BookingProvsion(models.Model):
 
         allowed_partners = records.mapped('customer_ids') | records.mapped('line_ids.customer_id')
 
+        records._sync_journal_lines_to_party_records()
         # Check if selected records already have journal lines on the record
-        existing_jlines = records.filtered('journal_line_ids')[:1].journal_line_ids if records else False
+        existing_jlines = records.mapped('journal_line_ids')
         line_vals = []
         if existing_jlines:
+            seen = set()
             for jline in existing_jlines:
-                line_vals.append((0, 0, {
-                    'account_id': jline.account_id.id,
-                    'partner_id': jline.partner_id.id if jline.partner_id else False,
-                    'label': getattr(jline, 'label', False),
-                    'analytic_account_id': jline.analytic_account_id.id if jline.analytic_account_id else False,
-                    'debit': jline.debit or 0.0,
-                    'credit': jline.credit or 0.0,
-                }))
+                key = (
+                    jline.account_id.id if jline.account_id else False,
+                    jline.partner_id.id if jline.partner_id else False,
+                    jline.label,
+                    jline.analytic_account_id.id if jline.analytic_account_id else False,
+                    jline.debit or 0.0,
+                    jline.credit or 0.0,
+                )
+                if key not in seen:
+                    seen.add(key)
+                    line_vals.append((0, 0, {
+                        'account_id': jline.account_id.id if jline.account_id else False,
+                        'partner_id': jline.partner_id.id if jline.partner_id else False,
+                        'label': getattr(jline, 'label', False),
+                        'analytic_account_id': jline.analytic_account_id.id if jline.analytic_account_id else False,
+                        'debit': jline.debit or 0.0,
+                        'credit': jline.credit or 0.0,
+                    }))
         else:
             # Prefill from each record's customer party_commission_account_id and net_commission
             for rec in records:
-                partners = rec.customer_ids or rec.line_ids.mapped('customer_id')
-                if partners:
-                    for partner in partners:
-                        partner_lines = rec.line_ids.filtered(lambda l: l.customer_id == partner)
-                        net_comm = sum(partner_lines.mapped('net_commission')) if partner_lines else sum(rec.line_ids.mapped('net_commission'))
-                        currency = rec.currency_id or self.env.company.currency_id
-                        credit_val = currency.round(net_comm) if currency else round(net_comm, 2)
-                        account = partner.party_commission_account_id
-                        line_vals.append((0, 0, {
-                            'account_id': account.id if account else False,
-                            'partner_id': partner.id,
-                            'label': f"Party Commission - {partner.name}" if partner.name else (rec.name or ''),
-                            'analytic_account_id': False,
-                            'debit': 0.0,
-                            'credit': credit_val,
-                        }))
-                else:
-                    net_comm = sum(rec.line_ids.mapped('net_commission'))
-                    if net_comm:
-                        currency = rec.currency_id or self.env.company.currency_id
-                        credit_val = currency.round(net_comm) if currency else round(net_comm, 2)
-                        line_vals.append((0, 0, {
-                            'account_id': False,
-                            'partner_id': False,
-                            'label': rec.name or '',
-                            'analytic_account_id': False,
-                            'debit': 0.0,
-                            'credit': credit_val,
-                        }))
+                line_vals.extend(rec._get_default_journal_line_vals())
 
         wizard = self.env['create.journal.wizard'].create({
             'booking_provision_ids': [(6, 0, records.ids)],

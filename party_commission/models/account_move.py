@@ -31,3 +31,11 @@ class AccountMove(models.Model):
         string='Invoices',
         domain="[('move_type', '=', 'out_invoice')]"
     )
+    booking_provision_ids = fields.Many2many(
+        'booking.provsion',
+        'booking_provsion_account_move_rel',
+        'move_id',
+        'provision_id',
+        string='Booking Provisions',
+        copy=False
+    )

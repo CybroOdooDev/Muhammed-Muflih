@@ -4,8 +4,9 @@
         <field name="name">booking.provsion.line.view.list</field>
         <field name="model">booking.provsion.line</field>
         <field name="arch" type="xml">
-            <list string="Party Commission Payout" delete="0">
+            <list string="Party Commission Payout" delete="0" editable="top">
                 <field name="booking_provision_id"/>
+                <field name="sales_excutive_id" readonly="1"/>
                 <field name="date"/>
                 <field name="invoice_number"/>
                 <field name="customer_id"/>
@@ -20,8 +21,9 @@
                 <field name="commission_percentage"/>
                 <field name="commission_value" sum="Total Commission Value"/>
                 <field name="net_commission" sum="Total Net Commission"/>
-                <field name="paid"/>
+                <field name="paid" readonly="state == 'payout'"/>
                 <field name="difference"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-primary="state == 'payout'"/>
                 <field name="profit" sum="Total Profit" groups="party_commission.group_party_commission_manager"/>
                 <field name="profit_percentage" groups="party_commission.group_party_commission_manager"/>
             </list>
@@ -38,6 +40,7 @@
                     <group>
                         <group>
                             <field name="booking_provision_id" readonly="1"/>
+                            <field name="sales_excutive_id" readonly="1"/>
                             <field name="customer_id" readonly="1"/>
                             <field name="date" readonly="1"/>
                             <field name="invoice_number" readonly="1"/>
@@ -59,7 +62,8 @@
                             <field name="commission_percentage" readonly="is_commission_readonly"/>
                             <field name="commission_value" readonly="is_commission_readonly"/>
                             <field name="net_commission" readonly="1"/>
-                            <field name="paid"/>
+                            <field name="state" widget="badge" decoration-success="state == 'done'" decoration-primary="state == 'payout'"/>
+                            <field name="paid" readonly="state == 'payout'"/>
                             <field name="difference" readonly="1"/>
                         </group>
                         <group string="Profitability" groups="party_commission.group_party_commission_manager">
@@ -80,15 +84,22 @@
         <field name="arch" type="xml">
             <search string="Party Commission Payout Search">
                 <field name="booking_provision_id" string="Booking Provision"/>
+                <field name="sales_excutive_id" string="Sales Executive"/>
                 <field name="customer_id" string="Customer"/>
                 <field name="invoice_number" string="Invoice Number"/>
                 <field name="item_code" string="Item Code"/>
-                <field name="date" string="Date"/>
+                <field name="state" string="Status"/>
+                <filter string="Done" name="state_done" domain="[('booking_provision_id.state', '=', 'done')]"/>
+                <filter string="Payout" name="state_payout" domain="[('booking_provision_id.state', '=', 'payout')]"/>
+                <separator/>
                 <group expand="0" string="Group By">
                     <filter string="Booking Provision" name="group_by_booking_provision_id" context="{'group_by': 'booking_provision_id'}"/>
-                    <filter string="Customer" name="group_by_customer_id" context="{'group_by': 'customer_id'}"/>
                     <filter string="Date" name="group_by_date" context="{'group_by': 'date'}"/>
+                    <filter string="Invoice" name="group_by_invoice_number" context="{'group_by': 'invoice_number'}"/>
+                    <filter string="Customer" name="group_by_customer_id" context="{'group_by': 'customer_id'}"/>
+                    <filter string="Sales Executive" name="group_by_sales_excutive_id" context="{'group_by': 'sales_excutive_id'}"/>
                     <filter string="Item Code" name="group_by_item_code" context="{'group_by': 'item_code'}"/>
+                    <filter string="Status" name="group_by_state" context="{'group_by': 'state'}"/>
                 </group>
             </search>
         </field>
@@ -102,6 +113,8 @@
         <field name="view_mode">list,form</field>
         <field name="view_id" ref="booking_provsion_line_view_list"/>
         <field name="search_view_id" ref="booking_provsion_line_view_search"/>
+        <field name="domain">[('booking_provision_id.state', 'in', ('done', 'payout'))]</field>
+        <field name="context">{'search_default_group_by_sales_excutive_id': 1,'search_default_group_by_booking_provision_id':1}</field>
     </record>
 
     <!--Menu Item for Party Commission Payout-->

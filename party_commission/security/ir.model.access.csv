@@ -9,3 +9,6 @@ access_party_commission,access.party.commission,model_party_commission,base.grou
 access_party_commission_manager,access.party.commission.manager,model_party_commission,party_commission.group_party_commission_manager,1,1,1,1
 access_create_journal_wizard,access.create.journal.wizard,model_create_journal_wizard,base.group_user,1,1,1,1
 access_create_journal_wizard_line,access.create.journal.wizard.line,model_create_journal_wizard_line,base.group_user,1,1,1,1
+access_commission_payout_wizard,access.commission.payout.wizard,model_commission_payout_wizard,base.group_user,1,1,1,1
+access_commission_payout_wizard_line,access.commission.payout.wizard.line,model_commission_payout_wizard_line,base.group_user,1,1,1,1
+

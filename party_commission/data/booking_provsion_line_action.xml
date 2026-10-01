@@ -1,0 +1,9 @@
+<odoo>
+    <record id="action_creating_payout_journal" model="ir.actions.server">
+        <field name="name">Create Payout</field>
+        <field name="model_id" ref="model_booking_provsion_line"/>
+        <field name="state">code</field>
+        <field name="code">action = records.create_payouts()</field>
+        <field name="binding_model_id" ref="party_commission.model_booking_provsion_line" />
+    </record>
+</odoo>

@@ -26,7 +26,7 @@ class BookingProvsionJournalLine(models.Model):
     _description = 'Booking Provision Journal Line'
 
     booking_provision_id = fields.Many2one('booking.provsion', string='Booking Provision', ondelete='cascade')
-    account_id = fields.Many2one('account.account', string='Account', required=True)
+    account_id = fields.Many2one('account.account', string='Account')
     partner_id = fields.Many2one('res.partner', string='Partner')
     debit = fields.Float(string='Debit')
     credit = fields.Float(string='Credit')
@@ -41,14 +41,14 @@ class BookingProvsionJournalLine(models.Model):
             related = prov.party_records - prov
             if related:
                 lines_copy = [(0, 0, {
-                    'account_id': line.account_id.id,
+                    'account_id': line.account_id.id if line.account_id else False,
                     'partner_id': line.partner_id.id if line.partner_id else False,
                     'label': line.label,
                     'analytic_account_id': line.analytic_account_id.id if line.analytic_account_id else False,
                     'debit': line.debit or 0.0,
                     'credit': line.credit or 0.0,
                 }) for line in prov.journal_line_ids]
-                related.with_context(skip_party_records_sync=True).sudo().write({
+                related.filtered(lambda r: r.state not in ('done', 'payout') and not r.move_id).with_context(skip_party_records_sync=True).sudo().write({
                     'journal_line_ids': [(5, 0, 0)] + lines_copy
                 })
 

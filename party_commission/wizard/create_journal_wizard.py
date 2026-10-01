@@ -64,6 +64,9 @@ class CreateJournalWizard(models.TransientModel):
             else:
                 label_val = ref_name
 
+            if not line.account_id:
+                raise UserError(_("Please select an Account for all journal lines."))
+
             line_vals = {
                 'account_id': line.account_id.id,
                 'partner_id': line.partner_id.id if line.partner_id else False,
@@ -102,6 +105,7 @@ class CreateJournalWizard(models.TransientModel):
                 }))
             rec.sudo().write({
                 'move_id': move.id,
+                'move_ids': [(4, move.id)],
                 'state': 'done',
                 'date': self.date,
                 'journal_id': self.journal_id.id,
