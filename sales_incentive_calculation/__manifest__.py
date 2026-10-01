@@ -21,7 +21,7 @@
 ################################################################################
 {
     'name': 'Sales Incentives',
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Extra Tools',
     'summary': "This module will calculate incentive for each salesperson"
                " based on sale target in gamification",
