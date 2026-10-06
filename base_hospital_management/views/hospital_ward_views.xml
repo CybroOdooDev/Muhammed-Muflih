@@ -9,7 +9,7 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_get_open_bed"
-                                class="oe_stat_button" icon="fa-archive"
+                                class="oe_stat_button" icon="bed"
                                 type="object">
                             <field name="bed_count" string="Bed"
                                    widget="statinfo"/>

@@ -1,24 +1,20 @@
 # -*- coding: utf-8 -*-
-################################################################################
+#############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
 #
-#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
-#    Author: Subina P (odoo@cybrosys.com)
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
-#    You can modify it under the terms of the GNU AFFERO
-#    GENERAL PUBLIC LICENSE (AGPL v3), Version 3.
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU AFFERO GENERAL PUBLIC LICENSE (AGPL v3) for more details.
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#    You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
-#    (AGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
-################################################################################
+#############################################################################
 from odoo import http
 from odoo.http import request
 
@@ -29,9 +25,10 @@ class ViewPortal(http.Controller):
     @http.route('/my/vaccinations', type='http', auth="public", website=True)
     def portal_my_vaccine(self, **kw):
         """Function for rendering vaccination details of portal user"""
+        partner_id = request.env.user.partner_id.id
+        domain = ['|', ('patient_id', '=', partner_id), ('patient_id.user_ids', 'in', [request.uid])]
         vaccination_list = []
-        for rec in request.env['hospital.vaccination'].sudo().search(
-                [('patient_id.user_ids.id', '=', request.uid)]):
+        for rec in request.env['hospital.vaccination'].sudo().search(domain):
             request.env.cr.execute(
                 f"""SELECT id FROM ir_attachment WHERE res_id = {rec.id} 
                     and res_model='hospital.vaccination' """)
@@ -59,9 +56,10 @@ class ViewPortal(http.Controller):
     @http.route(['/my/tests'], type='http', auth="public", website=True)
     def portal_my_tests(self, **kw):
         """Function for rendering tests of portal user"""
+        partner_id = request.env.user.partner_id.id
+        domain = ['|', ('patient_id', '=', partner_id), ('patient_id.user_ids', 'in', [request.uid])]
         tests_list = []
-        for rec in request.env['patient.lab.test'].sudo().search(
-                [('patient_id.user_ids', '=', request.uid)]):
+        for rec in request.env['patient.lab.test'].sudo().search(domain):
             request.env['account.move'].sudo().search(
                 [('ref', '=', rec.test_id.name)
                  ], limit=1)
@@ -113,8 +111,10 @@ class ViewPortal(http.Controller):
                 website=True)
     def portal_my_op(self, **kw):
         """Function for rendering prescriptions of portal user"""
+        partner_id = request.env.user.partner_id.id
+        domain = ['|', ('patient_id', '=', partner_id), ('patient_id.user_ids', 'in', [request.uid])]
         op = request.env['hospital.outpatient'].sudo().search_read(
-            [('patient_id.user_ids.id', '=', request.uid)],
+            domain,
             ['op_reference', 'op_date', 'doctor_id', 'slot',
              'prescription_ids'])
         for record in op:

@@ -147,7 +147,7 @@
                                                     </thead>
                                                     <tbody id="bill_table"
                                                            class="bill_tables">
-                                                        <t t-foreach="this.state.order_line" t-as="line" t-key="line_index">
+                                                        <t t-foreach="this.state.order_line" t-as="line" t-key="line.id">
                                                             <PharmacyOrderLines id="line.id" line="line" removeLine.bind="this.removeLine" updateOrderLine.bind="this.updateOrderLine" tax="this.tax_amount"/>
                                                         </t>
                                                     </tbody>

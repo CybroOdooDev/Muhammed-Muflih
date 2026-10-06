@@ -24,9 +24,9 @@
                        t-on-change="this._onChange_prod_qty"/>
             </td>
             <td>
-                <select name="uom_sl" class="form-control select_uom">
+                <select name="uom_sl" class="form-control select_uom" t-on-change="this._onChange_prod_uom">
                     <t t-foreach="this.state.units" t-as="unit" t-key="unit.id">
-                        <option t-att-value="unit.id">
+                        <option t-att-value="unit.id" t-att-selected="this.lineState.uom == unit.id">
                             <t t-esc="unit['name']"/>
                         </option>
                     </t>

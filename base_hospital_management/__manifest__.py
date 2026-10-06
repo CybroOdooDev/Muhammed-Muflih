@@ -1,27 +1,23 @@
 # -*- coding: utf-8 -*-
-################################################################################
+#############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
 #
-#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
-#    Author: Subina P (odoo@cybrosys.com)
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
-#    You can modify it under the terms of the GNU AFFERO
-#    GENERAL PUBLIC LICENSE (AGPL v3), Version 3.
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU AFFERO GENERAL PUBLIC LICENSE (AGPL v3) for more details.
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#    You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
-#    (AGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
-################################################################################
+#############################################################################
 {
     "name": "Hospital Management in Odoo 20",
-    "version": "19.5.1.0.0",
+    "version": "20.0.1.0.0",
     "category": "Services",
     "summary": """This Module Helps to Manage Patients Records, Doctors Details,
      Lab Management , Employee Management etc.""",
@@ -45,6 +41,7 @@
         "data/ir_sequence_data.xml",
         "data/ir_cron_data.xml",
         "data/website_data.xml",
+        "data/portal_entry_data.xml",
         "views/menu_views.xml",
         "views/inpatient_surgery_views.xml",
         "views/hospital_bed_views.xml",
@@ -103,7 +100,7 @@
     },
     "external_dependencies": {"python": ["barcode"]},
     "images": ["static/description/banner.jpg"],
-    "license": "AGPL-3",
+    "license": "LGPL-3",
     "installable": True,
     "auto_install": False,
     "application": True,

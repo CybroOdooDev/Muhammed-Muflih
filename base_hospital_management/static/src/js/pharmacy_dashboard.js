@@ -37,10 +37,13 @@ export class PharmacyDashboard extends Component {
             order_line: [],
             menu: 'home',
         });
+        this.selected_patient_id = false;
+        this.selected_patient_code = '';
+        this.selected_patient_name = '';
         this.fetch_product();
         onWillStart(async () => {
             this.state.med = await this.orm.call('product.template', 'action_get_medicine_data', []);
-        })
+        });
     }
 
     // Fetch product details
@@ -67,18 +70,20 @@ export class PharmacyDashboard extends Component {
 
     // To update the orderline of sale order
     updateOrderLine(line, id) {
-        const orderline = this.state.order_line.filter(orderline => orderline.id === id)[0]
-        orderline.product = line.product
-        orderline.qty = parseInt(line.qty)
-        orderline.uom = line.uom
-        orderline.price = line.price
-        orderline.sub_total = line.sub_total
+        const orderline = this.state.order_line.find(orderline => orderline.id === id);
+        if (orderline) {
+            orderline.product = line.product;
+            orderline.qty = parseInt(line.qty) || 0;
+            orderline.uom = line.uom;
+            orderline.price = line.price;
+            orderline.sub_total = line.sub_total;
+        }
     }
 
     // To add new row in the sale order line
     addRow() {
         const newLine = proxy({
-            id: Date.now(),
+            id: Date.now() + Math.random(),
             product: false,
             qty: 1,
             uom: false,
@@ -91,37 +96,40 @@ export class PharmacyDashboard extends Component {
 
     // To remove the line if not needed
     removeLine(id) {
-        const filteredData = this.state.order_line.filter(line => line.id != id)
-        this.state.order_line = filteredData
+        const filteredData = this.state.order_line.filter(line => line.id != id);
+        this.state.order_line = filteredData;
     }
 
     // Create sale order
     async create_sale_order() {
-        var data = {};
-        data['name'] = document.getElementById('patient-name').value;
-        data['phone'] = document.getElementById('patient-phone').value;
-        data['email'] = document.getElementById('patient-mail').value;
-        data['dob'] = document.getElementById('o_patient-dob').value;
-        data['products'] = this.state.order_line;
-        const genderRadios = document.getElementsByName('gender');
-        data['gender'] = 'male';
-        for (let radio of genderRadios) {
-            if (radio.checked) {
-                data['gender'] = radio.value;
-                break;
-            }
-        }
         const nameElement = document.getElementById('patient-name');
         const emailElement = document.getElementById('patient-mail');
-        if (!nameElement || nameElement.value.trim() === "") {
+        const phoneElement = document.getElementById('patient-phone');
+        const dobElement = document.getElementById('o_patient-dob');
+
+        const nameVal = nameElement ? nameElement.value.trim() : '';
+        if (!nameVal) {
             alert("Please enter the Name");
             return;
         }
 
-        if (!emailElement || emailElement.value.trim() === "") {
+        // If the user modified the name and it doesn't match the searched patient, reset tracked patient
+        if (this.selected_patient_name && nameVal.toLowerCase() !== this.selected_patient_name.toLowerCase()) {
+            this.selected_patient_id = false;
+            this.selected_patient_code = '';
+        }
+
+        // Only enforce email when creating a brand new patient
+        if (!this.selected_patient_id && (!emailElement || emailElement.value.trim() === "")) {
             alert("Please enter the Email");
             return;
         }
+
+        if (!this.state.order_line || this.state.order_line.length === 0) {
+            alert("Please add at least one medicine line.");
+            return;
+        }
+
         let hasInvalidQuantity = false;
         for (let line of this.state.order_line) {
             if (line.qty < 1) {
@@ -134,6 +142,25 @@ export class PharmacyDashboard extends Component {
             alert('Medicine quantity must be greater than or equal to 1.');
             return;
         }
+
+        var data = {};
+        data['name'] = nameVal;
+        data['phone'] = phoneElement ? phoneElement.value.trim() : '';
+        data['email'] = emailElement ? emailElement.value.trim() : '';
+        data['dob'] = dobElement ? dobElement.value : '';
+        data['patient_id'] = this.selected_patient_id || false;
+        data['patient_code'] = this.selected_patient_code || document.getElementById('patient-code')?.innerText?.trim() || '';
+        data['products'] = this.state.order_line;
+
+        const genderRadios = document.getElementsByName('gender');
+        data['gender'] = 'male';
+        for (let radio of genderRadios) {
+            if (radio.checked) {
+                data['gender'] = radio.value;
+                break;
+            }
+        }
+
         try {
             const result = await this.orm.call('hospital.pharmacy', 'create_sale_order', [data]);
             alert('The sale order has been created with reference number ' + result.invoice);
@@ -190,6 +217,10 @@ export class PharmacyDashboard extends Component {
             }
 
             if (result.name && result.name !== 'Patient Not Found') {
+                this.selected_patient_id = result.id || false;
+                this.selected_patient_code = result.unique || '';
+                this.selected_patient_name = result.name;
+
                 const nameInput = document.getElementById('patient-name');
                 if (nameInput) nameInput.value = result.name;
 
@@ -210,6 +241,9 @@ export class PharmacyDashboard extends Component {
                     });
                 }
             } else {
+                this.selected_patient_id = false;
+                this.selected_patient_code = '';
+                this.selected_patient_name = '';
                 const histHead = document.getElementById('hist_head');
                 if (histHead) histHead.innerHTML = '';
                 alert("Patient Not Found");
@@ -240,6 +274,10 @@ export class PharmacyDashboard extends Component {
 
     // Method for emptying the data
     async clear_data() {
+        this.selected_patient_id = false;
+        this.selected_patient_code = '';
+        this.selected_patient_name = '';
+
         const searchEl = document.getElementById('patient_search') || this.PatientSearch?.el;
         if (searchEl) searchEl.value = '';
         const histHead = document.getElementById('hist_head');

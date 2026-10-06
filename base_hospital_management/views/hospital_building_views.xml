@@ -9,13 +9,13 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_get_room_count"
-                                class="oe_stat_button" icon="fa-archive"
+                                class="oe_stat_button" icon="bed"
                                 type="object">
                             <field name="room_count" string="Room"
                                    widget="statinfo"/>
                         </button>
                         <button name="action_get_ward_count"
-                                class="oe_stat_button" icon="fa-list"
+                                class="oe_stat_button" icon="domain"
                                 type="object">
                             <field name="ward_count" string="Ward"
                                    widget="statinfo"/>

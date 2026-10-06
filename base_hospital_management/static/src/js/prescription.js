@@ -1,12 +1,14 @@
-/** @odoo-module **/
-import publicWidget from "@web/legacy/js/public/public_widget";
+import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
 
-publicWidget.registry.prescriptionWidget = publicWidget.Widget.extend({
-    selector: '#my_prescriptions',
-    events: {
-        'click .pr_download': 'onDownloadClick',
-    },
+export class PrescriptionWidget extends Interaction {
+    static selector = "#my_prescriptions";
+    dynamicContent = {
+        ".pr_download": {
+            "t-on-click": this.onDownloadClick,
+        },
+    };
 
     async onDownloadClick(ev) {
         const recId = ev.currentTarget.dataset.id;
@@ -14,15 +16,20 @@ publicWidget.registry.prescriptionWidget = publicWidget.Widget.extend({
             console.warn("No record id found on download button");
             return;
         }
-        const result = await rpc({
-            model: 'hospital.outpatient',
-            method: 'create_file',
-            args: [parseInt(recId)],
-        });
+        const result = await this.waitFor(
+            rpc("/web/dataset/call_kw/hospital.outpatient/create_file", {
+                model: "hospital.outpatient",
+                method: "create_file",
+                args: [parseInt(recId, 10)],
+                kwargs: {},
+            })
+        );
         if (result?.url) {
-            window.open(result.url, '_blank');
+            window.open(result.url, "_blank");
         }
-    },
-});
+    }
+}
 
-export default publicWidget.registry.prescriptionWidget;
+registry
+    .category("public.interactions")
+    .add("base_hospital_management.prescription", PrescriptionWidget);

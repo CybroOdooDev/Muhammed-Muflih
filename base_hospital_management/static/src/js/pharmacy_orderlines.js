@@ -2,15 +2,17 @@
 import { registry} from '@web/core/registry';
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
-import { Component, proxy } from "@odoo/owl";
+import { Component, proxy, useProps } from "@odoo/owl";
 import {Dropdown} from "@web/core/dropdown/dropdown";
 import {DropdownItem} from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
     var currency=0;
 export class PharmacyOrderLines extends Component {
+    props = useProps();
+
     setup() {
-        super.setup(...arguments);
-        this.orm = useService('orm')
+        super.setup();
+        this.orm = useService('orm');
         this.user = user;
         this.actionService = useService("action");
         this.state = proxy({
@@ -21,12 +23,12 @@ export class PharmacyOrderLines extends Component {
               table_row: [{}]
         });
         this.lineState = proxy({
-            product: this.props.line.product || false,
-            qty: this.props.line.qty || 1,
-            uom: this.props.line.uom || false,
-            price: this.props.line.price || 0,
-            sub_total: this.props.line.sub_total || 0,
-        })
+            product: this.props.line?.product || false,
+            qty: this.props.line?.qty || 1,
+            uom: this.props.line?.uom || false,
+            price: this.props.line?.price || 0,
+            sub_total: this.props.line?.sub_total || 0,
+        });
         this.fetch_product();
         this.fetch_uom();
         this.fetch_tax();
@@ -55,22 +57,29 @@ export class PharmacyOrderLines extends Component {
     }
 
     //   Fetch UOM of selected product
-    async fetch_uom (){
-        var uom_lst= [];
-        var result= await this.orm.call( 'uom.uom','search_read',)
-        this.uom_lst=result
+    async fetch_uom() {
+        try {
+            var result = await this.orm.call('uom.uom', 'search_read', []);
+            this.uom_lst = result;
+            this.state.units = result;
+        } catch (error) {
+            console.error('Error fetching UOM:', error);
+        }
     }
 
     //  Fetch tax amount of product.
-    async fetch_tax(){
-        var tax_lst= [];
-        var result= await this.orm.call( 'account.tax','search_read',)
-        this.tax_lst=result
+    async fetch_tax() {
+        try {
+            var result = await this.orm.call('account.tax', 'search_read', []);
+            this.tax_lst = result;
+        } catch (error) {
+            console.error('Error fetching tax:', error);
+        }
     }
 
     //  Method for creating sale order
     async create_order() {
-        await this.orm.call('hospital.pharmacy','company_currency',
+        await this.orm.call('hospital.pharmacy', 'company_currency', []
         ).then(function (result){
             const symbolElements = document.querySelectorAll('[id^="symbol"]');
             symbolElements.forEach(el => {
@@ -80,12 +89,12 @@ export class PharmacyOrderLines extends Component {
             classSymbolElements.forEach(el => {
                 el.textContent = result || '';
             });
-        })
+        });
         this.state.medicines = await this.product_lst;
         this.state.units = await this.uom_lst;
     }
     calculateSubtotal(qty, price) {
-        return qty *price
+        return qty * price;
     }
 
     //  Method on changing the product in the sale order
@@ -95,22 +104,30 @@ export class PharmacyOrderLines extends Component {
         const medicine = this.state.medicines.find(med => med.id === med_id);
         if (medicine) {
             this.lineState.price = medicine.list_price || 0;
+            if (medicine.uom_id) {
+                this.lineState.uom = Array.isArray(medicine.uom_id) ? medicine.uom_id[0] : medicine.uom_id;
+            }
             this.lineState.sub_total = this.calculateSubtotal(this.lineState.qty, this.lineState.price);
-            this.props.updateOrderLine(this.lineState, this.props.id);
+            this.props.updateOrderLine?.(this.lineState, this.props.id);
         }
     }
 
     //  Calculation of sub total based on product quantity
-    async _onChange_prod_qty () {
-        var self = this;
-        this.lineState.sub_total = this.calculateSubtotal(this.lineState.qty, this.lineState.price)
-        this.props.updateOrderLine(this.lineState, this.props.id)
+    async _onChange_prod_qty() {
+        this.lineState.sub_total = this.calculateSubtotal(this.lineState.qty, this.lineState.price);
+        this.props.updateOrderLine?.(this.lineState, this.props.id);
+    }
+
+    //  Method on changing UOM
+    _onChange_prod_uom(ev) {
+        this.lineState.uom = parseInt(ev.target.value) || false;
+        this.props.updateOrderLine?.(this.lineState, this.props.id);
     }
 
     //  To remove the added line
-    async remove_line () {
-        this.props.removeLine(this.props.id)
+    async remove_line() {
+        this.props.removeLine?.(this.props.id);
     }
 }
-PharmacyOrderLines.template = "PharmacyOrderLines"
-PharmacyOrderLines.components = { Dropdown, DropdownItem }
+PharmacyOrderLines.template = "PharmacyOrderLines";
+PharmacyOrderLines.components = { Dropdown, DropdownItem };

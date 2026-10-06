@@ -1,24 +1,20 @@
 # -*- coding: utf-8 -*-
-################################################################################
+#############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
 #
-#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
-#    Author: Subina P (odoo@cybrosys.com)
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
-#    You can modify it under the terms of the GNU AFFERO
-#    GENERAL PUBLIC LICENSE (AGPL v3), Version 3.
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU AFFERO GENERAL PUBLIC LICENSE (AGPL v3) for more details.
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#    You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
-#    (AGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
-################################################################################
+#############################################################################
 from odoo import fields, http
 from odoo.http import request
 
@@ -31,9 +27,24 @@ class PatientBooking(http.Controller):
         """Function for patient booking from website."""
         if request.env.user._is_public():
             return request.redirect('/web/login')
+        today = fields.Date.today()
+        domain = [('date', '=', today), ('state', '=', 'confirm')]
+        allocations = request.env['doctor.allocation'].sudo().search(domain)
+        doctors = []
+        departments = []
+        current_partner = request.env.user.partner_id
+        for rec in allocations:
+            if current_partner not in rec.mapped('op_ids.patient_id'):
+                doctors.append({'id': rec.id, 'name': rec.name})
+                if rec.department_id:
+                    dep_info = {'id': rec.department_id.id, 'name': rec.department_id.name}
+                    if dep_info not in departments:
+                        departments.append(dep_info)
         values = {
             'user': request.env.user.name,
-            'date': fields.Date.today()
+            'date': today,
+            'doctors': doctors,
+            'departments': departments,
         }
         return request.render(
             "base_hospital_management.patient_booking_form", values)
@@ -56,23 +67,27 @@ class PatientBooking(http.Controller):
         outpatient.sudo().action_confirm()
         return request.redirect('/my/home')
 
-    @http.route('/patient_booking/get_doctors', type='json', auth="public",
+    @http.route('/patient_booking/get_doctors', type='jsonrpc', auth="public",
                 website=True)
     def update_doctors(self, **kw):
         """Method for fetching doctor allocation for the selected date"""
-        domain = [('date', '=', kw.get('selected_date'))]
+        domain = [('date', '=', kw.get('selected_date')), ('state', '=', 'confirm')]
         departments = []
         doctors = []
-        if kw.get('department'):
-            domain.append(
-                ('doctor_id.department_id.id', '=', kw.get('department')))
+        department = kw.get('department')
+        if department:
+            try:
+                dept_id = int(department)
+                domain.append(('doctor_id.department_id.id', '=', dept_id))
+            except (ValueError, TypeError):
+                pass
         allocation = request.env['doctor.allocation'].sudo().search(domain)
+        current_partner = request.env.user.partner_id
         for rec in allocation:
-            if request.env.user.partner_id not in rec.mapped(
-                    'op_ids.patient_id'):
+            if current_partner not in rec.mapped('op_ids.patient_id'):
                 doctors.append({'id': rec.id, 'name': rec.name})
-                if ({'id': rec.department_id.id, 'name': rec.department_id.name}
-                        not in departments):
-                    departments.append({'id': rec.department_id.id,
-                                        'name': rec.department_id.name})
+                if rec.department_id:
+                    dep_info = {'id': rec.department_id.id, 'name': rec.department_id.name}
+                    if dep_info not in departments:
+                        departments.append(dep_info)
         return {'doctors': doctors, 'departments': departments}

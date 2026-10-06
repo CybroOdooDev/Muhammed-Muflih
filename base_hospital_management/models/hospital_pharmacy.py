@@ -1,24 +1,20 @@
 # -*- coding: utf-8 -*-
-################################################################################
+#############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
 #
-#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
-#    Author: Subina P (odoo@cybrosys.com)
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
-#    You can modify it under the terms of the GNU AFFERO
-#    GENERAL PUBLIC LICENSE (AGPL v3), Version 3.
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU AFFERO GENERAL PUBLIC LICENSE (AGPL v3) for more details.
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#    You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
-#    (AGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
-################################################################################
+#############################################################################
 from odoo import api, fields, models
 
 
@@ -74,30 +70,90 @@ class HospitalPharmacy(models.Model):
     @api.model
     def create_sale_order(self, kwargs):
         """Creating sale order from pharmacy dashboard"""
-        if 'op' not in kwargs.keys():
-            patient_id = self.env['res.partner'].sudo().search(
-                [('name', '=', kwargs['name']), ('email', '=', kwargs['email'])])
-        else:
-            patient_id = self.env['hospital.outpatient'].sudo().search(
-                [('op_reference', '=', kwargs['op'])]).patient_id
+        partner_obj = self.env['res.partner'].sudo()
+        patient_id = False
+
+        # 1. If explicit patient_id passed from frontend search
+        if kwargs.get('patient_id'):
+            patient = partner_obj.browse(int(kwargs['patient_id']))
+            if patient.exists():
+                patient_id = patient
+
+        # 2. If patient_code / sequence passed
+        if not patient_id and kwargs.get('patient_code'):
+            patient_id = partner_obj.search([
+                ('patient_seq', '=ilike', str(kwargs['patient_code']).strip()),
+                ('patient_seq', 'not in', ['New', 'Employee', 'User'])
+            ], limit=1)
+
+        # 3. If OP reference passed
+        if not patient_id and kwargs.get('op'):
+            op_rec = self.env['hospital.outpatient'].sudo().search(
+                [('op_reference', '=', kwargs['op'])], limit=1)
+            if op_rec and op_rec.patient_id:
+                patient_id = op_rec.patient_id
+
+        # 4. Search existing patient by name / email / phone
         if not patient_id:
-            patient_id = self.env['res.partner'].sudo().create({
-                'name': kwargs['name'],
-                'email': kwargs['email'],
-                'phone': kwargs['phone'],
-                'date_of_birth': kwargs['dob'],
-                'gender': kwargs['gender'],
+            name = (kwargs.get('name') or '').strip()
+            email = (kwargs.get('email') or '').strip()
+            phone = (kwargs.get('phone') or '').strip()
+            patient_domain = [('patient_seq', 'not in', ['New', 'Employee', 'User'])]
+
+            if name and email:
+                patient_id = partner_obj.search(
+                    [('name', '=ilike', name), ('email', '=ilike', email)] + patient_domain, limit=1)
+            if not patient_id and name and phone:
+                patient_id = partner_obj.search(
+                    [('name', '=ilike', name), ('phone', '=ilike', phone)] + patient_domain, limit=1)
+            if not patient_id and email:
+                patient_id = partner_obj.search(
+                    [('email', '=ilike', email)] + patient_domain, limit=1)
+            if not patient_id and phone:
+                patient_id = partner_obj.search(
+                    [('phone', '=ilike', phone)] + patient_domain, limit=1)
+            if not patient_id and name:
+                patient_id = partner_obj.search(
+                    [('name', '=ilike', name)] + patient_domain, limit=1)
+
+        # 5. Only create if patient does not exist anywhere
+        if not patient_id:
+            patient_id = partner_obj.create({
+                'name': kwargs.get('name'),
+                'email': kwargs.get('email') or False,
+                'phone': kwargs.get('phone') or False,
+                'date_of_birth': kwargs.get('dob') or False,
+                'gender': kwargs.get('gender') or 'male',
             })
+        else:
+            # Update missing details on the existing patient if provided
+            update_vals = {}
+            if kwargs.get('email') and not patient_id.email:
+                update_vals['email'] = kwargs['email']
+            if kwargs.get('phone') and not patient_id.phone:
+                update_vals['phone'] = kwargs['phone']
+            if kwargs.get('dob') and not patient_id.date_of_birth:
+                update_vals['date_of_birth'] = kwargs['dob']
+            if kwargs.get('gender') and not patient_id.gender:
+                update_vals['gender'] = kwargs['gender']
+            if update_vals:
+                patient_id.write(update_vals)
+
         pharmacy_sale_order = self.env['sale.order'].sudo().create({
             'partner_id': patient_id.id,
         })
-        for rec in kwargs['products']:
+        for rec in kwargs.get('products', []):
+            product = self.env['product.product'].sudo().search([
+                ('product_tmpl_id', '=', int(rec['product']))
+            ], limit=1)
+            if not product:
+                continue
+            price_unit = float(rec['price']) if 'price' in rec and rec['price'] else product.list_price
             pharmacy_sale_order.sudo().write({
                 'order_line': [(0, 0, {
-                    'product_id': self.env['product.product'].search([('product_tmpl_id', '=', int(rec['product']))]).id,
-                    'product_uom_qty': float(rec['qty']),
-                    'price_unit': float(rec['price']) if 'price' in rec.keys() else
-                        self.env['product.product'].search([('product_tmpl_id', '=', int(rec['product']))]).list_price
+                    'product_id': product.id,
+                    'product_uom_qty': float(rec.get('qty', 1)),
+                    'price_unit': price_unit,
                 })]
             })
         pharmacy_sale_order.action_confirm()

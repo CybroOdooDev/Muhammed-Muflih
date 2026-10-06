@@ -26,7 +26,7 @@
                     <div class="oe_button_box" name="button_box">
                         <button name="action_get_patient_booking"
                                 invisible="state != 'confirm'"
-                                class="oe_stat_button" icon="fa-archive"
+                                class="oe_stat_button" icon="calendar_today"
                                 type="object">
                             <field name="patient_count" string="Booking"
                                    widget="statinfo"/>

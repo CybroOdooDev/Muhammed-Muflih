@@ -39,28 +39,34 @@
                                            required="True"/>
                                 </div>
                                 <div class="mb-3 col-3">
-                                    <label for="qty"
+                                    <label for="doctor-department"
                                            class="form-label">Department
                                     </label>
                                     <select name="doctor-department"
                                             id="doctor-department"
                                             class="form-control link-style">
-                                        <option/>
-                                        <t t-foreach="departments" t-as="dep">
-                                            <option t-att-value="dep[0]">
-                                                <t t-esc="dep[1]"/>
-                                            </option>
+                                        <option value="">Select Department...</option>
+                                        <t t-if="departments">
+                                            <t t-foreach="departments" t-as="dep">
+                                                <option t-att-value="dep['id']" t-out="dep['name']"/>
+                                            </t>
                                         </t>
                                     </select>
                                 </div>
                                 <div class="mb-3 col-3">
-                                    <label for="qty"
+                                    <label for="doctor-name"
                                            class="form-label">Doctor
                                     </label>
                                     <select name="doctor-name"
                                             id="doctor-name"
                                             required="True"
                                             class="form-control link-style">
+                                        <option value="">Select Doctor...</option>
+                                        <t t-if="doctors">
+                                            <t t-foreach="doctors" t-as="doc">
+                                                <option t-att-value="doc['id']" t-out="doc['name']"/>
+                                            </t>
+                                        </t>
                                     </select>
                                 </div>
                             </div>

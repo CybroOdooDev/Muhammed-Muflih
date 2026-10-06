@@ -86,13 +86,13 @@
                         <button class="oe_stat_button" type="object"
                                 name="action_alive_status"
                                 invisible = "['|',(is_alive == 'dead'),(name == False)]"
-                                icon="fa-check">
+                                icon="check">
                             <span class="o_stat_text text-success">ALIVE</span>
                         </button>
                         <button class="oe_stat_button" type="object"
                                 name="action_alive_status"
                                 invisible="is_alive == 'alive'"
-                                icon="fa-times-circle">
+                                icon="cancel">
                             <span class="o_stat_text text-danger">EXPIRED</span>
                         </button>
                     </div>

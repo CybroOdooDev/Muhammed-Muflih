@@ -44,7 +44,7 @@
                         <button invisible="test_count == 0"
                                 name="action_view_test" type="object"
                                 class="oe_stat_button"
-                                icon="fa-tint">
+                                icon="water_drop">
                             <field name="test_count" widget="statinfo"/>
                         </button>
                         <button name="action_view_invoice" type="object"
