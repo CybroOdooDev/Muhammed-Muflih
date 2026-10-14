@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit res.config.settings form view to add QZ Tray configuration -->
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.qz.tray.integration</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="25"/>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="QZ Tray" string="QZ Tray" name="qz_tray_integration">
+                    <block title="QZ Tray Integration" name="qz_tray_integration_setting_container">
+                        <setting id="qz_enable_setting"
+                                 string="Enable QZ Tray"
+                                 help="Enable direct printing via QZ Tray.">
+                            <field name="qz_enable"/>
+                        </setting>
+
+                        <setting id="qz_connect_setting"
+                                 string="Connect to QZ Tray"
+                                 help="Connect to the local QZ Tray desktop application."
+                                 invisible="not qz_enable">
+                            <div class="mt-2 d-flex align-items-center gap-2">
+                                <button name="action_connect_qz"
+                                        type="object"
+                                        string="Connect"
+                                        class="btn-primary"/>
+                                <widget name="qz_connection_status"/>
+                            </div>
+                        </setting>
+
+                        <setting id="available_printers_setting"
+                                 string="Available Printers"
+                                 help="Select an available printer detected by QZ Tray."
+                                 invisible="not qz_enable">
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="available_printers" class="col-lg-3 o_light_label"/>
+                                    <field name="available_printers" class="col-lg-6"/>
+                                </div>
+                                <div class="mt-2">
+                                    <button name="action_check_available_printers"
+                                            type="object"
+                                            string="Check Available Printers"
+                                            class="btn-secondary"
+                                            icon="fa-print"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Action to open QZ Tray configuration settings directly -->
+    <record id="action_qz_tray_config_settings" model="ir.actions.act_window">
+        <field name="name">QZ Tray Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="context">{'module': 'qz_tray_integration'}</field>
+    </record>
+</odoo>
