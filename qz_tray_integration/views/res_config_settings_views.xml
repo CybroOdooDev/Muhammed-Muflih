@@ -16,33 +16,67 @@
                             <field name="qz_enable"/>
                         </setting>
 
-                        <setting id="qz_connect_setting"
-                                 string="Connect to QZ Tray"
-                                 help="Connect to the local QZ Tray desktop application."
-                                 invisible="not qz_enable">
-                            <div class="mt-2 d-flex align-items-center gap-2">
-                                <button name="action_connect_qz"
+                        <field name="qz_has_certificate" invisible="1"/>
+
+                        <!-- Step 1: Shown only when enabled and certificate is not yet generated -->
+                        <setting id="qz_cert_generate_setting"
+                                 string="Security Setup"
+                                 help="Generate a security certificate to connect and enable silent printing."
+                                 invisible="not qz_enable or qz_has_certificate">
+                            <div class="mt-2">
+                                <button name="action_generate_qz_certificate"
                                         type="object"
-                                        string="Connect"
-                                        class="btn-primary"/>
-                                <widget name="qz_connection_status"/>
+                                        string="Generate Certificate &amp; Key"
+                                        class="btn-primary"
+                                        icon="fa-key"/>
                             </div>
                         </setting>
 
+                        <!-- Step 2: Shown when certificate is generated -->
+                        <setting id="qz_cert_status_setting"
+                                 string="Security Status"
+                                 help="Digital certificate is active for silent printing."
+                                 invisible="not qz_enable or not qz_has_certificate">
+                            <div class="mt-2 d-flex align-items-center gap-2">
+                                <span class="badge rounded-pill text-bg-success py-2 px-3">
+                                    <i class="fa fa-check-circle me-1"/> Certificate Configured
+                                </span>
+                                <button name="action_generate_qz_certificate"
+                                        type="object"
+                                        string="Regenerate"
+                                        class="btn-link btn-sm text-muted"
+                                        confirm="Are you sure you want to regenerate the certificate and private key?"/>
+                            </div>
+                        </setting>
+
+                        <!-- Step 3: Connect button unlocked after certificate is generated -->
+                        <setting id="qz_connect_setting"
+                                 string="Connect to QZ Tray"
+                                 help="Connect to the local QZ Tray desktop application."
+                                 invisible="not qz_enable or not qz_has_certificate">
+                            <div class="mt-2">
+                                <button name="action_connect_qz"
+                                        type="object"
+                                        string="Connect"
+                                        class="btn-success"/>
+                            </div>
+                        </setting>
+
+                        <!-- Step 4: Printer selection unlocked after certificate is generated -->
                         <setting id="available_printers_setting"
-                                 string="Available Printers"
-                                 help="Select an available printer detected by QZ Tray."
-                                 invisible="not qz_enable">
+                                 string="Printer"
+                                 help="Select the default printer for all documents and labels."
+                                 invisible="not qz_enable or not qz_has_certificate">
                             <div class="content-group">
                                 <div class="row mt16">
-                                    <label for="available_printers" class="col-lg-3 o_light_label"/>
+                                    <label for="available_printers" string="Default Printer" class="col-lg-3 o_light_label"/>
                                     <field name="available_printers" class="col-lg-6"/>
                                 </div>
                                 <div class="mt-2">
                                     <button name="action_check_available_printers"
                                             type="object"
                                             string="Check Available Printers"
-                                            class="btn-secondary"
+                                            class="btn-primary"
                                             icon="fa-print"/>
                                 </div>
                             </div>
