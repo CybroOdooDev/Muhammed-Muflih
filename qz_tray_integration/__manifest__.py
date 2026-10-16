@@ -31,7 +31,7 @@
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['base', 'base_setup'],
+    'depends': ['base', 'base_setup', 'point_of_sale'],
     'data': [
         'views/res_config_settings_views.xml',
     ],
@@ -39,6 +39,10 @@
         'web.assets_backend': [
             'qz_tray_integration/static/lib/qz-tray.js',
             'qz_tray_integration/static/src/js/qz_service.js',
+        ],
+        'point_of_sale._assets_pos': [
+            'qz_tray_integration/static/lib/qz-tray.js',
+            'qz_tray_integration/static/src/js/pos_ticket_printer.js',
         ],
     },
     'license': 'LGPL-3',

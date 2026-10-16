@@ -10,6 +10,7 @@
             <xpath expr="//form" position="inside">
                 <app data-string="QZ Tray" string="QZ Tray" name="qz_tray_integration">
                     <block title="QZ Tray Integration" name="qz_tray_integration_setting_container">
+                        <!-- Enable QZ Tray -->
                         <setting id="qz_enable_setting"
                                  string="Enable QZ Tray"
                                  help="Enable direct printing via QZ Tray.">
@@ -18,42 +19,39 @@
 
                         <field name="qz_has_certificate" invisible="1"/>
 
-                        <!-- Step 1: Shown only when enabled and certificate is not yet generated -->
-                        <setting id="qz_cert_generate_setting"
-                                 string="Security Setup"
-                                 help="Generate a security certificate to connect and enable silent printing."
-                                 invisible="not qz_enable or qz_has_certificate">
-                            <div class="mt-2">
-                                <button name="action_generate_qz_certificate"
-                                        type="object"
-                                        string="Generate Certificate &amp; Key"
-                                        class="btn-primary"
-                                        icon="fa-key"/>
+                        <!-- Digital Certificate Attachment -->
+                        <setting id="qz_certificate_setting"
+                                 string="Digital Certificate"
+                                 help="Attach your purchased digital certificate (.txt or .crt) from QZ Industries for silent printing without popups."
+                                 invisible="not qz_enable">
+                            <div class="content-group mt-2">
+                                <div class="row">
+                                    <label for="qz_certificate_file" string="Certificate File" class="col-lg-3 o_light_label"/>
+                                    <field name="qz_certificate_file" filename="qz_certificate_filename" class="col-lg-6"/>
+                                    <field name="qz_certificate_filename" invisible="1"/>
+                                </div>
                             </div>
                         </setting>
 
-                        <!-- Step 2: Shown when certificate is generated -->
-                        <setting id="qz_cert_status_setting"
-                                 string="Security Status"
-                                 help="Digital certificate is active for silent printing."
-                                 invisible="not qz_enable or not qz_has_certificate">
-                            <div class="mt-2 d-flex align-items-center gap-2">
-                                <span class="badge rounded-pill text-bg-success py-2 px-3">
-                                    <i class="fa fa-check-circle me-1"/> Certificate Configured
-                                </span>
-                                <button name="action_generate_qz_certificate"
-                                        type="object"
-                                        string="Regenerate"
-                                        class="btn-link btn-sm text-muted"
-                                        confirm="Are you sure you want to regenerate the certificate and private key?"/>
+                        <!-- Private Key Attachment -->
+                        <setting id="qz_private_key_setting"
+                                 string="Private Key"
+                                 help="Attach the private key (.pem or .key) provided with your purchased QZ Tray certificate."
+                                 invisible="not qz_enable">
+                            <div class="content-group mt-2">
+                                <div class="row">
+                                    <label for="qz_private_key_file" string="Private Key File" class="col-lg-3 o_light_label"/>
+                                    <field name="qz_private_key_file" filename="qz_private_key_filename" class="col-lg-6"/>
+                                    <field name="qz_private_key_filename" invisible="1"/>
+                                </div>
                             </div>
                         </setting>
 
-                        <!-- Step 3: Connect button unlocked after certificate is generated -->
+                        <!-- Connect to QZ Tray -->
                         <setting id="qz_connect_setting"
                                  string="Connect to QZ Tray"
                                  help="Connect to the local QZ Tray desktop application."
-                                 invisible="not qz_enable or not qz_has_certificate">
+                                 invisible="not qz_enable">
                             <div class="mt-2">
                                 <button name="action_connect_qz"
                                         type="object"
@@ -62,11 +60,11 @@
                             </div>
                         </setting>
 
-                        <!-- Step 4: Printer selection unlocked after certificate is generated -->
+                        <!-- Printer selection -->
                         <setting id="available_printers_setting"
                                  string="Printer"
                                  help="Select the default printer for all documents and labels."
-                                 invisible="not qz_enable or not qz_has_certificate">
+                                 invisible="not qz_enable">
                             <div class="content-group">
                                 <div class="row mt16">
                                     <label for="available_printers" string="Default Printer" class="col-lg-3 o_light_label"/>
@@ -95,3 +93,5 @@
         <field name="context">{'module': 'qz_tray_integration'}</field>
     </record>
 </odoo>
+
+

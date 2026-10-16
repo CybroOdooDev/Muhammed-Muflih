@@ -15,11 +15,36 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
+import base64
 import logging
+import os
+import subprocess
+import tempfile
 
 from odoo import api, fields, models, _
 
 _logger = logging.getLogger(__name__)
+
+
+def _extract_binary_text(val):
+    """Safely extract plain text string from BinaryValue, base64 str, or bytes."""
+    if not val:
+        return ''
+    if hasattr(val, 'content'):
+        raw = val.content
+    elif isinstance(val, bytes):
+        raw = val
+    elif isinstance(val, str):
+        try:
+            raw = base64.b64decode(val)
+        except Exception:
+            raw = val.encode('utf-8')
+    else:
+        try:
+            raw = bytes(val)
+        except Exception:
+            raw = b''
+    return raw.decode('utf-8', errors='replace').strip()
 
 
 class ResConfigSettings(models.TransientModel):
@@ -41,22 +66,19 @@ class ResConfigSettings(models.TransientModel):
         string="Certificate Configured",
         compute="_compute_qz_has_certificate",
     )
-    qz_silent_printing = fields.Boolean(
-        string="Enable Silent Printing (Digital Certificate)",
-        config_parameter='qz_tray_integration.qz_silent_printing',
-        help="Enable completely silent printing using cryptographic digital signatures."
+    qz_certificate_file = fields.Binary(
+        string="Digital Certificate",
+        help="Attach your purchased digital certificate file (.txt or .crt) from QZ Industries (https://qz.io)."
     )
-    qz_certificate = fields.Text(
-        string="Digital Certificate (.crt)",
-        help="Paste your X.509 Digital Certificate in PEM format."
+    qz_certificate_filename = fields.Char(string="Certificate Filename")
+    qz_private_key_file = fields.Binary(
+        string="Private Key",
+        help="Attach the private key file (.pem or .key) provided with your purchased QZ Tray certificate."
     )
-    qz_private_key = fields.Text(
-        string="Private Key (.key)",
-        help="Paste your RSA Private Key in PEM format (kept securely on the server)."
-    )
+    qz_private_key_filename = fields.Char(string="Private Key Filename")
 
     def _compute_qz_has_certificate(self):
-        """Check if certificate and private key are already generated."""
+        """Check if certificate and private key are attached and configured."""
         ICP = self.env['ir.config_parameter'].sudo()
         get_param = getattr(ICP, 'get_str', getattr(ICP, 'get_param', lambda k, d='': d))
         has_cert = bool(get_param('qz_tray_integration.qz_certificate', '')) and bool(get_param('qz_tray_integration.qz_private_key', ''))
@@ -79,9 +101,16 @@ class ResConfigSettings(models.TransientModel):
         res = super().get_values()
         ICP = self.env['ir.config_parameter'].sudo()
         get_param = getattr(ICP, 'get_str', getattr(ICP, 'get_param', lambda k, d='': d))
+        cert_text = get_param('qz_tray_integration.qz_certificate', '')
+        cert_filename = get_param('qz_tray_integration.qz_certificate_filename', 'digital-certificate.txt' if cert_text else '')
+        key_text = get_param('qz_tray_integration.qz_private_key', '')
+        key_filename = get_param('qz_tray_integration.qz_private_key_filename', 'private-key.pem' if key_text else '')
+
         res.update(
-            qz_certificate=get_param('qz_tray_integration.qz_certificate', ''),
-            qz_private_key=get_param('qz_tray_integration.qz_private_key', ''),
+            qz_certificate_file=base64.b64encode(cert_text.encode('utf-8')).decode('ascii') if cert_text else False,
+            qz_certificate_filename=cert_filename,
+            qz_private_key_file=base64.b64encode(key_text.encode('utf-8')).decode('ascii') if key_text else False,
+            qz_private_key_filename=key_filename,
         )
         return res
 
@@ -89,9 +118,30 @@ class ResConfigSettings(models.TransientModel):
         super().set_values()
         ICP = self.env['ir.config_parameter'].sudo()
         set_param = getattr(ICP, 'set_str', getattr(ICP, 'set_param', None))
-        if set_param:
-            set_param('qz_tray_integration.qz_certificate', self.qz_certificate or '')
-            set_param('qz_tray_integration.qz_private_key', self.qz_private_key or '')
+        if not set_param:
+            return
+
+        cert_pem = _extract_binary_text(self.qz_certificate_file)
+        if cert_pem:
+            set_param('qz_tray_integration.qz_certificate', cert_pem)
+            set_param('qz_tray_integration.qz_certificate_filename', self.qz_certificate_filename or 'digital-certificate.txt')
+        else:
+            set_param('qz_tray_integration.qz_certificate', '')
+            set_param('qz_tray_integration.qz_certificate_filename', '')
+
+        key_pem = _extract_binary_text(self.qz_private_key_file)
+        if key_pem:
+            set_param('qz_tray_integration.qz_private_key', key_pem)
+            set_param('qz_tray_integration.qz_private_key_filename', self.qz_private_key_filename or 'private-key.pem')
+        else:
+            set_param('qz_tray_integration.qz_private_key', '')
+            set_param('qz_tray_integration.qz_private_key_filename', '')
+
+        has_both = bool(cert_pem and key_pem)
+        set_param('qz_tray_integration.qz_silent_printing', str(has_both))
+
+        if cert_pem:
+            self._install_qz_certificate(cert_pem)
 
     def action_connect_qz(self):
         """Connect to QZ Tray desktop application."""
@@ -107,7 +157,6 @@ class ResConfigSettings(models.TransientModel):
                     'sticky': False,
                 }
             }
-        # Delegate to the frontend QZ Tray WebSocket client action
         return {
             'type': 'ir.actions.client',
             'tag': 'qz_connect_action',
@@ -127,7 +176,6 @@ class ResConfigSettings(models.TransientModel):
                     'sticky': False,
                 }
             }
-        # Delegate to the frontend QZ Tray printers find client action
         return {
             'type': 'ir.actions.client',
             'tag': 'qz_find_printers_action',
@@ -149,135 +197,62 @@ class ResConfigSettings(models.TransientModel):
         return True
 
     def _install_qz_certificate(self, cert_pem):
-        """Install the certificate into QZ Tray's trusted certificate store.
-
-        This writes the certificate to ~/.qz/auth/override.crt which makes
-        QZ Tray treat it as fully trusted — no permission dialogs will appear
-        for any operation (connect, print, find printers).
-
-        Also updates ~/.qz/allowed.dat with the certificate fingerprint so
-        remembered decisions persist across QZ Tray restarts.
-        """
-        import os
-        import hashlib
-
+        """Install the certificate into local QZ Tray's trusted root and whitelist store if available."""
+        if not cert_pem:
+            return
         home_dir = os.path.expanduser('~')
         qz_dir = os.path.join(home_dir, '.qz')
-        auth_dir = os.path.join(qz_dir, 'auth')
+        os.makedirs(qz_dir, exist_ok=True)
 
-        # Ensure directories exist
-        os.makedirs(auth_dir, exist_ok=True)
-
-        # Write certificate to override.crt — this is the key to silent printing
-        override_crt_path = os.path.join(auth_dir, 'override.crt')
-        with open(override_crt_path, 'w') as f:
-            f.write(cert_pem)
-        _logger.info("QZ Tray: Installed certificate to %s", override_crt_path)
-
-        # Calculate certificate fingerprint (SHA-1 of DER-encoded cert)
+        override_path = os.path.join(qz_dir, 'override.crt')
         try:
-            from cryptography import x509 as x509_mod
-            cert_obj = x509_mod.load_pem_x509_certificate(cert_pem.encode('utf-8'))
-            der_bytes = cert_obj.public_bytes(
-                __import__('cryptography.hazmat.primitives.serialization',
-                           fromlist=['Encoding']).Encoding.DER
+            with open(override_path, 'w') as f:
+                f.write(cert_pem)
+            _logger.info("QZ Tray: Saved override certificate to %s", override_path)
+        except Exception as e:
+            _logger.warning("QZ Tray: Could not save %s: %s", override_path, e)
+
+        prefs_path = os.path.join(qz_dir, 'prefs.properties')
+        try:
+            prefs_lines = []
+            if os.path.exists(prefs_path):
+                with open(prefs_path, 'r') as f:
+                    prefs_lines = [line for line in f if not line.startswith('authcert.override')]
+            prefs_lines.append(f"authcert.override={override_path}\n")
+            with open(prefs_path, 'w') as f:
+                f.writelines(prefs_lines)
+            _logger.info("QZ Tray: Configured %s with authcert.override", prefs_path)
+        except Exception as e:
+            _logger.warning("QZ Tray: Could not update %s: %s", prefs_path, e)
+
+        autostart_dir = os.path.join(home_dir, '.config', 'autostart')
+        autostart_file = os.path.join(autostart_dir, 'qz-tray.desktop')
+        try:
+            os.makedirs(autostart_dir, exist_ok=True)
+            desktop_entry = (
+                "[Desktop Entry]\n"
+                "Type=Application\n"
+                "Name=QZ Tray\n"
+                f'Exec=env QZ_OPTS="-Dauthcert.override={override_path}" "/opt/qz-tray/qz-tray" --honorautostart\n'
+                "Path=/opt/qz-tray\n"
+                "Icon=/opt/qz-tray/qz-tray.svg\n"
+                "Terminal=false\n"
+                "StartupNotify=false\n"
             )
-            fingerprint = hashlib.sha1(der_bytes).hexdigest()
-
-            # Extract CN and O from the certificate subject
-            cn = ''
-            org = ''
-            for attr in cert_obj.subject:
-                if attr.oid.dotted_string == '2.5.4.3':  # CN
-                    cn = attr.value
-                elif attr.oid.dotted_string == '2.5.4.10':  # O
-                    org = attr.value
-
-            not_before = cert_obj.not_valid_before_utc.strftime('%Y-%m-%d %H:%M:%S')
-            not_after = cert_obj.not_valid_after_utc.strftime('%Y-%m-%d %H:%M:%S')
-
-            # Build allowed.dat entry — format: fingerprint\tCN\tO\tnotBefore\tnotAfter\tblocked
-            entry = f"{fingerprint}\t{cn}\t{org}\t{not_before}\t{not_after}\tfalse\n"
-
-            # Write/overwrite allowed.dat
-            allowed_path = os.path.join(qz_dir, 'allowed.dat')
-            with open(allowed_path, 'w') as f:
-                f.write(entry)
-            _logger.info("QZ Tray: Updated allowed.dat with fingerprint %s", fingerprint)
-
-            # Clear blocked.dat to remove any previous blocks
-            blocked_path = os.path.join(qz_dir, 'blocked.dat')
-            with open(blocked_path, 'w') as f:
-                f.write('')
-
+            with open(autostart_file, 'w') as f:
+                f.write(desktop_entry)
+            os.chmod(autostart_file, 0o755)
         except Exception as e:
-            _logger.warning("QZ Tray: Could not update allowed.dat: %s", e)
+            _logger.warning("QZ Tray: Could not update %s: %s", autostart_file, e)
 
-    def action_generate_qz_certificate(self):
-        """Generate a self-signed X.509 digital certificate and RSA private key."""
-        self.ensure_one()
-        try:
-            import datetime
-            from cryptography import x509
-            from cryptography.x509.oid import NameOID
-            from cryptography.hazmat.primitives import hashes, serialization
-            from cryptography.hazmat.primitives.asymmetric import rsa
-
-            key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-            subject = issuer = x509.Name([
-                x509.NameAttribute(NameOID.COMMON_NAME, u'Odoo QZ Tray'),
-                x509.NameAttribute(NameOID.ORGANIZATION_NAME, u'Odoo ERP'),
-            ])
-
-            cert = x509.CertificateBuilder().subject_name(
-                subject
-            ).issuer_name(
-                issuer
-            ).public_key(
-                key.public_key()
-            ).serial_number(
-                x509.random_serial_number()
-            ).not_valid_before(
-                datetime.datetime.now(datetime.timezone.utc)
-            ).not_valid_after(
-                datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=3650)
-            ).sign(key, hashes.SHA256())
-
-            cert_pem = cert.public_bytes(serialization.Encoding.PEM).decode('utf-8')
-            key_pem = key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()
-            ).decode('utf-8')
-
-            ICP = self.env['ir.config_parameter'].sudo()
-            set_param = getattr(ICP, 'set_str', getattr(ICP, 'set_param', None))
-            if set_param:
-                set_param('qz_tray_integration.qz_certificate', cert_pem)
-                set_param('qz_tray_integration.qz_private_key', key_pem)
-                set_param('qz_tray_integration.qz_silent_printing', 'True')
-
-            self.qz_certificate = cert_pem
-            self.qz_private_key = key_pem
-            self.qz_silent_printing = True
-
-            # Install cert into QZ Tray's trust store for fully silent operation
-            self._install_qz_certificate(cert_pem)
-
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'reload',
-            }
-        except Exception as e:
-            _logger.exception("Failed to generate QZ Tray certificate: %s", e)
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': _('Error'),
-                    'message': _('Failed to generate certificate: %s') % str(e),
-                    'type': 'danger',
-                    'sticky': True,
-                }
-            }
-
+        qz_bin = '/opt/qz-tray/qz-tray'
+        if os.path.exists(qz_bin):
+            try:
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.pem', delete=False) as tmp:
+                    tmp.write(cert_pem)
+                    tmp_file = tmp.name
+                subprocess.run([qz_bin, '--allow', tmp_file], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                os.unlink(tmp_file)
+                _logger.info("QZ Tray: Added certificate to allowed.dat via CLI")
+            except Exception as e:
+                _logger.warning("QZ Tray: Failed to run qz-tray --allow: %s", e)
