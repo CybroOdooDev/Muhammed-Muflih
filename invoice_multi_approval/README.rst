@@ -1,14 +1,46 @@
-.. image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
-    :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
-    :alt: License: AGPL-3
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+    :alt: License: LGPL-3
+
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |maintainer|
 
 Invoice Multi Level Approval
 ============================
 Enables the option for adding multiple approvals to the invoice documents
 
+Key Features
+------------
+
+* Role-Based Access & Manager Override
+*  Auto Approver List
+*  Document-Specific Approval Configuration
+
+
+
+Installation
+------------
+No external dependencies.
+
 Configuration
 =============
-* No additional configurations needed
+To configure multi-level approvals:
+
+1. Navigate to **Invoicing > Configuration > Approvals > Invoice Approval** (or **Accounting > Configuration > Approvals > Invoice Approval**).
+2. Enable approval for the desired document types:
+   * Customer Invoices
+   * Vendor Bills
+   * Customer Credit Notes
+   * Vendor Credit Notes
+3. Assign the designated approvers for each enabled document type.
+4. Save the configuration.
 
 Company
 -------
@@ -16,20 +48,9 @@ Company
 
 License
 -------
-GNU Affero General Public License v3.0 (AGPL v3)
-(http://www.gnu.org/licenses/agpl-3.0-standalone.html)
+Lesser General Public License, Version 3 (LGPL v3).
+(http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
-Credits
--------
-* Developer:
-            Sayooj A O
-            (V14) Muhammed Nafih,
-            (V15) Akshay CK,
-            (V16) Sahla Sherin,
-            (V17) Jumana Haseen,
-            (V18) Busthana Shirin,
-            (V19) Rahna Rasheed,
-  Contact: odoo@cybrosys.com
 
 Contacts
 --------
@@ -49,6 +70,3 @@ This module is maintained by Cybrosys Technologies.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
 
-Further information
-===================
-HTML Description: `<static/description/index.html>`__

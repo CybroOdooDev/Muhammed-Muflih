@@ -1,6 +1,16 @@
-.. image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
-    :target: https://www.gnu.org/licenses/lgpl-3.0-standalone.html
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
     :alt: License: LGPL-3
+
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |maintainer|
 
 Done Quantity Auto Fill
 =======================
@@ -9,9 +19,20 @@ transfer of products. This feature is available while the delivery of products,
 receiving the products and returning the products. Also we can unfill the done
 quantity of the selected products while the transfer.
 
+Key Features
+------------
+
+* Fill the Done Quantity.
+* Unfill the Done Quantity.
+* Select & Unselect All Lines.
+
+Installation
+------------
+No external dependencies.
+
 Configuration
 =============
-None.
+No additional configuration is required.
 
 Company
 -------
@@ -19,24 +40,15 @@ Company
 
 License
 -------
-General Public License, Version 3 (LGPL v3).
-(https://www.odoo.com/documentation/user/16.0/legal/licenses/licenses.html)
+Lesser General Public License, Version 3 (LGPL v3).
+(http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
-Credits
--------
-Developers: (V16) Saneen K,
-            (V17) Farhana Jahan PT,
-            (V19) Fansa Jabeen A,
-  Contact: odoo@cybrosys.com
 
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
 
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
 
 Maintainer
 ==========
@@ -47,6 +59,3 @@ This module is maintained by Cybrosys Technologies.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
 
-Further information
-===================
-HTML Description: `<static/description/index.html>`__

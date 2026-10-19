@@ -25,8 +25,8 @@ except ImportError:
     import xlsxwriter
 
 
-class One2manyExcelReport(models.Model):
-    """Used to get the excel report function"""
+class One2manyExcelReport(models.AbstractModel):
+    """Abstract model helper to generate the Excel report."""
     _name = 'one2many.report.excel'
     _description = 'One2many Excel Report'
 
@@ -39,7 +39,6 @@ class One2manyExcelReport(models.Model):
 
     def get_xlsx_report(self, data, names, response):
         """Used to print the excel report"""
-        sl = 0
         row_num = 7
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
@@ -63,7 +62,6 @@ class One2manyExcelReport(models.Model):
 
         # Field Labels
         for doc in names:
-            sl += 1
             row_num += 1
             col_num = 0
             sheet.merge_range(row_num, col_num + 2, row_num,
@@ -82,17 +80,21 @@ class One2manyExcelReport(models.Model):
                     else:
                         st = ''
                     data_list.append({'data': self.clean_data(st)})
+                elif isinstance(val, dict):
+                    lang = self.env.lang or 'en_US'
+                    st = val.get(lang) or (next(iter(val.values())) if val else '')
+                    data_list.append({'data': self.clean_data(str(st))})
                 elif val is False or val is None:
                     data_list.append({'data': ''})
+                elif isinstance(val, (int, float)):
+                    data_list.append({'data': val})
                 else:
-                    data_list.append({'data': self.clean_data(val)})
+                    data_list.append({'data': self.clean_data(str(val))})
 
-        sl = 3
         row_num = 7
         col_num = 4
         num = row_num + len(names)
         for doc in data_list:
-            sl += 1
             row_num += 1
             val_to_write = doc['data'] if doc['data'] is not None else ''
             sheet.merge_range(row_num, col_num + 2, row_num,

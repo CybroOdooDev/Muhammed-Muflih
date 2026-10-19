@@ -3,20 +3,16 @@
 #
 #    Cybrosys Technologies Pvt. Ltd.
 #
-#    Copyright (C) 2025-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
-#    Author: Cybrosys Techno Solutions (odoo@cybrosys.com)
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
-#    You can modify it under the terms of the GNU AFFERO
-#    GENERAL PUBLIC LICENSE (AGPL v3), Version 3.
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU AFFERO GENERAL PUBLIC LICENSE (AGPL v3) for more details.
-#
-#    You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
-#    (AGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
 from odoo import api, fields, models
@@ -30,75 +26,94 @@ class InvoiceApproval(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Invoice Approval'
 
-    name = fields.Char(default='Approval Configuration', string="Name",
-                       help="Approval configuration.")
-    approve_customer_invoice = fields.Boolean(string="Approval on"
-                                                     " Customer Invoice",
-                                              help='Enable this field '
-                                                   'for adding the approvals '
-                                                   'for the customer invoice.')
-    invoice_approver_ids = fields.Many2many('res.users',
-                                            'invoice_id',
-                                            string='Invoice Approver',
-                                            domain=lambda self: [
-                                                ('all_group_ids', 'in',
-                                                 self.env.ref('invoice_multi_approval.group_approver').id)],
-                                            help='In this field you can add '
-                                                 'the approvers for the '
-                                                 'customer invoice.')
-    approve_vendor_bill = fields.Boolean(string="Approval on Vendor Bill",
-                                         help='Enable this field for adding'
-                                              ' the approvals for the'
-                                              ' Vendor bill.')
-    bill_approver_ids = fields.Many2many('res.users',
-                                         'bill_id',
-                                         string='Bill Approver',
-                                         domain=lambda self: [
-                                             ('all_group_ids', 'in',
-                                              self.env.ref('invoice_multi_approval.group_approver').id)],
-                                         help='In this field you can add the '
-                                              'approvers for the Vendor bill.')
-    approve_customer_credit = fields.Boolean(string='Approval on Customer'
-                                                    ' Refund',
-                                             help='Enable this field for'
-                                                  ' adding the approvals'
-                                                  ' for the customer credit '
-                                                  'note.')
-    cust_credit_approver_ids = fields.Many2many('res.users',
-                                                'cust_credit_id',
-                                                string='Customer Credit Note'
-                                                       ' Approver',
-                                                domain=lambda self: [
-                                                    ('all_group_ids', 'in',
-                                                     self.env.ref(
-                                                         'invoice_multi_approval.group_approver').id)],
-                                                help='In this field you can add'
-                                                     'the approvers for the'
-                                                     ' Customer credit note.')
-    approve_vendor_credit = fields.Boolean(string='Approval on Vendor Refund',
-                                           help='Enable this field for adding '
-                                                'the approvals for the'
-                                                ' Vendor credit note.')
-    vend_credit_approver_ids = fields.Many2many('res.users',
-                                                'vend_credit_id',
-                                                string='Vendor Credit Note'
-                                                       ' Approver',
-                                                domain=lambda self: [
-                                                    ('all_group_ids', 'in',
-                                                     self.env.ref(
-                                                         'invoice_multi_approval.group_approver').id)],
-                                                help='In this field you can'
-                                                     ' add the approvers '
-                                                     'for the Vendor credit'
-                                                     ' note.')
-    no_approve = fields.Boolean(string='No Approval',
-                                help='Approval is not needed',
-                                compute="_compute_no_approve")
+    name = fields.Char(
+        default='Approval Configuration',
+        string="Name",
+        help="Approval configuration.",
+    )
+    approve_customer_invoice = fields.Boolean(
+        string="Approval on Customer Invoice",
+        help="Enable this field for adding approvals for customer invoices.",
+    )
+    invoice_approver_ids = fields.Many2many(
+        'res.users',
+        'invoice_approval_invoice_user_rel',
+        'approval_id',
+        'user_id',
+        string='Invoice Approver',
+        domain=lambda self: [(
+            'all_group_ids', 'in',
+            self.env.ref('invoice_multi_approval.group_approver').id
+        )],
+        help='In this field you can add approvers for customer invoices.',
+    )
+    approve_vendor_bill = fields.Boolean(
+        string="Approval on Vendor Bill",
+        help="Enable this field for adding approvals for vendor bills.",
+    )
+    bill_approver_ids = fields.Many2many(
+        'res.users',
+        'invoice_approval_bill_user_rel',
+        'approval_id',
+        'user_id',
+        string='Bill Approver',
+        domain=lambda self: [(
+            'all_group_ids', 'in',
+            self.env.ref('invoice_multi_approval.group_approver').id
+        )],
+        help='In this field you can add approvers for vendor bills.',
+    )
+    approve_customer_credit = fields.Boolean(
+        string='Approval on Customer Refund',
+        help="Enable this field for adding approvals for customer credit "
+             "notes.",
+    )
+    cust_credit_approver_ids = fields.Many2many(
+        'res.users',
+        'invoice_approval_cust_credit_user_rel',
+        'approval_id',
+        'user_id',
+        string='Customer Credit Note Approver',
+        domain=lambda self: [(
+            'all_group_ids', 'in',
+            self.env.ref('invoice_multi_approval.group_approver').id
+        )],
+        help='In this field you can add approvers for customer credit notes.',
+    )
+    approve_vendor_credit = fields.Boolean(
+        string='Approval on Vendor Refund',
+        help="Enable this field for adding approvals for vendor credit notes.",
+    )
+    vend_credit_approver_ids = fields.Many2many(
+        'res.users',
+        'invoice_approval_vend_credit_user_rel',
+        'approval_id',
+        'user_id',
+        string='Vendor Credit Note Approver',
+        domain=lambda self: [(
+            'all_group_ids', 'in',
+            self.env.ref('invoice_multi_approval.group_approver').id
+        )],
+        help='In this field you can add approvers for vendor credit notes.',
+    )
+    no_approve = fields.Boolean(
+        string='No Approval',
+        help='Approval is not needed',
+        compute="_compute_no_approve",
+    )
 
-    @api.depends('approve_vendor_credit', 'approve_customer_invoice',
-                 'approve_vendor_bill', 'approve_customer_credit')
+    @api.depends(
+        'approve_vendor_credit',
+        'approve_customer_invoice',
+        'approve_vendor_bill',
+        'approve_customer_credit',
+    )
     def _compute_no_approve(self):
-        """Method _compute_no_approve to compute the value to the field
-        no_approve"""
+        """Method _compute_no_approve to compute value for no_approve"""
         for rec in self:
-            rec.no_approve = True if rec.approve_customer_invoice or rec.approve_customer_credit or rec.approve_vendor_credit or rec.approve_vendor_bill else False
+            rec.no_approve = any([
+                rec.approve_customer_invoice,
+                rec.approve_customer_credit,
+                rec.approve_vendor_credit,
+                rec.approve_vendor_bill,
+            ])

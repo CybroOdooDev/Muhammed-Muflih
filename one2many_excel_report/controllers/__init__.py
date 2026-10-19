@@ -16,4 +16,3 @@
 #
 #############################################################################
 from . import excel
-from . import one2many_excel_report

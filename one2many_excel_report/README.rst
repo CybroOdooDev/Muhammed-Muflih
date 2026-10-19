@@ -12,25 +12,29 @@
 
 |license| |odoo| |maintainer|
 
+=====================
 One2many Excel Report
-=================================
-This module is used to print the excel report of the one2many fields using the
-'one2many_excel' widget
+=====================
+This module provides an interactive widget (``one2many_excel``) that allows users to export the contents of any One2many line field directly into a formatted Excel (.xlsx) file.
 
 Key Features
 ------------
-
-* Available in Odoo 18.0 Community and Enterprise.
-* Allows to print the excel report of the One2many fields.
-
+* Available for Odoo 20.0 Community and Enterprise editions.
+* Exports One2many lines to formatted Excel spreadsheets directly from form views.
+* Automatically inspects active list views to determine column headers and field order.
+* Formats dates, numbers, relational fields, and multi-line descriptions cleanly.
 
 Installation
 ------------
-No external dependencies.
+No external dependencies are required. Standard ``xlsxwriter`` is used for spreadsheet generation.
 
 Configuration
-=============
-*Add the widget "one2many_excel" for one2many field.
+-------------
+To enable Excel export on a One2many field in any view, set the ``widget="one2many_excel"`` attribute on the field in the view XML definition:
+
+.. code-block:: xml
+
+    <field name="order_line" widget="one2many_excel"/>
 
 Company
 -------
@@ -41,19 +45,16 @@ License
 Lesser General Public License, Version 3 (LGPL v3).
 (http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
-
 Contacts
 --------
-* Mail Contact : odoo@cybrosys.com
-* Website : https://cybrosys.com
-
+* Email: odoo@cybrosys.com
+* Website: https://cybrosys.com
 
 Maintainer
-==========
+----------
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
 
 This module is maintained by Cybrosys Technologies.
 
-For support and more information, please visit `Our Website <https://cybrosys.com/>`__
-
+For support and more information, please visit `Our Website <https://cybrosys.com/>`__.

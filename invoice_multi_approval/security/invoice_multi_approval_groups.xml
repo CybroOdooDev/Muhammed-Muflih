@@ -20,16 +20,13 @@
         <field name="privilege_id"
                ref="privilege_invoice_multi_approval"/>
         <field name="implied_ids"
-               eval="[(4, ref('invoice_multi_approval.group_approver')), (4, ref('account.group_account_invoice'))]"/>
+               eval="[(4, ref('invoice_multi_approval.group_approver')),
+                     (4, ref('account.group_account_invoice'))]"/>
     </record>
     <!--        Creating Billing administrator-->
     <record id="account.group_account_manager" model="res.groups">
         <field name="implied_ids"
-               eval="[(4, ref('account.group_account_invoice')), (4, ref('invoice_multi_approval.group_approve_manager'))]"/>
-    </record>
-    <!--        Creating Billing in accounts-->
-    <record id="account.group_account_invoice" model="res.groups">
-        <field name="implied_ids"
-               eval="[(4, ref('base.group_user')),(4, ref('account.group_account_invoice'))]"/>
+               eval="[(4, ref('account.group_account_invoice')),
+                     (4, ref('invoice_multi_approval.group_approve_manager'))]"/>
     </record>
 </odoo>

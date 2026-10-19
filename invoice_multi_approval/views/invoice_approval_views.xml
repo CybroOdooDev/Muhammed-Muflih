@@ -17,25 +17,25 @@
                             <field name="approve_customer_invoice"/>
                             <field name="invoice_approver_ids"
                                    widget="many2many_tags"
-                                   invisible="approve_customer_invoice == False"
-                                   required="approve_customer_invoice == True"/>
+                                   invisible="not approve_customer_invoice"
+                                   required="approve_customer_invoice"/>
                             <field name="approve_customer_credit"/>
                             <field name="cust_credit_approver_ids"
                                    widget="many2many_tags"
-                                   invisible="approve_customer_credit == False"
-                                   required="approve_customer_credit == True"/>
+                                   invisible="not approve_customer_credit"
+                                   required="approve_customer_credit"/>
                         </group>
                         <group string="Vendor Configuration">
                             <field name="approve_vendor_bill"/>
                             <field name="bill_approver_ids"
                                    widget="many2many_tags"
-                                   invisible="approve_vendor_bill == False"
-                                   required="approve_vendor_bill == True"/>
+                                   invisible="not approve_vendor_bill"
+                                   required="approve_vendor_bill"/>
                             <field name="approve_vendor_credit"/>
                             <field name="vend_credit_approver_ids"
                                    widget="many2many_tags"
-                                   invisible="approve_vendor_credit == False"
-                                   required="approve_vendor_credit == True"/>
+                                   invisible="not approve_vendor_credit"
+                                   required="approve_vendor_credit"/>
                         </group>
                     </group>
                 </sheet>

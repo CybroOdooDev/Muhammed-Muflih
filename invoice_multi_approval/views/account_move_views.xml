@@ -12,27 +12,17 @@
                 <field name="check_approve_ability" invisible="1"/>
                 <field name="is_approved" invisible="1"/>
                 <field name="page_visibility" invisible="1"/>
-                <field name="approval_ids" invisible="1"/>
             </xpath>
             <xpath expr="//button[@name='action_post']" position="before">
                 <button name="action_invoice_approve" class="oe_highlight"
                         string="Approve" type="object"
                         groups="invoice_multi_approval.group_approver,invoice_multi_approval.group_approve_manager"
-                        invisible="move_type not in ('out_invoice',
-                        'out_refund',
-              'in_invoice', 'in_refund') or check_approve_ability != True or
-              document_fully_approved ==True or is_approved == True"/>
+                        invisible="move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund') or not check_approve_ability or document_fully_approved or is_approved"/>
             </xpath>
-            <xpath expr="//button[@name='action_post'][2]"
-                   position="attributes">
-                <attribute name="invisible">
-                    document_fully_approved == False or state == 'posted'
-                </attribute>
-            </xpath>
+
             <xpath expr="//page[@id='other_tab']" position="after">
                 <page string="Approvals" name="approval_tab"
-                      invisible="move_type not in ('in_invoice','out_invoice',
-                      'in_refund','out_refund') and page_visibility ==False">
+                      invisible="move_type not in ('in_invoice', 'out_invoice', 'in_refund', 'out_refund') or not page_visibility">
                     <field name="approval_ids" mode="list" nolabel="1"
                            style="pointer-events:none;">
                         <list string="Approval lines"

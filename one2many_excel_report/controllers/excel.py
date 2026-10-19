@@ -28,12 +28,23 @@ class XLSXReportController(http.Controller):
 
     @http.route('/xlsx_reports', type='http', auth='user', methods=['POST'],
                 csrf=False)
-    def get_report_xlsx(self,
-                        report_name='excel', **kwargs):
+    def get_report_xlsx(self, report_name='excel', **kwargs):
         """Used to get the report data that are fetched from the one2many"""
         model = kwargs.get('current_model')
         model_id = kwargs.get('id')
         field = kwargs.get('field')
+
+        # Security check: Model must be valid and registered in the environment
+        if not model or model not in request.env:
+            return request.not_found()
+
+        model_pool = request.env[model]
+
+        # Enforce read access permissions for the current user (NO sudo)
+        try:
+            model_pool.check_access('read')
+        except Exception:
+            return request.make_response("Access Denied", status=403)
 
         model_id_val = False
         if model_id and str(model_id).lower() not in ('false', 'none', 'undefined', '0', ''):
@@ -42,70 +53,58 @@ class XLSXReportController(http.Controller):
             except (ValueError, TypeError):
                 model_id_val = False
 
-        domain = []
-        if model_id_val and field and field in request.env.get(model, {})._fields:
-            domain = [(field, '=', model_id_val)]
-
+        # Determine column names from list view arch or model fields
         names = []
-        if model and model in request.env:
-            views = request.env['ir.ui.view'].sudo().search([
-                ('model', '=', model),
-                ('type', 'in', ['list', 'tree'])
-            ], order='id asc', limit=1)
-            if views and views.arch:
-                try:
-                    arch_str = views.arch if isinstance(views.arch, str) else str(views.arch)
-                    tree = ET.fromstring(arch_str)
-                    names = [f.get('name') for f in tree.findall('.//field') if f.get('name')]
-                except Exception:
-                    names = []
+        views = request.env['ir.ui.view'].search([
+            ('model', '=', model),
+            ('type', '=', 'list')
+        ], order='priority asc, id asc', limit=1)
+        if views and views.arch:
+            try:
+                arch_str = views.arch if isinstance(views.arch, str) else str(views.arch)
+                tree = ET.fromstring(arch_str)
+                names = [f.get('name') for f in tree.findall('.//field') if f.get('name')]
+            except Exception:
+                names = []
 
-            # Filter names to existing fields on the model
-            names = [fn for fn in names if fn in request.env[model]._fields]
+        # Filter names to existing fields on the model
+        names = [fn for fn in names if fn in model_pool._fields]
 
-            # Ensure product_id or product_template_id is included if present on model
-            if 'product_id' in request.env[model]._fields and 'product_id' not in names:
-                if 'name' in names:
-                    names.insert(names.index('name'), 'product_id')
-                else:
-                    names.insert(0, 'product_id')
-            elif 'product_template_id' in request.env[model]._fields and 'product_template_id' not in names and 'product_id' not in names:
-                if 'name' in names:
-                    names.insert(names.index('name'), 'product_template_id')
-                else:
-                    names.insert(0, 'product_template_id')
+        # Fallback if names empty
+        if not names:
+            names = [fn for fn, fobj in model_pool._fields.items()
+                     if fobj.store and fobj.type not in ('one2many', 'many2many', 'binary')]
 
-            # Fallback if names empty
-            if not names:
-                names = [fn for fn, fobj in request.env[model]._fields.items()
-                         if fobj.store and fobj.type not in ('one2many', 'many2many', 'binary')]
-
-            report_data = request.env[model].sudo().search_read(
+        # Prevent data leakage: only search if model_id is a valid integer and field exists.
+        # If id=False (unsaved record) or field is missing, return empty data (NEVER domain = [])
+        if model_id_val and field and field in model_pool._fields:
+            domain = [(field, '=', model_id_val)]
+            # Use standard user environment without sudo to respect ACLs and record rules
+            report_data = model_pool.search_read(
                 domain=domain,
                 fields=names
             )
         else:
             report_data = []
 
-        uid = getattr(request.session, 'uid', None) or request.env.uid
-        report_obj = request.env['one2many.report.excel'].sudo().with_user(uid)
-        output_format = 'xlsx'
-        token = 'dummy-because-api-expects-one'
+        report_obj = request.env['one2many.report.excel']
         try:
-            if output_format == 'xlsx':
-                response = request.make_response(
-                    None,
-                    headers=[
-                        ('Content-Type', 'application/vnd.ms-excel'),
-                        ('Content-Disposition',
-                         content_disposition(report_name + '.xlsx'))
-                    ]
-                )
-                report_obj.get_xlsx_report(report_data, names or ['id'], response)
-            response.set_cookie('fileToken', token)
+            response = request.make_response(
+                None,
+                headers=[
+                    ('Content-Type', 'application/vnd.ms-excel'),
+                    ('Content-Disposition',
+                     content_disposition(report_name + '.xlsx'))
+                ]
+            )
+            report_obj.get_xlsx_report(report_data, names or ['id'], response)
             return response
         except Exception as e:
-            se = http.serialize_exception(e)
+            try:
+                from odoo.http.dispatcher import serialize_exception
+                se = serialize_exception(e)
+            except Exception:
+                se = {'name': type(e).__name__, 'message': str(e)}
             error = {
                 'code': 200,
                 'message': 'Odoo Server Error',
