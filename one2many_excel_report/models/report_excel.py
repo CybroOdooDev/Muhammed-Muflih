@@ -49,7 +49,8 @@ class One2manyExcelReport(models.AbstractModel):
             {'text_wrap': True, 'bold': True, 'num_format': 'dd-mm-yyyy', 'valign': 'vcenter'})
         head = workbook.add_format(
             {'align': 'center', 'bold': True, 'font_size': 20, 'valign': 'vcenter'})
-        txt = workbook.add_format({'font_size': 10, 'align': 'center', 'valign': 'vcenter', 'text_wrap': True})
+        txt = workbook.add_format(
+            {'font_size': 10, 'align': 'center', 'valign': 'vcenter', 'text_wrap': True})
 
         # Base column width setting
         total_cols = max(20, 6 + 3 * len(data))
@@ -113,7 +114,10 @@ class One2manyExcelReport(models.AbstractModel):
             num_records = len(data)
             for rec_idx in range(num_records):
                 rec_values = data_list[rec_idx * num_fields: (rec_idx + 1) * num_fields]
-                max_rec_len = max([len(str(d['data'])) for d in rec_values if d.get('data') is not None], default=15)
+                max_rec_len = max(
+                    [len(str(d['data'])) for d in rec_values if d.get('data') is not None],
+                    default=15
+                )
                 target_3col_width = min(90, max(45, max_rec_len + 4))
                 rec_col_width = math.ceil(target_3col_width / 3)
                 col_start = 6 + 3 * rec_idx
@@ -128,7 +132,10 @@ class One2manyExcelReport(models.AbstractModel):
                     if val_idx < len(data_list):
                         val_str = str(data_list[val_idx]['data'] or '')
                         rec_values = data_list[rec_idx * num_fields: (rec_idx + 1) * num_fields]
-                        max_rec_len = max([len(str(d['data'])) for d in rec_values if d.get('data') is not None], default=15)
+                        max_rec_len = max(
+                            [len(str(d['data'])) for d in rec_values if d.get('data') is not None],
+                            default=15
+                        )
                         target_3col_width = min(90, max(45, max_rec_len + 4))
                         lines = math.ceil(len(val_str) / max(1, target_3col_width))
                         if lines > max_lines:

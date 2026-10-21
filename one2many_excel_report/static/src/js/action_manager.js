@@ -8,7 +8,11 @@ registry.category("ir.actions.report handlers").add("xlsx", async function (acti
     if (action.report_type === 'xlsx') {
         await download({
             url: '/xlsx_reports',
-            data: {'id': action.context.id, 'field': action.context.field, 'current_model': action.context.model},
+            data: {
+                id: action.context.id,
+                field: action.context.field,
+                current_model: action.context.model,
+            },
         });
         return true;
     }

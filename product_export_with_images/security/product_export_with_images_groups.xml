@@ -2,6 +2,6 @@
 <odoo>
     <!-- Only users in this group are allowed to export product images -->
     <record id="group_product_export_with_images" model="res.groups">
-        <field name="name">Export products Images</field>
+        <field name="name">Export Product Images</field>
     </record>
 </odoo>

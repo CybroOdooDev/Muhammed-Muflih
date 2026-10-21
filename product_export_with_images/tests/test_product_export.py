@@ -15,130 +15,189 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-from odoo.tests.common import TransactionCase, HttpCase, tagged
+import base64
+from werkzeug.exceptions import Forbidden, NotFound
+
+from odoo.exceptions import AccessError
+from odoo.tests.common import HttpCase, TransactionCase, tagged
 
 
-@tagged('post_install', '-at_install')
+SAMPLE_PNG_BASE64 = (
+    b"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+)
+
+
+@tagged("post_install", "-at_install")
 class TestProductExportWizard(TransactionCase):
-    """Test cases for the product.export wizard."""
+    """Test suite for product.export wizard logic and access permissions."""
 
     @classmethod
     def setUpClass(cls):
-        super(TestProductExportWizard, cls).setUpClass()
-        cls.ProductTemplate = cls.env['product.template']
-        cls.ProductProduct = cls.env['product.product']
-        cls.ExportWizard = cls.env['product.export']
-        
-        cls.category = cls.env['product.category'].create({'name': 'Test Category'})
-        
-        cls.product_tmpl = cls.ProductTemplate.create({
-            'name': 'Test Product Template',
-            'default_code': 'TPT1',
-            'categ_id': cls.category.id,
-            'list_price': 100.0,
-            'standard_price': 50.0,
-        })
-        
-        cls.product_variant = cls.ProductProduct.create({
-            'name': 'Test Product Variant',
-            'default_code': 'TPV1',
-            'categ_id': cls.category.id,
-            'list_price': 150.0,
-            'standard_price': 75.0,
-        })
-
-    def test_01_action_export_products_template(self):
-        """Test action_export_products with product.template active model."""
-        wizard = self.ExportWizard.with_context(
-            active_ids=self.product_tmpl.ids,
-            active_model='product.template'
-        ).create({})
-        
-        res = wizard.action_export_products()
-        
-        self.assertEqual(res.get('type'), 'ir.actions.act_url')
-        self.assertEqual(res.get('target'), 'new')
-        self.assertTrue(res.get('url').startswith('/products_download/excel_report/'))
-
-    def test_02_action_export_products_variant(self):
-        """Test action_export_products with product.product active model."""
-        wizard = self.ExportWizard.with_context(
-            active_ids=self.product_variant.ids,
-            active_model='product.product'
-        ).create({})
-        
-        res = wizard.action_export_products()
-        
-        self.assertEqual(res.get('type'), 'ir.actions.act_url')
-        self.assertEqual(res.get('target'), 'new')
-        self.assertTrue(res.get('url').startswith('/products_download/excel_report/'))
-
-    def test_03_get_product_lines_template(self):
-        """Test get_product_lines returns correct data for templates."""
-        wizard = self.ExportWizard.create({
-            'product_tmp_ids': [(6, 0, self.product_tmpl.ids)]
-        })
-        lines = wizard.get_product_lines()
-        
-        self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0]['name'], 'Test Product Template')
-        self.assertEqual(lines[0]['internal_reference'], 'TPT1')
-        self.assertEqual(lines[0]['category'], 'Test Category')
-        self.assertEqual(lines[0]['cost'], 50.0)
-        self.assertEqual(lines[0]['sales_price'], 100.0)
-        
-    def test_04_get_product_lines_variant(self):
-        """Test get_product_lines returns correct data for variants."""
-        wizard = self.ExportWizard.create({
-            'product_ids': [(6, 0, self.product_variant.ids)]
-        })
-        lines = wizard.get_product_lines()
-        
-        self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0]['name'], 'Test Product Variant')
-        self.assertEqual(lines[0]['internal_reference'], 'TPV1')
-        self.assertEqual(lines[0]['category'], 'Test Category')
-        self.assertEqual(lines[0]['cost'], 75.0)
-        self.assertEqual(lines[0]['sales_price'], 150.0)
-
-
-@tagged('post_install', '-at_install')
-class TestProductExportController(HttpCase):
-    """Test cases for the ExcelReportController."""
-
-    def test_01_download_excel_report(self):
-        """Test the Excel report download controller endpoint."""
-        # Create a test user with the required group
-        user = self.env['res.users'].create({
-            'name': 'Test Export User',
-            'login': 'test_export_user',
-            'password': 'testpassword',
-            'group_ids': [(6, 0, [
-                self.env.ref('base.group_user').id,
-                self.env.ref('product_export_with_images.group_product_export_with_images').id
-            ])]
-        })
-        
-        product_tmpl = self.env['product.template'].create({
-            'name': 'Test Controller Template',
-            'list_price': 200.0,
-        })
-        
-        # Create the wizard AS the test user so they own the transient record
-        wizard = self.env['product.export'].with_user(user).create({
-            'product_tmp_ids': [(6, 0, product_tmpl.ids)]
-        })
-        
-        url = f"/products_download/excel_report/{wizard.id}"
-        
-        # Authenticate as the newly created user
-        self.authenticate('test_export_user', 'testpassword')
-        response = self.url_open(url)
-        
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.headers.get('Content-Type'),
-            'application/vnd.ms-excel'
+        super().setUpClass()
+        cls.export_group = cls.env.ref(
+            "product_export_with_images.group_product_export_with_images"
         )
-        self.assertIn('attachment', response.headers.get('Content-Disposition', ''))
-        self.assertIn('Products.xlsx', response.headers.get('Content-Disposition', ''))
+
+        cls.user_authorized = cls.env["res.users"].create({
+            "name": "Export Authorized User",
+            "login": "export_user_auth",
+            "groups_id": [(6, 0, [cls.env.ref("base.group_user").id, cls.export_group.id])],
+        })
+
+        cls.user_unauthorized = cls.env["res.users"].create({
+            "name": "Export Unauthorized User",
+            "login": "export_user_unauth",
+            "groups_id": [(6, 0, [cls.env.ref("base.group_user").id])],
+        })
+
+        cls.product_tmpl_1 = cls.env["product.template"].create({
+            "name": "Test Template 1",
+            "default_code": "TMP01",
+            "list_price": 150.0,
+            "standard_price": 90.0,
+            "image_1920": SAMPLE_PNG_BASE64,
+        })
+        cls.product_tmpl_2 = cls.env["product.template"].create({
+            "name": "Test Template 2",
+            "default_code": "TMP02",
+            "list_price": 200.0,
+            "standard_price": 120.0,
+        })
+
+    def test_01_action_export_product_template(self):
+        """Test wizard creation and URL action from product.template active_ids."""
+        wizard_model = self.env["product.export"].with_user(self.user_authorized)
+        context = {
+            "active_model": "product.template",
+            "active_ids": [self.product_tmpl_1.id, self.product_tmpl_2.id],
+        }
+        action = wizard_model.with_context(context).action_export_products()
+
+        self.assertIsInstance(action, dict, "Expected an action dictionary")
+        self.assertEqual(action.get("type"), "ir.actions.act_url")
+        self.assertEqual(action.get("target"), "new")
+        self.assertIn("/products_download/excel_report/", action.get("url", ""))
+
+        # Verify wizard record created with selected templates
+        wizard_id = int(action["url"].split("/")[-1])
+        wizard = self.env["product.export"].browse(wizard_id)
+        self.assertTrue(wizard.exists())
+        self.assertEqual(set(wizard.product_tmp_ids.ids), {self.product_tmpl_1.id, self.product_tmpl_2.id})
+
+    def test_02_action_export_product_variants(self):
+        """Test wizard creation and URL action from product.product active_ids."""
+        variant_1 = self.product_tmpl_1.product_variant_id
+        variant_2 = self.product_tmpl_2.product_variant_id
+        wizard_model = self.env["product.export"].with_user(self.user_authorized)
+        context = {
+            "active_model": "product.product",
+            "active_ids": [variant_1.id, variant_2.id],
+        }
+        action = wizard_model.with_context(context).action_export_products()
+
+        self.assertEqual(action.get("type"), "ir.actions.act_url")
+        wizard_id = int(action["url"].split("/")[-1])
+        wizard = self.env["product.export"].browse(wizard_id)
+        self.assertTrue(wizard.exists())
+        self.assertEqual(set(wizard.product_ids.ids), {variant_1.id, variant_2.id})
+
+    def test_03_get_product_lines_prefers_high_res_image(self):
+        """Verify get_product_lines extracts data and prioritizes image_1920."""
+        wizard = self.env["product.export"].create({
+            "product_tmp_ids": [(6, 0, [self.product_tmpl_1.id])],
+        })
+        lines = wizard.get_product_lines()
+        self.assertEqual(len(lines), 1)
+
+        line = lines[0]
+        self.assertEqual(line["name"], "Test Template 1")
+        self.assertEqual(line["internal_reference"], "TMP01")
+        self.assertEqual(line["sales_price"], 150.0)
+        self.assertEqual(line["cost"], 90.0)
+        # Ensure image is present and matches the high-res 1920 image
+        self.assertTrue(line["image"])
+        self.assertEqual(base64.b64decode(line["image"]), base64.b64decode(SAMPLE_PNG_BASE64))
+
+    def test_04_access_rights(self):
+        """Verify unauthorized users cannot access product.export."""
+        wizard_as_unauth = self.env["product.export"].with_user(self.user_unauthorized)
+        with self.assertRaises(AccessError):
+            wizard_as_unauth.create({"product_tmp_ids": [(6, 0, [self.product_tmpl_1.id])]})
+
+
+@tagged("post_install", "-at_install")
+class TestProductExportHttp(HttpCase):
+    """Test suite for ExcelReportController HTTP route and security."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.export_group = cls.env.ref(
+            "product_export_with_images.group_product_export_with_images"
+        )
+        cls.user_owner = cls.env["res.users"].create({
+            "name": "Owner Export User",
+            "login": "owner_export_user",
+            "password": "Password123!",
+            "groups_id": [(6, 0, [cls.env.ref("base.group_user").id, cls.export_group.id])],
+        })
+        cls.user_other = cls.env["res.users"].create({
+            "name": "Other Export User",
+            "login": "other_export_user",
+            "password": "Password123!",
+            "groups_id": [(6, 0, [cls.env.ref("base.group_user").id, cls.export_group.id])],
+        })
+        cls.user_unauthorized = cls.env["res.users"].create({
+            "name": "Unauthorized User",
+            "login": "unauth_user",
+            "password": "Password123!",
+            "groups_id": [(6, 0, [cls.env.ref("base.group_user").id])],
+        })
+
+        cls.product_tmpl = cls.env["product.template"].create({
+            "name": "Export Test Product",
+            "list_price": 50.0,
+            "standard_price": 25.0,
+        })
+        cls.wizard = cls.env["product.export"].with_user(cls.user_owner).create({
+            "product_tmp_ids": [(6, 0, [cls.product_tmpl.id])],
+        })
+
+    def test_01_public_access_forbidden(self):
+        """Unauthenticated requests must be redirected to login (not public download)."""
+        url = f"/products_download/excel_report/{self.wizard.id}"
+        response = self.url_open(url)
+        # Odoo auth="user" redirects unauthenticated requests to web/login
+        self.assertIn(
+            response.status_code, [200, 302, 303],
+            "Unauthenticated request should be redirected to login"
+        )
+        if response.status_code == 200:
+            self.assertIn("login", response.url, "Must redirect to login page")
+
+    def test_02_user_without_group_forbidden(self):
+        """Authenticated users without export group receive 403 Forbidden."""
+        self.authenticate(self.user_unauthorized.login, "Password123!")
+        url = f"/products_download/excel_report/{self.wizard.id}"
+        response = self.url_open(url)
+        self.assertEqual(response.status_code, 403, "Users without group must get 403")
+
+    def test_03_idor_protection_other_user_forbidden(self):
+        """Another user cannot download an export created by user_owner (IDOR check)."""
+        self.authenticate(self.user_other.login, "Password123!")
+        url = f"/products_download/excel_report/{self.wizard.id}"
+        response = self.url_open(url)
+        self.assertEqual(response.status_code, 403, "Non-owner user must receive 403 Forbidden")
+
+    def test_04_owner_download_success(self):
+        """The creator with proper group successfully downloads XLSX report."""
+        self.authenticate(self.user_owner.login, "Password123!")
+        url = f"/products_download/excel_report/{self.wizard.id}"
+        response = self.url_open(url)
+        self.assertEqual(response.status_code, 200, "Owner should download successfully")
+        self.assertEqual(
+            response.headers.get("Content-Type"),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "MIME type must be standard XLSX"
+        )
+        self.assertTrue(len(response.content) > 0, "Response content must not be empty")

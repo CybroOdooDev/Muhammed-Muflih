@@ -30,7 +30,8 @@ No external dependencies are required. Standard ``xlsxwriter`` is used for sprea
 
 Configuration
 -------------
-To enable Excel export on a One2many field in any view, set the ``widget="one2many_excel"`` attribute on the field in the view XML definition:
+To enable Excel export on a One2many field in any view, set the
+``widget="one2many_excel"`` attribute on the field in the view XML definition:
 
 .. code-block:: xml
 

@@ -22,11 +22,8 @@
     transform: scale(1.1);
 }
 
-.cy-icon {
-    color: white;
-}
-
-.fa-whatsapp {
+.cy_whatsapp_web .oi {
     color: #FFF;
+    font-size: 34px;
 }
 

@@ -25,7 +25,7 @@ class ExportWizard(models.TransientModel):
     _name = "product.export"
     _description = "Export Products and Make an Excel Download URL."
 
-    name = fields.Char(string="Name", help="Name of the record")
+    name = fields.Char(help="Name of the record")
     product_tmp_ids = fields.Many2many(
         "product.template", string="Products",
         help="Products for exporting")
@@ -52,7 +52,6 @@ class ExportWizard(models.TransientModel):
                 "type": "ir.actions.act_url",
                 "url": "/products_download/excel_report/%s" % export_wizard.id,
                 "target": "new",
-                "context": {"active_ids": active_products},
             }
 
     def get_product_lines(self):
@@ -72,7 +71,7 @@ class ExportWizard(models.TransientModel):
                 "currency": self.env.company.currency_id.symbol or "",
                 "cost": rec.standard_price,
                 "sales_price": rec.list_price,
-                "image": rec.image_128 or rec.image_1920,
+                "image": rec.image_1920 or rec.image_128,
             }
             rec_list.append(vals)
         return rec_list

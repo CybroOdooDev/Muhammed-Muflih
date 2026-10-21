@@ -1,40 +1,42 @@
-.cb_sticky {
+.o_pivot .cb_sticky {
     position: sticky;
     top: 0;
-    z-index : 10;
+    z-index: 10;
 }
 
-tbody tr .text-nowrap{
+.o_pivot tbody tr .text-nowrap {
     background-color: white;
-    left : 0;
+    left: 0;
     outline: 1px solid #dee2e6;
 }
 
-.cb_sticky tr th {
+.o_pivot .cb_sticky tr th {
     outline: 1px solid #dee2e6;
     border: none;
     outline-offset: -1px;
     left: 0;
     background-color: white;
 }
-thead tr .cb_sticky_first_child{
+
+.o_pivot thead tr .cb_sticky_first_child {
     position: sticky;
 }
 
-tbody tr .o_pivot_header_cell_closed{
-    position: sticky;
-}
-tbody tr .o_pivot_header_cell_opened{
+.o_pivot tbody tr .o_pivot_header_cell_closed {
     position: sticky;
 }
 
-.o-dropdown.dropdown.o_group_by_menu{
-    position: relative !important;
-    display: block !important;
+.o_pivot tbody tr .o_pivot_header_cell_opened {
+    position: sticky;
 }
 
-th .o-dropdown.dropdown.o_group_by_menu > .o-dropdown--menu.dropdown-menu{
-    position: absolute !important;
-    left: 105% !important;
-    top: 100% !important;
+.o_pivot .o-dropdown.dropdown.o_group_by_menu {
+    position: relative;
+    display: block;
+}
+
+.o_pivot th .o-dropdown.dropdown.o_group_by_menu > .o-dropdown--menu.dropdown-menu {
+    position: absolute;
+    left: 105%;
+    top: 100%;
 }

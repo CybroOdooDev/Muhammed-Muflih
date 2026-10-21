@@ -16,15 +16,18 @@
 #
 #############################################################################
 import base64
-import io
-import xlsxwriter
+import logging
 from io import BytesIO
+import xlsxwriter
+from werkzeug.exceptions import Forbidden, NotFound
+
 from odoo import http
-from odoo.http.stream import content_disposition
 from odoo.http import request
+from odoo.http.stream import content_disposition
 from odoo.tools.image import image_process
 from PIL import Image
-import traceback
+
+_logger = logging.getLogger(__name__)
 
 
 def _get_image_bytes(image_data):
@@ -40,17 +43,19 @@ def _get_image_bytes(image_data):
             b64_str = image_data.to_base64()
             if b64_str:
                 return base64.b64decode(b64_str)
-        except Exception:
-            pass
+        except Exception as err:
+            _logger.debug("Failed to convert image to base64 bytes: %s", err)
     if isinstance(image_data, str):
         try:
             return base64.b64decode(image_data)
-        except Exception:
+        except Exception as err:
+            _logger.debug("Failed to decode string image data: %s", err)
             return None
     if isinstance(image_data, bytes):
         try:
             return base64.b64decode(image_data)
-        except Exception:
+        except Exception as err:
+            _logger.debug("Image data already raw bytes or decode failed: %s", err)
             return image_data
     return None
 
@@ -61,20 +66,31 @@ class ExcelReportController(http.Controller):
     @http.route(
         ['/products_download/excel_report/<model("product.export"):wizards>'],
         type="http",
-        auth="public",
-        csrf=False,
+        auth="user",
     )
     def get_product_excel_report(self, wizards=None):
         """Download an Excel file containing details of selected products."""
+        if not wizards or not wizards.exists():
+            raise NotFound()
+        if not request.env.user.has_group(
+            "product_export_with_images.group_product_export_with_images"
+        ):
+            raise Forbidden()
+        if wizards.create_uid != request.env.user and not request.env.is_admin():
+            raise Forbidden()
+
         response = request.make_response(
             None,
             headers=[
-                ("Content-Type", "application/vnd.ms-excel"),
+                (
+                    "Content-Type",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ),
                 ("Content-Disposition", content_disposition("Products.xlsx")),
             ],
         )
 
-        output = io.BytesIO()
+        output = BytesIO()
         workbook = xlsxwriter.Workbook(output, {"in_memory": True})
 
         # Define formats
@@ -124,7 +140,7 @@ class ExcelReportController(http.Controller):
 
             if image_data_raw:
                 try:
-                    image_obj = Image.open(io.BytesIO(image_data_raw))
+                    image_obj = Image.open(BytesIO(image_data_raw))
                     image_type = image_obj.format.lower() if image_obj.format else "png"
 
                     if image_type == "webp":
@@ -146,8 +162,8 @@ class ExcelReportController(http.Controller):
                                 "positioning": 1,
                             }
                         )
-                except Exception:
-                    traceback.print_exc()
+                except Exception as err:
+                    _logger.warning("Could not process product image for row %s: %s", row, err)
 
             row += 1
 

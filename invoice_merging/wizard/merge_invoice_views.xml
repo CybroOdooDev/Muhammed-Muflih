@@ -23,18 +23,18 @@
                         <field name="target_invoice_id"
                                domain="[('id', 'in', invoice_ids)]"
                                context="{'display_invoice_with_partner': 1}"
-                               invisible="partner_id != False"/>
-                        <field name="partner_id" invisible="target_invoice_id != False"/>
+                               invisible="partner_id"/>
+                        <field name="partner_id" invisible="target_invoice_id"/>
                         <field name="merge_type" widget="radio"/>
                     </group>
-                    <footer>
-                        <button name="action_merge_invoice" string="Merge"
-                                type="object"
-                                class="btn-primary"/>
-                        <button string="Cancel" class="btn-secondary"
-                                special="cancel"/>
-                    </footer>
                 </sheet>
+                <footer>
+                    <button name="action_merge_invoice" string="Merge"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary"
+                            special="cancel"/>
+                </footer>
             </form>
         </field>
     </record>

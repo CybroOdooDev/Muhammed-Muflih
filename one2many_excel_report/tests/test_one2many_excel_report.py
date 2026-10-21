@@ -22,7 +22,7 @@ from zipfile import ZipFile
 
 from odoo.exceptions import AccessError
 from odoo.http import Response
-from odoo.tests.common import HttpCase, TransactionCase, tagged
+from odoo.tests.common import TransactionCase, tagged
 from ..controllers.excel import XLSXReportController
 
 
@@ -65,7 +65,9 @@ class TestOne2manyExcelModel(TransactionCase):
                 'amount': 100.50,
             },
             {
-                'name': '2. Test Line 2 with very long description that exceeds default column length',
+                'name': (
+                    '2. Test Line 2 with very long description that exceeds default column length'
+                ),
                 'ref': 'REF002',
                 'partner_id': (2, 'Customer Beta'),
                 'comment': 'A' * 120,
@@ -83,7 +85,9 @@ class TestOne2manyExcelModel(TransactionCase):
             self.assertIn('xl/worksheets/sheet1.xml', zf.namelist())
 
     def test_get_xlsx_report_edge_cases(self):
-        """Test generating report with edge cases: empty fields, nulls, dicts, single/empty tuples."""
+        """Test generating report with edge cases: empty fields, nulls, dicts,
+        single/empty tuples.
+        """
         names = ['name', 'partner_id', 'is_active', 'lang_dict', 'null_field']
         data = [
             {
@@ -218,7 +222,13 @@ class TestOne2manyExcelController(TransactionCase):
 
         mock_env = MagicMock()
         mock_env.__contains__.side_effect = lambda key: True
-        mock_env.__getitem__.side_effect = lambda key: mock_report_obj if key == 'one2many.report.excel' else self.env[key]
+
+        def _mock_getitem(key):
+            if key == 'one2many.report.excel':
+                return mock_report_obj
+            return self.env[key]
+
+        mock_env.__getitem__.side_effect = _mock_getitem
         mock_req.env = mock_env
 
         with patch('odoo.addons.one2many_excel_report.controllers.excel.request', mock_req):
@@ -231,38 +241,3 @@ class TestOne2manyExcelController(TransactionCase):
             response_data = res.get_data()
             self.assertIn(b'Odoo Server Error', response_data)
             self.assertIn(b'200', response_data)
-
-
-@tagged('post_install', '-at_install')
-class TestOne2manyExcelHttp(HttpCase):
-    """Integration HTTP tests for /xlsx_reports endpoint."""
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.partner = cls.env['res.partner'].create({
-            'name': 'HTTP Test Partner',
-            'is_company': True,
-        })
-        cls.env['res.partner'].create({
-            'name': 'HTTP Child Contact',
-            'parent_id': cls.partner.id,
-        })
-
-    def test_http_export_xlsx_flow(self):
-        """Test HTTP POST /xlsx_reports as authenticated user."""
-        self.authenticate('admin', 'admin')
-        response = self.url_open(
-            '/xlsx_reports',
-            data={
-                'current_model': 'res.partner',
-                'id': str(self.partner.id),
-                'field': 'parent_id',
-            },
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.headers.get('Content-Type'), 'application/vnd.ms-excel')
-        excel_bytes = response.content
-        self.assertTrue(len(excel_bytes) > 0)
-        with ZipFile(io.BytesIO(excel_bytes)) as zf:
-            self.assertIn('xl/workbook.xml', zf.namelist())

@@ -1,39 +1,57 @@
-.. image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
-    :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
-    :alt: License: AGPL-3
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+    :alt: License: LGPL-3
+
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |maintainer|
 
 Export Product Images
 =====================
 This module helps to export product images as an excel file along with other details.
 
+
+Key Features
+------------
+
+* Product Image Embedding
+* Bulk Export for Products & Variants
+* Instant Excel Download URL
+
+Installation
+------------
+Requires Python packages:
+
+* xlsxwriter
+* Pillow
+
 Configuration
 =============
-* No additional configuration required.
-
-License
--------
-Affero General Public License, v3.0 (AGPL v3).
-(https://www.gnu.org/licenses/agpl-3.0-standalone.html)
+No additional configuration required.
 
 Company
 -------
 * `Cybrosys Techno Solutions <https://cybrosys.com/>`__
 
-Credits
+
+License
 -------
-* Developers: (V16) Ajmunnisa KP,
-              (V17) Aysha Shalin,
-              (V18) Javid A,
-              (V19) Anjali VP Contact: odoo@cybrosys.com,
+Lesser General Public License, Version 3 (LGPL v3).
+(http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
+
+
 
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
 
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
 
 Maintainer
 ==========
@@ -44,6 +62,3 @@ This module is maintained by Cybrosys Technologies.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
 
-Further information
-===================
-HTML Description: `<static/description/index.html>`__
