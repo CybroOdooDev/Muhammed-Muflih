@@ -18,12 +18,13 @@
 import base64
 from werkzeug.exceptions import Forbidden, NotFound
 
+from odoo import Command
 from odoo.exceptions import AccessError
 from odoo.tests.common import HttpCase, TransactionCase, tagged
 
 
 SAMPLE_PNG_BASE64 = (
-    b"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
 )
 
 
@@ -41,13 +42,13 @@ class TestProductExportWizard(TransactionCase):
         cls.user_authorized = cls.env["res.users"].create({
             "name": "Export Authorized User",
             "login": "export_user_auth",
-            "groups_id": [(6, 0, [cls.env.ref("base.group_user").id, cls.export_group.id])],
+            "group_ids": [Command.set([cls.env.ref("base.group_user").id, cls.export_group.id])],
         })
 
         cls.user_unauthorized = cls.env["res.users"].create({
             "name": "Export Unauthorized User",
             "login": "export_user_unauth",
-            "groups_id": [(6, 0, [cls.env.ref("base.group_user").id])],
+            "group_ids": [Command.set([cls.env.ref("base.group_user").id])],
         })
 
         cls.product_tmpl_1 = cls.env["product.template"].create({
@@ -116,7 +117,8 @@ class TestProductExportWizard(TransactionCase):
         self.assertEqual(line["cost"], 90.0)
         # Ensure image is present and matches the high-res 1920 image
         self.assertTrue(line["image"])
-        self.assertEqual(base64.b64decode(line["image"]), base64.b64decode(SAMPLE_PNG_BASE64))
+        raw_bytes = line["image"].content if hasattr(line["image"], "content") else base64.b64decode(line["image"])
+        self.assertEqual(raw_bytes, base64.b64decode(SAMPLE_PNG_BASE64))
 
     def test_04_access_rights(self):
         """Verify unauthorized users cannot access product.export."""
@@ -139,19 +141,19 @@ class TestProductExportHttp(HttpCase):
             "name": "Owner Export User",
             "login": "owner_export_user",
             "password": "Password123!",
-            "groups_id": [(6, 0, [cls.env.ref("base.group_user").id, cls.export_group.id])],
+            "group_ids": [Command.set([cls.env.ref("base.group_user").id, cls.export_group.id])],
         })
         cls.user_other = cls.env["res.users"].create({
             "name": "Other Export User",
             "login": "other_export_user",
             "password": "Password123!",
-            "groups_id": [(6, 0, [cls.env.ref("base.group_user").id, cls.export_group.id])],
+            "group_ids": [Command.set([cls.env.ref("base.group_user").id, cls.export_group.id])],
         })
         cls.user_unauthorized = cls.env["res.users"].create({
             "name": "Unauthorized User",
             "login": "unauth_user",
             "password": "Password123!",
-            "groups_id": [(6, 0, [cls.env.ref("base.group_user").id])],
+            "group_ids": [Command.set([cls.env.ref("base.group_user").id])],
         })
 
         cls.product_tmpl = cls.env["product.template"].create({

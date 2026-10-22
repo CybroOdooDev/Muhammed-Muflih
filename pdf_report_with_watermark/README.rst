@@ -1,36 +1,49 @@
-.. image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
-    :target: https://www.gnu.org/licenses/lgpl-3.0-standalone.html
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
     :alt: License: LGPL-3
+
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |maintainer|
 
 Reports With Watermark
 ======================
-* This module allow to have watermark on your pdf reports
+This module allows you to add custom watermarks to your PDF reports.
+
+Key Features
+------------
+
+* Odoo 20.0 Community & Enterprise Edition Support.
+* Three Types of Watermarks: Text, Image, and Logo.
+* Full Integration with Document Layout Wizard and Company Settings.
 
 Installation
 ============
-    - www.odoo.com/documentation/17.0/setup/install.html
-    - Install our custom addon
+No external dependencies required.
 
-License
--------
-General Public License, Version 3 (LGPL v3).
-(https://www.odoo.com/documentation/user/17.0/legal/licenses/licenses.html)
+Configuration
+=============
+* Navigate to Settings > General Settings > Document Layout to configure watermarks for reports, or configure via Settings > Users & Companies > Companies.
 
 Company
 -------
 * `Cybrosys Techno Solutions <https://cybrosys.com/>`__
 
-Credits
+License
 -------
-* Developer:(v18) Saneen K,
-            (v19) Anupriya Ashok,
-            (v20) Muhammed Muflih c
+Lesser General Public License, Version 3 (LGPL v3).
+(http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
-Contact: odoo@cybrosys.com
-
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
+Contacts
+--------
+* Mail Contact : odoo@cybrosys.com
+* Website : https://cybrosys.com
 
 Maintainer
 ==========
@@ -42,6 +55,4 @@ This module is maintained by Cybrosys Technologies.
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
 
 
-Further information
-===================
-HTML Description: `<static/description/index.html>`__
+

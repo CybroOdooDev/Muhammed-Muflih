@@ -1,46 +1,48 @@
-.. image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
-    :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
-    :alt: License: AGPL-3
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+    :alt: License: LGPL-3
 
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |maintainer|
 Activity Reminder
 =================
- This app allows us to set an reminder email to the employees regarding their activities
+This module helps set reminder emails for employees regarding their scheduled activities.
+
+Key Features
+------------
+
+* Activity Reminder Due Date
+* Automated Email Notifications via Cron
+* Role-based Access for Activity Alarms
 
 Configuration
 =============
-* Enable Set Activity Alarm button in  users, settings
+* Enable the "Set Activity Alarm" checkbox under User settings (Settings > Users & Companies > Users > Access Rights) for authorized users.
 
 Installation
 ============
-- www.odoo.com/documentation/17.0/setup/install.html
-- Install our custom addon
+No external dependencies.
 
 License
 -------
-General Public License, Version 3 (AGPL v3).
-(https://www.gnu.org/licenses/agpl-3.0-standalone.html)
+Lesser General Public License, Version 3 (LGPL v3).
+(http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
 Company
 -------
 * `Cybrosys Techno Solutions <https://cybrosys.com/>`__
 
-Credits
--------
-* Developers:
-            (V16) Dhanya Babu,
-            (V17) Jumana Haseen,
-            (V18) Ranjith R,
-            (V19) Abhijith Ck
-Contact : odoo@cybrosys.com
-
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
-
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
 
 Maintainer
 ==========
@@ -50,7 +52,3 @@ Maintainer
 This module is maintained by Cybrosys Technologies.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
-
-Further information
-===================
-HTML Description: `<static/description/index.html>`__

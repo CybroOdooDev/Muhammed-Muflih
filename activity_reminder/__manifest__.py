@@ -19,8 +19,8 @@
     'name': 'Activity Reminder',
     'version': '20.0.1.0.0',
     'category': 'Discuss',
-    'summary': "Setting an reminder email to employees for their activity ",
-    'description': "Setting a reminder email to employees for their activity by"
+    'summary': "Helps set reminder emails to employees for their scheduled activities",
+    'description': "Setting a reminder email to employees for their activities by"
                    " scheduling a cron job involves automating the process of "
                    "sending reminder emails at specified intervals "
                    "using a cron job.",
@@ -28,7 +28,7 @@
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['mail', 'hr'],
+    'depends': ['mail'],
     'data':
         [
             'security/mail_activity_schedule_groups.xml',
@@ -36,7 +36,7 @@
             'views/mail_activity_views.xml',
         ],
     'images': ['static/description/banner.jpg'],
-    'license': 'AGPL-3',
+    'license': 'LGPL-3',
     'installable': True,
     'auto_install': False,
     'application': False,

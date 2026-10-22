@@ -6,21 +6,21 @@
         <xpath expr="//div[contains(@t-attf-class, 'article')]" position="inside">
             <t t-if="company.watermark">
                 <div class="watermark"
-                     t-attf-style="position: absolute; top: 380px; left: 50%; transform: translate(-50%, -50%) rotate(-{{company.rotating_angle or 0}}deg); -webkit-transform: translate(-50%, -50%) rotate(-{{company.rotating_angle or 0}}deg); opacity: 0.25; z-index: -1000; text-align: center; width: 100%; pointer-events: none; overflow: visible;">
+                     style="position: fixed; top: 480px; left: 50%; transform: translate(-50%, -50%); -webkit-transform: translate(-50%, -50%); opacity: 0.25; z-index: -1000; text-align: center; pointer-events: none;">
                     <t t-if="company.watermark_type == 'text'">
-                        <span t-attf-style="color: {{company.color_picker or '#000000'}}; font-size: {{company.font_size or 20}}px; font-weight: bold; display: inline-block; white-space: nowrap; line-height: 1.2;">
+                        <span t-attf-style="display: inline-block; transform: rotate(-{{company.rotating_angle or 0}}deg); -webkit-transform: rotate(-{{company.rotating_angle or 0}}deg); color: {{company.color_picker or '#000000'}}; font-size: {{company.font_size or 20}}px; font-weight: bold; white-space: nowrap; line-height: 1.2;">
                             <t t-out="company.content_text"/>
                         </span>
                     </t>
                     <t t-if="company.watermark_type == 'image'">
                         <img t-if="company.background_image"
                              t-att-src="image_data_uri(company.background_image)"
-                             style="max-height: 400px; max-width: 500px; object-fit: contain;"/>
+                             t-attf-style="max-height: 400px; max-width: 500px; object-fit: contain; transform: rotate(-{{company.rotating_angle or 0}}deg); -webkit-transform: rotate(-{{company.rotating_angle or 0}}deg);"/>
                     </t>
                     <t t-if="company.watermark_type == 'logo'">
                         <img t-if="company.logo"
                              t-att-src="image_data_uri(company.logo)"
-                             style="max-height: 400px; max-width: 500px; object-fit: contain;"/>
+                             t-attf-style="max-height: 400px; max-width: 500px; object-fit: contain; transform: rotate(-{{company.rotating_angle or 0}}deg); -webkit-transform: rotate(-{{company.rotating_angle or 0}}deg);"/>
                     </t>
                 </div>
             </t>

@@ -4,7 +4,7 @@
 #    Cybrosys Technologies Pvt. Ltd.
 #
 #    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
-#    Author: Cybrosys Techno Solutions (odoo@cybrosys.com)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
 #    You can modify it under the terms of the GNU LESSER
 #    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
@@ -13,10 +13,6 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
-#
-#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    (LGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
 from odoo import fields, models
@@ -30,19 +26,39 @@ class BaseDocumentLayout(models.TransientModel):
     """
     _inherit = 'base.document.layout'
 
-    watermark = fields.Boolean(related='company_id.watermark',string='Watermark',
-                               help='Enable it, if you want to apply watermark '
-                                    'on all your pdf reports'
-                               )
-    content_text = fields.Char(related='company_id.content_text',string='Content Text',
-                               help="Enter the text You want to display")
-    watermark_type = fields.Selection(related='company_id.watermark_type', string='Watermark Type',
-                                      help='Select the Type of watermark')
-    color_picker = fields.Char(related='company_id.color_picker', string='Color Picker',
-                               help='Select the Color')
-    font_size = fields.Integer(related='company_id.font_size', string='Font Size',
-                               help="Enter the font size for the text")
-    background_image = fields.Image(related='company_id.background_image',string='Background Image',
-                                    help='Set an image to display')
-    rotating_angle = fields.Float(related='company_id.rotating_angle', string='Rotating Angle',
-                                  help='Enter the angle of rotation')
+    watermark = fields.Boolean(
+        related='company_id.watermark',
+        string='Watermark',
+        readonly=False,
+        help='Enable it, if you want to apply watermark on all your pdf reports')
+    content_text = fields.Char(
+        related='company_id.content_text',
+        string='Content Text',
+        readonly=False,
+        help="Enter the text you want to display")
+    watermark_type = fields.Selection(
+        related='company_id.watermark_type',
+        string='Watermark Type',
+        readonly=False,
+        help='Select the type of watermark')
+    color_picker = fields.Char(
+        related='company_id.color_picker',
+        string='Color Picker',
+        readonly=False,
+        help='Select the color')
+    font_size = fields.Integer(
+        related='company_id.font_size',
+        string='Font Size',
+        readonly=False,
+        help="Enter the font size for the text")
+    background_image = fields.Image(
+        related='company_id.background_image',
+        string='Background Image',
+        readonly=False,
+        help='Set an image to display')
+    rotating_angle = fields.Float(
+        related='company_id.rotating_angle',
+        string='Rotating Angle',
+        readonly=False,
+        help='Enter the angle of rotation')
+
