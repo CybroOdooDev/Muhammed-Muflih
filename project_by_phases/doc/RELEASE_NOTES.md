@@ -1,7 +1,7 @@
 ## Module <project_by_phases>
 
-#### 14.09.2026
-#### Version 19.5.1.0.0
+#### 06.10.2026
+#### Version 20.0.1.0.0
 #### ADD
 
 - Initial commit for Project Phases

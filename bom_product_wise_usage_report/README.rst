@@ -1,5 +1,5 @@
 .. image:: https://img.shields.io/badge/license-OPL--1-red.svg
-    :target: https://www.odoo.com/documentation/16.0/legal/licenses.html#odoo-apps
+    :target: https://www.odoo.com/documentation/master/legal/licenses.html#odoo-apps
     :alt: License: OPL-1
 
 .. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
@@ -13,7 +13,7 @@
     :target: https://cybrosys.com
     :alt: Maintainer: Cybrosys Techno Solutions
 
-|license| |odoo| |edition| |maintainer|
+ |license| |odoo| |edition| |maintainer|
 
 
 BOM Product Wise Usage Report
@@ -23,7 +23,7 @@ Generates detailed PDF report of products which are used to produce various fini
 Key Features
 ------------
 
-* Available in Filter your report based on time period, products etc.
+* Filter your report based on time period, products, etc.
 * You get a clear picture about the usage of a particular component used in different BOMs.
 * Generate report with or without unbuild products.
 
@@ -43,7 +43,7 @@ Company
 License
 =======
 Odoo Proprietary License (OPL-1)
-(https://www.odoo.com/documentation/16.0/legal/licenses.html#odoo-apps)
+(https://www.odoo.com/documentation/master/legal/licenses.html#odoo-apps)
 
 Contacts
 --------

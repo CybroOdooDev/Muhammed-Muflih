@@ -16,7 +16,7 @@
 #
 #############################################################################
 {
-    'name': 'Image in Excel',
+    'name': 'Images in Excel File',
     'version': '20.0.1.0.0',
     'category': 'Tools',
     'summary': 'Export Odoo images as actual thumbnails in Excel instead of Base64 strings',
@@ -29,10 +29,6 @@
     'maintainer': 'Cybrosys Techno Solutions',
     'website': "https://www.cybrosys.com",
     'depends': ['web'],
-    'data': [],
     'images': ['static/description/banner.jpg'],
-    'license': 'AGPL-3',
-    'installable': True,
-    'auto_install': False,
-    'application': False,
+    'license': 'LGPL-3',
 }

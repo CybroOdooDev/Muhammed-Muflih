@@ -7,26 +7,21 @@
         <field name="inherit_id" ref="project.view_task_form2"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='tag_ids']" position="after">
-                <label for="task_timer"/>
-                <div class="o_row" style="display: inline-block;">
-                    <field name="task_timer" widget="boolean_toggle"
-                           invisible="true"/>
-                </div>
+                <field name="task_timer" invisible="true"/>
                 <field name="is_status_stage" invisible="true"/>
                 <field name="check_stage" invisible="true"/>
             </xpath>
             <xpath expr="//field[@name='timesheet_ids']/list/field[@name='unit_amount']"
                    position="before">
                 <field name="date_start" required="1"/>
-                <field name="date_end" required="1"/>
+                <field name="date_end"/>
                 <field name="timer_duration" column_invisible="1"/>
             </xpath>
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="is_user_working" invisible="1"/>
                 <field name="duration" id="duration" widget="task_timer"
-                       style="color: red;"
-                       readonly="is_user_working"
-                       sum="real duration"/>
+                       class="text-danger"
+                       readonly="is_user_working"/>
             </xpath>
         </field>
     </record>

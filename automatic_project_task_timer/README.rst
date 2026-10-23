@@ -6,23 +6,22 @@
     :target: https://www.odoo.com
     :alt: Odoo 20.0
 
-.. |edition| image:: https://img.shields.io/badge/Edition-Community-1ABC9C.svg
-    :alt: Community Edition
-
 .. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
     :target: https://cybrosys.com
     :alt: Maintainer: Cybrosys Techno Solutions
-|license| |odoo| |edition| |maintainer|
+
+|license| |odoo| |maintainer|
 
 Automatic Project Task Timer
 ============================
-App for running the timer automatically for the task comes in In Progress stage.
+App for running the timer automatically when the task enters the configured stage.
 
 Key Features
 ------------
 
 * Real-time tracking starts when the task is in the configured stage.
 * The timer stops and the timesheet is recorded when the task moves to another stage.
+
 
 Installation
 ------------
@@ -42,23 +41,15 @@ Company
 
 License
 -------
-General Public License, Version 3 (LGPL v3).
-(https://www.gnu.org/licenses/lgpl-3.0-standalone.html)
+Lesser General Public License, Version 3 (LGPL v3).
+(http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
-Credits
--------
-* Developers: (V18) Mohammed Irfan T, Contact: odoo@cybrosys.com
-* Developers: (V16) Prathyunnan R, Contact: odoo@cybrosys.com
-* Developers: (V19) Rheshikes P K, Contact: odoo@cybrosys.com
 
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
 
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
 
 Maintainer
 ==========
@@ -69,6 +60,3 @@ This module is maintained by Cybrosys Technologies.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
 
-Further information
-===================
-HTML Description: `<static/description/index.html>`__

@@ -10,7 +10,7 @@
             <xpath expr="//block[@id='tasks_management']/setting[@id='project_stages']"
                    position="after">
                 <setting id="timer_setting"
-                         help="Timer will automatically activate for tasks in progress stage">
+                         help="Timer will automatically activate for tasks in the configured stage">
                     <field name="timer_setting"/>
                 </setting>
             </xpath>

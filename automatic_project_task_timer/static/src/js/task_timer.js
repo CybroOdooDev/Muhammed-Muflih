@@ -44,8 +44,9 @@ export class TaskTimer extends Component {
                 : this.props.record.data.is_user_working;
 
         onWillStart(async () => {
-        //Check the status while form rendering.
-            if(this.props.ongoing === undefined && !this.props.record.model.useSampleModel && this.props.record.data.stage_id[0] == this.props.record.data.check_stage) {
+            // Check the status while form rendering.
+            const stageId = this.props.record.data.stage_id?.[0] ?? this.props.record.data.stage_id?.id;
+            if (this.props.ongoing === undefined && !this.props.record.model.useSampleModel && stageId && stageId === this.props.record.data.check_stage) {
                 const additionalDuration = await this.orm.call('project.task', 'get_working_duration', [this.props.record.resId]);
                 this.state.duration += additionalDuration;
             }

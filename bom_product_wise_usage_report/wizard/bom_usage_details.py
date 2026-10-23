@@ -20,167 +20,157 @@
 #
 ################################################################################
 from datetime import datetime, time
-from odoo import fields, models, _
+from odoo import fields, models
 from odoo.exceptions import ValidationError
 
 
 class BomUsageReport(models.TransientModel):
-    """Model in which fields are added to generate pdf reports regarding usage
-    of products in different Bill of Materials while manufacturing process."""
+    """Model to generate PDF reports regarding product usage in BOMs."""
     _name = 'bom.usage.details'
-    _description = " For Generating Products Pdf Reports used in BOM "
+    _description = "BOM Usage Details"
 
-    product_ids = fields.Many2many('product.product',
-                                  string='Products',
-                                  domain=lambda self:
-                                  self._get_product_domain(),
-                                  help="Select the products that used in BOM")
-    from_date = fields.Date(string='From Date', help="Starting date of report")
-    to_date = fields.Date(string='To Date', default=fields.Date.today,
-                          help="Ending date of report")
-    un_build_orders = fields.Boolean(string='Reduce un build orders',
-                                     help="Remove the un build orders in "
-                                          "report")
-    byproducts = fields.Boolean(string='Show byproducts',
-                                help="Show the Byproducts of BOM in report")
+    product_ids = fields.Many2many(
+        'product.product',
+        string='Products',
+        domain=lambda self: self._get_product_domain(),
+        help="Select the products used in the BOM.")
+    from_date = fields.Date(
+        help="Starting date of the report.")
+    to_date = fields.Date(
+        default=fields.Date.today,
+        help="Ending date of the report.")
+    un_build_orders = fields.Boolean(
+        string='Reduce Unbuild Orders',
+        help="Deduct unbuild orders from the report.")
 
     def _get_product_domain(self):
-        """Domain is passed dynamically such that the products is filtered and
-        only the products in the company is shown in field."""
+        """Domain to show products available in the active company."""
         return [('company_id', 'in', [False, self.env.company.id])]
 
     def action_get_report(self):
         """Button action to get the report data and pass to the report."""
-        if (self.to_date and self.from_date) and str(self.from_date) >= str(
-                self.to_date):
-            raise ValidationError(_("Please check from date and to date"))
-        un_build_dict = {}
-        product_list = tuple(self.product_ids.ids)
-        from_date = self.from_date
-        to_date = self.to_date
-        if self.from_date:
-            from_date = datetime.combine(from_date, time.min)
-        if self.to_date:
-            to_date = datetime.combine(to_date, time.max)
-        un_build = self.un_build_orders
+        if self.from_date and self.to_date and self.from_date > self.to_date:
+            raise ValidationError(
+                self.env._("The 'From Date' must be earlier than or equal to 'To Date'."))
+
+        product_ids = self.product_ids.ids or self.env[
+            'product.product'].search([
+                ('company_id', 'in', [False, self.env.company.id])
+            ]).ids
+        if not product_ids:
+            raise ValidationError(self.env._("No products found."))
+
+        product_tuple = tuple(product_ids)
         company_id = self.env.company.id
+        from_datetime = datetime.combine(
+            self.from_date, time.min) if self.from_date else None
+        to_datetime = datetime.combine(
+            self.to_date, time.max) if self.to_date else None
+
+        self.env.flush_all()
+
+        # Manufacturing query with component UoM and date_finished
+        mrp_query = """
+            SELECT mrp_production.product_id AS parent_product_id,
+                   stock_move.product_id AS child_product_id,
+                   stock_move.uom_id AS uom,
+                   SUM(COALESCE(stock_move.product_qty, stock_move.product_uom_qty, 0)) AS child_product_used
+            FROM mrp_production
+            INNER JOIN stock_move ON mrp_production.id = stock_move.raw_material_production_id
+            WHERE mrp_production.state = 'done'
+              AND stock_move.state = 'done'
+              AND stock_move.product_id IN %s
+              AND mrp_production.company_id = %s
+        """
+        mrp_params = [product_tuple, company_id]
+        if from_datetime:
+            mrp_query += " AND mrp_production.date_finished >= %s"
+            mrp_params.append(from_datetime)
+        if to_datetime:
+            mrp_query += " AND mrp_production.date_finished <= %s"
+            mrp_params.append(to_datetime)
+        mrp_query += """
+            GROUP BY mrp_production.product_id,
+                     stock_move.product_id,
+                     stock_move.uom_id
+        """
+        self.env.cr.execute(mrp_query, tuple(mrp_params))
+        query_data = self.env.cr.dictfetchall()
+
+        # Unbuild query with company filter
+        un_build_dict = {}
+        if self.un_build_orders:
+            unbuild_query = """
+                SELECT mrp_unbuild.product_id AS parent_product_id,
+                       stock_move.product_id AS child_product_id,
+                       SUM(COALESCE(stock_move.product_qty, stock_move.product_uom_qty, 0)) AS child_quantity_used
+                FROM stock_move
+                INNER JOIN mrp_unbuild ON stock_move.unbuild_id = mrp_unbuild.id
+                WHERE stock_move.state = 'done'
+                  AND stock_move.product_id IN %s
+                  AND mrp_unbuild.company_id = %s
+            """
+            unbuild_params = [product_tuple, company_id]
+            if from_datetime:
+                unbuild_query += " AND mrp_unbuild.create_date >= %s"
+                unbuild_params.append(from_datetime)
+            if to_datetime:
+                unbuild_query += " AND mrp_unbuild.create_date <= %s"
+                unbuild_params.append(to_datetime)
+            unbuild_query += """
+                GROUP BY mrp_unbuild.product_id,
+                         stock_move.product_id
+            """
+            self.env.cr.execute(unbuild_query, tuple(unbuild_params))
+            for row in self.env.cr.dictfetchall():
+                key = (row['parent_product_id'], row['child_product_id'])
+                un_build_dict[key] = row.get('child_quantity_used') or 0.0
+
+        # Pre-fetch products and UoMs in batches (avoids N+1 queries)
+        parent_pids = {row['parent_product_id'] for row in query_data}
+        child_pids = {row['child_product_id'] for row in query_data}
+        uom_ids = {row['uom'] for row in query_data}
+
+        products = {p.id: p.display_name for p in self.env[
+            'product.product'].sudo().browse(parent_pids | child_pids)}
+        uoms = {u.id: u.name for u in self.env[
+            'uom.uom'].sudo().browse(uom_ids)}
+
         body = []
         heading = []
-        query = """SELECT DISTINCT mrp_production.product_id AS
-                    parent_product_id,
-                    stock_move.product_id AS child_product_id,
-                    SUM(stock_move.product_qty) AS child_product_used,
-                    mrp_production.uom_id AS uom
-                    FROM mrp_production
-                    INNER JOIN stock_move ON 
-                    mrp_production.id = 
-                        stock_move.raw_material_production_id
-                    WHERE mrp_production.id IN (SELECT
-                            DISTINCT raw_material_production_id
-                            FROM stock_move
-                            WHERE raw_material_production_id IS NOT NULL)
-                            AND mrp_production.state = 'done' AND 
-                                stock_move.product_id IN %s AND
-                            mrp_production.company_id = %s"""
-        query_from_date = """ AND mrp_production.write_date >=  %s"""
-        query_to_date = """ AND mrp_production.write_date <= %s """
-        query_finish = """ GROUP BY mrp_production.product_id,
-                                stock_move.product_id,mrp_production.
-                                uom_id"""
-        un_build_query = """SELECT
-                                DISTINCT mrp_unbuild.product_id AS 
-                                    parent_product_id,
-                                stock_move.product_id AS child_product_id,
-                                SUM(stock_move.product_qty) AS 
-                                    child_quantity_used
-                                FROM stock_move
-                                INNER JOIN mrp_unbuild ON stock_move.unbuild_id 
-                                    = mrp_unbuild.id
-                                WHERE stock_move.state = 'done'
-                                AND stock_move.unbuild_id IN  (SELECT
-                                    DISTINCT unbuild_id
-                                    FROM stock_move
-                                    WHERE stock_move.product_id IN %s AND 
-                                        stock_move.unbuild_id IS NOT NULL)"""
-        un_build_query_from_date = """ AND mrp_unbuild.write_date >= %s """
-        un_build_query_to_date = """ AND mrp_unbuild.write_date <= %s """
-        un_build_query_finish = """GROUP BY mrp_unbuild.product_id,
-                                    stock_move.product_id"""
-        if not product_list:
-            product_list = self.env['product.product'].search([]).mapped('id')
-            product_list = tuple(product_list)
-        if not from_date and not to_date:
-            self.env.cr.execute(query + query_finish, (product_list,
-                                                       company_id))
-            query_data = self.env.cr.dictfetchall()
-            if un_build:
-                self.env.cr.execute(un_build_query + un_build_query_finish,
-                                    (product_list,))
-                un_build_dict = self.env.cr.dictfetchall()
-        elif not from_date and to_date:
-            self.env.cr.execute(query + query_to_date + query_finish,
-                                (product_list, company_id, to_date))
-            query_data = self.env.cr.dictfetchall()
-            if un_build:
-                self.env.cr.execute(un_build_query + un_build_query_to_date +
-                                    un_build_query_finish,
-                                    (product_list, to_date))
-                un_build_dict = self.env.cr.dictfetchall()
-        elif from_date and not to_date:
-            self.env.cr.execute(query + query_from_date + query_finish,
-                                (product_list, company_id,
-                                 from_date))
-            query_data = self.env.cr.dictfetchall()
-            if un_build:
-                self.env.cr.execute(un_build_query + un_build_query_from_date +
-                                    un_build_query_finish, (product_list,
-                                                            from_date))
-                un_build_dict = self.env.cr.dictfetchall()
-        else:
-            self.env.cr.execute(query + query_from_date + query_to_date +
-                                query_finish, (product_list, company_id,
-                                               from_date, to_date))
-            query_data = self.env.cr.dictfetchall()
-            if un_build:
-                self.env.cr.execute(
-                    un_build_query + un_build_query_from_date +
-                    un_build_query_to_date + un_build_query_finish,
-                    (product_list, from_date, to_date))
-                un_build_dict = self.env.cr.dictfetchall()
         for data in query_data:
-            product_dict = {
-                'parent_product_id': data['parent_product_id'],
-                'parent_product_name': self.env['product.product'].sudo().
-                search([('id', '=', data['parent_product_id'])]).display_name,
-                'child_quantity_used': data['child_product_used'],
-                'uom': self.env['uom.uom'].sudo().search([('id', '=',
-                                                           data['uom'])]).name,
-                'child_product_name': self.env[
-                    'product.product'].sudo().search(
-                    [('id', '=', data['child_product_id'])]).display_name,
-                'child_product_id': data['child_product_id'],
-            }
-            if un_build:
-                for rec in un_build_dict:
-                    if data['child_product_id'] == rec['child_product_id'] and \
-                            data['parent_product_id'] == rec['parent_product_id']:
-                        product_dict['child_quantity_used'] = (
-                                data['child_product_used'] -
-                                rec['child_quantity_used'])
-                        break
-            if not product_dict['child_quantity_used'] < 1:
-                body += [product_dict]
-                head_dict = {'child_product_name': product_dict['child_product_name']}
+            parent_id = data['parent_product_id']
+            child_id = data['child_product_id']
+            qty_used = data.get('child_product_used') or 0.0
+
+            if self.un_build_orders:
+                qty_used -= un_build_dict.get((parent_id, child_id), 0.0)
+
+            # Include all positive fractional or integer quantities
+            if qty_used > 0:
+                child_name = products.get(child_id, '')
+                product_dict = {
+                    'parent_product_id': parent_id,
+                    'parent_product_name': products.get(parent_id, ''),
+                    'child_quantity_used': qty_used,
+                    'uom': uoms.get(data['uom'], ''),
+                    'child_product_name': child_name,
+                    'child_product_id': child_id,
+                }
+                body.append(product_dict)
+                head_dict = {'child_product_name': child_name}
                 if head_dict not in heading:
                     heading.append(head_dict)
+
+        if not body:
+            raise ValidationError(self.env._("No data is available"))
+
         data = {
             'heading': heading,
             'body': body,
-            'from_date': from_date,
-            'to_date': to_date,
+            'from_date': self.from_date,
+            'to_date': self.to_date,
         }
-        if not body:
-            raise ValidationError(_("No data is available"))
         return self.env.ref(
-            'bom_product_wise_usage_report.action_bom_usage_report'). \
-            sudo().report_action(None, data=data)
+            'bom_product_wise_usage_report.action_bom_usage_report'
+        ).sudo().report_action(None, data=data, config=False)

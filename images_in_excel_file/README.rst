@@ -6,35 +6,35 @@
     :target: https://www.odoo.com
     :alt: Odoo 20.0
 
-.. |edition| image:: https://img.shields.io/badge/Edition-Community-1ABC9C.svg
-    :alt: Community Edition
-
 .. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
     :target: https://cybrosys.com
     :alt: Maintainer: Cybrosys Techno Solutions
 
-Image In Excel
-==============
+|license| |odoo| |maintainer|
+
+Images in Excel File
+====================
 Export product images directly into Excel files as visual thumbnails instead
 of raw Base64 strings. When exporting records with image fields (e.g.,
-image_1920, image_128) from Odoo to XLSX format, this module embeds the actual
-images inline so they are immediately visible without any manual decoding.
+image_1920, image_128, avatar_128, photo, signature) from Odoo to XLSX format,
+this module embeds the actual images inline so they are immediately visible
+without any manual decoding.
 
 Key Features
 ------------
 
-* Embeds product images as thumbnails directly in XLSX cells .
-* Works with all Odoo image field sizes (128, 256, 512, 1024, 1920).
-* Converts all image formats to PNG for full Excel compatibility.
-*  Auto-resizes rows and columns to fit thumbnails neatly.
+* Embeds product images as thumbnails directly in XLSX cells.
+* Supports all standard image field variants (image_1920, image_512, image_128, avatar_128, photo, signature).
+* Converts image formats to PNG for full Excel compatibility.
+* Auto-resizes rows and columns to fit thumbnails neatly.
 
 Installation
 ------------
-No external dependencies.
+No external dependencies beyond standard Odoo Python packages (Pillow, xlsxwriter).
 
 Configuration
 =============
-* No additional configurations needed
+No additional configuration is required.
 
 Company
 -------
@@ -50,12 +50,6 @@ Contacts
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
 
-Credits
--------
-* Developer: (V19) Harshitha AP
-Contact: odoo@cybrosys.com
-
-
 
 Maintainer
 ==========
@@ -65,6 +59,3 @@ Maintainer
 This module is maintained by Cybrosys Technologies.
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
 
-Further information
-===================
-HTML Description: `<static/description/index.html>`__

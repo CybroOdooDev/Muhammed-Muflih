@@ -30,7 +30,8 @@ class Task(models.Model):
                                      help="Technical field indicating whether "
                                           "the current user is working. ")
     duration = fields.Float(string='Real Duration', store=True, copy=False,
-                            readonly=False, help='Shows the duration')
+                            compute='_compute_duration', readonly=False,
+                            help='Shows the total duration in minutes')
     is_status_stage = fields.Boolean(string='Stage Status',
                                      help='To set the status of task at the '
                                           'initial time.')
@@ -39,29 +40,50 @@ class Task(models.Model):
                                  help='To check the stage whether it is '
                                       'configured or not')
 
+    @api.depends('timesheet_ids.timer_duration')
+    def _compute_duration(self):
+        """Compute cumulative duration in minutes from timesheets."""
+        for task in self:
+            task.duration = sum(task.timesheet_ids.mapped('timer_duration'))
+
     def _compute_check_stage(self):
         """To check the stage whether it is configured or not, for that
         assigning the configured stage id to this field."""
         for rec in self:
-            rec.check_stage = self.env['timer.configuration'].search(
-                [('project_id.id', '=', rec.project_id.id)]).stage_id.id
+            config = self.env['timer.configuration'].search(
+                [('project_id', '=', rec.project_id.id)], limit=1
+            )
+            rec.check_stage = config.stage_id.id if config else False
 
-    @api.constrains('stage_id')
-    def _task_timer(self):
-        """Checks the status of timer setting and
-        toggle the task timer boolean to active """
-        self.write({
-            'is_status_stage': False
-        })
+    @api.model_create_multi
+    def create(self, vals_list):
+        tasks = super().create(vals_list)
+        tasks._update_task_timer_stage()
+        return tasks
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'stage_id' in vals or 'project_id' in vals:
+            self._update_task_timer_stage()
+        elif 'task_timer' in vals:
+            self._handle_timer_toggle()
+        return res
+
+    def _update_task_timer_stage(self):
+        """Checks the status of timer setting and updates task_timer."""
         timer_setting = self.env['ir.config_parameter'].sudo().get_bool(
             'automatic_project_task_timer.timer_setting')
-        if timer_setting:
-            for rec in self.env['timer.configuration'].search([]):
-                if self.project_id == rec.project_id:
-                    if self.stage_id.id == rec.stage_id.id:
-                        self.write({'task_timer': True})
-                    else:
-                        self.write({'task_timer': False})
+        for task in self:
+            task.is_status_stage = False
+            is_timer_stage = False
+            if timer_setting and task.project_id:
+                config = self.env['timer.configuration'].search(
+                    [('project_id', '=', task.project_id.id)], limit=1
+                )
+                if config and task.stage_id == config.stage_id:
+                    is_timer_stage = True
+            if task.task_timer != is_timer_stage:
+                task.write({'task_timer': is_timer_stage})
 
     def _compute_is_user_working(self):
         """ Checks whether the current user is working """
@@ -73,71 +95,56 @@ class Task(models.Model):
             else:
                 order.is_user_working = False
 
-    @api.model
-    @api.constrains('task_timer')
-    def toggle_start(self):
-        """The time sheet record will be created
-         by checking all the conditions """
+    def _handle_timer_toggle(self):
+        """Start or stop timesheet lines when task_timer changes."""
         time_line_obj = self.env['account.analytic.line']
         for rec in self:
-            if rec.task_timer is True:
-                rec.write({'is_user_working': True})
-                for time_sheet in rec:
+            if rec.task_timer:
+                open_lines = time_line_obj.search([
+                    ('task_id', '=', rec.id),
+                    ('user_id', '=', self.env.user.id),
+                    ('date_end', '=', False),
+                ])
+                if not open_lines:
                     time_line_obj.create({
-                        'name': '%s : %s' % (self.env.user.name,
-                                             time_sheet.name),
-                        'task_id': time_sheet.id,
+                        'name': '%s : %s' % (self.env.user.name, rec.name),
+                        'task_id': rec.id,
                         'user_id': self.env.user.id,
-                        'project_id': time_sheet.project_id.id,
-                        'date_start': datetime.now(),
+                        'project_id': rec.project_id.id,
+                        'date_start': fields.Datetime.now(),
                     })
             else:
-                rec.write({'is_user_working': False})
-                for time_line in time_line_obj.search(
-                        [('task_id', 'in', self.ids),
-                         ('date_end', '=', False)]):
-                    time_line.write({'date_end': fields.Datetime.now()})
-                    if time_line.date_start:
-                        if time_line.date_end:
-                            diff = fields.Datetime.from_string(
-                                time_line.date_end) \
-                                   - fields.Datetime.from_string(
-                                time_line.date_start).replace(
-                                second=0, microsecond=0)
-                            time_line.timer_duration = \
-                                round(diff.total_seconds() / 60.0, 2)
-                            time_line.unit_amount = \
-                                round(diff.total_seconds() / (60.0 * 60.0), 2)
-                        else:
-                            time_line.unit_amount = 0.0
-                            time_line.timer_duration = 0.0
-                    else:
-                        time_line.write({'date_start': fields.Datetime.now()})
-                        if time_line.date_end:
-                            diff = fields.Datetime.from_string(
-                                time_line.date_end) \
-                                   - fields.Datetime.from_string(
-                                time_line.date_start).replace(
-                                second=0, microsecond=0)
-                            time_line.timer_duration = \
-                                round(diff.total_seconds() / 60.0, 2)
-                            time_line.unit_amount = \
-                                round(diff.total_seconds() / (60.0 * 60.0), 2)
-                        else:
-                            time_line.unit_amount = 0.0
-                            time_line.timer_duration = 0.0
+                open_lines = time_line_obj.search([
+                    ('task_id', '=', rec.id),
+                    ('date_end', '=', False),
+                ])
+                now = fields.Datetime.now()
+                for time_line in open_lines:
+                    start = time_line.date_start or now
+                    diff = now - start.replace(second=0, microsecond=0)
+                    total_seconds = max(diff.total_seconds(), 0)
+                    time_line.write({
+                        'date_end': now,
+                        'date_start': start,
+                        'timer_duration': round(total_seconds / 60.0, 2),
+                        'unit_amount': round(total_seconds / 3600.0, 2),
+                    })
+                rec.duration = sum(rec.timesheet_ids.mapped('timer_duration'))
+
+    def toggle_start(self):
+        """The time sheet record will be created or stopped
+        by checking all the conditions."""
+        self._handle_timer_toggle()
 
     def get_working_duration(self):
         """Get the additional duration for 'open times'
         i.e. productivity lines with no date_end."""
         self.ensure_one()
         duration = 0
-        for time in \
-                self.timesheet_ids.filtered(lambda time: not time.date_end):
-            if type(time.date_start) != datetime:
-                time.date_start = datetime.now()
-                duration = 0
+        now = fields.Datetime.now()
+        for time in self.timesheet_ids.filtered(lambda t: not t.date_end):
+            if not isinstance(time.date_start, datetime):
+                time.date_start = now
             else:
-                duration += \
-                    (datetime.now() - time.date_start).total_seconds() / 60
+                duration += (now - time.date_start).total_seconds() / 60
         return duration

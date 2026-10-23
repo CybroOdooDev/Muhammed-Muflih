@@ -46,23 +46,17 @@ class TimerConfiguration(models.Model):
                 data.append(rec.id)
         self.stage_ids = data
 
-
-    @api.model
+    @api.model_create_multi
     def create(self, vals_list):
         """To set the status stage for all the tasks in the corresponding
-            project, so that the warning message will pop-ups when the form
-            opens. For that supering the ORM Create method to get the corresponding
-            project. """
-        records = super(TimerConfiguration, self).create(vals_list)
-
-        for vals, record in zip(vals_list, records):
-            project = self.env['project.project'].sudo().browse(vals.get('project_id'))
-            if project:
-                tasks = self.env['project.task'].search([('project_id', '=', project.id)])
+        project, so that the warning message will pop-up when the form
+        opens."""
+        records = super().create(vals_list)
+        for record in records:
+            if record.project_id and record.stage_id:
+                tasks = self.env['project.task'].search([
+                    ('project_id', '=', record.project_id.id)
+                ])
                 for task in tasks:
-                    if task.stage_id.id == vals.get('stage_id'):
-                        task.write({'is_status_stage': True})
-                    else:
-                        task.write({'is_status_stage': False})
-
+                    task.is_status_stage = (task.stage_id == record.stage_id)
         return records

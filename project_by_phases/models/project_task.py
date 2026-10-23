@@ -19,10 +19,13 @@ from odoo import fields, models
 
 
 class ProjectTask(models.Model):
-    """Inherits 'project.task' and adds a field for select project phases."""
+    """Inherit 'project.task' and add a field to select project phases."""
     _inherit = 'project.task'
 
-    project_phase_id = fields.Many2one('project.phase',
-                                       string="Project Phase",
-                                       help="Select any project phase "
-                                            "from the list.",domain="[('project_id', '=', project_id)]")
+    project_phase_id = fields.Many2one(
+        'project.phase',
+        string="Project Phase",
+        domain="[('project_id', '=', project_id)]",
+        help="Select any project phase from the list."
+    )
+

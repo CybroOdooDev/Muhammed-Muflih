@@ -4,36 +4,34 @@
 #    Cybrosys Technologies Pvt. Ltd.
 #
 #    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
-#    Author: Safa KB (Contact : odoo@cybrosys.com)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
-#    You can modify it under the terms of the GNU AFFERO
-#    GENERAL PUBLIC LICENSE (AGPL v3), Version 3.
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU AFFERO GENERAL PUBLIC LICENSE (AGPL v3) for more details.
-#
-#    You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
-#    (AGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
 from odoo import models
 
 
 class ProjectProject(models.Model):
-    """Inherits 'project.project' and define the action for open the related
-    project phase model from project module.  """
+    """Inherit 'project.project' and define action to open related
+    project phases."""
     _inherit = 'project.project'
 
     def get_project_phases(self):
-        """Function for open project phases related to the project in the
-        kanban view."""
+        """Return action to open project phases related to the project."""
+        self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
             'name': 'Phases',
             'view_mode': 'kanban,list,form',
             'res_model': 'project.phase',
-            'domain': [('project_id', '=', self.display_name)],
+            'domain': [('project_id', '=', self.id)],
+            'context': {'default_project_id': self.id},
         }
+

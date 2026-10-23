@@ -5,7 +5,7 @@
         <field name="name">BOM Usage Details</field>
         <field name="model">bom.usage.details</field>
         <field name="arch" type="xml">
-            <form string="Stock Report">
+            <form string="BOM Usage Report">
                 <group>
                     <group>
                         <field name="from_date"/>

@@ -20,10 +20,10 @@
     'version': '20.0.1.0.0',
     'category': 'Project',
     'summary': 'Automatic Running Timer for Project Tasks',
-    'description': "This module helps you to track time sheet in project "
-                   "using a real timer, it's starts when task is in "
-                   "configured stage and stops when its moves to any other "
-                   "stage and the timesheet will be recorded.",
+    'description': "This module helps you to track timesheets in projects "
+                   "using a real timer. It starts when a task is in the "
+                   "configured stage and stops when it moves to any other "
+                   "stage, automatically recording the timesheet.",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
@@ -43,7 +43,5 @@
         ]},
     'images': ['static/description/banner.jpg'],
     'license': 'LGPL-3',
-    'installable': True,
-    'auto_install': False,
     'application': False,
 }

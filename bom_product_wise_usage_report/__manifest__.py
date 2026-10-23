@@ -23,9 +23,8 @@
     'name': 'BOM Product Wise Usage Report',
     'version': '20.0.1.0.0',
     'category': 'Manufacturing',
-    'summary': """Generate PDF report of Products used in Bill of materials""",
-    'description': """ This module generates a detailed PDF report of 
-     components/products used for manufacturing products.""",
+    'summary': """Generate PDF report of products used in Bills of Materials""",
+    'description': """This module generates a detailed PDF report of components and products used for manufacturing.""",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',

@@ -8,8 +8,8 @@
                 <t t-set="data_report_header_spacing" t-value="9"/>
                 <t t-set="data_report_dpi" t-value="110"/>
                 <div class="page">
-                    <h2 align = "center">BOM Product Usage</h2>
-                    <div class="col-xs-3">
+                    <h2 class="text-center">BOM Product Usage</h2>
+                    <div class="col-3">
                         <t t-if="from_date"><strong>Date from :</strong> <span t-out="from_date"/><br/></t>
                         <t t-if="to_date"><strong>Date to :</strong> <span t-out="to_date"/><br/></t>
                     </div>

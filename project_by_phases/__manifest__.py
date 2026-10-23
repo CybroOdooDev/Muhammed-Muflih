@@ -16,11 +16,11 @@
 #
 #############################################################################
 {
-    'name': "Project Phases",
+    'name': "Project By Phases",
     'version': '20.0.1.0.0',
     'category': 'Project',
     'summary': """A Module For Managing Different Phases of Project.""",
-    'description': 'Using Project By Phases,you can manage different phases '
+    'description': 'Using Project By Phases, you can manage different phases '
                    'of project.',
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
@@ -36,7 +36,7 @@
     'images': [
         'static/description/banner.jpg',
     ],
-    'license': 'AGPL-3',
+    'license': 'LGPL-3',
     'installable': True,
     'auto_install': False,
     'application': False,

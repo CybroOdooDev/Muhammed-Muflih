@@ -2,7 +2,7 @@
 <odoo>
     <!--    Action for model-->
     <record id="project_phase_action" model="ir.actions.act_window">
-        <field name="name">Project Phase</field>
+        <field name="name">Project Phases</field>
         <field name="res_model">project.phase</field>
         <field name="view_mode">kanban,list,form</field>
     </record>
@@ -11,7 +11,7 @@
         <field name="name">project.phase.view.form</field>
         <field name="model">project.phase</field>
         <field name="arch" type="xml">
-            <form string="project_phase">
+            <form string="Project Phase">
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="get_project_tasks" type="object"
@@ -30,12 +30,12 @@
                             <field name="end_date"/>
                             <field name="company_id"/>
                         </group>
-                        <notebook>
-                            <page string="Internal Note">
-                                <field name="internal_notes"/>
-                            </page>
-                        </notebook>
                     </group>
+                    <notebook>
+                        <page string="Internal Note">
+                            <field name="internal_notes"/>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -48,11 +48,11 @@
             <kanban>
                 <templates>
                     <t t-name="card">
-                        <div t-attf-class="oe_kanban_global_click">
+                        <div>
                             <div class="row mb4">
                                 <div>
                                     <h3>
-                                        <field name="name" class="mr-3"/>
+                                        <field name="name" class="me-3"/>
                                     </h3>
                                 </div>
                             </div>
@@ -65,8 +65,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <button name="open_project_task" string="Task"
-                                    type="object"/>
+                            <button name="get_project_tasks" string="Tasks"
+                                    type="object" class="btn btn-secondary btn-sm"/>
                         </div>
                     </t>
                 </templates>
@@ -74,11 +74,11 @@
         </field>
     </record>
     <!--    List view of the model project.phase-->
-    <record id="project_phase_view_tree" model="ir.ui.view">
+    <record id="project_phase_view_list" model="ir.ui.view">
         <field name="name">project.phase.view.list</field>
         <field name="model">project.phase</field>
         <field name="arch" type="xml">
-            <list string="phase">
+            <list string="Project Phases">
                 <field name="name"/>
                 <field name="project_id"/>
                 <field name="responsible_user_id"/>
@@ -86,6 +86,26 @@
                 <field name="end_date"/>
                 <field name="company_id"/>
             </list>
+        </field>
+    </record>
+    <!--    Search view of the model project.phase-->
+    <record id="project_phase_view_search" model="ir.ui.view">
+        <field name="name">project.phase.view.search</field>
+        <field name="model">project.phase</field>
+        <field name="arch" type="xml">
+            <search string="Search Project Phases">
+                <field name="name" string="Phase"/>
+                <field name="project_id"/>
+                <field name="responsible_user_id"/>
+                <group>
+                    <filter string="Project" name="group_by_project"
+                            context="{'group_by': 'project_id'}"/>
+                    <filter string="Responsible User" name="group_by_responsible"
+                            context="{'group_by': 'responsible_user_id'}"/>
+                    <filter string="Company" name="group_by_company"
+                            context="{'group_by': 'company_id'}"/>
+                </group>
+            </search>
         </field>
     </record>
     <!--    Menu item for show it in project module-->

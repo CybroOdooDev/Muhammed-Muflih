@@ -6,23 +6,20 @@
     :target: https://www.odoo.com
     :alt: Odoo 20.0
 
-.. |edition| image:: https://img.shields.io/badge/Edition-Community-1ABC9C.svg
-    :alt: Community Edition
-
 .. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
     :target: https://cybrosys.com
     :alt: Maintainer: Cybrosys Techno Solutions
 
-|license| |odoo| |edition| |maintainer|
+|license| |odoo| |maintainer|
 
-Project Phases
-==============
-Using Project By Phases,you can manage different phases of project.
+Project By Phases
+=================
+Using Project By Phases, you can manage different phases of project.
 
 Key Features
 ------------
 
-* Available in Odoo 19.0 Community, Enterprise and Odoo.sh .
+* Available in Odoo 20.0 Community, Enterprise and Odoo.sh.
 * Users can select project phases in project tasks.
 
 Installation
@@ -47,20 +44,6 @@ Contacts
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
 
-
-Credits
--------
-* Developer:V16 Anagha C
-            V17 Gayathri V
-            V18 Gayathri V
-            V19 Safa KB
-Contact : odoo@cybrosys.com
-
-
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
-
 Maintainer
 ==========
 .. image:: https://cybrosys.com/images/logo.png
@@ -70,6 +53,3 @@ This module is maintained by Cybrosys Technologies.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
 
-Further information
-===================
-HTML Description: `<static/description/index.html>`__
