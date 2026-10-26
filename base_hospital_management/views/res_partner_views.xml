@@ -68,7 +68,7 @@
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_invoice" type="object"
                                 class="oe_stat_button"
-                                invisible="name == False"
+                                invisible="not name"
                                 icon="edit_square">
                             <div class="o_stat_info">
                                 <span class="o_stat_text">Invoice</span>
@@ -85,7 +85,7 @@
                         </button>
                         <button class="oe_stat_button" type="object"
                                 name="action_alive_status"
-                                invisible = "['|',(is_alive == 'dead'),(name == False)]"
+                                invisible="is_alive == 'dead' or not name"
                                 icon="check">
                             <span class="o_stat_text text-success">ALIVE</span>
                         </button>
@@ -182,7 +182,7 @@
                                     <field name="insurance_id"
                                            options="{'no_create': True, 'no_edit': True}"/>
                                     <field name="unique_id"
-                                           invisible="insurance_id == False"/>
+                                           invisible="not insurance_id"/>
                                 </group>
                             </group>
                             <group>
@@ -203,7 +203,7 @@
                                 <group string="Physical Exercise">
                                     <field name="exercise"/>
                                     <field name="minute"
-                                          invisible="exercise == False"/>
+                                           invisible="not exercise"/>
                                 </group>
                                 <group string="Sleep Schedule">
                                     <field name="day_sleep"/>
@@ -220,7 +220,7 @@
                                 <group>
                                     <field name="coffee"/>
                                     <field name="cup"
-                                           invisible="coffee == False"/>
+                                           invisible="not coffee"/>
                                     <field name="drink"/>
                                 </group>
                             </group>
@@ -230,49 +230,49 @@
                                         <group>
                                             <field name="smoke"/>
                                             <field name="age_start"
-                                                   invisible="smoke == False"/>
+                                                   invisible="not smoke"/>
                                         </group>
                                         <group>
                                             <field name="cigarettes"
-                                                   invisible="smoke == False"/>
+                                                   invisible="not smoke"/>
                                             <field name="ex_smoke"
-                                                   invisible="smoke == True"/>
+                                                   invisible="smoke"/>
                                             <field name="age_quit"
-                                                   invisible="ex_smoke == False"/>
+                                                   invisible="not ex_smoke"/>
                                             <field name="passive"
-                                                   invisible="smoke == True"/>
+                                                   invisible="smoke"/>
                                         </group>
                                     </group>
                                     <group string="Drinking">
                                         <group>
                                             <field name="alcoholic"/>
                                             <field name="age_start_alco"
-                                                   invisible="alcoholic == False"/>
+                                                   invisible="not alcoholic"/>
                                             <field name="beer"
-                                                   invisible="alcoholic == False"/>
+                                                   invisible="not alcoholic"/>
                                         </group>
                                         <group>
                                             <field name="liquor"
-                                                  invisible="alcoholic == False"/>
+                                                   invisible="not alcoholic"/>
                                             <field name="wine"
-                                                   invisible="alcoholic == False"/>
+                                                   invisible="not alcoholic"/>
                                             <field name="ex_alcoholic"
-                                                   invisible="alcoholic == True"/>
+                                                   invisible="alcoholic"/>
                                             <field name="age_quit_alcoholic"
-                                                   invisible="ex_alcoholic == False"/>
+                                                   invisible="not ex_alcoholic"/>
                                         </group>
                                     </group>
                                     <group string="Drugs">
                                         <group>
                                             <field name="drugs"/>
                                             <field name="age_start_drug"
-                                                   invisible="drugs == False"/>
+                                                   invisible="not drugs"/>
                                         </group>
                                         <group>
                                             <field name="ex_drugs"
-                                                   invisible="drugs == True"/>
+                                                   invisible="drugs"/>
                                             <field name="age_quit_drug"
-                                                   invisible="ex_drugs == False"/>
+                                                   invisible="not ex_drugs"/>
                                             <field name="iv_user"/>
                                         </group>
                                     </group>
@@ -306,15 +306,15 @@
                                         <group>
                                             <field name="rider"/>
                                             <field name="helmet"
-                                                  invisible="rider == False"/>
+                                                   invisible="not rider"/>
                                             <field name="laws"/>
                                         </group>
                                         <group>
                                             <field name="revision"/>
                                             <field name="belt"
-                                                   invisible="revision == False"/>
+                                                   invisible="not revision"/>
                                             <field name="safety"
-                                                   invisible="revision == False"/>
+                                                   invisible="not revision"/>
                                             <field name="home"/>
                                         </group>
                                     </group>

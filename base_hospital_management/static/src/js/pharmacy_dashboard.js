@@ -5,16 +5,16 @@ import { useService } from "@web/core/utils/hooks";
 import { Component, onWillStart, proxy, signal } from "@odoo/owl";
 import { PharmacyOrderLines } from "./pharmacy_orderlines";
 
-var currency = 0;
-var quantity = 0;
-var amount = 0;
-var sub_t = 0;
-var sub_total = 0;
-var product_lst = [];
-var uom_lst = [];
-var invoice = 0;
-var invoice_id = 0;
-var tax = 0;
+let currency = 0;
+let quantity = 0;
+let amount = 0;
+let sub_t = 0;
+let sub_total = 0;
+let product_lst = [];
+let uom_lst = [];
+let invoice = 0;
+let invoice_id = 0;
+let tax = 0;
 
 export class PharmacyDashboard extends Component {
     setup() {
@@ -143,7 +143,7 @@ export class PharmacyDashboard extends Component {
             return;
         }
 
-        var data = {};
+        const data = {};
         data['name'] = nameVal;
         data['phone'] = phoneElement ? phoneElement.value.trim() : '';
         data['email'] = emailElement ? emailElement.value.trim() : '';

@@ -87,7 +87,7 @@ class HospitalVaccination(models.Model):
             ('product_tmpl_id', '=', self.vaccine_product_id.id)
         ])
         sale = self.env['sale.order'].search([
-            ('partner_id.id', '=', self.patient_id.id),
+            ('partner_id', '=', self.patient_id.id),
             ('state', '=', 'draft')], limit=1)
         if sale:
             sale.sudo().write({
@@ -130,13 +130,11 @@ class HospitalVaccination(models.Model):
         data = self.sudo().search(kwargs['domain'])
         context = []
         for rec in data:
-            self.env.cr.execute(
-                f"""SELECT id FROM ir_attachment WHERE 
-                res_id = {rec.id} and res_model='hospital.vaccination' """)
-            attachment_id = False
-            attachment = self.env.cr.dictfetchall()
-            if attachment:
-                attachment_id = attachment[0]['id']
+            attachment = self.env['ir.attachment'].sudo().search([
+                ('res_id', '=', rec.id),
+                ('res_model', '=', 'hospital.vaccination'),
+            ], limit=1)
+            attachment_id = attachment.id if attachment else False
             context.append({
                 'id': rec.id,
                 'name': rec.name,

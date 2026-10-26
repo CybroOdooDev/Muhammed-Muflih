@@ -14,7 +14,7 @@
 
 Hospital Management
 ===================
-This Module helps to manage day to day activities of a hospital.
+This module helps manage the day-to-day activities of a hospital.
 
 Key Features
 ------------

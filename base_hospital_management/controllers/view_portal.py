@@ -29,13 +29,11 @@ class ViewPortal(http.Controller):
         domain = ['|', ('patient_id', '=', partner_id), ('patient_id.user_ids', 'in', [request.uid])]
         vaccination_list = []
         for rec in request.env['hospital.vaccination'].sudo().search(domain):
-            request.env.cr.execute(
-                f"""SELECT id FROM ir_attachment WHERE res_id = {rec.id} 
-                    and res_model='hospital.vaccination' """)
-            attachment_id = False
-            attachment = request.env.cr.dictfetchall()
-            if attachment:
-                attachment_id = attachment[0]['id']
+            attachment = request.env['ir.attachment'].sudo().search([
+                ('res_id', '=', rec.id),
+                ('res_model', '=', 'hospital.vaccination')
+            ], limit=1)
+            attachment_id = attachment.id if attachment else False
             data = {
                 'id': rec.id,
                 'name': rec.name,
@@ -80,18 +78,21 @@ class ViewPortal(http.Controller):
                 website=True)
     def tests_view(self, test_id):
         """Function for rendering test results of portal user"""
-        result_list = []
         all_test = request.env['patient.lab.test'].sudo().browse(test_id)
+        if not all_test.exists():
+            return request.redirect('/my/tests')
+        partner_id = request.env.user.partner_id.id
+        if all_test.patient_id.id != partner_id and request.uid not in all_test.patient_id.user_ids.ids:
+            return request.redirect('/my/tests')
+        result_list = []
         test_result_ids = request.env['lab.test.result'].sudo().search(
             [('id', 'in', all_test.result_ids.ids)])
         for rec in test_result_ids:
-            query = f"""SELECT id FROM ir_attachment WHERE res_id = {rec.id} 
-                                and res_model='lab.test.result' """
-            request.env.cr.execute(query)
-            attachment_id = False
-            attachment = request.env.cr.dictfetchall()
-            if attachment:
-                attachment_id = attachment[0]['id']
+            attachment = request.env['ir.attachment'].sudo().search([
+                ('res_id', '=', rec.id),
+                ('res_model', '=', 'lab.test.result')
+            ], limit=1)
+            attachment_id = attachment.id if attachment else False
             result_list.append({
                 'id': rec.id,
                 'name': rec.test_id.name,

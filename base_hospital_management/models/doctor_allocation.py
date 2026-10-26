@@ -37,13 +37,12 @@ class DoctorAllocation(models.Model):
                              string='Booking',
                              help='Patient booking belongs to this '
                                   'allocation')
-    company_id = fields.Many2one('res.company', string='Company',
+    company_id = fields.Many2one('res.company',
                                  default=lambda self: self.env.company.id,
                                  help='Indicates the company')
     is_doctor = fields.Boolean(string='Is Doctor', help='True for doctors.')
-    date = fields.Date(string='Date',
-                       help='Indicate the allocated date for a doctor',
-                       default=fields.Date.today())
+    date = fields.Date(help='Indicate the allocated date for a doctor',
+                       default=fields.Date.today)
     work_to = fields.Float(string='Work To', required=True,
                            help='Allocation time ending time in 24 hrs format')
     work_from = fields.Float(string='Work From', required=True,
@@ -74,7 +73,7 @@ class DoctorAllocation(models.Model):
     state = fields.Selection(
         [('draft', 'Draft'), ('confirm', 'Confirmed'),
          ('cancel', 'Cancelled')],
-        default='draft', string='State', help='State of Doctor allocation')
+        default='draft', help='State of Doctor allocation')
 
     @api.model
     def create(self, vals_list):

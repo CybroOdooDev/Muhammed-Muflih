@@ -33,13 +33,11 @@ class HrEmployee(models.Model):
             record.doctor = (record.job_title == 'Doctor' or
                              (record.job_id and record.job_id.name == 'Doctor'))
 
-    currency_id = fields.Many2one('res.currency', string='Currency',
+    currency_id = fields.Many2one('res.currency',
+                                  related='company_id.currency_id',
                                   help='Currency in which consultation fee '
-                                       'is calculating',
-                                  default=lambda self: self.env.user.company_id
-                                  .currency_id.id,
-                                  required=True)
-    coach_id = fields.Many2one('hr.employee', string='Coach',
+                                       'is calculating')
+    coach_id = fields.Many2one('hr.employee',
                                help='Name of the coach')
     consultancy_charge = fields.Monetary(string="Consultation Charge",
                                          help='Charge for consultation')

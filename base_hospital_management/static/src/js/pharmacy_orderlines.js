@@ -5,8 +5,6 @@ import { useService } from "@web/core/utils/hooks";
 import { Component, proxy, useProps } from "@odoo/owl";
 import {Dropdown} from "@web/core/dropdown/dropdown";
 import {DropdownItem} from "@web/core/dropdown/dropdown_item";
-import { _t } from "@web/core/l10n/translation";
-    var currency=0;
 export class PharmacyOrderLines extends Component {
     props = useProps();
 
@@ -59,7 +57,7 @@ export class PharmacyOrderLines extends Component {
     //   Fetch UOM of selected product
     async fetch_uom() {
         try {
-            var result = await this.orm.call('uom.uom', 'search_read', []);
+            const result = await this.orm.call('uom.uom', 'search_read', []);
             this.uom_lst = result;
             this.state.units = result;
         } catch (error) {
@@ -70,7 +68,7 @@ export class PharmacyOrderLines extends Component {
     //  Fetch tax amount of product.
     async fetch_tax() {
         try {
-            var result = await this.orm.call('account.tax', 'search_read', []);
+            const result = await this.orm.call('account.tax', 'search_read', []);
             this.tax_lst = result;
         } catch (error) {
             console.error('Error fetching tax:', error);

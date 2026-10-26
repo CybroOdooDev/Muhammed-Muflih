@@ -14,12 +14,12 @@
 
 Automatic Project Task Timer
 ============================
-App for running the timer automatically when the task enters the configured stage.
+App for running the timer automatically when a task enters the configured stage.
 
 Key Features
 ------------
 
-* Real-time tracking starts when the task is in the configured stage.
+* Real-time tracking starts when the task enters the configured stage.
 * The timer stops and the timesheet is recorded when the task moves to another stage.
 
 
@@ -29,11 +29,8 @@ No external dependencies.
 
 Configuration
 =============
-* For configuring the timer, Go to Users --> Set the user group as Administrator
-  for Projects then,
-
-  Projects --> Configuration --> Timer Configuration menu to configure the
-  project and stage.
+* For configuring the timer, go to Settings -> Users & Companies -> Users and set the Project user group to Administrator.
+* Then, go to Projects -> Configuration -> Timer Configuration to configure the project and stage.
 
 Company
 -------
@@ -59,4 +56,3 @@ Maintainer
 This module is maintained by Cybrosys Technologies.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
-

@@ -4,7 +4,7 @@
 #    Cybrosys Technologies Pvt. Ltd.
 #
 #    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
-#    Author: Henna Mehjabin (odoo@cybrosys.com)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
 #    This program is under the terms of the Odoo Proprietary License v1.0
 #    (OPL-1) It is forbidden to publish, distribute, sublicense, or sell
@@ -33,7 +33,7 @@ class Goals(models.Model):
     _inherit = 'gamification.goal'
 
     target_achievement_percentage = fields.Float(
-        string='percentage',
+        string='Percentage',
         compute='_compute_target_achievement_percentage',
         help='Target Achievement Percentage')
     incentive = fields.Float(string='Incentive')

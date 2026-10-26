@@ -94,7 +94,7 @@ class HospitalInpatient(models.Model):
     notes = fields.Text(string="Notes", help='Notes regarding the inpatient')
     bed_rent = fields.Monetary(string='Rent Per Day', related='bed_id.bed_rent',
                                help='Rent for the bed')
-    currency_id = fields.Many2one('res.currency', string='Currency',
+    currency_id = fields.Many2one('res.currency',
                                   help='Currency in which rent is calculating',
                                   default=lambda self: self.env.user.company_id
                                   .currency_id.id)
@@ -102,7 +102,7 @@ class HospitalInpatient(models.Model):
                               ('reserve', 'Reserved'),
                               ('admit', 'Admitted'), ('invoice', 'Invoiced'),
                               ('dis', 'Discharge')],
-                             string='State', readonly=True,
+                             readonly=True,
                              help='State of inpatient',
                              default="draft")
     bed_rent_amount = fields.Monetary(string="Total Bed Rent",
@@ -111,7 +111,7 @@ class HospitalInpatient(models.Model):
                                            'days',
                                       compute='_compute_bed_rent_amount',
                                       copy=False)
-    invoice_id = fields.Many2one('account.move', string='Invoice',
+    invoice_id = fields.Many2one('account.move',
                                  help='Invoice id of the inpatient', copy=False)
     admit_days = fields.Integer(string='Days',
                                 help='Number of days the inpatient admitted',

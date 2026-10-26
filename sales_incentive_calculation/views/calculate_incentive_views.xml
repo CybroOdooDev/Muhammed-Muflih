@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Tree view of calculate.incentive -->
-    <record id="calculate_incentive_view_tree" model="ir.ui.view">
-        <field name="name">
-            calculate.incentive.view.tree.sales_incentive_calculation
-        </field>
+    <!-- List view of calculate.incentive -->
+    <record id="calculate_incentive_view_list" model="ir.ui.view">
+        <field name="name">calculate.incentive.view.list.sales_incentive_calculation</field>
         <field name="model">calculate.incentive</field>
         <field name="arch" type="xml">
             <list string="Incentive" create="false" import="false">
@@ -19,17 +17,14 @@
                 <field name="check" column_invisible="True"/>
                 <field name="date_check" column_invisible="True"/>
                 <button name="action_submit_to_accountant" type="object"
-                        string="Submit for approval"
-                        />
+                        string="Submit for approval"/>
             </list>
         </field>
     </record>
 
     <!-- Form view of calculate.incentive -->
     <record id="calculate_incentive_view_form" model="ir.ui.view">
-        <field name="name">
-            calculate.incentive.view.form.sales_incentive_calculation
-        </field>
+        <field name="name">calculate.incentive.view.form.sales_incentive_calculation</field>
         <field name="model">calculate.incentive</field>
         <field name="arch" type="xml">
             <form string="Incentive Approval">
@@ -62,7 +57,7 @@
         <field name="res_model">calculate.incentive</field>
         <field name="view_mode">list,pivot,form</field>
         <field name="help" type="html">
-            <p class="oe_view_nocontent_create">
+            <p class="oe_view_nocontent_smiling_face">
                 Click to create a new incentive setting.
             </p>
         </field>

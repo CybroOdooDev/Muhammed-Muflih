@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!--    Tree view record of the timer configuration model-->
-    <record id="timer_configuration_view_tree" model="ir.ui.view">
-        <field name="name">timer.configuration.view.tree</field>
+    <!-- List view record of the timer configuration model -->
+    <record id="timer_configuration_view_list" model="ir.ui.view">
+        <field name="name">timer.configuration.view.list</field>
         <field name="model">timer.configuration</field>
         <field name="arch" type="xml">
             <list string="Configuration" editable="bottom">
@@ -12,15 +12,17 @@
             </list>
         </field>
     </record>
-    <!--     Record action for timer configuration model-->
+
+    <!-- Record action for timer configuration model -->
     <record id="timer_configuration_action" model="ir.actions.act_window">
         <field name="name">Timer Configuration</field>
         <field name="res_model">timer.configuration</field>
         <field name="view_mode">list</field>
     </record>
-    <!--    Menu action for timer configuration model-->
-    <menuitem id="timer_configuration_menu_root" name="Timer Configuration"
+
+    <!-- Menu action for timer configuration model -->
+    <menuitem id="timer_configuration_menu_root"
+              name="Timer Configuration"
               action="timer_configuration_action"
-              parent="project.menu_project_config">
-    </menuitem>
+              parent="project.menu_project_config"/>
 </odoo>

@@ -4,7 +4,7 @@
 #    Cybrosys Technologies Pvt. Ltd.
 #
 #    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
-#    Author: Henna Mehjabin (odoo@cybrosys.com)
+#    Author:  Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
 #    This program is under the terms of the Odoo Proprietary License v1.0
 #    (OPL-1) It is forbidden to publish, distribute, sublicense, or sell
@@ -19,7 +19,7 @@
 #    THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 ################################################################################
-from odoo import fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
 
@@ -72,18 +72,17 @@ class CalculateIncentive(models.Model):
         help='Status of the record.'
     )
 
+    @api.depends('end_date')
     def _compute_date_check(self):
         """
-            Compute the date check for each record.
-            This method iterates over the records and checks if the end date
-            is less than or equal to the current date. If true, it sets the
-            date_check field to True; otherwise, it sets it to False.
-            :return: None
-            """
+        Compute the date check for each record.
+        This method iterates over the records and checks if the end date
+        is less than or equal to the current date. If true, it sets the
+        date_check field to True; otherwise, it sets it to False.
+        """
+        today = fields.Date.today()
         for rec in self:
-            rec.date_check = False
-            if rec.end_date <= fields.Date.today():
-                rec.date_check = True
+            rec.date_check = bool(rec.end_date and rec.end_date <= today)
 
     def action_submit_to_accountant(self):
         """
@@ -91,8 +90,9 @@ class CalculateIncentive(models.Model):
         amount, and updates the status to 'Submitted To Accountant'.
         If the incentive amount is 0.0, a UserError is raised.
         """
+        self.ensure_one()
         if self.incentive == 0.0:
-            raise UserError('Incentive amount is 0.0')
+            raise UserError(_('Incentive amount is 0.0'))
         data = {
             'salesperson_id': self.salesperson_id.id,
             'goal': self.goal,
@@ -104,5 +104,7 @@ class CalculateIncentive(models.Model):
             'end_date': self.end_date,
         }
         self.env['approve.incentive'].create(data)
-        self.check = True
-        self.status = 'submit'
+        self.write({
+            'check': True,
+            'status': 'submit',
+        })

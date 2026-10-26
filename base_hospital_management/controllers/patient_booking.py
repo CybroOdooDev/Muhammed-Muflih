@@ -15,8 +15,11 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
+import logging
 from odoo import fields, http
 from odoo.http import request
+
+_logger = logging.getLogger(__name__)
 
 
 class PatientBooking(http.Controller):
@@ -79,8 +82,8 @@ class PatientBooking(http.Controller):
             try:
                 dept_id = int(department)
                 domain.append(('doctor_id.department_id.id', '=', dept_id))
-            except (ValueError, TypeError):
-                pass
+            except (ValueError, TypeError) as err:
+                _logger.warning("Invalid department parameter '%s': %s", department, err)
         allocation = request.env['doctor.allocation'].sudo().search(domain)
         current_partner = request.env.user.partner_id
         for rec in allocation:

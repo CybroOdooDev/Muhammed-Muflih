@@ -62,7 +62,7 @@
                         </button>
                         <button name="action_view_invoice" type="object"
                                 class="oe_stat_button"
-                                invisible="invoiced == False"
+                                invisible="not invoiced"
                                 icon="edit_square">
                             <span class="o_stat_text">Invoice</span>
                         </button>

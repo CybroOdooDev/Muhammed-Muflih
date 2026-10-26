@@ -26,7 +26,7 @@ class InpatientSurgery(models.Model):
 
     name = fields.Char(string='Name', help='Name of the surgery',
                        required=True)
-    date = fields.Date(dafault=fields.Date.today(), string='Date',
+    date = fields.Date(default=fields.Date.today, string='Date',
                        help='Date of adding surgery')
     planned_date = fields.Datetime(string='Planned Date',
                                    help='Planned date for surgery',
@@ -36,17 +36,16 @@ class InpatientSurgery(models.Model):
                                 domain=[('job_id.name', '=', 'Doctor')],
                                 help='Doctor responsible for the surgery',
                                 required=True)
-    inpatient_id = fields.Many2one('hospital.inpatient',
-                                   string='Inpatient',required=True,
+    inpatient_id = fields.Many2one('hospital.inpatient', required=True,
                                    help='Inpatient to whom surgery is added')
     hours_to_take = fields.Float(string='Duration',
                                  help='Time duration for the surgery')
-    company_id = fields.Many2one('res.company', string='Company',
+    company_id = fields.Many2one('res.company',
                                  default=lambda self: self.env.company.id)
     state = fields.Selection([('draft', 'Draft'), ('confirmed', 'Confirmed'),
                               ('done', 'Done'), ('cancel', 'Cancel'),
                               ], default='draft',
-                             string='State', help='State of the slot')
+                             help='State of the slot')
 
     def action_confirm(self):
         """Function for confirming a surgery"""

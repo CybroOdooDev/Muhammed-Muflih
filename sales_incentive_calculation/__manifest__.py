@@ -4,7 +4,7 @@
 #    Cybrosys Technologies Pvt. Ltd.
 #
 #    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
-#    Author: Henna Mehjabin (odoo@cybrosys.com)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
 #    This program is under the terms of the Odoo Proprietary License v1.0
 #    (OPL-1) It is forbidden to publish, distribute, sublicense, or sell
@@ -23,20 +23,16 @@
     'name': 'Sales Incentives',
     'version': '20.0.1.0.0',
     'category': 'Extra Tools',
-    'summary': "This module will calculate incentive for each salesperson"
-               " based on sale target in gamification",
-    'description': "This module will calculate incentive for salesperson in "
-                   "gamification,incentive version 17,"
-                   "salesman,extra salary,salesman commision,"
-                   " sale target,sale achievement,gamification,challenge,"
-                   " crm,incentive,goal achievement,goal,extra pay,"
-                   "sales target, rewards,target complete,employee,extra work,"
-                   " work salary, achievement",
+    'summary': "This module calculates incentives for salespeople based on "
+               "gamification target achievements",
+    'description': "This module calculates incentives for salespeople based on "
+                   "gamification targets, salesman commission, sales achievement, "
+                   "and goals.",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['sale', 'crm', 'gamification', 'account'],
+    'depends': ['crm', 'sales_team', 'gamification', 'account'],
     'data': [
         'security/ir.access.csv',
         'views/sales_incentive_views.xml',
@@ -50,8 +46,6 @@
     'images': ['static/description/banner.jpg'],
     'license': 'OPL-1',
     'installable': True,
-    'auto_install': False,
-    'application': False,
     'price': 79,
     'currency': 'EUR',
 }

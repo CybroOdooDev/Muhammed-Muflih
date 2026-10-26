@@ -24,7 +24,7 @@
                             string="Create Invoice"
                             class="oe_highlight"
                             groups="base_hospital_management.base_hospital_management_group_lab_assistant"
-                            invisible="state != 'completed' or invoiced == True"
+                            invisible="state != 'completed' or invoiced"
                             type="object"/>
                 </header>
                 <sheet>

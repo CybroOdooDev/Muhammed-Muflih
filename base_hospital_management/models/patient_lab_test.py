@@ -24,23 +24,21 @@ class PatientLabTest(models.Model):
     _description = 'Patient Lab Test'
     _rec_name = 'test_id'
 
-    test_id = fields.Many2one('lab.test.line', string='Test',
+    test_id = fields.Many2one('lab.test.line',
                               help='Name of the test')
-    patient_id = fields.Many2one('res.partner', string="Patient",
+    patient_id = fields.Many2one('res.partner',
                                  domain=[('patient_seq', 'not in',
                                           ['New', 'Employee', 'User'])],
                                  required=True, help='Choose the patient')
-    patient_type = fields.Selection(selection=[
-        ('inpatient', 'Inpatient'), ('outpatient', 'Outpatient')
-    ], related='test_id.patient_type', string='Type',
-        help='Choose the type of patient')
+    patient_type = fields.Selection(related='test_id.patient_type', string='Type',
+                                    help='Choose the type of patient')
     test_ids = fields.Many2many('lab.test',
                                 related='test_id.test_ids', string='Tests',
                                 help='All the tests added for the patient')
-    date = fields.Date(string='Date', help='Date of test',
-                       default=fields.Date.today())
+    date = fields.Date(help='Date of test',
+                       default=fields.Date.today)
     total_price = fields.Float(string='Price', help='Total price for the test')
-    currency_id = fields.Many2one('res.currency', string='Currency',
+    currency_id = fields.Many2one('res.currency',
                                   help='Currency in which lab test amount will'
                                        ' be calculated',
                                   default=lambda self: self.env.user.company_id
@@ -49,7 +47,7 @@ class PatientLabTest(models.Model):
     state = fields.Selection([('draft', 'Draft'),
                               ('test', 'Test In Progress'),
                               ('completed', 'Completed')],
-                             string='State', readonly=True,
+                             readonly=True,
                              help='State of test',
                              default="draft")
     result_ids = fields.One2many('lab.test.result',
@@ -61,10 +59,10 @@ class PatientLabTest(models.Model):
                                    compute='_compute_medicine_ids',
                                    readonly=False,
                                    help='Medicines needed for the test')
-    notes = fields.Text(string='Notes', help='Notes regarding the test')
+    notes = fields.Text(help='Notes regarding the test')
     lab_id = fields.Many2one('hospital.laboratory', string='Lab',
                              help='Lab in which test is doing')
-    invoice_id = fields.Many2one('account.move', string='Invoice',
+    invoice_id = fields.Many2one('account.move',
                                  help='Invoice for the test', copy=False)
     order = fields.Integer(string='Sale Order',
                            help='Number of sale orders for vaccines and '
@@ -79,7 +77,7 @@ class PatientLabTest(models.Model):
     sold = fields.Boolean(string='Sold',
                           help='If true, sale order smart button will be '
                                'visible ', copy=False)
-    company_id = fields.Many2one('res.company', string='Company',
+    company_id = fields.Many2one('res.company',
                                  default=lambda self: self.env.company.id)
     invoice_count = fields.Integer(string='Invoice '
                                           'Count',
@@ -92,7 +90,6 @@ class PatientLabTest(models.Model):
                                 help='Total number of sale orders for this '
                                      'patient lab test.')
     inpatient_id = fields.Many2one('hospital.inpatient',
-                                   string='Inpatient',
                                    help='Choose the inpatient')
 
     @api.depends('test_id')

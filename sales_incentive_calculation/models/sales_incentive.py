@@ -4,7 +4,7 @@
 #    Cybrosys Technologies Pvt. Ltd.
 #
 #    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
-#    Author: Henna Mehjabin (odoo@cybrosys.com)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
 #    This program is under the terms of the Odoo Proprietary License v1.0
 #    (OPL-1) It is forbidden to publish, distribute, sublicense, or sell
@@ -19,8 +19,8 @@
 #    THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 ################################################################################
-from odoo import api, fields, models
-from odoo.exceptions import UserError
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError, UserError
 
 
 class SalesIncentive(models.Model):
@@ -38,7 +38,7 @@ class SalesIncentive(models.Model):
         required=True)
     calculation_method = fields.Selection(
         [('linear', 'Linear'), ('step', 'Tiered Commission Plan')],
-        help='Tired : the amount of Incentive '
+        help='Tiered: the amount of Incentive '
              'increases as the sales person achieves more.',
         string='Based On', default='linear')
     select_incentive_ids = fields.One2many(
@@ -48,19 +48,36 @@ class SalesIncentive(models.Model):
         copy=False,
         help='This field controls whether the scheme is active or not.')
 
+    @api.constrains('active_calculation')
+    def _check_active_calculation(self):
+        """
+        Ensures only one scheme has active_calculation enabled.
+        """
+        for rec in self:
+            if rec.active_calculation:
+                domain = [('active_calculation', '=', True)]
+                if rec.id:
+                    domain.append(('id', '!=', rec.id))
+                if self.search_count(domain):
+                    raise ValidationError(_('Another scheme already active for incentive calculation'))
+
     @api.onchange('active_calculation')
     def _onchange_active_calculation(self):
         """
-            Checks for any active_calculation, if any returns a user error.
+        Checks for any active_calculation in UI.
         """
-        if self.search([('active_calculation', '=', True)]):
-            if self.active_calculation:
-                raise UserError('Another scheme already active for incentive calculation')
+        if self.active_calculation:
+            domain = [('active_calculation', '=', True)]
+            if self._origin.id:
+                domain.append(('id', '!=', self._origin.id))
+            if self.search_count(domain):
+                raise ValidationError(_('Another scheme already active for incentive calculation'))
 
     def action_incentive_compute(self):
         """
             Computes calculate_incentive and returns it.
         """
+        self.ensure_one()
         calc = self.env['calculate.incentive'].search([])
         challenge = self.env['gamification.challenge'].search(
             [('incentive_calculation', '=', True)])
@@ -115,11 +132,10 @@ class SalesIncentive(models.Model):
         :param2 docs that is goals of the challenge
         """
         if not (challenge and docs):
-            raise UserError('There is on active challenge and goal for calculation')
+            raise UserError(_('There is no active challenge and goal for calculation'))
         if docs.filtered(lambda goal: not goal.end_date):
             error_users = "'s,  ".join(docs.mapped('user_id.name'))
-            raise UserError(f"The goal {error_users}'s "
-                  f"{docs[0].display_name} has no end date.")
+            raise UserError(_("The goal %s's %s has no end date.") % (error_users, docs[0].display_name))
 
     def filter_expired_calc_records(self, calc, docs):
         """

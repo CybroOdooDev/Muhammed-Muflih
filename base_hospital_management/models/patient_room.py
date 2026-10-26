@@ -23,8 +23,8 @@ class PatientRoom(models.Model):
     _name = 'patient.room'
     _description = 'Patient Room'
 
-    name = fields.Char(string="Name", help='The name of room', required=True)
-    currency_id = fields.Many2one('res.currency', string='Currency',
+    name = fields.Char(help='The name of room', required=True)
+    currency_id = fields.Many2one('res.currency',
                                   default=lambda self: self.env.user.company_id
                                   .currency_id.id,
                                   required=True, help='Currency in which '
@@ -46,11 +46,11 @@ class PatientRoom(models.Model):
                                  ('clinitron', 'Clinitron'),
                                  ], string="Bed Type", help='Select the type '
                                                             'of bed')
-    rent = fields.Monetary(string='Rent', help='Rent for the room')
+    rent = fields.Monetary(help='Rent for the room')
     state = fields.Selection([('avail', 'Available'),
                               ('reserve', 'Reserve'),
                               ('not', 'Unavailable'), ],
-                             string='State', readonly=True,
+                             readonly=True,
                              default="avail", help='State of room')
     room_facilities_ids = fields.Many2many('room.facility',
                                            string='Facilities',

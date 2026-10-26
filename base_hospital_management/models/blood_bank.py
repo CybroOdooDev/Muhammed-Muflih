@@ -33,8 +33,8 @@ class BloodBank(models.Model):
                                           ['New', 'Employee', 'User'])],
                                  help='Name of the blood donor',
                                  required=True)
-    date = fields.Date(string='Date', help='Blood donating date',
-                       default=fields.Date.today())
+    date = fields.Date(help='Blood donating date',
+                       default=fields.Date.today)
     blood_type = fields.Selection([('a_positive', 'A+'),
                                    ('a_negative', 'A-'),
                                    ('b_positive', 'B+'), ('b_negative', 'B-'),
@@ -51,7 +51,7 @@ class BloodBank(models.Model):
                                               'contraindications')
     state = fields.Selection([('avail', 'Available'),
                               ('not', 'Unavailable')],
-                             string='State', help='State of the blood donation',
+                             help='State of the blood donation',
                              readonly=True, default="avail")
     assigned_patient_id = fields.Many2one('res.partner',
                                           string='Receiver',

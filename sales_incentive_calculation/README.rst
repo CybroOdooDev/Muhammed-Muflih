@@ -1,41 +1,51 @@
-.. image:: https://img.shields.io/badge/license-OPL--1-red.svg
-    :target: https://www.odoo.com/documentation/18.0/legal/licenses.html#odoo-apps
+.. |license| image:: https://img.shields.io/badge/license-OPL--1-red.svg
+    :target: https://www.odoo.com/documentation/20.0/legal/licenses.html#odoo-apps
     :alt: License: OPL-1
+
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |maintainer|
 
 Sales Incentives
 ================
-Shows the Incentive Calculation
+This module calculates sales incentives for salespersons based on gamification target achievements.
+
+Key Features
+------------
+* Calculates sales incentives based on gamification target achievements.
+* Supports both Linear and Tiered (Step) commission calculation methods.
+* Multi-level approval workflow with accountant submission.
+* Automatic accounting journal entry generation upon approval.
+* Detailed PDF incentive report generation.
+
+Installation
+------------
+No external dependencies.
 
 Configuration
 =============
-* No additional configurations needed
-
-License
--------
-Odoo Proprietary License v1.0 (OPL-1)
-(https://www.odoo.com/documentation/user/12.0/legal/licenses/licenses.html)
+* Configure Sales Incentive schemes under CRM -> Challenges -> Incentive Scheme.
+* Set calculation method (Linear or Tiered Commission Plan) and reward criteria.
 
 Company
 -------
 * `Cybrosys Techno Solutions <https://cybrosys.com/>`__
 
-Credits
+License
 -------
-* Developers: (V13) Nimisha Murali,
-              (V15) Neeraj,
-              (V16) Javid,
-              (V17) Aswin A K,
-              (V18) Adarsh K,
-              (V19) Henna Mehjabin
-* Contact: odoo@cybrosys.com
+Odoo Proprietary License v1.0 (OPL-1)
+(https://www.odoo.com/documentation/20.0/legal/licenses.html#odoo-apps)
 
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
-
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
+* Website : https://cybrosys.com
 
 Maintainer
 ==========
@@ -44,8 +54,6 @@ Maintainer
 
 This module is maintained by Cybrosys Technologies.
 
-For support and more information, please visit https://www.cybrosys.com
+For support and more information, please visit `Our Website <https://cybrosys.com/>`__
 
-Further information
-===================
-HTML Description: `<static/description/index.html>`__
+

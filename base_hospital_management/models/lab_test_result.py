@@ -28,8 +28,8 @@ class LabTestResult(models.Model):
                                  domain=[('patient_seq', 'not in',
                                           ['New', 'Employee', 'User'])],
                                  help='Patient for whom the test has been done')
-    result = fields.Char(string='Result', help='Result of the test')
-    normal = fields.Char(string='Normal', help="The normal rate of the test")
+    result = fields.Char(help='Result of the test')
+    normal = fields.Char(help="The normal rate of the test")
     uom_id = fields.Many2one('uom.uom', string='Unit',
                              help='Unit of the normal and result value')
     parent_id = fields.Many2one('patient.lab.test', string='Tests',
@@ -37,18 +37,17 @@ class LabTestResult(models.Model):
                                      ' corresponds to')
     test_id = fields.Many2one('lab.test', string="Test Name",
                               help='Name of the test')
-    attachment = fields.Binary(string='Result', help='Result document')
+    attachment = fields.Binary(string='Result Document', help='Result document')
     currency_id = fields.Many2one('res.currency',
                                   related='test_id.currency_id',
-                                  string='Currency',
                                   help='Currency in which payments to be done')
     price = fields.Monetary(string='Cost', help='Cost for the test',
                             related='test_id.price')
-    tax_ids = fields.Many2many('account.tax', string='Tax',
+    tax_ids = fields.Many2many('account.tax',
                                help='Tax for the test')
     state = fields.Selection(selection=[('processing', 'Processing'),
                                         ('published', 'Published')],
-                             string='State', help='State of the result',
+                             help='State of the result',
                              default='processing', compute='_compute_state')
 
     @api.depends('attachment')
@@ -66,13 +65,11 @@ class LabTestResult(models.Model):
         data = self.sudo().search([])
         context = []
         for rec in data:
-            self.env.cr.execute(
-                f"""SELECT id FROM ir_attachment WHERE res_id = {rec.id} 
-                                            and res_model='lab.test.result' """)
-            attachment_id = False
-            attachment = self.env.cr.dictfetchall()
-            if attachment:
-                attachment_id = attachment[0]['id']
+            attachment = self.env['ir.attachment'].sudo().search([
+                ('res_id', '=', rec.id),
+                ('res_model', '=', 'lab.test.result'),
+            ], limit=1)
+            attachment_id = attachment.id if attachment else False
             context.append({
                 'id': rec.id,
                 'parent_id': rec.parent_id.test_id.name,

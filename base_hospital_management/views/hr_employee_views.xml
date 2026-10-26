@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <!--    Inherit Hr employee for view-->
-    <record id="view_employee_form" model="ir.ui.view">
+    <record id="view_employee_form_inherit_base_hospital_management" model="ir.ui.view">
         <field name="name">hr.employee.view.form.inherit.base.hospital.management</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
@@ -19,9 +19,9 @@
             </xpath>
             <xpath expr="//field[@name='certificate']" position="after">
                 <field name="degree_ids" widget="many2many_tags"
-                       invisible="job_title != 'Doctor' and doctor == False"/>
+                       invisible="job_title != 'Doctor' and not doctor"/>
                 <field name="specialization_ids" widget="many2many_tags"
-                       invisible="job_title != 'Doctor' and doctor == False"/>
+                       invisible="job_title != 'Doctor' and not doctor"/>
             </xpath>
         </field>
     </record>

@@ -4,7 +4,7 @@
 #    Cybrosys Technologies Pvt. Ltd.
 #
 #    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
-#    Author: Henna Mehjabin (odoo@cybrosys.com)
+#    Author:  Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
 #    This program is under the terms of the Odoo Proprietary License v1.0
 #    (OPL-1) It is forbidden to publish, distribute, sublicense, or sell
@@ -19,8 +19,8 @@
 #    THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 ################################################################################
-from odoo import api, fields, models
-from odoo.exceptions import UserError
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError, UserError
 
 
 class Challenge(models.Model):
@@ -34,12 +34,27 @@ class Challenge(models.Model):
     incentive_calculation = fields.Boolean(
         string='Use in incentive calculation', copy=False)
 
+    @api.constrains('incentive_calculation')
+    def _check_incentive_calculation(self):
+        """
+        Ensures only one gamification challenge has incentive_calculation active.
+        """
+        for rec in self:
+            if rec.incentive_calculation:
+                domain = [('incentive_calculation', '=', True)]
+                if rec.id:
+                    domain.append(('id', '!=', rec.id))
+                if self.search_count(domain):
+                    raise ValidationError(_('Another challenge is already active for incentive calculation.'))
+
     @api.onchange('incentive_calculation')
     def _onchange_incentive_calculation(self):
         """
-            Checks if any gamification_challenge is
-            active for incentive_calculation
+        Checks if any gamification_challenge is active for incentive_calculation in UI.
         """
-        if self.search([('incentive_calculation', '=', True)]):
-            if self.incentive_calculation:
-                raise UserError('Another goal already active for incentive calculation')
+        if self.incentive_calculation:
+            domain = [('incentive_calculation', '=', True)]
+            if self._origin.id:
+                domain.append(('id', '!=', self._origin.id))
+            if self.search_count(domain):
+                raise ValidationError(_('Another challenge is already active for incentive calculation.'))

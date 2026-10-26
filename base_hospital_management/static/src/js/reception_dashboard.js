@@ -39,7 +39,7 @@ class ReceptionDashBoard extends Component {
 
     // Method for save patient
     async savePatient() {
-        var data = await this.fetch_patient_data();
+        const data = await this.fetch_patient_data();
         if (!data['name'] || !data['phone']) {
             alert("Please fill the name and phone");
             return;
@@ -52,16 +52,16 @@ class ReceptionDashBoard extends Component {
 
     // Method which returns the details of a patient given in the form
     fetch_patient_data() {
-        var patient_name = document.querySelector('#patient-name')?.value || '';
-        var patient_img = document.querySelector('#patient-img')?.dataset?.file || '';
-        var patient_phone = document.querySelector('#patient-phone')?.value || '';
-        var patient_mail = document.querySelector('#patient-mail')?.value || '';
-        var patient_dob = document.querySelector('#patient-dob')?.value || '';
-        var patient_bloodgroup = document.querySelector('#patient-bloodgroup')?.value || '';
-        var patient_m_status = document.querySelector('#patient-m-status')?.value || '';
-        var patient_rhtype = document.querySelector("input[name='rhtype']:checked")?.value;
-        var patient_gender = document.querySelector("input[name='gender']:checked")?.value;
-        var data = {
+        const patient_name = document.querySelector('#patient-name')?.value || '';
+        const patient_img = document.querySelector('#patient-img')?.dataset?.file || '';
+        const patient_phone = document.querySelector('#patient-phone')?.value || '';
+        const patient_mail = document.querySelector('#patient-mail')?.value || '';
+        const patient_dob = document.querySelector('#patient-dob')?.value || '';
+        const patient_bloodgroup = document.querySelector('#patient-bloodgroup')?.value || '';
+        const patient_m_status = document.querySelector('#patient-m-status')?.value || '';
+        const patient_rhtype = document.querySelector("input[name='rhtype']:checked")?.value;
+        const patient_gender = document.querySelector("input[name='gender']:checked")?.value;
+        const data = {
             'name': patient_name,
             'blood_group': patient_bloodgroup,
             'rh_type': patient_rhtype,
@@ -95,9 +95,9 @@ class ReceptionDashBoard extends Component {
 
     // Creates new outpatient
     async createOutPatient() {
-        var self = this;
+        const self = this;
         const date = new Date();
-        var formattedCurrentDate = date.toISOString().split('T')[0];
+        const formattedCurrentDate = date.toISOString().split('T')[0];
         const result = await this.orm.call('res.partner', 'fetch_patient_data', []);
         this.state.patient_lst = result;
         self.patient_lst = result;
@@ -105,21 +105,21 @@ class ReceptionDashBoard extends Component {
         this.state.dr_lst = doctorResult;
         const controlsEl = document.querySelector('#controls');
         if (controlsEl) controlsEl.innerHTML = ``;
-        var currentDate = new Date();
+        const currentDate = new Date();
         const opDateEl = document.querySelector('#op_date');
         if (opDateEl) opDateEl.value = currentDate.toISOString().split('T')[0];
     }
 
     // Method for creating inpatient
     async createInPatient() {
-        var self = this;
+        const self = this;
         document.querySelector('.room-ward')?.classList.add("d-none");
         document.querySelector('.r_Profile')?.classList.add("d-none");
         document.querySelector('.out-patient')?.classList.add("d-none");
         document.querySelector('.inpatient')?.classList.remove("d-none");
         document.querySelector('.ward')?.classList.add("d-none");
         document.querySelector('.room')?.classList.add("d-none");
-        var domain = [['job_id.name', '=', 'Doctor']];
+        const domain = [['job_id.name', '=', 'Doctor']];
         const patientResult = await this.orm.call('res.partner', 'fetch_patient_data', []);
         self.patient_id_lst = patientResult;
         this.state.patient_id_lst = patientResult;
@@ -129,10 +129,10 @@ class ReceptionDashBoard extends Component {
 
     // Method for saving outpatient
     async save_out_patient_data() {
-        var self = this;
-        var data = await self.fetch_out_patient_data();
+        const self = this;
+        const data = await self.fetch_out_patient_data();
         if (data !== false) {
-            var result = await this.orm.call('res.partner', 'create_patient', [data]);
+            const result = await this.orm.call('res.partner', 'create_patient', [data]);
             alert('The outpatient is created');
             const nameEl = document.querySelector('#o_patient-name');
             if (nameEl) nameEl.value = '';
@@ -163,9 +163,9 @@ class ReceptionDashBoard extends Component {
 
     // Method for fetching OP details
     async fetch_op_details() {
-        var patient_id = document.querySelector('#sl_patient')?.value || '';
-        var phone = document.querySelector('#o_patient-phone')?.value || '';
-        var data = {
+        const patient_id = document.querySelector('#sl_patient')?.value || '';
+        const phone = document.querySelector('#o_patient-phone')?.value || '';
+        const data = {
             'patient_data': patient_id,
             'patient-phone': phone
         };
@@ -174,7 +174,7 @@ class ReceptionDashBoard extends Component {
 
     // Method for fetching patient details
     async fetch_patient_id() {
-        var data = await this.fetch_op_details();
+        const data = await this.fetch_op_details();
         await this.orm.call('res.partner', 'reception_op_barcode', [data]
         ).then(function (result) {
             const nameEl = document.querySelector('#o_patient-name');
@@ -194,22 +194,22 @@ class ReceptionDashBoard extends Component {
 
     // Method for fetching outpatient data
     async fetch_out_patient_data() {
-        var o_patient_name = document.querySelector('#o_patient-name')?.value || '';
-        var o_patient_phone = document.querySelector('#o_patient-phone')?.value || '';
-        var o_patient_dob = document.querySelector('#o_patient-dob')?.value || '';
-        var o_patient_blood_group = document.querySelector("#o_patient_bloodgroup")?.value || '';
-        var o_patient_rhtype = document.querySelector("input[id='o_rhtype']:checked")?.value;
-        var o_patient_gender = document.querySelector("input[id='o_patient-gender']:checked")?.value;
-        var patient_id = document.querySelector('#sl_patient')?.value || '';
-        var op_date = document.querySelector('#op_date')?.value || '';
-        var reason = document.querySelector('#reason')?.value || '';
-        var ticket_no = document.querySelector('#slot')?.value || '';
-        var doctor = document.querySelector('#sl_dr')?.value || '';
+        const o_patient_name = document.querySelector('#o_patient-name')?.value || '';
+        const o_patient_phone = document.querySelector('#o_patient-phone')?.value || '';
+        const o_patient_dob = document.querySelector('#o_patient-dob')?.value || '';
+        const o_patient_blood_group = document.querySelector("#o_patient_bloodgroup")?.value || '';
+        const o_patient_rhtype = document.querySelector("input[id='o_rhtype']:checked")?.value;
+        const o_patient_gender = document.querySelector("input[id='o_patient-gender']:checked")?.value;
+        const patient_id = document.querySelector('#sl_patient')?.value || '';
+        const op_date = document.querySelector('#op_date')?.value || '';
+        const reason = document.querySelector('#reason')?.value || '';
+        const ticket_no = document.querySelector('#slot')?.value || '';
+        const doctor = document.querySelector('#sl_dr')?.value || '';
         if (o_patient_name === '' || doctor === '' || op_date === '') {
             alert('Please fill out all the required fields.');
             return false;
         } else {
-            var data = {
+            const data = {
                 'op_name': o_patient_name,
                 'op_phone': o_patient_phone,
                 'op_blood_group': o_patient_blood_group,
@@ -230,15 +230,15 @@ class ReceptionDashBoard extends Component {
 
     // Method for fetching inpatient data
     async fetch_in_patient_data() {
-        var patient_id = document.querySelector('#sl_patient_id')?.value;
-        var reason_of_admission = document.querySelector('#reason_of_admission')?.value || '';
-        var admission_type = document.querySelector('#admission_type')?.value || '';
-        var attending_doctor_id = document.querySelector('#attending_doctor_id')?.value;
+        const patient_id = document.querySelector('#sl_patient_id')?.value;
+        const reason_of_admission = document.querySelector('#reason_of_admission')?.value || '';
+        const admission_type = document.querySelector('#admission_type')?.value || '';
+        const attending_doctor_id = document.querySelector('#attending_doctor_id')?.value;
         if (!patient_id || !attending_doctor_id || !admission_type) {
             alert('Please fill out all the required fields.');
             return false;
         } else {
-            var data = {
+            const data = {
                 'patient_id': patient_id,
                 'reason_of_admission': reason_of_admission,
                 'admission_type': admission_type,
@@ -250,7 +250,7 @@ class ReceptionDashBoard extends Component {
 
     // Method for creating new inpatient
     async save_in_patient_data() {
-        var data = await this.fetch_in_patient_data();
+        const data = await this.fetch_in_patient_data();
         if (data != false && data != null && data != undefined) {
             this.orm.call('hospital.inpatient', 'create_new_in_patient', [null, data]
             ).then(function () {
@@ -292,7 +292,7 @@ class ReceptionDashBoard extends Component {
             el.classList.remove('r_active2');
         });
         document.querySelector('.o_ward_button')?.classList.add('r_active2');
-        var result = await this.orm.call('hospital.ward', 'fetch_ward_details', []);
+        const result = await this.orm.call('hospital.ward', 'fetch_ward_details', []);
         this.state.ward_data = result;
     }
 
@@ -304,7 +304,7 @@ class ReceptionDashBoard extends Component {
             el.classList.remove('r_active2');
         });
         document.querySelector('.o_room_button')?.classList.add('r_active2');
-        var result = await this.orm.call('patient.room', 'fetch_rooms_details', []);
+        const result = await this.orm.call('patient.room', 'fetch_rooms_details', []);
         this.state.room_data = result;
     }
 }

@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <form string="Incentive Settings">
                 <sheet>
-                    <div align="right">
+                    <div class="text-end">
                         <button name="action_incentive_compute" type="object"
                                 string="Compute incentive"
                                 invisible="not active_calculation"/>
@@ -36,9 +36,9 @@
         </field>
     </record>
 
-    <!-- Tree view of sales.incentive -->
-    <record id="sales_incentive_view_tree" model="ir.ui.view">
-        <field name="name">sales.incentive.view.tree</field>
+    <!-- List view of sales.incentive -->
+    <record id="sales_incentive_view_list" model="ir.ui.view">
+        <field name="name">sales.incentive.view.list</field>
         <field name="model">sales.incentive</field>
         <field name="arch" type="xml">
             <list string="Sales">
@@ -49,13 +49,14 @@
         </field>
     </record>
 
-    <!--    Action for sales.incentive-->
+    <!-- Action for sales.incentive -->
     <record id="sales_incentive_action" model="ir.actions.act_window">
         <field name="name">Incentive</field>
+        <field name="type">ir.actions.act_window</field>
         <field name="res_model">sales.incentive</field>
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
-            <p class="oe_view_nocontent_create">
+            <p class="oe_view_nocontent_smiling_face">
                 Click to create a new incentive Scheme.
             </p>
         </field>

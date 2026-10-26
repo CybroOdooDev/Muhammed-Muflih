@@ -25,7 +25,7 @@ class DoctorSlot(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
 
     name = fields.Char(string='Surgery', help='Name of surgery')
-    doctor_id = fields.Many2one('hr.employee', string="Doctor",
+    doctor_id = fields.Many2one('hr.employee',
                                 help='Doctors name',
                                 domain=[('job_id.name', '=', 'Doctor')])
     date_start = fields.Datetime(default=fields.Date.today(), string='Date',
@@ -33,16 +33,16 @@ class DoctorSlot(models.Model):
     patient_id = fields.Many2one('res.partner',
                                  domain=[('patient_seq', 'not in',
                                           ['New', 'Employee', 'User'])],
-                                 string='Patient', help='Name of the patient')
+                                 help='Name of the patient')
     state = fields.Selection([('confirmed', 'Confirmed'),
                               ('cancel', 'Cancel'),
                               ('done', 'Done'),
                               ('draft', 'Draft')], default='draft',
-                             string='State', help='State of the slot')
-    time = fields.Float(string='Time', help='Time of surgery')
+                             help='State of the slot')
+    time = fields.Float(help='Time of surgery')
     hours_to_take = fields.Float(string='Duration',
                                  help='Time duration for the surgery')
-    company_id = fields.Many2one('res.company', string='Company',
+    company_id = fields.Many2one('res.company',
                                  default=lambda self: self.env.company.id)
 
     def hospital_inpatient_confirm(self):

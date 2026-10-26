@@ -15,14 +15,33 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-import math
-import re
 import base64
 from datetime import date
-from barcode import EAN13
-from barcode.writer import ImageWriter
+import io
+import logging
+import math
+import re
 from dateutil.relativedelta import *
+
 from odoo import api, fields, models
+
+_logger = logging.getLogger(__name__)
+
+try:
+    import barcode
+    from barcode.writer import ImageWriter
+    try:
+        EAN13 = barcode.get_barcode_class('ean13')
+    except (AttributeError, Exception):
+        from barcode.ean import EAN13
+except (ImportError, AttributeError):
+    try:
+        from barcode import EAN13
+        from barcode.writer import ImageWriter
+    except (ImportError, AttributeError):
+        EAN13 = None
+        ImageWriter = None
+        _logger.warning("The 'python-barcode' library is not available or EAN13 is missing.")
 
 
 class ResPartner(models.Model):
@@ -340,12 +359,13 @@ class ResPartner(models.Model):
             'context': "{'create':False}"
         }
 
-    def name_get(self):
-        """Returns the patient name"""
-        result = []
+    @api.depends('name', 'patient_seq')
+    def _compute_display_name(self):
+        """Computes display name with patient sequence for patients"""
+        super()._compute_display_name()
         for rec in self:
-            result.append((rec.id, f'{rec.patient_seq} - {rec.name}'))
-        return result
+            if rec.patient_seq and rec.patient_seq not in ['New', 'Employee', 'User']:
+                rec.display_name = f'{rec.patient_seq} - {rec.name}'
 
     def action_alive_status(self):
         """Function for setting the value of is_alive field"""
@@ -417,11 +437,12 @@ class ResPartner(models.Model):
             ean = self.sudo().generate_ean(str(self.id))
             self.sudo().write({'barcode': ean})
             number = self.barcode
-            my_code = EAN13(number, writer=ImageWriter())
-            my_code.save("code")
-            with open('code.png', 'rb') as f:
+            if EAN13 and ImageWriter:
+                fp = io.BytesIO()
+                my_code = EAN13(number, writer=ImageWriter())
+                my_code.write(fp)
                 self.sudo().write({
-                    'barcode_png': base64.b64encode(f.read()).decode('utf-8')
+                    'barcode_png': base64.b64encode(fp.getvalue()).decode('utf-8')
                 })
         if self.gender:
             gender_caps = self.gender.capitalize()
@@ -431,8 +452,7 @@ class ResPartner(models.Model):
             today = date.today()
             dob = self.date_of_birth
             current_age = relativedelta(today, dob).years
-        company = self.env['res.company'].sudo().search(
-            [('id', '=', self.env.context['allowed_company_ids'])])
+        company = self.env.company
         data = {
             'name': self.name or '',
             'code': self.patient_seq or '',
@@ -469,7 +489,7 @@ class ResPartner(models.Model):
             'blood_group': '',
             'gender': '',
         }
-        if kw['patient_data']:
+        if kw and kw.get('patient_data'):
             patient = self.sudo().search(
                 ['|', ('id', '=', kw['patient_data']),
                  ('phone', '=', kw['patient_data'])])
@@ -486,8 +506,8 @@ class ResPartner(models.Model):
     @api.model
     def reception_op_phone(self, phone):
         """Returns a patient details having the phone number"""
-        patient_phone = self.sudo().search(
-            [('phone', '=', phone['patient-phone'])])
+        phone_val = phone.get('patient-phone') if isinstance(phone, dict) else phone
+        patient_phone = self.sudo().search([('phone', '=', phone_val)])
         return {
             'patient_seq': patient_phone.patient_seq,
             'name': patient_phone.name,

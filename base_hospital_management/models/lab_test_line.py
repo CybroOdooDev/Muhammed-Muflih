@@ -27,14 +27,14 @@ class LabTestLine(models.Model):
     name = fields.Char(string='Test Sequence', required=True,
                        copy=False, readonly=True, index=True,
                        default=lambda self: 'New', help='Name of lab test line')
-    patient_id = fields.Many2one('res.partner', string='Patient',
+    patient_id = fields.Many2one('res.partner',
                                  help='Choose the patient',
                                  domain=[('patient_seq', 'not in',
                                           ['New', 'Employee', 'User'])])
-    doctor_id = fields.Many2one('hr.employee', string='Doctor',
+    doctor_id = fields.Many2one('hr.employee',
                                 help='Choose the doctor',
                                 domain=[('job_id.name', '=', 'Doctor')])
-    date = fields.Date(default=fields.Date.today(), string='Date',
+    date = fields.Date(default=fields.Date.today,
                        help='Date of test')
     test_ids = fields.Many2many('lab.test', string='Test',
                                 help='All the tests')
@@ -47,7 +47,7 @@ class LabTestLine(models.Model):
                             help='ID of inpatient')
     state = fields.Selection(selection=[
         ('draft', 'Draft'), ('created', 'created')
-    ], default='draft', string='State', help='State of the record')
+    ], default='draft', help='State of the record')
 
     @api.model_create_multi
     def create(self, vals_list):

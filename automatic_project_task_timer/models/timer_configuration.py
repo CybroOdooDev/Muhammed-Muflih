@@ -19,44 +19,63 @@ from odoo import api, fields, models
 
 
 class TimerConfiguration(models.Model):
-    """Timer configuration model for configure the automatic timer
-    stage to activate the timer, Each project have different stages,
-    based on the configured stage for each project the timer will be runs."""
+    """Timer configuration model to configure the automatic timer
+    stage for each project."""
     _name = 'timer.configuration'
     _description = 'Timer Configuration'
 
-    project_id = fields.Many2one('project.project', string='Project',
-                                 help='Configure the project to activate the '
-                                      'timer')
-    stage_ids = fields.Many2many('project.task.type',
-                                 string='Stages',
-                                 help='To set the domain for stages')
-    stage_id = fields.Many2one('project.task.type', string='Stage',
-                               help='Set the stage to activate the timer',
-                               domain="[('id', 'in', stage_ids)]",
-                               required=True)
+    project_id = fields.Many2one(
+        'project.project',
+        string='Project',
+        help='Configure the project to activate the timer.'
+    )
+    stage_ids = fields.Many2many(
+        'project.task.type',
+        string='Stages',
+        help='Stages of the selected project.'
+    )
+    stage_id = fields.Many2one(
+        'project.task.type',
+        string='Stage',
+        domain="[('id', 'in', stage_ids)]",
+        required=True,
+        help='Set the stage to activate the timer.'
+    )
 
     @api.onchange('project_id')
     def _onchange_project_id(self):
-        """To set the domain for stage_id field to select the stages
-         from the stages of the selected project"""
-        data = []
-        for rec in self.env['project.task.type'].search([]):
-            if self.project_id.id in rec.project_ids.ids:
-                data.append(rec.id)
-        self.stage_ids = data
+        """Set the domain for stage_id to stages of the selected project."""
+        if self.project_id:
+            stages = self.env['project.task.type'].search([
+                ('project_ids', 'in', self.project_id.id)
+            ])
+            self.stage_ids = stages
+        else:
+            self.stage_ids = self.env['project.task.type']
+        if self.stage_id and self.stage_id not in self.stage_ids:
+            self.stage_id = False
 
     @api.model_create_multi
     def create(self, vals_list):
-        """To set the status stage for all the tasks in the corresponding
-        project, so that the warning message will pop-up when the form
-        opens."""
+        """Set the status stage for all tasks in the corresponding project."""
         records = super().create(vals_list)
         for record in records:
             if record.project_id and record.stage_id:
                 tasks = self.env['project.task'].search([
-                    ('project_id', '=', record.project_id.id)
+                    ('project_id', '=', record.project_id.id),
+                    ('stage_id', '=', record.stage_id.id),
                 ])
-                for task in tasks:
-                    task.is_status_stage = (task.stage_id == record.stage_id)
+                tasks.write({'is_status_stage': True})
         return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'stage_id' in vals or 'project_id' in vals:
+            for record in self:
+                if record.project_id and record.stage_id:
+                    tasks = self.env['project.task'].search([
+                        ('project_id', '=', record.project_id.id),
+                        ('stage_id', '=', record.stage_id.id),
+                    ])
+                    tasks.write({'is_status_stage': True})
+        return res

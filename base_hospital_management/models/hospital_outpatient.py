@@ -55,23 +55,20 @@ class HospitalOutpatient(models.Model):
     state = fields.Selection(
         [('draft', 'Draft'), ('op', 'OP'), ('inpatient', 'In Patient'),
          ('invoice', 'Invoiced'), ('cancel', 'Canceled')],
-        default='draft', string='State', help='State of the outpatient')
+        default='draft', help='State of the outpatient')
     prescription_ids = fields.One2many('prescription.line',
                                        'outpatient_id',
                                        string='Prescription',
                                        help='Prescription for the patient')
-    invoiced = fields.Boolean(string='Invoiced',
-                              help='True for invoiced')
+    invoiced = fields.Boolean(help='True for invoiced')
     invoice_id = fields.Many2one('account.move', copy=False,
-                                 string='Invoice',
                                  help='Invoice of the patient')
     attachment_id = fields.Many2one('ir.attachment',
-                                    string='Attachment',
                                     help='Attachments related to the'
                                          ' outpatient')
-    active = fields.Boolean(string='Active', help='True for active patients',
+    active = fields.Boolean(help='True for active patients',
                             default=True)
-    slot = fields.Float(string='Slot', help='Slot for the patient',
+    slot = fields.Float(help='Slot for the patient',
                         copy=False, readonly=True)
     is_sale_created = fields.Boolean(string='Sale Created',
                                      help='True if sale order created')

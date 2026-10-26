@@ -4,7 +4,7 @@
 #    Cybrosys Technologies Pvt. Ltd.
 #
 #    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
-#    Author: Henna Mehjabin (odoo@cybrosys.com)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
 #    This program is under the terms of the Odoo Proprietary License v1.0
 #    (OPL-1) It is forbidden to publish, distribute, sublicense, or sell
@@ -19,7 +19,7 @@
 #    THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 ################################################################################
-from odoo import fields, models
+from odoo import fields, models, _
 from odoo.exceptions import UserError
 
 
@@ -84,9 +84,10 @@ class SalesIncentive(models.Model):
             Approves the incentive and creates account_move with the
             corresponding values. Changes the state.
         """
+        self.ensure_one()
         if not (self.journal_id
                 and self.debit_account_id and self.credit_account_id):
-            raise UserError('You must enter journal, debit account and credit account')
+            raise UserError(_('You must enter journal, debit account and credit account'))
         lines = [fields.Command.create({
             'account_id': self.credit_account_id.id,
             'partner_id': self.salesperson_id.partner_id.id,
@@ -121,6 +122,7 @@ class SalesIncentive(models.Model):
         """
             Rejects the incentive request and changes the state.
         """
+        self.ensure_one()
         self.write({
             'status': 'reject',
             'check': True

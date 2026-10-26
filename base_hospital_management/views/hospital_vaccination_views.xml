@@ -23,14 +23,14 @@
                 <header>
                     <button name="action_create_so" class="oe_highlight"
                             type="object" string="Create Sale order"
-                           invisible="sold == True"/>
+                           invisible="sold"/>
                 </header>
                 <sheet>
                     <div name="button_box" class="oe_button_box">
                         <button id="invoice_smart_btn" name="action_get_sale_order"
                                 type="object" class="oe_stat_button"
                                 icon="attach_money"
-                               invisible="sold == False">
+                               invisible="not sold">
                             <div class="o_stat_info">
                                 <span class="o_stat_text">Sale order</span>
                             </div>
@@ -57,7 +57,7 @@
                     </group>
                     <notebook>
                         <page name="Recurring Vaccine"
-                              invisible="recurring_vaccine == False"
+                              invisible="not recurring_vaccine"
                               string="Recurring Vaccine">
                             <group>
                                 <group>

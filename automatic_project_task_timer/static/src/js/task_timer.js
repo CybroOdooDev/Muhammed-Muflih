@@ -1,16 +1,28 @@
 /** @odoo-module **/
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { parseFloatTime } from "@web/views/fields/parsers";
 import { useInputField } from "@web/views/fields/input_field_hook";
+import { useRecordObserver } from "@web/model/relational_model/utils";
+import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import {
+    Component,
+    onWillDestroy,
+    proxy,
+    signal,
+    t,
+    untrack,
+    useOnChange,
+    useProps,
+} from "@odoo/owl";
 
-import { Component, proxy, signal, onWillUpdateProps, onWillStart, onWillDestroy } from "@odoo/owl";
-
-// Function for converting the time and return the value in each seconds.
+// Function for converting the time and return the formatted minutes:seconds.
 function formatMinutes(value) {
-    if (value === false) {
-        return "";
+    if (value === false || value === undefined || value === null || isNaN(value)) {
+        return "00:00";
     }
+    value = Number(value);
     const isNegative = value < 0;
     if (isNegative) {
         value = Math.abs(value);
@@ -22,72 +34,165 @@ function formatMinutes(value) {
     return `${isNegative ? "-" : ""}${min}:${sec}`;
 }
 
+function getRecordId(val) {
+    if (!val) {
+        return false;
+    }
+    if (Array.isArray(val)) {
+        return val[0];
+    }
+    if (typeof val === "object" && "id" in val) {
+        return val.id;
+    }
+    if (typeof val === "number") {
+        return val;
+    }
+    return false;
+}
+
+export class TimerWidget extends Component {
+    static template = "automatic_project_task_timer.TimerWidget";
+    props = useProps({
+        value: t.number().optional(0),
+        ongoing: t.boolean().optional(false),
+    });
+
+    setup() {
+        this.state = proxy({
+            duration: this.props.value || 0,
+        });
+        this.lastDateTime = Date.now();
+
+        useOnChange(
+            () => [this.props.ongoing, this.props.value],
+            (ongoing, value) => {
+                this.state.duration = value || 0;
+                if (!ongoing) {
+                    this._stopTimers();
+                    return;
+                }
+                this.lastDateTime = Date.now();
+                this._runTimer();
+                this._runSleepTimer();
+                return () => this._stopTimers();
+            }
+        );
+
+        onWillDestroy(() => this._stopTimers());
+    }
+
+    get durationFormatted() {
+        return formatMinutes(this.state.duration);
+    }
+
+    _stopTimers() {
+        clearTimeout(this.tickTimer);
+        clearTimeout(this.sleepTimer);
+    }
+
+    _runTimer() {
+        clearTimeout(this.tickTimer);
+        this.tickTimer = setTimeout(() => {
+            if (this.props.ongoing) {
+                this.state.duration += 1 / 60;
+                this._runTimer();
+            }
+        }, 1000);
+    }
+
+    _runSleepTimer() {
+        clearTimeout(this.sleepTimer);
+        this.sleepTimer = setTimeout(() => {
+            if (this.props.ongoing) {
+                const diff = Date.now() - this.lastDateTime - 10000;
+                if (diff > 1000) {
+                    this.state.duration += diff / (1000 * 60);
+                }
+                this.lastDateTime = Date.now();
+                this._runSleepTimer();
+            }
+        }, 10000);
+    }
+}
+
+export const taskTimerProps = {
+    ...standardFieldProps,
+    ongoing: t.boolean().optional(),
+    placeholder: t.string().optional(),
+};
+
 export class TaskTimer extends Component {
-//Extend component to add TaskTimer
+    static template = "TaskTimerTemplate";
+    static components = { TimerWidget };
+    props = useProps(taskTimerProps);
     numpadDecimalRef = signal.ref();
 
     setup() {
-        this.orm = useService('orm');
+        this.orm = useService("orm");
+        const stageId = getRecordId(this.props.record.data.stage_id);
+        const checkStageId = getRecordId(this.props.record.data.check_stage);
+        const isTimerStage =
+            Boolean(this.props.record.data.task_timer) ||
+            Boolean(this.props.record.data.is_user_working) ||
+            Boolean(stageId && checkStageId && stageId === checkStageId);
+
         this.state = proxy({
-            // Duration is expected to be given in minutes
-            duration:this.props?.value ? this.props.value : this.props.record.data.duration,
+            duration: isTimerStage ? (this.props.record.data[this.props.name] || 0) : 0,
         });
+
         useInputField({
             getValue: () => this.durationFormatted,
             ref: this.numpadDecimalRef,
             parse: (v) => parseFloatTime(v),
         });
 
-        this.ongoing =
-            this.props.ongoing !== undefined
-                ? this.props.ongoing
-                : this.props.record.data.is_user_working;
+        useRecordObserver(async (record) => {
+            const useSampleModel = untrack(() => record.model?.useSampleModel);
+            const currentStageId = getRecordId(record.data.stage_id);
+            const currentCheckStageId = getRecordId(record.data.check_stage);
+            const currentlyTimerStage =
+                Boolean(record.data.task_timer) ||
+                Boolean(record.data.is_user_working) ||
+                Boolean(currentStageId && currentCheckStageId && currentStageId === currentCheckStageId);
 
-        onWillStart(async () => {
-            // Check the status while form rendering.
-            const stageId = this.props.record.data.stage_id?.[0] ?? this.props.record.data.stage_id?.id;
-            if (this.props.ongoing === undefined && !this.props.record.model.useSampleModel && stageId && stageId === this.props.record.data.check_stage) {
-                const additionalDuration = await this.orm.call('project.task', 'get_working_duration', [this.props.record.resId]);
-                this.state.duration += additionalDuration;
-            }
-            if (this.ongoing) {
-                this._runTimer();
-            }
-        });
-        onWillUpdateProps((nextProps) => {
-            const newOngoing = "ongoing" in nextProps? nextProps.ongoing: "record" in nextProps && nextProps.record.data.is_user_working;
-            const rerun = !this.ongoing && newOngoing;
-            this.ongoing = newOngoing;
-            if (rerun) {
-                this.state.duration = nextProps.record.data.duration;
-                this._runTimer();
-            }
-            else{
-            this.state.duration = nextProps.record.data.duration
+            if (!useSampleModel && currentlyTimerStage && record.resId) {
+                const additionalDuration = await this.orm.call(
+                    "project.task",
+                    "get_working_duration",
+                    [record.resId]
+                );
+                this.state.duration = additionalDuration || 0;
+            } else {
+                this.state.duration = 0;
             }
         });
-        onWillDestroy(() => clearTimeout(this.timer));
     }
-    //Getting the formatted time duration
+
     get durationFormatted() {
         return formatMinutes(this.state.duration);
     }
-    //Function for setting the interval and call in each 1000ms
-    _runTimer() {
-        this.timer = setTimeout(() => {
-            if (this.ongoing) {
-                this.state.duration += 1 / 60;
-                this._runTimer();
-            }
-        }, 1000);
+
+    get ongoing() {
+        const stageId = getRecordId(this.props.record.data.stage_id);
+        const checkStageId = getRecordId(this.props.record.data.check_stage);
+        return Boolean(
+            this.props.ongoing !== undefined
+                ? this.props.ongoing
+                : (this.props.record.data.task_timer ||
+                   this.props.record.data.is_user_working ||
+                   (stageId && checkStageId && stageId === checkStageId))
+        );
     }
 }
 
-TaskTimer.template = "TaskTimerTemplate";
 export const taskTimer = {
     component: TaskTimer,
-    supportedTypes : ["float"],
+    displayName: _t("Task Timer"),
+    supportedTypes: ["float"],
+    extractProps: ({ attrs, placeholder }) => ({
+        placeholder,
+    }),
 };
-//Adding the widget to the field registry
+
 registry.category("fields").add("task_timer", taskTimer);
 registry.category("formatters").add("task_timer", formatMinutes);

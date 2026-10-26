@@ -19,18 +19,18 @@ from odoo import fields, models
 
 
 class AccountAnalyticLine(models.Model):
-    """inherited the 'account.analytic.line' for showing the time records."""
+    """Inherit 'account.analytic.line' for recording timer sessions."""
     _inherit = 'account.analytic.line'
 
     date_start = fields.Datetime(
         string='Start Date',
-        help='Shows the starting time of the timer'
+        help='Shows the starting time of the timer.'
     )
     date_end = fields.Datetime(
         string='End Date',
-        help='Shows the ending time of the timer'
+        help='Shows the ending time of the timer.'
     )
     timer_duration = fields.Float(
         string='Time Duration (Minutes)',
-        help='Shows the real time in minutes'
+        help='Shows the real time in minutes.'
     )

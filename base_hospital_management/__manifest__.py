@@ -19,14 +19,12 @@
     "name": "Hospital Management in Odoo 20",
     "version": "20.0.1.0.0",
     "category": "Services",
-    "summary": """This Module Helps to Manage Patients Records, Doctors Details,
-     Lab Management , Employee Management etc.""",
-    "description": """The hospital management module can be used to handle 
-     the day-to-day activities of the hospital. Managing patient scheduling, 
-     making patient ID cards, creating patient lab test results, and adding 
-     doctors, patients, prescriptions, vaccines, etc. are all made easier 
-     with the help of this module. This app offers a different dashboards for 
-     different users.""",
+    "summary": """Manage patient records, doctor details, lab tests, prescriptions, and hospital workflows.""",
+    "description": """The hospital management module handles the day-to-day activities
+     of a hospital. Managing patient scheduling, creating patient ID cards, handling
+     lab test results, and managing doctors, patients, prescriptions, and vaccines
+     are all streamlined with this module. This app provides dedicated dashboards
+     for different user roles.""",
     "author": "Cybrosys Techno Solutions",
     "company": "Cybrosys Techno Solutions",
     "maintainer": "Cybrosys Techno Solutions",
