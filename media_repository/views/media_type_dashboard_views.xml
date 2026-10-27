@@ -8,6 +8,7 @@
 
      <!--MENU-->
     <menuitem name="Dashboard" id="media_type_dashboard_menu"
+          groups="media_repository.group_user"
           action="media_type_dashboard_action"
           parent="media_repository_root_menu"
           sequence="10"/>

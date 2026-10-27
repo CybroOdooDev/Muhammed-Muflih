@@ -3,7 +3,7 @@
     :alt: License: LGPL-3
 
 Media Repository
-==============
+================
 This module will help you in managing media assets.
 
 Configuration
@@ -23,8 +23,8 @@ License
 
 Credits
 -------
-Developer :(V18) Muhammed Muflih c
-Contact:odoo@cybrosys.com
+Developer : Muhammed Muflih c
+Contact: odoo@cybrosys.com
 
 Contacts
 --------

@@ -25,6 +25,7 @@
       <!--MENU-->
      <menuitem id="menu_media_category"
               name="Media Category"
+              groups="media_repository.group_manager"
               parent="menu_media_repository_configuration"
               action="media_category_action"/>
 </odoo>

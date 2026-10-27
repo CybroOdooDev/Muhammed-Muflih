@@ -23,7 +23,7 @@
     'version': '17.0.1.0.0',
     'category': 'Tools',
     'summary': 'Centralized location for storing, organizing, searching, and managing media assets',
-    'description': """The Media Repository module provides a centralized platform for storing, organizing, and managing media assets within Odoo. Users can upload files, categorize them, search efficiently.""",
+    'description': """The Media Repository module provides a centralized platform for storing, organizing, and managing media assets within Odoo. Users can upload files, categorize them, and search efficiently.""",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
@@ -31,7 +31,6 @@
     'license': 'LGPL-3',
     'depends': ['base', 'mail'],
     'data': [
-        'data/ir_config_parameter_data.xml',
         'security/media_repository_groups.xml',
         'security/ir.model.access.csv',
         'security/media_repository_record_rules.xml',
@@ -42,6 +41,7 @@
     ],
     'assets': {
         'web.assets_backend': [
+            'media_repository/static/src/css/dashboard.css',
             'media_repository/static/src/js/dashboard.js',
             'media_repository/static/src/xml/dashboard.xml',
             'media_repository/static/src/js/large_file_field.js',
@@ -50,6 +50,5 @@
     },
     'images': ['static/description/banner.jpg'],
     'installable': True,
-    'auto_install': False,
     'application': True,
 }

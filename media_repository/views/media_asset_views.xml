@@ -27,43 +27,47 @@
             <form string="Media Asset">
                 <header>
                     <field name="state" widget="statusbar"/>
-                    <button type="object" name="confirm" string="Confirm" class="btn btn-primary" invisible="state in 'confirmed'"/>
+                    <button type="object" name="confirm" string="Confirm" class="btn btn-primary" invisible="state == 'confirmed'"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
                         <label for="name"/>
                         <h1>
-                            <field name="name" placeholder="Media Name…" readonly="state in 'confirmed'"/>
+                            <field name="name" placeholder="Media Name…" readonly="state == 'confirmed'"/>
                         </h1>
                     </div>
 
                     <group>
                         <group string="General Information">
-                            <field name="media_type" readonly="state in 'confirmed'"/>
-                            <field name="category_id" readonly="state in 'confirmed'"/>
-                            <field name="source_type" readonly="state in 'confirmed'"/>
+                            <field name="media_type" readonly="state == 'confirmed'"/>
+                            <field name="category_id" readonly="state == 'confirmed'"/>
+                            <field name="source_type" readonly="state == 'confirmed'"/>
                         </group>
-                         <group string="Upload Info" >
-                            <field name="create_uid" readonly="state in 'confirmed'"/>
-                            <field name="create_date" readonly="state in 'confirmed'"/>
-                             <field name="favorite" readonly="state in 'confirmed'"/>
-                             <field name="media_tag_ids" widget="many2many_tags" readonly="state in 'confirmed'"/>
+                         <group string="Upload Info">
+                            <field name="create_uid" string="Uploaded By" readonly="state == 'confirmed'"/>
+                            <field name="create_date" string="Upload Date" readonly="state == 'confirmed'"/>
+                            <field name="favorite" readonly="state == 'confirmed'"/>
+                            <field name="media_tag_ids" widget="many2many_tags" readonly="state == 'confirmed'"/>
                         </group>
 
                     </group>
 
-                    <group string="Upload" >
-                        <field name="file" filename="file_name" widget="media_large_file" invisible="source_type =='url' or not source_type" readonly="state in 'confirmed'"/>
-                        <field name="source_url" widget="url" placeholder="https://…" invisible="source_type =='file' or not source_type " readonly="state in 'confirmed'"/>
-                        <field name="file_name" invisible="source_type =='url' or not source_type" readonly="state in 'confirmed'"/>
-                        <field name="file_size" invisible="source_type =='url' or not source_type" readonly="state in 'confirmed'"/>
+                    <group string="Upload">
+                        <field name="file" filename="file_name" widget="media_large_file" invisible="source_type =='url' or not source_type" readonly="state == 'confirmed'"/>
+                        <field name="source_url" widget="url" placeholder="https://…" invisible="source_type =='file' or not source_type" readonly="state == 'confirmed'"/>
+                        <field name="file_name" invisible="source_type =='url' or not source_type" readonly="state == 'confirmed'"/>
+                        <field name="file_size" invisible="source_type =='url' or not source_type" readonly="state == 'confirmed'"/>
                     </group>
 
                     <group string="Description">
-                        <field name="description" nolabel="1" placeholder="Enter a description…" readonly="state in 'confirmed'"/>
+                        <field name="description" nolabel="1" placeholder="Enter a description…" readonly="state == 'confirmed'"/>
                     </group>
                 </sheet>
-               <chatter/>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
             </form>
         </field>
     </record>
@@ -76,30 +80,31 @@
         <field name="model">media.asset</field>
         <field name="arch" type="xml">
             <kanban>
+                <field name="media_type"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click d-flex flex-row w-100">
                             <aside class="o_kanban_image m-1">
                                 <div style="padding-left:10px;" class="o_kanban_image_wrapper d-flex align-items-center justify-content-center">
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" invisible="media_type !='image'"
-                                     style="width: 60px; height: 60px; background-color: #eff6ff;">
-                                    <i class="fa fa-picture-o text-primary" style="font-size: 24px;"/>
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" t-if="record.media_type.raw_value == 'image'"
+                                         style="width: 60px; height: 60px; background-color: #eff6ff;">
+                                        <i class="fa fa-picture-o text-primary" style="font-size: 24px;" title="Image Icon"/>
                                     </div>
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3"
-                                     style="width: 60px; height: 60px; background-color: #fff1f2;" invisible="media_type !='video'">
-                                    <i class="fa fa-video-camera" style="font-size: 24px; color: #f43f5e;"/>
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" t-if="record.media_type.raw_value == 'video'"
+                                         style="width: 60px; height: 60px; background-color: #fff1f2;">
+                                        <i class="fa fa-video-camera" style="font-size: 24px; color: #f43f5e;" title="Video Icon"/>
                                     </div>
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3"
-                                     style="width: 60px; height: 60px; background-color: #ecfdf5;" invisible="media_type !='document'">
-                                    <i class="fa fa-file-text" style="font-size: 24px; color: #10b981;"/>
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" t-if="record.media_type.raw_value == 'document'"
+                                         style="width: 60px; height: 60px; background-color: #ecfdf5;">
+                                        <i class="fa fa-file-text" style="font-size: 24px; color: #10b981;" title="Document Icon"/>
                                     </div>
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" invisible="media_type !='audio'"
-                                     style="width: 60px; height: 60px; background-color: #f5f3ff;">
-                                    <i class="fa fa-music" style="font-size: 24px; color: #8b5cf6;"/>
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" t-if="record.media_type.raw_value == 'audio'"
+                                         style="width: 60px; height: 60px; background-color: #f5f3ff;">
+                                        <i class="fa fa-music" style="font-size: 24px; color: #8b5cf6;" title="Audio Icon"/>
                                     </div>
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" invisible="media_type !='url'"
-                                     style="width: 60px; height: 60px; background-color: #fffbeb;">
-                                    <i class="fa fa-link" style="font-size: 24px; color: #f59e0b;"/>
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" t-if="record.media_type.raw_value == 'url'"
+                                         style="width: 60px; height: 60px; background-color: #fffbeb;">
+                                        <i class="fa fa-link" style="font-size: 24px; color: #f59e0b;" title="URL Link Icon"/>
                                     </div>
                                 </div>
                             </aside>
@@ -128,8 +133,8 @@
                 <field name="name"/>
                 <field name="media_type"/>
                 <field name="category_id"/>
-                <field name="create_uid"/>
-                <field name="create_date"/>
+                <field name="create_uid" string="Uploaded By"/>
+                <field name="create_date" string="Upload Date"/>
                 <field name="state"/>
             </tree>
         </field>
@@ -141,49 +146,55 @@
         <field name="model">media.asset</field>
         <field name="arch" type="xml">
             <search string="Search Media Assets">
-    <field name="name"/>
-    <field name="category_id"/>
+                <field name="name"/>
+                <field name="category_id"/>
 
-    <filter name="filter_image"
-            string="Images"
-            domain="[('media_type','=','image')]"/>
-
-    <filter name="filter_video"
-            string="Videos"
-            domain="[('media_type','=','video')]"/>
-
+                <filter name="filter_image"
+                        string="Images"
+                        domain="[('media_type', '=', 'image')]"/>
+                <filter name="filter_video"
+                        string="Videos"
+                        domain="[('media_type', '=', 'video')]"/>
                 <filter name="filter_url"
-        string="URL"
-        domain="[('media_type','=','url')]"/>
-        <filter name="filter_document" string="Documents" domain="[('media_type','=','document')]" />
-              <filter name="filter_favourite" string="Favourites" domain="[('favorite','=',True)]"/>
-        <filter name="admin_records" string="My Records"    domain="[('create_uid', '=', uid)]"  groups="media_repository.group_manager"/>
+                        string="URL"
+                        domain="[('media_type', '=', 'url')]"/>
+                <filter name="filter_document"
+                        string="Documents"
+                        domain="[('media_type', '=', 'document')]"/>
+                <filter name="filter_favourite"
+                        string="Favourites"
+                        domain="[('favorite', '=', True)]"/>
+                <filter name="admin_records"
+                        string="My Records"
+                        domain="[('create_uid', '=', uid)]"
+                        groups="media_repository.group_manager"/>
 
-        <filter name="media_type"
-                string="Media Type"
-                context="{'group_by':'media_type'}"/>
-
-    <filter name="group_by_category"
-            string="Category"
-            context="{'group_by': 'category_id'}"/>
-
-</search>
+                <filter name="media_type"
+                        string="Media Type"
+                        context="{'group_by': 'media_type'}"/>
+                <filter name="group_by_category"
+                        string="Category"
+                        context="{'group_by': 'category_id'}"/>
+            </search>
         </field>
     </record>
 
     <!--MENU ITEMS-->
     <menuitem id="media_repository_root_menu"
               name="Media Repository"
+              groups="media_repository.group_user"
               web_icon="media_repository,static/description/icon.png"
               sequence="11"/>
 
-     <menuitem id="menu_media_repository_configuration"
+    <menuitem id="menu_media_repository_configuration"
               name="Configuration"
+              groups="media_repository.group_manager"
               parent="media_repository_root_menu"
               sequence="20"/>
 
     <menuitem id="menu_media_assets"
               name="Media Assets"
+              groups="media_repository.group_user"
               parent="media_repository_root_menu"
               action="media_asset_action"
               sequence="11"/>

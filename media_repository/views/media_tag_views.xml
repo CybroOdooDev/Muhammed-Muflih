@@ -22,6 +22,7 @@
     <!-- MENU ITEM -->
     <menuitem id="menu_media_tag"
               name="Media Tag"
+              groups="media_repository.group_manager"
               parent="menu_media_repository_configuration"
               action="action_media_tag"/>
 </odoo>

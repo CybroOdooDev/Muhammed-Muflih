@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates>
-    <t t-name="media_type_dashboard.MediaTypeDashboard">
+    <t t-name="media_repository.MediaTypeDashboard">
         <div class="container-fluid p-4 bg-light min-vh-100" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
             <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
                 <div>
@@ -16,10 +16,7 @@
 
             <div class="row g-4">
                 <div class="col-12 col-sm-6 col-lg">
-                    <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden"
-                         style="border-top: 4px solid #3b82f6 !important; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
-                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(59, 130, 246, 0.15)';"
-                         onmouseout="this.style.transform='none'; this.style.boxShadow='none';"
+                    <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden o_media_dashboard_card o_media_dashboard_card_image"
                          t-on-click.prevent="() => this.actionService.doAction({
                              name: 'Image',
                              res_model: 'media.asset',
@@ -43,10 +40,7 @@
                 </div>
 
                 <div class="col-12 col-sm-6 col-lg">
-                    <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden"
-                         style="border-top: 4px solid #f43f5e !important; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
-                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(244, 63, 94, 0.15)';"
-                         onmouseout="this.style.transform='none'; this.style.boxShadow='none';"
+                    <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden o_media_dashboard_card o_media_dashboard_card_video"
                          t-on-click.prevent="() => this.actionService.doAction({
                              name: 'Video',
                              res_model: 'media.asset',
@@ -70,10 +64,7 @@
                 </div>
 
                 <div class="col-12 col-sm-6 col-lg">
-                    <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden"
-                         style="border-top: 4px solid #10b981 !important; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
-                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(16, 185, 129, 0.15)';"
-                         onmouseout="this.style.transform='none'; this.style.boxShadow='none';"
+                    <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden o_media_dashboard_card o_media_dashboard_card_document"
                          t-on-click.prevent="() => this.actionService.doAction({
                              name: 'Document',
                              res_model: 'media.asset',
@@ -97,12 +88,9 @@
                 </div>
 
                 <div class="col-12 col-sm-6 col-lg">
-                    <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden"
-                         style="border-top: 4px solid #f59e0b !important; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
-                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(245, 158, 11, 0.15)';"
-                         onmouseout="this.style.transform='none'; this.style.boxShadow='none';"
+                    <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden o_media_dashboard_card o_media_dashboard_card_url"
                          t-on-click.prevent="() => this.actionService.doAction({
-                             name: 'Url',
+                             name: 'URL',
                              res_model: 'media.asset',
                              type: 'ir.actions.act_window',
                              views: [[false, 'list'], [false, 'form']],
@@ -124,10 +112,7 @@
                 </div>
 
                 <div class="col-12 col-sm-6 col-lg">
-                    <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden"
-                         style="border-top: 4px solid #8b5cf6 !important; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
-                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(139, 92, 246, 0.15)';"
-                         onmouseout="this.style.transform='none'; this.style.boxShadow='none';"
+                    <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden o_media_dashboard_card o_media_dashboard_card_audio"
                          t-on-click.prevent="() => this.actionService.doAction({
                              name: 'Audio',
                              res_model: 'media.asset',

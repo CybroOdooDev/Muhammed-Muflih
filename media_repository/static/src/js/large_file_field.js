@@ -3,20 +3,19 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { FileInput } from "@web/core/file_input/file_input";
 import { download } from "@web/core/network/download";
 import { isBinarySize, toBase64Length } from "@web/core/utils/binary";
+import { humanNumber } from "@web/core/utils/numbers";
 import { _t } from "@web/core/l10n/translation";
-import { session } from "@web/session";
 
-import { Component } from "@odoo/owl";
+import { Component, useRef, useState } from "@odoo/owl";
 
 export const MAX_FILENAME_SIZE_BYTES = 0xFF;
 export const UPLOAD_ROUTE = "/media_repository/asset/upload_file";
+export const MAX_MEDIA_FILE_UPLOAD_SIZE = 2 * 1024 * 1024 * 1024; // 2 GB
 
 export class LargeFileBinaryField extends Component {
     static template = "media_repository.LargeFileBinaryField";
-    static components = { FileInput };
     static props = {
         ...standardFieldProps,
         fileNameField: { type: String, optional: true },
@@ -24,10 +23,12 @@ export class LargeFileBinaryField extends Component {
 
     setup() {
         this.notification = useService("notification");
+        this.http = useService("http");
+        this.fileInputRef = useRef("fileInput");
+        this.state = useState({
+            isUploading: false,
+        });
         this.uploadRoute = UPLOAD_ROUTE;
-        
-        // OVERRIDE THE 134MB LIMIT ON THE FRONTEND TO ALLOW 50GB
-        session.max_file_upload_size = 53687091200;
     }
 
     get fileName() {
@@ -44,12 +45,57 @@ export class LargeFileBinaryField extends Component {
         return Boolean(this.props.record.data[this.props.name]);
     }
 
-    async onFileUploaded(data) {
-        if (data.error) {
-            this.notification.add(data.error, { type: "danger" });
+    onUploadBtnClick() {
+        if (this.fileInputRef.el) {
+            this.fileInputRef.el.click();
+        }
+    }
+
+    async onFileInputChange() {
+        const input = this.fileInputRef.el;
+        if (!input || !input.files || !input.files.length) {
             return;
         }
-        await this.props.record.load();
+        const file = input.files[0];
+        if (file.size > MAX_MEDIA_FILE_UPLOAD_SIZE) {
+            this.notification.add(
+                _t(
+                    "The selected file (%sB) is over the maximum allowed file size (%sB).",
+                    humanNumber(file.size),
+                    humanNumber(MAX_MEDIA_FILE_UPLOAD_SIZE)
+                ),
+                { type: "danger" }
+            );
+            input.value = null;
+            return;
+        }
+
+        this.state.isUploading = true;
+        try {
+            const formData = new FormData();
+            formData.append("csrf_token", odoo.csrf_token);
+            formData.append("model", this.props.record.resModel);
+            formData.append("id", this.props.record.resId);
+            formData.append("ufile", file);
+
+            const responseText = await this.http.post(this.uploadRoute, formData, "text");
+            const data = JSON.parse(responseText);
+            if (data.error) {
+                this.notification.add(data.error, { type: "danger" });
+            } else {
+                await this.props.record.load();
+            }
+        } catch (err) {
+            this.notification.add(
+                _t("File upload failed: %s", err.message || err),
+                { type: "danger" }
+            );
+        } finally {
+            this.state.isUploading = false;
+            if (this.fileInputRef.el) {
+                this.fileInputRef.el.value = null;
+            }
+        }
     }
 
     async onFileDownload() {
