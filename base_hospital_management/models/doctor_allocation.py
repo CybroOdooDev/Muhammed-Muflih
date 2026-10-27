@@ -24,13 +24,12 @@ class DoctorAllocation(models.Model):
     _name = 'doctor.allocation'
     _description = 'Doctor Allocation'
 
-    name = fields.Char(string="Name", readonly=True, default='New',
+    name = fields.Char(readonly=True, default='New',
                        help='Name of the allocation')
-    doctor_id = fields.Many2one('hr.employee', string="Doctor",
+    doctor_id = fields.Many2one('hr.employee',
                                 help='Name of the doctor',
                                 domain=[('job_id.name', '=', 'Doctor')])
-    department_id = fields.Many2one(string='Department',
-                                    help='Department of the doctor',
+    department_id = fields.Many2one(help='Department of the doctor',
                                     related='doctor_id.department_id')
     op_ids = fields.One2many('hospital.outpatient',
                              'doctor_id',
@@ -40,12 +39,12 @@ class DoctorAllocation(models.Model):
     company_id = fields.Many2one('res.company',
                                  default=lambda self: self.env.company.id,
                                  help='Indicates the company')
-    is_doctor = fields.Boolean(string='Is Doctor', help='True for doctors.')
+    is_doctor = fields.Boolean(help='True for doctors.')
     date = fields.Date(help='Indicate the allocated date for a doctor',
                        default=fields.Date.today)
-    work_to = fields.Float(string='Work To', required=True,
+    work_to = fields.Float(required=True,
                            help='Allocation time ending time in 24 hrs format')
-    work_from = fields.Float(string='Work From', required=True,
+    work_from = fields.Float(required=True,
                              help='Allocation time starting time in 24 hrs '
                                   'format')
     time_avg = fields.Float(string='Duration', help="Average Consultation time "
@@ -54,14 +53,12 @@ class DoctorAllocation(models.Model):
                             related='doctor_id.time_avg')
     patient_type = fields.Selection([('inpatient', 'Inpatient'),
                                      ('outpatient', 'Outpatient')],
-                                    string='Patient Type',
                                     help='Indicates the type of patient')
     patient_limit = fields.Integer(string='Limit Patient',
                                    help='Maximum number of patients allowed '
                                         'per allocation', store=True,
                                    compute='_compute_patient_limit', )
-    patient_count = fields.Integer(string='Patient Count',
-                                   help='Number of patient under '
+    patient_count = fields.Integer(help='Number of patient under '
                                         'this allocation',
                                    compute='_compute_patient_count')
     slot_remaining = fields.Integer(string='Slots Remaining',
@@ -101,7 +98,7 @@ class DoctorAllocation(models.Model):
         """Method for calculating name"""
         if self.work_from and self.work_to:
             if self.work_from >= self.work_to:
-                raise ValidationError("Work From must be less than Work To.")
+                raise ValidationError(self.env._("Work From must be less than Work To."))
 
     @api.model
     def default_get(self, doctor_id):
@@ -138,8 +135,7 @@ class DoctorAllocation(models.Model):
             ])
             if overlapping_allocations:
                 raise ValidationError(
-                    "Overlap detected with another doctor allocation on the "
-                    "same date.")
+                    self.env._("Overlap detected with another doctor allocation on the same date."))
 
     @api.depends('work_from', 'work_to', 'time_avg')
     def _compute_patient_limit(self):
@@ -154,7 +150,7 @@ class DoctorAllocation(models.Model):
                     continue
                 duration = (work_to - work_from)*60
                 if duration <= 0:
-                    raise ValidationError("Work From must be less than Work To.")
+                    raise ValidationError(self.env._("Work From must be less than Work To."))
                 if duration > 0:
                     patient_slots = int(duration / time_avg)
                     record.patient_limit = max(patient_slots, 0)

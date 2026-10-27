@@ -26,5 +26,4 @@ class MedicineBrand(models.Model):
     name = fields.Char(string="Brand", help='Name of the brand')
     medicine_ids = fields.One2many('product.template',
                                    'medicine_brand_id',
-                                   string='Medicine',
                                    help='All medicines belongs to this brand')

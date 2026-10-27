@@ -23,5 +23,5 @@ class HospitalPrescription(models.Model):
     _name = 'hospital.prescription'
     _description = 'Hospital Prescription'
 
-    name = fields.Char(string='Name', help='Hospital Prescription',
+    name = fields.Char(help='Hospital Prescription',
                        required=True)

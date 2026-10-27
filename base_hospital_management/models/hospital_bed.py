@@ -40,7 +40,7 @@ class HospitalBed(models.Model):
                                  ('clinitron', 'Clinitron'),
                                  ], string="Type", help='Type of bed')
     note = fields.Text(string="Notes", help='Notes regarding bed')
-    ward_id = fields.Many2one('hospital.ward', string="Ward",
+    ward_id = fields.Many2one('hospital.ward',
                               help='Indicates the ward to which the bed'
                                    ' belongs to')
     room_id = fields.Many2one('patient.room',

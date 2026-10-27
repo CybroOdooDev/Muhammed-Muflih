@@ -92,6 +92,6 @@ class BloodBank(models.Model):
 
     def action_change_availability(self):
         """Cron action for changing the state of the record"""
-        for rec in self.sudo().search([]):
-            if rec.date <= fields.Date.subtract(fields.Date.today(), months=1):
-                rec.state = 'avail'
+        cutoff_date = fields.Date.subtract(fields.Date.today(), months=1)
+        records = self.sudo().search([('date', '<=', cutoff_date), ('state', '!=', 'avail')])
+        records.write({'state': 'avail'})

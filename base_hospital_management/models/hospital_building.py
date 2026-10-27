@@ -27,12 +27,10 @@ class HospitalBuilding(models.Model):
                        help='Code for uniquely identifying a block',
                        copy=False, readonly=True, index=True,
                        default=lambda self: 'New')
-    notes = fields.Text(string='Notes', help='Notes regarding the building')
-    phone = fields.Char(string='Phone',
-                        help='Phone number for contact the building')
-    mobile = fields.Char(string='Mobile',
-                         help='Mobile number for contact the building')
-    email = fields.Char(string='Email', help='Email of the building')
+    notes = fields.Text(help='Notes regarding the building')
+    phone = fields.Char(help='Phone number for contact the building')
+    mobile = fields.Char(help='Mobile number for contact the building')
+    email = fields.Char(help='Email of the building')
     room_count = fields.Integer(string="Rooms",
                                 help='Number of rooms in the building',
                                 compute="_compute_room_count")

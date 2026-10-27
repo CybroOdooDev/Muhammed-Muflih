@@ -15,7 +15,7 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -36,11 +36,11 @@ class LabTestLine(models.Model):
                                 domain=[('job_id.name', '=', 'Doctor')])
     date = fields.Date(default=fields.Date.today,
                        help='Date of test')
-    test_ids = fields.Many2many('lab.test', string='Test',
+    test_ids = fields.Many2many('lab.test',
                                 help='All the tests')
     patient_type = fields.Selection(selection=[
         ('inpatient', 'Inpatient'), ('outpatient', 'Outpatient')
-    ], required=True, string='Patient Type', help='Choose the patient type')
+    ], required=True, help='Choose the patient type')
     op_id = fields.Many2one('hospital.outpatient', string='OP Number',
                             help='ID of outpatient')
     ip_id = fields.Many2one('hospital.inpatient', string='Inpatient ID',
@@ -60,7 +60,7 @@ class LabTestLine(models.Model):
     def action_confirm(self):
         """Method for confirming the test"""
         if not self.test_ids:
-            raise UserError(_('You need to add a test before posting.'))
+            raise UserError(self.env._('You need to add a test before posting.'))
         total = 0
         for test in self.test_ids:
             total += test.price

@@ -28,7 +28,7 @@ class HospitalOutpatient(models.Model):
     _inherit = 'mail.thread'
     _order = 'op_date desc'
 
-    op_reference = fields.Char(string="OP Reference", readonly=True,
+    op_reference = fields.Char(readonly=True,
                                default='New',
                                help='Op reference number of the patient')
     patient_id = fields.Many2one('res.partner',
@@ -37,7 +37,6 @@ class HospitalOutpatient(models.Model):
                                  string='Patient ID', help='Id of the patient',
                                  required=True)
     doctor_id = fields.Many2one('doctor.allocation',
-                                string='Doctor',
                                 help='Select the doctor',
                                 required=True,
                                 domain=[('slot_remaining', '>', 0),
@@ -45,12 +44,11 @@ class HospitalOutpatient(models.Model):
                                         ('state', '=', 'confirm')])
     op_date = fields.Date(default=fields.Date.today(), string='Date',
                           help='Date of OP')
-    reason = fields.Text(string='Reason', help='Reason for visiting hospital')
+    reason = fields.Text(help='Reason for visiting hospital')
     test_count = fields.Integer(string='Test Created',
                                 help='Number of tests created for the patient',
                                 compute='_compute_test_count')
     test_ids = fields.One2many('lab.test.line', 'op_id',
-                               string='Tests',
                                help='Tests for the patient')
     state = fields.Selection(
         [('draft', 'Draft'), ('op', 'OP'), ('inpatient', 'In Patient'),
@@ -58,7 +56,6 @@ class HospitalOutpatient(models.Model):
         default='draft', help='State of the outpatient')
     prescription_ids = fields.One2many('prescription.line',
                                        'outpatient_id',
-                                       string='Prescription',
                                        help='Prescription for the patient')
     invoiced = fields.Boolean(help='True for invoiced')
     invoice_id = fields.Many2one('account.move', copy=False,
@@ -93,8 +90,7 @@ class HospitalOutpatient(models.Model):
                 ('doctor_id', '=', vals['doctor_id'])
             ]):
                 raise ValidationError(
-                    'An OP already exists for this patient under the specified '
-                    'allocation')
+                    self.env._('An OP already exists for this patient under the specified allocation'))
         return super().create(vals_list)
 
     @api.depends('test_ids')

@@ -25,13 +25,12 @@ class PrescriptionLine(models.Model):
     _rec_name = 'prescription_id'
 
     prescription_id = fields.Many2one('hospital.prescription',
-                                      string='Prescription',
                                       help='Name of the prescription')
     medicine_id = fields.Many2one('product.template', domain=[
         '|', ('medicine_ok', '=', True), ('vaccine_ok', '=', True)],
-                                  string='Medicine', required=True,
+                                  required=True,
                                   help='Medicines or vaccines')
-    quantity = fields.Integer(string='Quantity', required=True,
+    quantity = fields.Integer(required=True,
                               help="The number of medicines for the time "
                                    "period")
     no_intakes = fields.Float(string='Intakes', required=True,
@@ -39,7 +38,7 @@ class PrescriptionLine(models.Model):
     time = fields.Selection(
         [('once', 'Once in a day'), ('twice', 'Twice in a Day'),
          ('thrice', 'Thrice in a day'), ('morning', 'In Morning'),
-         ('noon', 'In Noon'), ('evening', 'In Evening')], string='Time',
+         ('noon', 'In Noon'), ('evening', 'In Evening')],
         required=True,
         help='The interval for medicine intake')
     note = fields.Selection(
@@ -47,11 +46,9 @@ class PrescriptionLine(models.Model):
         string='Before/ After Food',
         help='Whether the medicine to be taken before or after food')
     inpatient_id = fields.Many2one('hospital.inpatient',
-                                   string='Inpatient',
                                    help='The inpatient corresponds to the '
                                         'prescription line')
     outpatient_id = fields.Many2one('hospital.outpatient',
-                                    string='Outpatient',
                                     help='The outpatient corresponds to the '
                                          'prescription line')
     res_partner_id = fields.Many2one('res.partner',

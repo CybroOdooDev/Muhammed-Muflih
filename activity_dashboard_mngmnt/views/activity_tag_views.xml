@@ -23,9 +23,9 @@
             </form>
         </field>
     </record>
-    <!--    Activity tag tree view-->
+    <!--    Activity tag list view-->
     <record id="activity_tag_view_tree" model="ir.ui.view">
-        <field name="name">activity.tag.view.tree</field>
+        <field name="name">activity.tag.view.list</field>
         <field name="model">activity.tag</field>
         <field name="arch" type="xml">
             <list string="Tags" editable="bottom" sample="1">
@@ -44,12 +44,12 @@
                 No tags found. Let's create one!
             </p>
             <p>
-                Tags are perfect to categorize.
+                Tags are perfect for categorizing activities.
             </p>
         </field>
     </record>
-    <!--    Activity Dashboard menu-->
-    <menuitem id="activity_menu_root" name="Activity Dashboard"
+    <!--    Activity Dashboard root menu-->
+    <menuitem id="activity_menu_root" name="Activity Management"
               sequence="25"
               web_icon="activity_dashboard_mngmnt,static/description/icon.png"/>
     <!--    Configuration menu-->

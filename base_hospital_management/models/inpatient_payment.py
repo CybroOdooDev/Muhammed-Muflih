@@ -23,11 +23,10 @@ class InpatientPayment(models.Model):
     _name = 'inpatient.payment'
     _description = "Inpatient Payments"
 
-    name = fields.Char(string='Name', help='Name of payment')
-    subtotal = fields.Float(string='Subtotal', help='Total payment')
+    name = fields.Char(help='Name of payment')
+    subtotal = fields.Float(help='Total payment')
     inpatient_id = fields.Many2one('hospital.inpatient',
-                                   string='Inpatient',
                                    help='Inpatient related to the payment')
-    date = fields.Datetime(string='Date', help="Date of payment")
-    tax_ids = fields.Many2many('account.tax', string='Tax',
+    date = fields.Datetime(help="Date of payment")
+    tax_ids = fields.Many2many('account.tax',
                                help='Tax for the test')

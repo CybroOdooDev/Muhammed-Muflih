@@ -34,7 +34,7 @@ class PatientRoom(models.Model):
                                   required=True, help='Building to which '
                                                         'the room corresponds '
                                                         'to')
-    nurse_ids = fields.Many2many('hr.employee', string='Nurses',
+    nurse_ids = fields.Many2many('hr.employee',
                                  domain="[('job_id.name','=','Nurse')]",
                                  help='Nurses of the room')
     bed_type = fields.Selection([('gatch', 'Gatch Bed'),
@@ -44,7 +44,7 @@ class PatientRoom(models.Model):
                                  ('air', 'Low Air Loss'),
                                  ('circo', 'Circo Electric'),
                                  ('clinitron', 'Clinitron'),
-                                 ], string="Bed Type", help='Select the type '
+                                 ], help='Select the type '
                                                             'of bed')
     rent = fields.Monetary(help='Rent for the room')
     state = fields.Selection([('avail', 'Available'),

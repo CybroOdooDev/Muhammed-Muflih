@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
@@ -11,8 +10,9 @@
 #
 #############################################################################
 from datetime import date, timedelta
+
 from odoo import fields
-from odoo.exceptions import ValidationError, UserError
+from odoo.exceptions import ValidationError
 from odoo.tests.common import TransactionCase, tagged
 
 
@@ -367,6 +367,7 @@ class TestHospitalManagement(TransactionCase):
         brand = self.env['medicine.brand'].create({
             'name': 'PharmaCorp',
         })
+        self.assertTrue(brand.id)
         pharmacy = self.env['hospital.pharmacy'].create({
             'name': 'Central Hospital Pharmacy',
         })
@@ -397,6 +398,7 @@ class TestHospitalManagement(TransactionCase):
         contra = self.env['contra.indication'].create({
             'blood_donation_question': 'Have you traveled abroad in the last 30 days?',
         })
+        self.assertTrue(contra.id)
         blood_entry = self.env['blood.bank'].create({
             'partner_id': self.patient_john.id,
             'blood_type': 'o_positive',
@@ -470,3 +472,267 @@ class TestHospitalManagement(TransactionCase):
         self.assertTrue(self.patient_john.display_name)
         search_res = self.env['res.partner'].name_search('John Patient')
         self.assertTrue(search_res)
+
+    def test_11_pharmacy_and_sale_orders(self):
+        """Test pharmacy create_sale_order with multiple parameter combinations."""
+        pharmacy = self.env['hospital.pharmacy'].search([], limit=1)
+        if not pharmacy:
+            pharmacy = self.env['hospital.pharmacy'].create({'name': 'Test Pharmacy'})
+
+        # 1. With patient_id
+        res1 = pharmacy.create_sale_order({
+            'patient_id': self.patient_john.id,
+            'products': [{'product': self.medicine_product.id, 'qty': 2, 'price': 25.0}],
+        })
+        self.assertTrue(res1.get('invoice_id'))
+
+        # 2. With patient_code
+        res2 = pharmacy.create_sale_order({
+            'patient_code': self.patient_john.patient_seq,
+            'products': [{'product': self.medicine_product.id, 'qty': 1, 'price': 20.0}],
+        })
+        self.assertTrue(res2.get('invoice_id'))
+
+        # 3. With op reference
+        op = self.env['hospital.outpatient'].create({
+            'patient_id': self.patient_john.id,
+            'doctor_id': self.allocation.id,
+            'op_date': fields.Date.today(),
+            'reason': 'Pharmacy test checkup',
+        })
+        res3 = pharmacy.create_sale_order({
+            'op': op.op_reference,
+            'products': [{'product': self.medicine_product.id, 'qty': 1, 'price': 15.0}],
+        })
+        self.assertTrue(res3.get('invoice_id'))
+
+        # 4. With new patient info
+        res4 = pharmacy.create_sale_order({
+            'name': 'Walk-in Pharmacy Patient',
+            'email': 'walkin@example.com',
+            'phone': '5551234567',
+            'dob': '1990-01-01',
+            'gender': 'female',
+            'products': [{'product': self.medicine_product.id, 'qty': 3}],
+        })
+        self.assertTrue(res4.get('invoice_id'))
+
+        # Test pharmacy helper methods
+        self.assertTrue(pharmacy.company_currency())
+        inv_act = pharmacy.action_get_inventory()
+        self.assertEqual(inv_act.get('res_model'), 'stock.quant')
+        so_act = pharmacy.action_get_sale_order()
+        self.assertEqual(so_act.get('res_model'), 'sale.order')
+        so_list = pharmacy.fetch_sale_orders()
+        self.assertIsInstance(so_list, list)
+        tax = self.env['account.tax'].search([], limit=1)
+        if tax:
+            t_res = pharmacy.tax_amount(tax.id)
+            self.assertIn('amount', t_res)
+
+    def test_12_patient_lab_test_and_results_helpers(self):
+        """Test patient lab test helpers, status changes, and report rendering."""
+        lab_line = self.env['lab.test.line'].create({
+            'patient_id': self.patient_john.id,
+            'doctor_id': self.doctor_employee.id,
+            'patient_type': 'outpatient',
+            'test_ids': [(6, 0, [self.lab_test.id])],
+        })
+        lab_line.action_confirm()
+
+        patient_test = self.env['patient.lab.test'].search([('test_id', '=', lab_line.id)], limit=1)
+        self.assertTrue(patient_test)
+
+        # Test action_get_patient_data
+        data = self.env['patient.lab.test'].action_get_patient_data(patient_test.id)
+        self.assertTrue(data)
+        self.assertEqual(data.get('name'), self.patient_john.name)
+
+        # Test lab.test.line helpers
+        line_data = self.env['lab.test.line'].action_get_patient_data(lab_line.id)
+        self.assertTrue(line_data)
+
+        # Test test_end and create_invoice
+        self.env['patient.lab.test'].test_end(patient_test.id)
+        self.assertEqual(patient_test.state, 'completed')
+
+        patient_test.action_create_invoice()
+        self.assertTrue(patient_test.invoiced)
+
+        # Smart buttons
+        inv_view = patient_test.action_view_invoice()
+        self.assertEqual(inv_view.get('res_model'), 'account.move')
+
+        report = patient_test.print_lab_tests()
+        self.assertTrue(report)
+
+    def test_13_inpatient_and_outpatient_additional_workflows(self):
+        """Test additional inpatient and outpatient actions and reports."""
+        inpatient = self.env['hospital.inpatient'].create({
+            'patient_id': self.patient_john.id,
+            'type_admission': 'routine',
+            'attending_doctor_id': self.doctor_employee.id,
+            'hosp_date': fields.Date.today(),
+            'is_ward': 'ward',
+            'ward_id': self.ward.ward_no,
+            'bed_id': self.bed.id,
+        })
+        inpatient.action_reserve()
+
+        # Add prescription to inpatient and print
+        self.env['prescription.line'].create({
+            'inpatient_id': inpatient.id,
+            'medicine_id': self.medicine_product.id,
+            'quantity': 5,
+            'time': 'twice',
+            'no_intakes': 2,
+            'note': 'after',
+        })
+        presc_report = inpatient.action_print_prescription()
+        self.assertTrue(presc_report)
+
+        # Inpatient dashboard list and fetch
+        ip_list = self.env['hospital.inpatient'].hospital_inpatient_list()
+        self.assertIsInstance(ip_list, list)
+        fetch_data = self.env['hospital.inpatient'].fetch_inpatient(False)
+        self.assertIsInstance(fetch_data, list)
+        fetch_data2 = self.env['hospital.inpatient'].fetch_inpatient('routine')
+        self.assertIsInstance(fetch_data2, list)
+
+        # Inpatient invoice action
+        inv_res = inpatient.action_invoice()
+        self.assertTrue(inpatient.invoice_id)
+        self.assertEqual(inv_res.get('res_model'), 'account.move')
+
+        # Inpatient admit and discharge
+        inpatient.action_admit()
+        self.assertEqual(inpatient.state, 'admit')
+        inpatient.action_discharge()
+        self.assertEqual(inpatient.state, 'dis')
+
+        # Outpatient extra actions
+        outpatient = self.env['hospital.outpatient'].create({
+            'patient_id': self.patient_jane.id,
+            'doctor_id': self.allocation.id,
+            'op_date': fields.Date.today(),
+            'reason': 'Fever and cold',
+        })
+        outpatient.action_confirm()
+        outpatient.create_invoice()
+        self.assertTrue(outpatient.invoice_id)
+        view_inv = outpatient.action_view_invoice()
+        self.assertEqual(view_inv.get('res_model'), 'account.move')
+
+    def test_14_doctor_allocation_slots_and_infrastructure(self):
+        """Test doctor allocations, slots, building, and ward helpers."""
+        # Allocation helpers
+        booking_act = self.allocation.action_get_patient_booking()
+        self.assertEqual(booking_act.get('res_model'), 'hospital.outpatient')
+        lines = self.env['doctor.allocation'].get_allocation_lines()
+        self.assertIsInstance(lines, list)
+
+        # Cancel allocation
+        self.allocation.action_cancel_allocation()
+        self.assertEqual(self.allocation.state, 'cancel')
+
+        # Slot helpers
+        slot = self.env['doctor.slot'].create({
+            'name': 'Slot-Test-01',
+            'doctor_id': self.doctor_employee.id,
+            'date_start': fields.Datetime.now(),
+            'patient_id': self.patient_john.id,
+            'state': 'draft',
+        })
+        slot.action_confirm()
+        self.assertEqual(slot.state, 'confirmed')
+        self.env['doctor.slot'].hospital_inpatient_confirm()
+        slot.action_done()
+        self.assertEqual(slot.state, 'done')
+        self.env['doctor.slot'].hospital_inpatient_done()
+        slot.action_cancel()
+        self.assertEqual(slot.state, 'cancel')
+        self.env['doctor.slot'].hospital_inpatient_cancel()
+        slot_data = self.env['doctor.slot'].action_get_doctor_slot()
+        self.assertIsInstance(slot_data, list)
+
+        # Building & Ward helpers
+        self.assertTrue(self.building.name)
+        room_act = self.building.action_get_room_count()
+        self.assertEqual(room_act.get('res_model'), 'patient.room')
+        ward_act = self.building.action_get_ward_count()
+        self.assertEqual(ward_act.get('res_model'), 'hospital.ward')
+
+        bed_act = self.ward.action_get_open_bed()
+        self.assertEqual(bed_act.get('res_model'), 'hospital.bed')
+        wards = self.env['hospital.ward'].fetch_ward_details()
+        self.assertIsInstance(wards, list)
+        rooms = self.env['patient.room'].fetch_rooms_details()
+        self.assertIsInstance(rooms, list)
+
+    def test_15_res_partner_users_and_payments(self):
+        """Test partner data retrieval, user creation, employee helpers, and payment register."""
+        # Partner action_get_patient_data
+        p_data = self.patient_john.action_get_patient_data(self.patient_john.name)
+        self.assertEqual(p_data.get('name'), self.patient_john.name)
+        p_empty = self.patient_john.action_get_patient_data(False)
+        self.assertEqual(p_empty.get('name'), 'Patient Not Found')
+
+        # Reception barcode and phone helpers
+        bc_res = self.env['res.partner'].reception_op_barcode({'patient_data': self.patient_john.id})
+        self.assertEqual(bc_res.get('name'), self.patient_john.name)
+        phone_res = self.env['res.partner'].reception_op_phone({'patient-phone': self.patient_john.phone})
+        self.assertEqual(phone_res.get('name'), self.patient_john.name)
+
+        # Partner fetch_patient_data
+        p_list = self.env['res.partner'].fetch_patient_data()
+        self.assertIsInstance(p_list, list)
+
+        # Partner create_patient helper
+        self.env['res.partner'].create_patient({
+            'patient_id': False,
+            'op_name': 'Emergency Walk-in Patient',
+            'op_blood_group': 'b',
+            'op_gender': 'male',
+            'date': str(fields.Date.today()),
+            'reason': 'Acute pain',
+        })
+
+        # Res.users creation override
+        test_user = self.env['res.users'].create({
+            'name': 'Hospital Portal User',
+            'login': 'hospital_portal_user@example.com',
+        })
+        self.assertEqual(test_user.partner_id.patient_seq, 'User')
+
+        # Employee user creation and doctor fetch
+        user_act = self.doctor_employee.action_create_user()
+        self.assertEqual(user_act.get('res_model'), 'res.users')
+        self.doctor_employee._inverse_work_contact_details()
+        doctors = self.env['hr.employee'].fetch_doctors_for_reception([('doctor', '=', True)])
+        self.assertIsInstance(doctors, list)
+
+        # Inpatient payment via account.payment.register
+        inpatient = self.env['hospital.inpatient'].create({
+            'patient_id': self.patient_john.id,
+            'type_admission': 'emergency',
+            'attending_doctor_id': self.doctor_employee.id,
+            'hosp_date': fields.Date.today(),
+        })
+        income_account = self.env['account.account'].search([('account_type', '=', 'income')], limit=1)
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.patient_john.id,
+            'invoice_date': fields.Date.today(),
+            'invoice_line_ids': [(0, 0, {'name': 'Hospital Service', 'price_unit': 200.0, 'account_id': income_account.id})],
+        })
+        invoice.action_post()
+        self.env['account.payment.register'].with_context(
+            active_model='account.move',
+            active_ids=invoice.ids,
+        ).create({
+            'communication': 'Deposit payment',
+            'amount': 200.0,
+            'payment_date': fields.Date.today(),
+        })
+        payments = self.env['inpatient.payment'].search([('inpatient_id', '=', inpatient.id)])
+        self.assertTrue(payments)

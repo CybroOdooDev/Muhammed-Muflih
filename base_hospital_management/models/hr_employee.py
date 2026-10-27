@@ -15,7 +15,7 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -23,7 +23,7 @@ class HrEmployee(models.Model):
     """Inherited to add more fields and functions"""
     _inherit = 'hr.employee'
 
-    doctor = fields.Boolean(string='Doctor', compute='_compute_doctor',
+    doctor = fields.Boolean(compute='_compute_doctor',
                             store=True, readonly=False, help='True for Doctors')
 
     @api.depends('job_id', 'job_title')
@@ -49,13 +49,10 @@ class HrEmployee(models.Model):
                             help="Average Consultation time "
                                  "per Patient in minutes")
     degree_ids = fields.Many2many('hospital.degree',
-                                  string="Degree",
                                   help='Degrees of staff')
     pharmacy_id = fields.Many2one('hospital.pharmacy',
-                                  string="Pharmacy",
                                   help='Name of the pharmacy')
     specialization_ids = fields.Many2many('doctor.specialization',
-                                          string="Specialization",
                                           help="Doctors specialization for"
                                                " an area")
 
@@ -63,9 +60,9 @@ class HrEmployee(models.Model):
         """Updating employee field of res user to true"""
         self.ensure_one()
         if self.user_id:
-            raise ValidationError(_("This employee already has an user."))
+            raise ValidationError(self.env._("This employee already has an user."))
         return {
-            'name': _('Create User'),
+            'name': self.env._('Create User'),
             'type': 'ir.actions.act_window',
             'res_model': 'res.users',
             'view_mode': 'form',

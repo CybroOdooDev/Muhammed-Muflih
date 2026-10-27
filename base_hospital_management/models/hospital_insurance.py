@@ -24,11 +24,10 @@ class HospitalInsurance(models.Model):
     _description = 'Hospital Insurance'
 
     name = fields.Char(string='Provider', help='Name of the insurance provider')
-    currency_id = fields.Many2one('res.currency', string='Currency',
+    currency_id = fields.Many2one('res.currency',
                                   help='Currency in which insurance will be '
                                        'calculated',
                                   default=lambda self: self.env.user.company_id
                                   .currency_id.id,
                                   required=True)
-    total_coverage = fields.Monetary(string='Total Coverage',
-                                     help='Total coverage of the insurance')
+    total_coverage = fields.Monetary(help='Total coverage of the insurance')

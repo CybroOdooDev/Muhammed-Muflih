@@ -29,7 +29,6 @@ class PharmacyMedicine(models.Model):
                                  help='Name of medicine',
                                  domain="[('medicine_ok', '=', True)]")
     pharmacy_id = fields.Many2one('hospital.pharmacy',
-                                  string='Pharmacy',
                                   help='Name of pharmacy')
     qty_available = fields.Float(related='product_id.qty_available',
                                  string='Available Quantity',

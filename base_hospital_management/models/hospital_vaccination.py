@@ -32,11 +32,11 @@ class HospitalVaccination(models.Model):
                                  domain=[('patient_seq', 'not in',
                                           ['New', 'Employee', 'User'])],
                                  required=True,
-                                 string="Patient", help='Choose the patient')
+                                 help='Choose the patient')
     vaccine_date = fields.Date(string='Vaccination Date', help='Date of '
                                                                'vaccination',
                                default=fields.Date.today())
-    dose = fields.Float(string='Dose', help='Dose of the vaccine')
+    dose = fields.Float(help='Dose of the vaccine')
     vaccine_product_id = fields.Many2one('product.template',
                                          domain="[('vaccine_ok', '=', True)]",
                                          string="Vaccine", help='Choose the '
@@ -45,16 +45,13 @@ class HospitalVaccination(models.Model):
     vaccine_price = fields.Float(related='vaccine_product_id.list_price',
                                  string="Price", help='Price of vaccine')
     sale_order_id = fields.Many2one('sale.order',
-                                    string='Sale Order',
                                     help='Sale order for the vaccine')
-    sold = fields.Boolean(string='Sold', help='True if sale order created')
-    certificate = fields.Binary(string="Certificate", help='Vaccination '
+    sold = fields.Boolean(help='True if sale order created')
+    certificate = fields.Binary(help='Vaccination '
                                                            'certificate')
     attachment_id = fields.Many2one('ir.attachment',
-                                    string='Attachment',
                                     help='Attachments added to the vaccination')
-    recurring_vaccine = fields.Boolean(string='Recurring Vaccine',
-                                       help='True for recurring vaccinations')
+    recurring_vaccine = fields.Boolean(help='True for recurring vaccinations')
     total_vaccine = fields.Integer(string="Total Dose",
                                    help='Total number of vaccines')
     next_vaccine_days = fields.Integer(string="Next Vaccine (In Days)",

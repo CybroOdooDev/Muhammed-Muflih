@@ -26,9 +26,7 @@ class BloodDonation(models.Model):
 
     questions = fields.Text(string='Contra Indications',
                             help='Contraindications of the blood donor')
-    is_true = fields.Boolean(string='Is True',
-                             help='True for contraindications')
+    is_true = fields.Boolean(help='True for contraindications')
     blood_bank_id = fields.Many2one('blood.bank',
-                                    string='Blood Bank',
                                     help='Blood bank corresponding to the '
                                          'donor')

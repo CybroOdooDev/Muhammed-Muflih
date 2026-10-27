@@ -25,7 +25,6 @@ class ProductTemplate(models.Model):
     medicine_ok = fields.Boolean(string='Medicine', help='True for medicines')
     vaccine_ok = fields.Boolean(string="Vaccine", help='True for vaccines')
     pharmacy_id = fields.Many2one('hospital.pharmacy',
-                                  string='Pharmacy',
                                   help='Name of the pharmacy')
     medicine_brand_id = fields.Many2one('medicine.brand',
                                         string='Brand',

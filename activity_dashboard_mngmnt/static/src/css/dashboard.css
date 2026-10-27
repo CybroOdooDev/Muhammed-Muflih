@@ -1,4 +1,4 @@
-strong {
+.table_activity strong {
 	font-weight: 600;
 }
 
@@ -15,13 +15,6 @@ strong {
 	font-weight: 600;
 }
 
-.chart #canvas_graph {
-	height: 400px !important;
-}
-
-.highcharts-background {
-	fill: none;
-}
 
 .text-mauve {
     padding-right: 10px;
@@ -79,4 +72,13 @@ strong {
     background-color: #c4c4f2;
     width: 100px;
     height: 35px;
+}
+
+.table_view {
+    overflow-x: auto;
+}
+
+.o_action:has(.dashboard_main_section),
+.o_action:has(.table_activity) {
+    overflow-y: auto !important;
 }

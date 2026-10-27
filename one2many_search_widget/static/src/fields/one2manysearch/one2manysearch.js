@@ -4,8 +4,8 @@ import { useSubEnv } from "@web/owl2/utils";
 import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
 
 // Dynamically resolve parent field definition (sol_o2m -> section_and_note_one2many -> x2ManyField)
-const baseFieldDef = registry.category("fields").get("sol_o2m")
-    || registry.category("fields").get("section_and_note_one2many")
+const baseFieldDef = registry.category("fields").get("sol_o2m", null)
+    || registry.category("fields").get("section_and_note_one2many", null)
     || x2ManyField;
 
 const BaseComponent = baseFieldDef.component || X2ManyField;

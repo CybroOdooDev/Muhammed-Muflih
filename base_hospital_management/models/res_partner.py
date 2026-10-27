@@ -21,7 +21,7 @@ import io
 import logging
 import math
 import re
-from dateutil.relativedelta import *
+from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models
 
@@ -49,10 +49,8 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
     _description = 'Hospital Patients'
 
-    date_of_birth = fields.Date(string='Date of Birth',
-                                help='Date of birth of the patient')
-    blood_group = fields.Selection(string='Blood Group',
-                                   help='Blood group of the patient',
+    date_of_birth = fields.Date(help='Date of birth of the patient')
+    blood_group = fields.Selection(help='Blood group of the patient',
                                    selection=[('a', 'A'), ('b', 'B'),
                                               ('o', 'O'), ('ab', 'AB')])
     rh_type = fields.Selection(selection=[('-', '-ve'), ('+', '+ve')],
@@ -60,11 +58,11 @@ class ResPartner(models.Model):
                                help='Rh type of the blood group')
     gender = fields.Selection(selection=[
         ('male', 'Male'), ('female', 'Female'), ('other', 'Other')
-    ], string='Gender', help='Gender of the patient')
+    ], help='Gender of the patient')
     marital_status = fields.Selection(selection=[
         ('married', 'Married'), ('unmarried', 'Unmarried'), ('widow', 'Widow'),
         ('widower', 'Widower'), ('divorcee', 'Divorcee')
-    ], string='Marital Status', help='Marital status of patient')
+    ], help='Marital status of patient')
     is_alive = fields.Selection(
         string='Status',
         selection=[('alive', 'Alive'), ('dead', 'Dead')],
@@ -75,37 +73,32 @@ class ResPartner(models.Model):
                               default=lambda self: 'New')
     notes = fields.Html(string='Note', help='Notes regarding the notes',
                         sanitize_style=True)
-    invoice_count = fields.Integer(compute='_compute_invoice_count', string='Invoice Count')
+    invoice_count = fields.Integer(compute='_compute_invoice_count')
     patient_profession = fields.Char(string="Profession",
                                      help="Profession of patient")
     doctor_id = fields.Many2one('hr.employee',
                                 domain=[('job_id.name', '=', 'Doctor')],
                                 string="Family Doctor",
                                 help='Family doctor of the patient')
-    barcode = fields.Char(string='Barcode', help='Barcode for the patient')
-    barcode_png = fields.Binary(string='Barcode PNG',
-                                help='Image file of the barcode', readonly=True)
+    barcode = fields.Char(help='Barcode for the patient')
+    barcode_png = fields.Binary(help='Image file of the barcode', readonly=True)
     group = fields.Selection(selection=[
         ('hindu', 'Hindu'), ('muslim', 'Muslim'), ('christian', 'Christian')],
         string="Ethnic Group", help="Specify your religion")
     risk = fields.Text(string="Genetic Risks",
                        help='Genetic risks of the patient')
     insurance_id = fields.Many2one('hospital.insurance',
-                                   string="Insurance",
                                    help="Patient insurance")
-    unique_id = fields.Char(string='Unique ID',
-                            help="Unique identifier to fetch "
+    unique_id = fields.Char(help="Unique identifier to fetch "
                                  "patient insurance data")
     family_ids = fields.One2many('hospital.family',
                                  'family_id',
                                  string="Family ID", help='Family of a patient')
     lab_test_ids = fields.One2many('patient.lab.test',
                                    'patient_id',
-                                   string='Lab Test',
                                    help='Lab tests for the patient')
     prescription_ids = fields.One2many('prescription.line',
                                        'res_partner_id',
-                                       string='Prescription',
                                        help='Prescription for patient')
     economic_level = fields.Selection(selection=[
         ('low', 'Lower Class'), ('middle', 'Middle Class'),
@@ -113,7 +106,7 @@ class ResPartner(models.Model):
         help="Specify your economic status")
     education_level = fields.Selection(selection=[
         ('post', 'Post Graduation'), ('graduation', 'Graduation'),
-        ('pre', 'Pre Graduation')], string="Education Level",
+        ('pre', 'Pre Graduation')],
         help="Education status of patient")
     house_level = fields.Selection(selection=[
         ('good', 'Good'), ('bad', 'Bad'), ('poor', 'Poor')],
@@ -126,8 +119,8 @@ class ResPartner(models.Model):
     hostile = fields.Boolean(string='Hostile Area',
                              help="Specify your house in a friendly "
                                   "neighbourhood ")
-    income = fields.Monetary(string='Income', help="The in come of patient")
-    currency_id = fields.Many2one('res.currency', string='Currency',
+    income = fields.Monetary(help="The in come of patient")
+    currency_id = fields.Many2one('res.currency',
                                   help='Currency in which invoices and payments'
                                        ' will be generated',
                                   default=lambda self: self.env.user.company_id
@@ -140,8 +133,7 @@ class ResPartner(models.Model):
                              help="water that comes into a building through "
                                   "pipes. A cabin with hot and cold running "
                                   "water.")
-    electricity = fields.Boolean(string='Electricity',
-                                 help='True if you have electricity')
+    electricity = fields.Boolean(help='True if you have electricity')
     gas = fields.Boolean(string='Gas Supply',
                          help='True if you have gas supply')
     trash = fields.Boolean(string='Trash Collection',
@@ -149,8 +141,7 @@ class ResPartner(models.Model):
     home_phone = fields.Boolean(string='Telephone',
                                 help='True if you have telephone')
     tv = fields.Boolean(string='Television', help='True if you have television')
-    internet = fields.Boolean(string='Internet',
-                              help='True if you have internet')
+    internet = fields.Boolean(help='True if you have internet')
     help = fields.Selection([('yes', 'Yes'), ('no', 'No')],
                             string="Family Help",
                             help="Specify whether your family is willing "
@@ -183,8 +174,7 @@ class ResPartner(models.Model):
                            help='Do you faced any sexual abuse')
     drug = fields.Boolean(string='Drug Addiction',
                           help='Do you have drug addiction')
-    withdrawal = fields.Boolean(string='Withdrawal',
-                                help='Do you faced any withdrawal symptoms')
+    withdrawal = fields.Boolean(help='Do you faced any withdrawal symptoms')
     in_prison = fields.Boolean(string='Has Been In Prison',
                                help='True if you had been in prison')
     current_prison = fields.Boolean(string='Currently In Prison',
@@ -196,12 +186,12 @@ class ResPartner(models.Model):
         'hospital.vaccination', 'patient_id',
         string='Vaccination', help='Vaccination details of '
                                    'patient')
-    fertile = fields.Boolean(string='Fertile', help="""Capable of developing 
+    fertile = fields.Boolean(help="""Capable of developing 
                                              into a complete organism; 
                                              fertilized. Capable of supporting 
                                              plant life; favorable to the 
                                              growth of crops and plants.""")
-    menarche_age = fields.Integer(string='Menarche Age', help="""The first 
+    menarche_age = fields.Integer(help="""The first 
                                      menstrual period in a female adolescent""")
     pause = fields.Boolean(string='Menopause', help="""Menopause is a point in 
                                  time 12 months after a woman's last period""")
@@ -214,14 +204,13 @@ class ResPartner(models.Model):
                          area around it so they can be checked under a 
                          microscope for cervical cancer or cell changes that
                          may lead to cervical cancer.""")
-    colposcopy = fields.Boolean(string='Colposcopy', help=""" test to take a
+    colposcopy = fields.Boolean(help=""" test to take a
                             closer look at your cervix""")
     self = fields.Boolean(string='Self breast examination',
                           help="A breast self-exam for breast awareness is "
                                "in inspection "
                                "of your breasts that women do on your own")
-    mommography = fields.Boolean(string='Mommography',
-                                 help="Mammograms can be used to look for "
+    mommography = fields.Boolean(help="Mammograms can be used to look for "
                                       "breast cancer")
     last_pap = fields.Date(string="Last PAP Test",
                            help='The date on which last PAP test has been done')
@@ -231,16 +220,15 @@ class ResPartner(models.Model):
     deceased = fields.Boolean(string='Deceased during 1st week',
                               help='The family member deceased during first '
                                    'week')
-    grandiva = fields.Boolean(string='Grandiva', help='True for grandiva')
+    grandiva = fields.Boolean(help='True for grandiva')
     alive = fields.Boolean(string='Born Alive', help='Whether born alive or '
                                                      'not')
-    premature = fields.Integer(string='Premature',
-                               help="Premature birth is birth that happens too"
+    premature = fields.Integer(help="Premature birth is birth that happens too"
                                     "soon, before 37 weeks of pregnancy")
     abortions = fields.Integer(string='No Of Abortions', help='Number of '
                                                               'abortions of '
                                                               'patient')
-    exercise = fields.Boolean(string='Exercise', help='True if patient doing '
+    exercise = fields.Boolean(help='True if patient doing '
                                                       'exercise regularly')
     minute = fields.Integer(string='Minute/Day', help='The duration of '
                                                       'exercise per day')
@@ -251,13 +239,13 @@ class ResPartner(models.Model):
     sleep_hrs = fields.Integer(string='Sleep Hours', help='Duration of sleep')
     meals = fields.Integer(string='Meals/Day', help='Number of meals per day')
     alone = fields.Boolean(string='Eat Alone', help='True if eats alone')
-    coffee = fields.Boolean(string='Coffee', help='True if you have a habit '
+    coffee = fields.Boolean(help='True if you have a habit '
                                                   'of drinking coffee')
     cup = fields.Integer(string='Cups/Day', help='Number of cups of coffee '
                                                  'per day')
     drink = fields.Boolean(string='Soft Drink', help='True if you drinks soft '
                                                      'drinks')
-    salt = fields.Boolean(string='Salt', help='True if you use salt')
+    salt = fields.Boolean(help='True if you use salt')
     diet = fields.Boolean(string='Currently On Diet', help='True if you are '
                                                            'on diet currently')
     smoke = fields.Boolean(string='Smoker', help='True for smoker')
@@ -270,7 +258,7 @@ class ResPartner(models.Model):
                              help='True for passive smokers')
     age_quit = fields.Integer(string='Age of Quitting',
                               help='Age at which you quit your smoking habit')
-    alcoholic = fields.Boolean(string='Alcoholic', help='True for alcoholics')
+    alcoholic = fields.Boolean(help='True for alcoholics')
     ex_alcoholic = fields.Boolean(string='Ex-Alcoholic', help='True for ex- '
                                                               'alcoholics')
     age_start_alco = fields.Integer(string='Age to Start Drinking',
@@ -298,7 +286,7 @@ class ResPartner(models.Model):
     orientation = fields.Selection([('straight', 'Straight'),
                                     ('homo', 'Homosexual'),
                                     ('trans', 'Trans-Gender')],
-                                   string="Orientation")
+                                   )
     age_sex = fields.Integer(string="Age of First Encounter",
                              help='Age of first sex encounter')
     partners = fields.Integer(string="No of Partners",
@@ -311,7 +299,7 @@ class ResPartner(models.Model):
                                                    "words"))
     anal = fields.Boolean(string='Anal Sex', help="True if you are "
                                                   "encountering anal sex")
-    prostitute = fields.Boolean(string='Prostitute', help='True for '
+    prostitute = fields.Boolean(help='True for '
                                                           'prostitutes')
     prostitute_sex = fields.Boolean(string='Sex With Prostitute',
                                     help='True if you are encountered sex '
@@ -330,7 +318,7 @@ class ResPartner(models.Model):
     safety = fields.Boolean(string='Car Child Safety',
                             help='True if you have car child safety')
     home = fields.Boolean(string='Home Safety', help='True for home safety')
-    occupation = fields.Char(string='Occupation', help='Your occupation')
+    occupation = fields.Char(help='Your occupation')
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -362,10 +350,11 @@ class ResPartner(models.Model):
     @api.depends('name', 'patient_seq')
     def _compute_display_name(self):
         """Computes display name with patient sequence for patients"""
-        super()._compute_display_name()
+        res = super()._compute_display_name()
         for rec in self:
             if rec.patient_seq and rec.patient_seq not in ['New', 'Employee', 'User']:
                 rec.display_name = f'{rec.patient_seq} - {rec.name}'
+        return res
 
     def action_alive_status(self):
         """Function for setting the value of is_alive field"""
@@ -436,14 +425,20 @@ class ResPartner(models.Model):
         if not self.barcode:
             ean = self.sudo().generate_ean(str(self.id))
             self.sudo().write({'barcode': ean})
+        if not self.barcode_png:
             number = self.barcode
+            png_b64 = False
             if EAN13 and ImageWriter:
-                fp = io.BytesIO()
-                my_code = EAN13(number, writer=ImageWriter())
-                my_code.write(fp)
-                self.sudo().write({
-                    'barcode_png': base64.b64encode(fp.getvalue()).decode('utf-8')
-                })
+                try:
+                    fp = io.BytesIO()
+                    my_code = EAN13(number, writer=ImageWriter())
+                    my_code.write(fp)
+                    png_b64 = base64.b64encode(fp.getvalue()).decode('utf-8')
+                except Exception as err:
+                    _logger.warning("Error generating barcode image: %s", err)
+            if not png_b64:
+                png_b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+            self.sudo().write({'barcode_png': png_b64})
         if self.gender:
             gender_caps = self.gender.capitalize()
         if self.blood_group:

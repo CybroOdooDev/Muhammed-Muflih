@@ -24,12 +24,11 @@ class InpatientSurgery(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _description = 'Inpatient Surgery'
 
-    name = fields.Char(string='Name', help='Name of the surgery',
+    name = fields.Char(help='Name of the surgery',
                        required=True)
-    date = fields.Date(default=fields.Date.today, string='Date',
+    date = fields.Date(default=fields.Date.today,
                        help='Date of adding surgery')
-    planned_date = fields.Datetime(string='Planned Date',
-                                   help='Planned date for surgery',
+    planned_date = fields.Datetime(help='Planned date for surgery',
                                    required=True)
     doctor_id = fields.Many2one('hr.employee',
                                 string="Operating Doctor",

@@ -33,7 +33,7 @@ class PatientLabTest(models.Model):
     patient_type = fields.Selection(related='test_id.patient_type', string='Type',
                                     help='Choose the type of patient')
     test_ids = fields.Many2many('lab.test',
-                                related='test_id.test_ids', string='Tests',
+                                related='test_id.test_ids',
                                 help='All the tests added for the patient')
     date = fields.Date(help='Date of test',
                        default=fields.Date.today)
@@ -51,16 +51,14 @@ class PatientLabTest(models.Model):
                              help='State of test',
                              default="draft")
     result_ids = fields.One2many('lab.test.result',
-                                 'parent_id',
-                                 string="Result", help='Results of the test')
+                                 'parent_id', help='Results of the test')
     medicine_ids = fields.One2many('lab.medicine.line',
                                    'lab_test_id',
-                                   string='Medicine',
                                    compute='_compute_medicine_ids',
                                    readonly=False,
                                    help='Medicines needed for the test')
     notes = fields.Text(help='Notes regarding the test')
-    lab_id = fields.Many2one('hospital.laboratory', string='Lab',
+    lab_id = fields.Many2one('hospital.laboratory',
                              help='Lab in which test is doing')
     invoice_id = fields.Many2one('account.move',
                                  help='Invoice for the test', copy=False)
@@ -71,21 +69,17 @@ class PatientLabTest(models.Model):
     started = fields.Boolean(string='Test Started',
                              help='True if the test has been started',
                              copy=False)
-    invoiced = fields.Boolean(string='Invoiced',
-                              help='True if the test has been invoiced',
+    invoiced = fields.Boolean(help='True if the test has been invoiced',
                               copy=False)
-    sold = fields.Boolean(string='Sold',
-                          help='If true, sale order smart button will be '
+    sold = fields.Boolean(help='If true, sale order smart button will be '
                                'visible ', copy=False)
     company_id = fields.Many2one('res.company',
                                  default=lambda self: self.env.company.id)
-    invoice_count = fields.Integer(string='Invoice '
-                                          'Count',
+    invoice_count = fields.Integer(
                                    compute='_compute_invoice_count',
                                    help='Total number of invoices for this '
                                         'patient lab test.')
-    sale_count = fields.Integer(string='Sale '
-                                       'Count',
+    sale_count = fields.Integer(
                                 compute='_compute_sale_count',
                                 help='Total number of sale orders for this '
                                      'patient lab test.')

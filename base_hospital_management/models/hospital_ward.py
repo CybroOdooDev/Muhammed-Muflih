@@ -33,10 +33,10 @@ class HospitalWard(models.Model):
     floor_no = fields.Integer(string="Floor No.", help='The floor to '
                                                        'which the ward '
                                                        'corresponds to')
-    note = fields.Text(string="Note", help='Note regarding the ward')
+    note = fields.Text(help='Note regarding the ward')
     bed_count = fields.Integer(string="Count", compute="_compute_bed_count",
                                help='The bed count')
-    nurse_ids = fields.Many2many('hr.employee', string='Nurses',
+    nurse_ids = fields.Many2many('hr.employee',
                                  domain="[('job_id','=','Nurse')]",
                                  help='Nurses corresponds to the ward')
     ward_facilities_ids = fields.Many2many('room.facility',

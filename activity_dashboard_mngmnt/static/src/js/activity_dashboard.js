@@ -25,7 +25,18 @@ export class ActivityDashboard extends Component {
             activity_type: 0,
         });
 
-        onWillStart(async () => await this.render_dashboards());
+        // Backward-compatible method aliases for templates
+        this.render_dashboards = this.renderDashboards.bind(this);
+        this.show_all_activities = this.showAllActivities.bind(this);
+        this.show_planned_activities = this.showPlannedActivities.bind(this);
+        this.show_completed_activities = this.showCompletedActivities.bind(this);
+        this.show_today_activities = this.showTodayActivities.bind(this);
+        this.show_overdue_activities = this.showOverdueActivities.bind(this);
+        this.show_activity_types = this.showActivityTypes.bind(this);
+        this.click_view = this.clickView.bind(this);
+        this.click_origin = this.clickOrigin.bind(this);
+
+        onWillStart(async () => await this.renderDashboards());
     }
 
     get len_all() { return this.state.len_all; }
@@ -39,7 +50,7 @@ export class ActivityDashboard extends Component {
     get done_activity() { return this.state.done_activity; }
     get overdue_activity() { return this.state.overdue_activity; }
 
-    async render_dashboards() {
+    async renderDashboards() {
         try {
             const fields = ['display_name', 'activity_type_id', 'user_id', 'date_deadline'];
             const planned_activity = await this.orm.searchRead('mail.activity', [["state", "=", 'planned']], fields) || [];
@@ -60,11 +71,11 @@ export class ActivityDashboard extends Component {
             this.state.len_all = this.state.len_planned + this.state.len_today + this.state.len_overdue + this.state.len_done;
             this.state.activity_type = activity_type_count;
         } catch (error) {
-            console.error("Error loading activity dashboard:", error);
+            this.notification.add(_t("Could not load activity dashboard data."), { type: "danger" });
         }
     }
 
-    show_all_activities(e) {
+    showAllActivities(e) {
         if (e) {
             e.stopPropagation();
             e.preventDefault();
@@ -83,7 +94,7 @@ export class ActivityDashboard extends Component {
         });
     }
 
-    show_planned_activities(e) {
+    showPlannedActivities(e) {
         if (e) {
             e.stopPropagation();
             e.preventDefault();
@@ -102,7 +113,7 @@ export class ActivityDashboard extends Component {
         });
     }
 
-    show_completed_activities(e) {
+    showCompletedActivities(e) {
         if (e) {
             e.stopPropagation();
             e.preventDefault();
@@ -121,7 +132,7 @@ export class ActivityDashboard extends Component {
         });
     }
 
-    show_today_activities(e) {
+    showTodayActivities(e) {
         if (e) {
             e.stopPropagation();
             e.preventDefault();
@@ -140,7 +151,7 @@ export class ActivityDashboard extends Component {
         });
     }
 
-    show_overdue_activities(e) {
+    showOverdueActivities(e) {
         if (e) {
             e.stopPropagation();
             e.preventDefault();
@@ -159,7 +170,7 @@ export class ActivityDashboard extends Component {
         });
     }
 
-    show_activity_types(e) {
+    showActivityTypes(e) {
         if (e) {
             e.stopPropagation();
             e.preventDefault();
@@ -174,24 +185,24 @@ export class ActivityDashboard extends Component {
         });
     }
 
-    click_view(e) {
-        var id = e && e.currentTarget ? e.currentTarget.value : (e && e.target ? e.target.value : null);
+    clickView(e) {
+        const id = e && e.currentTarget ? e.currentTarget.value : (e && e.target ? e.target.value : null);
         if (!id) return;
         this.action.doAction({
             type: 'ir.actions.act_window',
             name: 'All Activity',
             res_model: 'mail.activity',
-            res_id: parseInt(id),
+            res_id: parseInt(id, 10),
             views: [[false, 'form']],
             view_mode: 'form',
-            target: 'current'
+            target: 'current',
         });
     }
 
-    async click_origin(e) {
-        var id = e && e.currentTarget ? e.currentTarget.value : (e && e.target ? e.target.value : null);
+    async clickOrigin(e) {
+        const id = e && e.currentTarget ? e.currentTarget.value : (e && e.target ? e.target.value : null);
         if (!id) return;
-        var result = await this.orm.call('mail.activity', 'get_activity', [parseInt(id)], {});
+        const result = await this.orm.call('mail.activity', 'get_activity', [parseInt(id, 10)], {});
         if (!result || !result.model || !result.res_id) {
             this.notification.add(
                 _t("This activity has no linked document."),
@@ -206,10 +217,11 @@ export class ActivityDashboard extends Component {
             res_id: result.res_id,
             views: [[false, 'form']],
             view_mode: 'form',
-            target: 'current'
+            target: 'current',
         });
     }
 }
 ActivityDashboard.template = "ActivityDashboard";
 ActivityDashboard.components = { Layout };
 registry.category("actions").add("activity_dashboard", ActivityDashboard);
+

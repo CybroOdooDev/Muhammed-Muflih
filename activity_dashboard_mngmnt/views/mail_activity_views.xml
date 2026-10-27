@@ -42,11 +42,9 @@
             </form>
         </field>
     </record>
-    <!--Inherit mail activity tree view to add extra fields-->
-    <record id="mail_activity_view_tree" model="ir.ui.view">
-        <field name="name">mail.activity.view.tree.inherit.activity.dashboard
-            .mngmnt
-        </field>
+    <!--Inherit mail activity list view to add extra fields-->
+    <record id="mail_activity_view_tree_inherit_activity_dashboard_mngmnt" model="ir.ui.view">
+        <field name="name">mail.activity.view.list.inherit.activity.dashboard.mngmnt</field>
         <field name="model">mail.activity</field>
         <field name="priority" eval="30"/>
         <field name="inherit_id" ref="mail.mail_activity_view_tree"/>
@@ -63,9 +61,6 @@
             </xpath>
         </field>
     </record>
-    <!--    Activity Dashboard menu-->
-    <menuitem id="activity_menu_root" name="Activity Management" sequence="25"
-              web_icon="activity_dashboard_mngmnt,static/description/icon.png"/>
     <!--   Mail activity Menu-->
     <menuitem id="mail_activity_menu" name="Activity"
               parent="activity_menu_root"

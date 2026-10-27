@@ -15,7 +15,7 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-from odoo import api, models
+from odoo import api, fields, models
 
 
 class AccountPaymentRegister(models.TransientModel):
@@ -24,16 +24,27 @@ class AccountPaymentRegister(models.TransientModel):
     """
     _inherit = "account.payment.register"
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals_list):
         """Create records to inpatient payment"""
-        for vals in vals_list:
-            self.env['inpatient.payment'].sudo().create({
-                'name': vals['communication'],
-                'subtotal': vals['amount'],
-                'inpatient_id': self.env['hospital.inpatient'].sudo().search([(
-                    'patient_id', '=', vals['partner_id'])],
-                    order='create_date desc', limit=1).id,
-                'date': vals['payment_date']
-            })
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        for record, vals in zip(records, vals_list):
+            partner_id = (vals.get('partner_id')
+                          or (record.partner_id.id if record.partner_id else False))
+            communication = (vals.get('communication')
+                             or record.communication or 'Payment')
+            amount = vals.get('amount') if 'amount' in vals else record.amount
+            payment_date = (vals.get('payment_date')
+                            or record.payment_date or fields.Date.today())
+            if partner_id:
+                inpatient = self.env['hospital.inpatient'].sudo().search([
+                    ('patient_id', '=', partner_id)
+                ], order='create_date desc', limit=1)
+                if inpatient:
+                    self.env['inpatient.payment'].sudo().create({
+                        'name': communication,
+                        'subtotal': amount,
+                        'inpatient_id': inpatient.id,
+                        'date': payment_date,
+                    })
+        return records

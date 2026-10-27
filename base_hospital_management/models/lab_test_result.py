@@ -24,7 +24,7 @@ class LabTestResult(models.Model):
     _description = 'Lab Test Result'
     _rec_name = 'test_id'
 
-    patient_id = fields.Many2one('res.partner', string='Patient',
+    patient_id = fields.Many2one('res.partner',
                                  domain=[('patient_seq', 'not in',
                                           ['New', 'Employee', 'User'])],
                                  help='Patient for whom the test has been done')
@@ -62,7 +62,7 @@ class LabTestResult(models.Model):
     @api.model
     def print_test_results(self):
         """Method for printing rest result"""
-        data = self.sudo().search([])
+        data = self.sudo().search([], limit=100)
         context = []
         for rec in data:
             attachment = self.env['ir.attachment'].sudo().search([

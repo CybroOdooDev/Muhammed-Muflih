@@ -23,35 +23,34 @@ class HospitalPharmacy(models.Model):
     _name = 'hospital.pharmacy'
     _description = 'Pharmacy'
 
-    name = fields.Char(string="Name", help='Name of the pharmacy',
+    name = fields.Char(help='Name of the pharmacy',
                        required=True)
     pharmacist_id = fields.Many2one('hr.employee',
-                                    string="Pharmacist",
                                     help='Name of the pharmacist',
                                     domain=[
                                         ('job_id.name', '=', 'Pharmacist')])
-    phone = fields.Char(string='Phone', help='Phone number of the pharmacy')
-    mobile = fields.Char(string='Mobile', help='Mobile number of the pharmacy')
-    email = fields.Char(string='Email', help='Email of the pharmacy')
-    street = fields.Char(string='Street', help='Street of pharmacy')
-    street2 = fields.Char(string='Street2', help='Street2 of pharmacy')
-    zip = fields.Char(string='Zip', help='Zip code of pharmacy')
-    city = fields.Char(string='City', help='City of pharmacy')
-    state_id = fields.Many2one("res.country.state", string='State',
+    phone = fields.Char(help='Phone number of the pharmacy')
+    mobile = fields.Char(help='Mobile number of the pharmacy')
+    email = fields.Char(help='Email of the pharmacy')
+    street = fields.Char(help='Street of pharmacy')
+    street2 = fields.Char(help='Street2 of pharmacy')
+    zip = fields.Char(help='Zip code of pharmacy')
+    city = fields.Char(help='City of pharmacy')
+    state_id = fields.Many2one("res.country.state",
                                help='State of pharmacy')
-    country_id = fields.Many2one('res.country', string='Country',
+    country_id = fields.Many2one('res.country',
                                  help='Country of pharmacy')
-    notes = fields.Text(string='Notes', help='Notes regarding pharmacy')
+    notes = fields.Text(help='Notes regarding pharmacy')
     image_129 = fields.Image(string='Image', help='Image of pharmacy',
                              max_width=128, max_height=128)
-    active = fields.Boolean(string='Active', help='True for active pharmacy',
+    active = fields.Boolean(help='True for active pharmacy',
                             default=True)
     medicine_ids = fields.One2many('pharmacy.medicine',
                                    'pharmacy_id',
                                    string='Pharmacy',
                                    help='Indicates the medicines in the '
                                         'pharmacy')
-    sales_team_id = fields.Many2one('crm.team', string='Sales Team',
+    sales_team_id = fields.Many2one('crm.team',
                                     help='Choose the sales-team for the'
                                          ' pharmacy')
 
@@ -179,11 +178,10 @@ class HospitalPharmacy(models.Model):
 
     def action_get_inventory(self):
         """Inventory adjustment for medicine"""
-        med_list = []
-        for med in self.medicine_ids.product_id:
-            for product in self.env['product.product'].sudo().search([]):
-                if med.id == product.product_tmpl_id.id:
-                    med_list.append(product.id)
+        products = self.env['product.product'].sudo().search([
+            ('product_tmpl_id', 'in', self.medicine_ids.product_id.ids)
+        ])
+        med_list = products.ids
         return {
             'name': 'medicine',
             'domain': ['&', ('product_id', 'in', med_list),

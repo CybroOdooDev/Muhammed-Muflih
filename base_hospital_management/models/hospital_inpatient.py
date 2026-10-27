@@ -30,16 +30,16 @@ class HospitalInpatient(models.Model):
                        help='Sequence number of inpatient for uniquely '
                             'identifying',
                        default=lambda self: 'New')
-    patient_id = fields.Many2one('res.partner', string="Patient",
+    patient_id = fields.Many2one('res.partner',
                                  domain=[('patient_seq', 'not in',
                                           ['New', 'Employee', 'User'])],
                                  required=True, help='Choose the patient')
     reason = fields.Text(
         string="Reason For Admission",
         help="Current reason for hospitalization of the patient")
-    bed_id = fields.Many2one('hospital.bed', string='Bed',
+    bed_id = fields.Many2one('hospital.bed',
                              help='Choose the bed')
-    room_id = fields.Many2one('patient.room', string='Room',
+    room_id = fields.Many2one('patient.room',
                               help='Choose the room to which patient admitted'
                                    ' to')
     building_id = fields.Many2one(
@@ -47,11 +47,9 @@ class HospitalInpatient(models.Model):
         string="Block", help='Name of the block')
     room_building_id = fields.Many2one(
         'hospital.building', related='room_id.building_id',
-        string="Room Building",
         help='Name of the building to which room belongs to')
     ward_id = fields.Many2one('hospital.ward',
                               related='bed_id.ward_id',
-                              string='Ward',
                               help='Ward to which the bed belongs to')
     type_admission = fields.Selection([('emergency',
                                         'Emergency Admission'),
@@ -60,38 +58,32 @@ class HospitalInpatient(models.Model):
                                       help='The type of admission',
                                       required=True)
     attending_doctor_id = fields.Many2one('hr.employee',
-                                          string="Attending Doctor",
                                           required=True,
                                           help='Name of attending doctor',
                                           domain=[
                                               ('job_id.name', '=', 'Doctor')])
     operating_doctor_id = fields.Many2one('hr.employee',
-                                          string="Operating Doctor",
                                           help='Name of operating doctor',
                                           domain=[
                                               ('job_id.name', '=', 'Doctor')])
     hosp_date = fields.Date(string="Admission Date",
                             help='Date of hospitalisation',
                             default=fields.Date.today())
-    discharge_date = fields.Date(string="Discharge Date",
-                                 help='Date of discharge', copy=False)
+    discharge_date = fields.Date(help='Date of discharge', copy=False)
     condition = fields.Text(
         string="Condition Before Hospitalization",
         help="The condition of the patient before he/she is admitted to"
              " the hospital")
     nursing_plan_ids = fields.One2many('nursing.plan',
                                        'admission_id',
-                                       string='Nursing Plan',
                                        help='Nursing plan of the inpatient')
-    active = fields.Boolean(string='Active', default=True,
+    active = fields.Boolean(default=True,
                             help='True for active inpatients')
     doctor_round_ids = fields.One2many('doctor.round',
                                        'admission_id',
-                                       string='Doctor Rounds',
                                        help='Doctor rounds of the patient')
-    discharge_plan = fields.Text(string="Discharge Plan",
-                                 help='Discharge plan of the inpatient')
-    notes = fields.Text(string="Notes", help='Notes regarding the inpatient')
+    discharge_plan = fields.Text(help='Discharge plan of the inpatient')
+    notes = fields.Text(help='Notes regarding the inpatient')
     bed_rent = fields.Monetary(string='Rent Per Day', related='bed_id.bed_rent',
                                help='Rent for the bed')
     currency_id = fields.Many2one('res.currency',
@@ -124,7 +116,7 @@ class HospitalInpatient(models.Model):
                                  ('air', 'Low Air Loss'),
                                  ('circo', 'Circo Electric'),
                                  ('clinitron', 'Clinitron'),
-                                 ], string="Bed Type",
+                                 ],
                                 help='Indicates the type of bed')
     is_ward = fields.Selection([('ward', 'Ward'), ('room', 'Room')],
                                string='Room/Ward',
@@ -133,12 +125,10 @@ class HospitalInpatient(models.Model):
                                   'inpatient_id',
                                   string='Payment Details',
                                   help='Payment details of the patient')
-    is_invoice = fields.Boolean(string='Is Invoice',
-                                help='View invoice button will be visible if '
+    is_invoice = fields.Boolean(help='View invoice button will be visible if '
                                      'this field is true')
     prescription_ids = fields.One2many('prescription.line',
                                        'inpatient_id',
-                                       string='Prescription',
                                        help='Medical prescriptions of patient')
     enable_outpatient = fields.Boolean(string='Prescription History',
                                        help='If checked, the prescription '
@@ -146,7 +136,6 @@ class HospitalInpatient(models.Model):
                                             'added')
     lab_test_ids = fields.One2many('patient.lab.test',
                                    'inpatient_id',
-                                   string='Lab Test',
                                    help='Lab tests of the inpatient')
     test_count = fields.Integer(string='Test Created',
                                 help='Number of tests of the inpatient',
@@ -461,7 +450,7 @@ class HospitalInpatient(models.Model):
     def hospital_inpatient_list(self):
         """Returns list of inpatients to doctor's dashboard"""
         patient_list = []
-        patients = self.sudo().search([])
+        patients = self.sudo().search([], limit=100)
         patient_type = {'emergency': 'Emergency Admission',
                         'routine': 'Routine Admission'}
         for rec in patients:

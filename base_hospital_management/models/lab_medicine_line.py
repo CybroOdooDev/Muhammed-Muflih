@@ -26,18 +26,18 @@ class LabMedicineLine(models.Model):
     lab_test_id = fields.Many2one('patient.lab.test',
                                   string='Lab Test Line',
                                   help='Lab test corresponds to the medicine')
-    test_id = fields.Many2one('lab.test', string='Test',
+    test_id = fields.Many2one('lab.test',
                               help='Test corresponds to medicine')
     medicine_id = fields.Many2one('product.template',
                                   domain="['|', ('medicine_ok', '=', True),"
                                          "('vaccine_ok', '=', True)"
-                                         "]", required=True, string='Medicine',
+                                         "]", required=True,
                                   help='Medicine for the lab test')
-    quantity = fields.Integer(string='Quantity', default=1,
+    quantity = fields.Integer(default=1,
                               help='Quantity of medicine')
     qty_available = fields.Float(string='Available', help='Available quantity',
                                  related='medicine_id.qty_available')
-    price = fields.Float(string='Price', help='Price for the medicine',
+    price = fields.Float(help='Price for the medicine',
                          related='medicine_id.list_price')
     sub_total = fields.Float(string='Subtotal',
                              help='Total cost of the medicine',

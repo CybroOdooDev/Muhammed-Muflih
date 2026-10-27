@@ -24,5 +24,4 @@ class DoctorSpecialization(models.Model):
     _description = 'Doctor Specialization'
     _rec_name = 'specialization'
 
-    specialization = fields.Char(string="Specialization",
-                                 help='Specify the name of specialization')
+    specialization = fields.Char(help='Specify the name of specialization')

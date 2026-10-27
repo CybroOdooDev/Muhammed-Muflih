@@ -23,10 +23,10 @@ class HospitalLaboratory(models.Model):
     _name = 'hospital.laboratory'
     _description = 'Hospital Laboratory'
 
-    notes = fields.Text(string='Notes', help='Notes regarding the laboratory')
+    notes = fields.Text(help='Notes regarding the laboratory')
     image_130 = fields.Image(max_width=128, max_height=128, string='Image',
                              help='Image of the laboratory')
-    phone = fields.Char(string='Phone', help='Phone number of laboratory')
+    phone = fields.Char(help='Phone number of laboratory')
     mobile = fields.Char(help='Mobile number of'
                                ' laboratory')
     email = fields.Char(help='Email of the laboratory')
