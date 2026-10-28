@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!--    template for export pdf with group by-->
+    <!-- Template for export PDF with group by -->
     <template id="export_in_pdf_group_by">
         <t t-call="web.html_container">
             <t t-call="web.internal_layout">
                 <div class="page">
                     <t t-foreach="record['other']" t-as="object">
-                        <div style="background-color:grey;">
+                        <div class="bg-secondary text-white p-2 fw-bold mb-1 rounded-top">
                             <t t-if="object[1]">
                                 <t t-if="record['type'][0]=='many2one'">
                                     <span t-out="object[1][1]"/>
@@ -30,22 +30,27 @@
                                 <span t-out="obj[0]"/>
                             </t>
                         </div>
-                        <table class="table table-bordered"
-                               style="table-layout: fixed">
-                            <t t-foreach="length" t-as="le">
-                                <th>
-                                    <span t-out="record['header'][le]"/>
-                                </th>
-                            </t>
-                            <t t-foreach="object[2][0]" t-as="info">
+                        <table class="table table-bordered w-100 mb-4">
+                            <thead>
                                 <tr>
-                                    <t t-foreach="length" t-as="leng">
-                                        <td>
-                                            <span t-out="info[leng]"/>
-                                        </td>
+                                    <t t-foreach="length" t-as="le">
+                                        <th class="text-center fw-bold">
+                                            <span t-out="record['header'][le]"/>
+                                        </th>
                                     </t>
                                 </tr>
-                            </t>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="object[2][0]" t-as="info">
+                                    <tr>
+                                        <t t-foreach="length" t-as="leng">
+                                            <td>
+                                                <span t-out="info[leng]"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </tbody>
                         </table>
                     </t>
                 </div>

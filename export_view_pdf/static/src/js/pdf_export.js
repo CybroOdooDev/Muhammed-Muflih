@@ -25,52 +25,53 @@ export class ExportPdf extends Component {
 //  method to define the functionality when clicking on the export pdf menu
     async onDirectExportPdf() {
         this.env.searchModel.trigger('direct-export-pdf');
-        const exportField = [];
         const exportedFields = Object.values(this.env.model.config.fields).map(field => ({
-            name: field.name,  // Assuming `field` has a `name` property
-            label: field.label || field.string,  // Use field properties like label or string
+            name: field.name,
+            label: field.label || field.string,
         }));
         const resIds = await this.env.model.root.getResIds();
         this.env.model.dialog.add(ExportDialog, {
-                title: _t("Export PDF"),
-                context: exportedFields,
-                confirm: async () => {
-                    let checkboxes = document.querySelectorAll(`#${'check'} input[type="checkbox"]`);
-                    checkboxes.forEach(item => {
-                        if (item.checked === true){
-                            exportField.push({name:item.name,label:item.value})
-                        }
-                    });
-                    var length_field = Array.from(Array(exportField.length).keys());
-                    await rpc('/get_data',{
-                        'model':this.env.model.config.resModel,
-                        'res_ids':resIds.length > 0 && resIds,
-                        'fields':exportField,
-                        'grouped_by':this.env.model.config.groupBy,
-                        'context': this.env.model.config.context,
-                        'domain':this.env.model.config.domain,
-                    }).then(data => {
-                        if (this.env.model.config.groupBy[0]){
-                            var action = {
-                                'type': 'ir.actions.report',
-                                'report_type': 'qweb-pdf',
-                                'report_name':'export_view_pdf.export_in_pdf_group_by',
-                                'data':{'length':length_field,'group_len':[0,1,2,3],'record':data,}
-                            };
-                        }
-                        else{
-                            var action = {
-                                'type': 'ir.actions.report',
-                                'report_type': 'qweb-pdf',
-                                'report_name':'export_view_pdf.export_in_pdf',
-                                'data':{'length':length_field,'record':data}
-                            };
-                        }
-                        return this.env.model.action.doAction(action);
-                    });
-                },
-                cancel: () => {},
-            });
+            title: _t("Export PDF"),
+            context: exportedFields,
+            confirm: async () => {
+                const exportField = [];
+                const checkboxes = document.querySelectorAll(
+                    ".o_export_field_item input[type='checkbox'], #check input[type='checkbox']"
+                );
+                checkboxes.forEach(item => {
+                    if (item.checked) {
+                        exportField.push({ name: item.name, label: item.value });
+                    }
+                });
+                if (exportField.length === 0) {
+                    return;
+                }
+                const lengthField = Array.from(Array(exportField.length).keys());
+                const data = await rpc('/get_data', {
+                    model: this.env.model.config.resModel,
+                    res_ids: resIds.length > 0 && resIds,
+                    fields: exportField,
+                    grouped_by: this.env.model.config.groupBy,
+                    context: this.env.model.config.context,
+                    domain: this.env.model.config.domain,
+                });
+                const isGrouped = Boolean(this.env.model.config.groupBy?.[0]);
+                const action = {
+                    type: 'ir.actions.report',
+                    report_type: 'qweb-pdf',
+                    report_name: isGrouped
+                        ? 'export_view_pdf.export_in_pdf_group_by'
+                        : 'export_view_pdf.export_in_pdf',
+                    data: {
+                        length: lengthField,
+                        record: data,
+                        ...(isGrouped ? { group_len: [0, 1, 2, 3] } : {}),
+                    },
+                };
+                return this.env.model.action.doAction(action);
+            },
+            cancel: () => {},
+        });
     }
 }
 // for adding export pdf menu item

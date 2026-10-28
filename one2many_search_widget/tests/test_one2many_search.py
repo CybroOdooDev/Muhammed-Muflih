@@ -79,8 +79,27 @@ class TestOne2ManySearchWidget(TransactionCase):
 class TestOne2ManySearchWidgetHttp(HttpCase):
     """HTTP integration tests for One2many Search Widget."""
 
-    def test_01_web_assets_backend_http(self):
-        """Verify that web assets can be retrieved successfully via HTTP."""
-        self.authenticate('admin', 'admin')
-        response = self.url_open('/web')
-        self.assertEqual(response.status_code, 200, "Web client must load with status 200.")
+    def test_01_static_assets_http(self):
+        """Verify that widget static assets are served properly via HTTP."""
+        response_js = self.url_open('/one2many_search_widget/static/src/fields/one2manysearch/one2manysearch.js')
+        self.assertEqual(response_js.status_code, 200, "JS asset should be accessible via HTTP.")
+        self.assertIn('one2many_search', response_js.text, "JS file content must contain widget definition.")
+
+        response_css = self.url_open('/one2many_search_widget/static/src/css/header.css')
+        self.assertEqual(response_css.status_code, 200, "CSS asset should be accessible via HTTP.")
+        self.assertIn('.o_one2many_search_wrapper', response_css.text)
+
+        response_xml = self.url_open('/one2many_search_widget/static/src/fields/one2manysearch/one2manysearch_template.xml')
+        self.assertEqual(response_xml.status_code, 200, "XML template asset should be accessible via HTTP.")
+        self.assertIn('One2ManySearchTemplate', response_xml.text)
+
+    def test_02_web_client_access(self):
+        """Verify that web client loads for authenticated internal user."""
+        user = self.env.ref('base.user_admin', raise_if_not_found=False) or self.env['res.users'].search([
+            ('share', '=', False),
+            ('active', '=', True),
+        ], limit=1)
+        if user:
+            self.authenticate(user.login, user.login)
+            response = self.url_open('/web')
+            self.assertEqual(response.status_code, 200, "Web client must load with status 200.")

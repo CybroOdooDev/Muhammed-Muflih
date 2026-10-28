@@ -25,12 +25,12 @@
     'category': 'Extra Tools',
     'summary': """Export List View Data to PDF""",
     'description': """This module adds an option to export the current list view data into a PDF report.
-     Users can dynamically select fields and export both grouped and ungrouped data..""",
+     Users can dynamically select fields and export both grouped and ungrouped data.""",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': "https://www.cybrosys.com",
-    'depends': ['base','web'],
+    'depends': ['web'],
     'data':
         [
             'report/export_pdf_group_by_templates.xml',

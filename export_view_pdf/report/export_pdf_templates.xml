@@ -1,26 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!--    template for export pdf without  group by-->
+    <!-- Template for export PDF without group by -->
     <template id="export_in_pdf">
         <t t-call="web.html_container">
             <t t-call="web.internal_layout">
                 <div class="page">
-                    <table class="table table-bordered"
-                           style="table-layout: fixed">
-                        <t t-foreach="length" t-as="length">
-                            <th class="text-center fw-bold">
-                                <span t-out="record['header'][length]"/>
-                            </th>
-                        </t>
-                        <t t-foreach="record['data']" t-as="rec">
+                    <table class="table table-bordered w-100">
+                        <thead>
                             <tr>
-                                <t t-foreach="length+1" t-as="ln">
-                                    <td>
-                                        <span t-out="rec[ln]"/>
-                                    </td>
+                                <t t-foreach="length" t-as="col_idx">
+                                    <th class="text-center fw-bold">
+                                        <span t-out="record['header'][col_idx]"/>
+                                    </th>
                                 </t>
                             </tr>
-                        </t>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="record['data']" t-as="rec">
+                                <tr>
+                                    <t t-foreach="length" t-as="col_idx">
+                                        <td>
+                                            <span t-out="rec[col_idx]"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </t>
+                        </tbody>
                     </table>
                 </div>
             </t>
