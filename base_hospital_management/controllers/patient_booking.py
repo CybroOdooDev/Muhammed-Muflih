@@ -15,6 +15,7 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
+import base64
 import logging
 from odoo import fields, http
 from odoo.http import request
@@ -94,3 +95,31 @@ class PatientBooking(http.Controller):
                     if dep_info not in departments:
                         departments.append(dep_info)
         return {'doctors': doctors, 'departments': departments}
+
+    @http.route('/patient_card', type='http', auth="public", website=True)
+    def patient_card(self):
+        """Render patient card registration form."""
+        return request.render("base_hospital_management.patient_card_form")
+
+    @http.route('/patient_card/success', type='http', auth="public",
+                website=True, csrf=False, methods=['POST'])
+    def patient_card_submit(self, **kw):
+        """Submit patient card form and create patient record."""
+        partner_vals = {
+            'name': kw.get('pname'),
+            'date_of_birth': kw.get('dob') or False,
+            'gender': kw.get('gender') or False,
+            'email': kw.get('mail') or False,
+            'phone': kw.get('phone') or False,
+            'city': kw.get('place') or False,
+        }
+        file_obj = kw.get('file')
+        if file_obj and hasattr(file_obj, 'read'):
+            partner_vals['image_1920'] = base64.b64encode(file_obj.read())
+        partner = request.env['res.partner'].sudo().create(partner_vals)
+        if not partner.patient_seq or partner.patient_seq in ['New', 'User', 'Employee']:
+            partner.sudo().write({
+                'patient_seq': request.env['ir.sequence'].sudo().next_by_code('patient.sequence') or 'New'
+            })
+        partner.sudo().action_generate_patient_card()
+        return request.redirect('/my/home')

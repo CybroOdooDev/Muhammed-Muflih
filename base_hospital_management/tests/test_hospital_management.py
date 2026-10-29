@@ -566,6 +566,19 @@ class TestHospitalManagement(TransactionCase):
         report = patient_test.print_lab_tests()
         self.assertTrue(report)
 
+        # Test printing lab test as a non-HR lab assistant user (ensuring no hr.employee.public access error)
+        lab_user = self.env['res.users'].create({
+            'name': 'Lab Tech User',
+            'login': 'lab_tech_test_user',
+            'email': 'labtech@hospital.test',
+            'group_ids': [(6, 0, [
+                self.env.ref('base.group_user').id,
+                self.env.ref('base_hospital_management.base_hospital_management_group_lab_assistant').id,
+            ])],
+        })
+        report_lab_user = patient_test.with_user(lab_user).print_lab_tests()
+        self.assertTrue(report_lab_user)
+
     def test_13_inpatient_and_outpatient_additional_workflows(self):
         """Test additional inpatient and outpatient actions and reports."""
         inpatient = self.env['hospital.inpatient'].create({

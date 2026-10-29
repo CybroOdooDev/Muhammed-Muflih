@@ -34,6 +34,11 @@ class ViewPortal(http.Controller):
                 ('res_model', '=', 'hospital.vaccination')
             ], limit=1)
             attachment_id = attachment.id if attachment else False
+            access_token = ''
+            if attachment:
+                if not attachment.access_token:
+                    attachment.generate_access_token()
+                access_token = attachment.access_token or ''
             data = {
                 'id': rec.id,
                 'name': rec.name,
@@ -41,7 +46,8 @@ class ViewPortal(http.Controller):
                 'dose': rec.dose,
                 'vaccine_product_id': rec.vaccine_product_id.name,
                 'vaccine_price': rec.vaccine_price,
-                'attachment_id': attachment_id
+                'attachment_id': attachment_id,
+                'access_token': access_token,
             }
             vaccination_list.append(data)
         values = {
@@ -93,12 +99,18 @@ class ViewPortal(http.Controller):
                 ('res_model', '=', 'lab.test.result')
             ], limit=1)
             attachment_id = attachment.id if attachment else False
+            access_token = ''
+            if attachment:
+                if not attachment.access_token:
+                    attachment.generate_access_token()
+                access_token = attachment.access_token or ''
             result_list.append({
                 'id': rec.id,
                 'name': rec.test_id.name,
                 'result': rec.result,
                 'price': rec.price,
                 'attachment_id': attachment_id,
+                'access_token': access_token,
             })
         values = {
             'all_test_id': all_test.id,
@@ -128,3 +140,14 @@ class ViewPortal(http.Controller):
         }
         return request.render(
             "base_hospital_management.portal_my_op", values)
+
+    @http.route('/my/op/prescription/download', type='jsonrpc', auth="user")
+    def portal_download_prescription(self, op_id):
+        """Generates prescription and returns download url for portal user"""
+        op = request.env['hospital.outpatient'].sudo().browse(int(op_id))
+        if not op.exists():
+            return {'error': 'Record not found'}
+        partner_id = request.env.user.partner_id.id
+        if op.patient_id.id != partner_id and request.uid not in op.patient_id.user_ids.ids:
+            return {'error': 'Unauthorized'}
+        return op.create_file(op.id)

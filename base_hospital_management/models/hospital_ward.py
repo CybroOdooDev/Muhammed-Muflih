@@ -37,7 +37,7 @@ class HospitalWard(models.Model):
     bed_count = fields.Integer(string="Count", compute="_compute_bed_count",
                                help='The bed count')
     nurse_ids = fields.Many2many('hr.employee',
-                                 domain="[('job_id','=','Nurse')]",
+                                 domain="[('job_id.name','=','Nurse')]",
                                  help='Nurses corresponds to the ward')
     ward_facilities_ids = fields.Many2many('room.facility',
                                            string='Facilities',
@@ -45,7 +45,7 @@ class HospitalWard(models.Model):
                                                 'ward.')
     _name_uniq = models.Constraint(
         'unique (ward_no)',
-        "TWard number should be unique!",
+        "Ward number should be unique!",
     )
 
     def _compute_bed_count(self):
@@ -54,13 +54,6 @@ class HospitalWard(models.Model):
             rec.bed_count = rec.env['hospital.bed'].sudo().search_count([(
                 'ward_id', '=', rec.ward_no)])
 
-    @api.onchange('building_id')
-    def _onchange_building_id(self):
-        """Returns domain for the field bed_id"""
-        return {'domain': {
-            'bed_id': [
-                ('ward_id', '=', self.id),
-            ]}}
 
     def action_get_open_bed(self):
         """Returns form view of bed"""

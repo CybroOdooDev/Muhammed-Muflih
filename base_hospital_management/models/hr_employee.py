@@ -106,3 +106,23 @@ class HrEmployee(models.Model):
         Uses sudo to bypass access restrictions.
         """
         return self.sudo().search_read(domain=domain)
+
+
+class HrEmployeePublic(models.Model):
+    """Inherited to expose hospital fields on employee public profile"""
+    _inherit = 'hr.employee.public'
+
+    doctor = fields.Boolean(related='employee_id.doctor', readonly=True)
+    currency_id = fields.Many2one('res.currency',
+                                  related='employee_id.currency_id',
+                                  readonly=True)
+    consultancy_charge = fields.Monetary(related='employee_id.consultancy_charge',
+                                         readonly=True)
+    consultancy_type = fields.Selection(related='employee_id.consultancy_type',
+                                        readonly=True)
+    time_avg = fields.Float(related='employee_id.time_avg', readonly=True)
+    degree_ids = fields.Many2many(related='employee_id.degree_ids', readonly=True)
+    pharmacy_id = fields.Many2one(related='employee_id.pharmacy_id', readonly=True)
+    specialization_ids = fields.Many2many(related='employee_id.specialization_ids',
+                                          readonly=True)
+

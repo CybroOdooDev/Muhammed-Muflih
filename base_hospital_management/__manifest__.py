@@ -40,6 +40,7 @@
         "data/ir_cron_data.xml",
         "data/website_data.xml",
         "data/portal_entry_data.xml",
+        "data/hr_job_data.xml",
         "views/menu_views.xml",
         "views/inpatient_surgery_views.xml",
         "views/hospital_bed_views.xml",
@@ -74,7 +75,6 @@
         "reports/res_partner_reports.xml",
         "reports/lab_test_line_reports.xml",
     ],
-    "demo": ["demo/hr_job_demo.xml"],
     "assets": {
         "web.assets_frontend": [
             "base_hospital_management/static/src/js/prescription.js",
@@ -101,6 +101,5 @@
     "images": ["static/description/banner.jpg"],
     "license": "LGPL-3",
     "installable": True,
-    "auto_install": False,
     "application": True,
 }

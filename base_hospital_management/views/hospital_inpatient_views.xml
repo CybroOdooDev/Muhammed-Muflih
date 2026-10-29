@@ -121,13 +121,13 @@
                                     <field name="bed_type"/>
                                     <field name="bed_id"
                                            options="{'no_create': True, 'no_edit': True}"
-                                           invisible="is_ward != 'ward'" domain="[('state','=','avail')]"/>
+                                           invisible="is_ward != 'ward'" domain="[('bed_type', '=', bed_type), ('state', '=', 'avail')]"/>
                                     <field name="ward_id"
                                            options="{'no_create': True, 'no_edit': True}"
                                             invisible="is_ward != 'ward'"/>
                                     <field name="room_id"
                                            options="{'no_create': True, 'no_edit': True}"
-                                            invisible="is_ward != 'room'" domain="[('state','=','avail')]"/>
+                                            invisible="is_ward != 'room'" domain="[('bed_type', '=', bed_type), ('state', '=', 'avail')]"/>
                                     <field name="building_id"
                                            options="{'no_create': True, 'no_edit': True}"
                                             invisible="is_ward != 'ward'"/>

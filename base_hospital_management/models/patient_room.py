@@ -25,7 +25,7 @@ class PatientRoom(models.Model):
 
     name = fields.Char(help='The name of room', required=True)
     currency_id = fields.Many2one('res.currency',
-                                  default=lambda self: self.env.user.company_id
+                                  default=lambda self: self.env.company
                                   .currency_id.id,
                                   required=True, help='Currency in which '
                                                       'payments will be done')

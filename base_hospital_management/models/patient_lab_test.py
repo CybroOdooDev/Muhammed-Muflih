@@ -41,7 +41,7 @@ class PatientLabTest(models.Model):
     currency_id = fields.Many2one('res.currency',
                                   help='Currency in which lab test amount will'
                                        ' be calculated',
-                                  default=lambda self: self.env.user.company_id
+                                  default=lambda self: self.env.company
                                   .currency_id.id,
                                   required=True)
     state = fields.Selection([('draft', 'Draft'),
@@ -277,19 +277,22 @@ class PatientLabTest(models.Model):
         test_list = []
         for rec in self.result_ids:
             datas = {
-                'test': rec.test_id.test,
-                'normal': rec.normal,
-                'uom_id': rec.uom_id.name,
-                'result': rec.result,
+                'name': rec.test_id.name or '',
+                'test': rec.test_id.name or '',
+                'normal': rec.normal or '',
+                'uom_id': rec.uom_id.name or '',
+                'result': rec.result or '',
                 'cost': rec.price,
-                'currency': self.env.company.currency_id.symbol
+                'currency': self.env.company.currency_id.symbol or ''
             }
             test_list.append(datas)
+        doctor = self.sudo().test_id.doctor_id
         data = {
             'datas': test_list,
             'date': self.date,
-            'patient_name': self.patient_id.name,
-            'doctor_name': self.test_id.doctor_id.name
+            'patient_id': self.patient_id.name or '',
+            'patient_name': self.patient_id.name or '',
+            'doctor_name': doctor.name if doctor else '',
         }
         return self.env.ref(
             'base_hospital_management.action_report_patient_lab_tests').report_action(self, data=data)

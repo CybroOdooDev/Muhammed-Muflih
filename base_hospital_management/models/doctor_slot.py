@@ -28,7 +28,7 @@ class DoctorSlot(models.Model):
     doctor_id = fields.Many2one('hr.employee',
                                 help='Doctors name',
                                 domain=[('job_id.name', '=', 'Doctor')])
-    date_start = fields.Datetime(default=fields.Date.today(), string='Date',
+    date_start = fields.Datetime(default=fields.Datetime.now, string='Date',
                                  help='Date of surgery')
     patient_id = fields.Many2one('res.partner',
                                  domain=[('patient_seq', 'not in',

@@ -37,11 +37,16 @@ class HospitalInpatient(models.Model):
     reason = fields.Text(
         string="Reason For Admission",
         help="Current reason for hospitalization of the patient")
-    bed_id = fields.Many2one('hospital.bed',
-                             help='Choose the bed')
-    room_id = fields.Many2one('patient.room',
-                              help='Choose the room to which patient admitted'
-                                   ' to')
+    bed_id = fields.Many2one(
+        'hospital.bed',
+        domain="[('bed_type', '=', bed_type), ('state', '=', 'avail')]",
+        help='Choose the bed'
+    )
+    room_id = fields.Many2one(
+        'patient.room',
+        domain="[('bed_type', '=', bed_type), ('state', '=', 'avail')]",
+        help='Choose the room to which patient admitted to'
+    )
     building_id = fields.Many2one(
         'hospital.building', related='room_id.building_id',
         string="Block", help='Name of the block')
@@ -68,7 +73,7 @@ class HospitalInpatient(models.Model):
                                               ('job_id.name', '=', 'Doctor')])
     hosp_date = fields.Date(string="Admission Date",
                             help='Date of hospitalisation',
-                            default=fields.Date.today())
+                            default=fields.Date.context_today)
     discharge_date = fields.Date(help='Date of discharge', copy=False)
     condition = fields.Text(
         string="Condition Before Hospitalization",
@@ -88,7 +93,7 @@ class HospitalInpatient(models.Model):
                                help='Rent for the bed')
     currency_id = fields.Many2one('res.currency',
                                   help='Currency in which rent is calculating',
-                                  default=lambda self: self.env.user.company_id
+                                  default=lambda self: self.env.company
                                   .currency_id.id)
     state = fields.Selection([('draft', 'Draft'),
                               ('reserve', 'Reserved'),
@@ -165,49 +170,42 @@ class HospitalInpatient(models.Model):
     @api.depends('test_ids')
     def _compute_test_count(self):
         """Method for computing test count"""
-        self.test_count = self.env['lab.test.line'].sudo().search_count(
-            [('id', 'in', self.test_ids.ids)])
+        for rec in self:
+            rec.test_count = self.env['lab.test.line'].sudo().search_count(
+                [('id', 'in', rec.test_ids.ids)])
 
+    @api.depends('hosp_date', 'discharge_date')
     def _compute_admit_days(self):
         """Method for computing admit days"""
-        if self.hosp_date:
-            if self.discharge_date:
-                self.admit_days = (self.discharge_date - self.hosp_date +
+        today = fields.Date.today()
+        for rec in self:
+            if rec.hosp_date:
+                end_date = rec.discharge_date or today
+                rec.admit_days = (end_date - rec.hosp_date +
                                    datetime.timedelta(days=1)).days
             else:
-                self.admit_days = (fields.Date.today() - self.hosp_date +
-                                   datetime.timedelta(days=1)).days
+                rec.admit_days = 0
 
     @api.depends('hosp_date', 'discharge_date',
-                 'admit_days', 'room_id')
+                 'admit_days', 'room_id', 'room_id.rent')
     def _compute_room_rent_amount(self):
         """Method for computing room rent amount"""
-        if self.hosp_date:
-            if self.discharge_date:
-                self.admit_days = (self.discharge_date - self.hosp_date +
-                                   datetime.timedelta(days=1)).days
-                self.room_rent_amount = self.room_id.rent * self.admit_days
-            else:
-                self.admit_days = (fields.Date.today() - self.hosp_date +
-                                   datetime.timedelta(days=1)).days
-                self.room_rent_amount = self.room_id.rent * self.admit_days
-        self.room_rent_amount = self.room_id.rent * self.admit_days
+        for rec in self:
+            if not rec.admit_days and rec.hosp_date:
+                rec._compute_admit_days()
+            rec.room_rent_amount = (rec.room_id.rent or 0.0) * (rec.admit_days or 0)
 
     @api.depends('hosp_date', 'discharge_date', 'room_rent_amount',
-                 'admit_days')
+                 'admit_days', 'bed_id', 'bed_id.bed_rent')
     def _compute_bed_rent_amount(self):
         """Method for computing bed rent amount"""
-        if self.hosp_date:
-            if self.discharge_date:
-                self.admit_days = (self.discharge_date - self.hosp_date +
-                                   datetime.timedelta(days=1)).days
-                self.bed_rent_amount = self.bed_id.bed_rent * self.admit_days
+        for rec in self:
+            if not rec.admit_days and rec.hosp_date:
+                rec._compute_admit_days()
+            if rec.hosp_date:
+                rec.bed_rent_amount = (rec.bed_id.bed_rent or 0.0) * (rec.admit_days or 0)
             else:
-                self.admit_days = (fields.Date.today() - self.hosp_date +
-                                   datetime.timedelta(days=1)).days
-                self.bed_rent_amount = self.bed_id.bed_rent * self.admit_days
-        else:
-            self.bed_rent_amount = self.bed_id.bed_rent
+                rec.bed_rent_amount = rec.bed_id.bed_rent or 0.0
 
     @api.onchange('enable_outpatient')
     def _onchange_enable_outpatient(self):
@@ -228,15 +226,11 @@ class HospitalInpatient(models.Model):
 
     @api.onchange('bed_type')
     def _onchange_bed_type(self):
-        """Method for filtering beds according to the bed type"""
-        return {'domain': {
-            'bed_id': [
-                ('bed_type', '=', self.bed_type),
-                ('state', '=', 'avail')
-            ], 'room_id': [
-                ('bed_type', '=', self.bed_type),
-                ('state', '=', 'avail')
-            ]}}
+        """Method for resetting bed and room when bed type changes"""
+        if self.bed_id and self.bed_id.bed_type != self.bed_type:
+            self.bed_id = False
+        if self.room_id and self.room_id.bed_type != self.bed_type:
+            self.room_id = False
 
     def action_view_invoice(self):
         """Method for viewing Invoice"""
@@ -426,24 +420,23 @@ class HospitalInpatient(models.Model):
 
     def action_print_prescription(self):
         """Method for printing prescription"""
-        data = False
         prescription_list = []
         for rec in self.sudo().prescription_ids:
             prescription_list.append({
                 'medicine': rec.medicine_id.name,
                 'intake': rec.no_intakes,
-                'time': rec.time.capitalize(),
+                'time': rec.time.capitalize() if rec.time else '',
                 'quantity': rec.quantity,
-                'note': rec.note.capitalize(),
+                'note': rec.note.capitalize() if rec.note else '',
             })
-            data = {
-                'datas': prescription_list,
-                'date': fields.Date.today(),
-                'patient_name': self.sudo().patient_id.name,
-                'doctor_name': self.sudo().attending_doctor_id.name,
-            }
+        data = {
+            'datas': prescription_list,
+            'date': fields.Date.today(),
+            'patient_name': self.sudo().patient_id.name or '',
+            'doctor_name': self.sudo().attending_doctor_id.name if self.sudo().attending_doctor_id else '',
+        }
         return self.env.ref(
-            'base_hospital_management.action_report_patient_prescription'). \
+            'base_hospital_management.action_report_inpatient_prescription'). \
             report_action(self, data=data)
 
     @api.model

@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!--Patient prescription report -->
+    <!-- Outpatient prescription report action -->
     <record id="action_report_patient_prescription" model="ir.actions.report">
         <field name="name">Patient Prescription</field>
-        <field name="model">res.partner</field>
+        <field name="model">hospital.outpatient</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">base_hospital_management.patient_prescription_report</field>
-        <field name="binding_model_id" ref="model_res_partner"/>
+        <field name="binding_model_id" ref="model_hospital_outpatient"/>
+        <field name="binding_type">report</field>
+    </record>
+    <!-- Inpatient prescription report action -->
+    <record id="action_report_inpatient_prescription" model="ir.actions.report">
+        <field name="name">Inpatient Prescription</field>
+        <field name="model">hospital.inpatient</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">base_hospital_management.patient_prescription_report</field>
+        <field name="binding_model_id" ref="model_hospital_inpatient"/>
         <field name="binding_type">report</field>
     </record>
     <!--    Patient prescription report template-->
@@ -14,18 +23,19 @@
         <t t-call="web.html_container">
             <t t-call="web.external_layout">
                 <center>
-                <h1>Doctor Prescription</h1></center>
+                    <h1>Doctor Prescription</h1>
+                </center>
                 <div>
                     <strong>Date :</strong>
-                    <span t-out="date"/>
+                    <span t-out="date or (docs and (getattr(docs[0], 'op_date', False) or getattr(docs[0], 'hosp_date', False)))"/>
                 </div>
                 <div>
                     <strong>Patient's Name :</strong>
-                    <span t-out="patient_name"/>
+                    <span t-out="patient_name or (docs and docs[0].patient_id.name)"/>
                 </div>
                 <div>
                     <strong>Doctor :</strong>
-                    <span t-out="doctor_name"/>
+                    <span t-out="doctor_name or (docs and (getattr(docs[0], 'doctor_id', False) and getattr(docs[0].doctor_id, 'doctor_id', False) and docs[0].doctor_id.doctor_id.name or getattr(docs[0], 'attending_doctor_id', False) and docs[0].attending_doctor_id.name))"/>
                 </div>
                 <table class="table">
                     <thead>
@@ -40,29 +50,52 @@
                     </thead>
                     <t t-set="i" t-value="0"/>
                     <tbody>
-                        <center>
-                        <tr t-foreach="datas" t-as="line">
-                            <td>
-                                <t t-set="i" t-value="i + 1"/>
-                                <span t-out="i"/>
-                            </td>
-                            <td>
-                                <span t-out="line['medicine']"/>
-                            </td>
-                            <td>
-                                <span t-out="line['intake']"/>
-                            </td>
-                            <td>
-                                <span t-out="line['time']"/>
-                            </td>
-                            <td>
-                                <span t-out="line['quantity']"/>
-                            </td>
-                            <td>
-                                <span t-out="line['note']"/>
-                            </td>
-                        </tr>
-                        </center>
+                        <t t-if="datas">
+                            <tr t-foreach="datas" t-as="line">
+                                <td>
+                                    <t t-set="i" t-value="i + 1"/>
+                                    <span t-out="i"/>
+                                </td>
+                                <td>
+                                    <span t-out="line['medicine']"/>
+                                </td>
+                                <td>
+                                    <span t-out="line['intake']"/>
+                                </td>
+                                <td>
+                                    <span t-out="line['time']"/>
+                                </td>
+                                <td>
+                                    <span t-out="line['quantity']"/>
+                                </td>
+                                <td>
+                                    <span t-out="line['note']"/>
+                                </td>
+                            </tr>
+                        </t>
+                        <t t-elif="docs">
+                            <tr t-foreach="docs[0].prescription_ids" t-as="line">
+                                <td>
+                                    <t t-set="i" t-value="i + 1"/>
+                                    <span t-out="i"/>
+                                </td>
+                                <td>
+                                    <span t-out="line.medicine_id.name"/>
+                                </td>
+                                <td>
+                                    <span t-out="line.no_intakes"/>
+                                </td>
+                                <td>
+                                    <span t-out="line.time.capitalize() if line.time else ''"/>
+                                </td>
+                                <td>
+                                    <span t-out="line.quantity"/>
+                                </td>
+                                <td>
+                                    <span t-out="line.note.capitalize() if line.note else ''"/>
+                                </td>
+                            </tr>
+                        </t>
                     </tbody>
                 </table>
             </t>

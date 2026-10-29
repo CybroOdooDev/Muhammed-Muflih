@@ -36,13 +36,13 @@ class HospitalOutpatient(models.Model):
                                           ['New', 'Employee', 'User'])],
                                  string='Patient ID', help='Id of the patient',
                                  required=True)
-    doctor_id = fields.Many2one('doctor.allocation',
-                                help='Select the doctor',
-                                required=True,
-                                domain=[('slot_remaining', '>', 0),
-                                        ('date', '=', fields.Date.today()),
-                                        ('state', '=', 'confirm')])
-    op_date = fields.Date(default=fields.Date.today(), string='Date',
+    doctor_id = fields.Many2one(
+        'doctor.allocation',
+        help='Select the doctor',
+        required=True,
+        domain="[('slot_remaining', '>', 0), ('date', '=', op_date), ('state', '=', 'confirm'), ('patient_type', 'in', [False, 'outpatient'])]"
+    )
+    op_date = fields.Date(default=fields.Date.context_today, string='Date',
                           help='Date of OP')
     reason = fields.Text(help='Reason for visiting hospital')
     test_count = fields.Integer(string='Test Created',
@@ -70,7 +70,7 @@ class HospitalOutpatient(models.Model):
     is_sale_created = fields.Boolean(string='Sale Created',
                                      help='True if sale order created')
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals_list):
         """Op number generator"""
         for vals in vals_list:
@@ -96,17 +96,13 @@ class HospitalOutpatient(models.Model):
     @api.depends('test_ids')
     def _compute_test_count(self):
         """Computes the value of test count"""
-        self.test_count = len(self.test_ids.ids)
+        for rec in self:
+            rec.test_count = len(rec.test_ids.ids)
 
     @api.onchange('op_date')
     def _onchange_op_date(self):
-        """Method for updating the doamil of doctor_id"""
+        """Method for resetting doctor_id on date change"""
         self.doctor_id = False
-        return {'domain': {'doctor_id': [('slot_remaining', '>', 0),
-                                         ('date', '=', self.op_date),
-                                         ('state', '=', 'confirm'), (
-                                             'patient_type', 'in',
-                                             [False, 'outpatient'])]}}
 
     @api.model
     def action_row_click_data(self, op_reference):
@@ -140,7 +136,7 @@ class HospitalOutpatient(models.Model):
             self.env['sale.order.line'].sudo().create({
                 'product_id': i.medicine_id.id,
                 'product_uom_qty': i.quantity,
-                'order': sale_order.id,
+                'order_id': sale_order.id,
             })
             self.create_invoice()
 
@@ -149,35 +145,34 @@ class HospitalOutpatient(models.Model):
         """Method for creating prescription"""
         record = self.env['hospital.outpatient'].sudo().browse(rec_id)
         prescription_list = []
-        data = False
         for rec in record.prescription_ids:
             prescription_list.append({
                 'medicine': rec.medicine_id.name,
                 'intake': rec.no_intakes,
-                'time': rec.time.capitalize(),
+                'time': rec.time.capitalize() if rec.time else '',
                 'quantity': rec.quantity,
                 'note': rec.note.capitalize() if rec.note else '',
             })
-            data = {
-                'datas': prescription_list,
-                'date': record.op_date,
-                'patient_name': record.patient_id.name,
-                'doctor_name': record.doctor_id.doctor_id.name,
-            }
+        data = {
+            'datas': prescription_list,
+            'date': record.op_date,
+            'patient_name': record.patient_id.name or '',
+            'doctor_name': record.doctor_id.doctor_id.name if record.doctor_id and record.doctor_id.doctor_id else '',
+        }
         pdf = self.env['ir.actions.report'].sudo()._render_qweb_pdf(
             'base_hospital_management.action_report_patient_prescription',
             rec_id, data=data)
         record.attachment_id = self.env['ir.attachment'].sudo().create({
             'datas': base64.b64encode(pdf[0]).decode('utf-8'),
-            'name': "Prescription",
+            'name': "Prescription.pdf",
             'type': 'binary',
             'res_model': 'hospital.outpatient',
             'res_id': rec_id,
+            'mimetype': 'application/pdf',
         })
+        record.attachment_id.generate_access_token()
         return {
-            'url': f'/web/content'
-                   f'/{record.attachment_id.id}?download=true&amp'
-                   f';access_token=',
+            'url': f'/web/content/{record.attachment_id.id}?download=true&access_token={record.attachment_id.access_token}',
         }
 
     @api.model
@@ -285,23 +280,22 @@ class HospitalOutpatient(models.Model):
 
     def action_print_prescription(self):
         """Method for printing prescription"""
-        data = False
         prescription_list = []
         for rec in self.sudo().prescription_ids:
             datas = {
                 'medicine': rec.medicine_id.name,
                 'intake': rec.no_intakes,
-                'time': rec.time.capitalize(),
+                'time': rec.time.capitalize() if rec.time else '',
                 'quantity': rec.quantity,
-                'note': rec.note.capitalize(),
+                'note': rec.note.capitalize() if rec.note else '',
             }
             prescription_list.append(datas)
-            data = {
-                'datas': prescription_list,
-                'date': self.sudo().op_date,
-                'patient_name': self.sudo().patient_id.name,
-                'doctor_name': self.sudo().doctor_id.doctor_id.name,
-            }
+        data = {
+            'datas': prescription_list,
+            'date': self.sudo().op_date,
+            'patient_name': self.sudo().patient_id.name or '',
+            'doctor_name': self.sudo().doctor_id.doctor_id.name if self.sudo().doctor_id and self.sudo().doctor_id.doctor_id else '',
+        }
         return self.env.ref(
             'base_hospital_management.action_report_patient_prescription'). \
             report_action(self, data=data)

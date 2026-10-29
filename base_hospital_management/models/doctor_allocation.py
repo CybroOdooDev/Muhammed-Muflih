@@ -72,7 +72,7 @@ class DoctorAllocation(models.Model):
          ('cancel', 'Cancelled')],
         default='draft', help='State of Doctor allocation')
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals_list):
         """Method for creating name"""
         for vals in vals_list:

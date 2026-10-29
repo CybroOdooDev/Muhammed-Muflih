@@ -27,7 +27,7 @@ class HospitalFamily(models.Model):
     relation = fields.Char(help='Relation with the patient')
     age = fields.Integer(help='Age of family member')
     deceased = fields.Selection([('yes', 'Yes'), ('no', 'NO')],
-                                string="Diseased", help='Specify whether the '
+                                string="Deceased", help='Specify whether the '
                                                         'family member is '
                                                         'alive or not')
     family_id = fields.Many2one('res.partner', help='Choose the family '

@@ -97,7 +97,7 @@
                          <td class="text-right">
                             <t t-if="vaccine['attachment_id']">
                                 <span class="btn btn-outline-info">
-                                    <a t-attf-href="/web/content/{{vaccine['attachment_id']}}?download=true&amp;access_token=">
+                                    <a t-attf-href="/web/content/{{vaccine['attachment_id']}}?download=true&amp;access_token={{vaccine.get('access_token', '')}}">
                                         <i class="fa fa-download"/>
                                     </a>
                                 </span>
@@ -175,7 +175,7 @@
                         <td class="text-right">
                             <t t-if="data['attachment_id']">
                                 <span class="btn btn-outline-info">
-                                    <a t-attf-href="/web/content/{{data['attachment_id']}}?download=true&amp;access_token=">
+                                    <a t-attf-href="/web/content/{{data['attachment_id']}}?download=true&amp;access_token={{data.get('access_token', '')}}">
                                         <i class="fa fa-download"/>
                                     </a>
                                 </span>

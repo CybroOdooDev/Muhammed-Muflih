@@ -49,7 +49,7 @@ class HospitalBed(models.Model):
     currency_id = fields.Many2one('res.currency',
                                   help='Currency in which bed rent calculates',
                                   default=lambda self:
-                                  self.env.user.company_id.currency_id.id,
+                                  self.env.company.currency_id.id,
                                   required=True)
     bed_rent = fields.Monetary(string='Rent', help="The charge for the bed")
     state = fields.Selection([('avail', 'Available'), ('not', 'Unavailable')],

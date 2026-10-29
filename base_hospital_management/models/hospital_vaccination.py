@@ -35,7 +35,7 @@ class HospitalVaccination(models.Model):
                                  help='Choose the patient')
     vaccine_date = fields.Date(string='Vaccination Date', help='Date of '
                                                                'vaccination',
-                               default=fields.Date.today())
+                               default=fields.Date.context_today)
     dose = fields.Float(help='Dose of the vaccine')
     vaccine_product_id = fields.Many2one('product.template',
                                          domain="[('vaccine_ok', '=', True)]",

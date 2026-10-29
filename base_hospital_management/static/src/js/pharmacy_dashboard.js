@@ -166,7 +166,6 @@ export class PharmacyDashboard extends Component {
             alert('The sale order has been created with reference number ' + result.invoice);
             window.location.reload();
         } catch (error) {
-            console.error('Error creating sale order:', error);
             alert('Error creating sale order: ' + error.message);
         }
     }
@@ -249,7 +248,6 @@ export class PharmacyDashboard extends Component {
                 alert("Patient Not Found");
             }
         } catch (error) {
-            console.error('Error fetching patient data:', error);
             alert('Error fetching patient data: ' + error.message);
         }
     }

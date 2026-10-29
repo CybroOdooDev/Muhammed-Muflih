@@ -260,11 +260,6 @@ select{
     background: transparent url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='4' viewBox='0 0 7 4'><polygon fill='%23495057' points='3.5 4 7 0 0 0'/></svg>") no-repeat 98% center !important;
 }
 
-<div class="d-flex align-items-center">
-    input class="mr-2"
-    label
-</div>
-
 @media (max-width: 575.98px) {
     .o_patient_button{
         FONT-SIZE: 12PX;

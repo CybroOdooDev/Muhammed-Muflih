@@ -13,15 +13,11 @@ export class PrescriptionWidget extends Interaction {
     async onDownloadClick(ev) {
         const recId = ev.currentTarget.dataset.id;
         if (!recId) {
-            console.warn("No record id found on download button");
             return;
         }
         const result = await this.waitFor(
-            rpc("/web/dataset/call_kw/hospital.outpatient/create_file", {
-                model: "hospital.outpatient",
-                method: "create_file",
-                args: [parseInt(recId, 10)],
-                kwargs: {},
+            rpc("/my/op/prescription/download", {
+                op_id: parseInt(recId, 10),
             })
         );
         if (result?.url) {

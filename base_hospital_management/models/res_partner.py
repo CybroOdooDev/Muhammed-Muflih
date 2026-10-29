@@ -123,7 +123,7 @@ class ResPartner(models.Model):
     currency_id = fields.Many2one('res.currency',
                                   help='Currency in which invoices and payments'
                                        ' will be generated',
-                                  default=lambda self: self.env.user.company_id
+                                  default=lambda self: self.env.company
                                   .currency_id.id, required=True)
     sanitary = fields.Boolean('Sanitary Sewers',
                               help="A sewer or sewer system for carrying off "
@@ -206,10 +206,10 @@ class ResPartner(models.Model):
                          may lead to cervical cancer.""")
     colposcopy = fields.Boolean(help=""" test to take a
                             closer look at your cervix""")
-    self = fields.Boolean(string='Self breast examination',
-                          help="A breast self-exam for breast awareness is "
-                               "in inspection "
-                               "of your breasts that women do on your own")
+    self_breast_exam = fields.Boolean(string='Self breast examination',
+                                      help="A breast self-exam for breast awareness is "
+                                           "in inspection "
+                                           "of your breasts that women do on your own")
     mommography = fields.Boolean(help="Mammograms can be used to look for "
                                       "breast cancer")
     last_pap = fields.Date(string="Last PAP Test",
@@ -368,7 +368,6 @@ class ResPartner(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'hospital.outpatient',
-            'view_type': 'form',
             'view_mode': 'form',
             'target': 'new',
             'views': [[False, 'form']],
@@ -397,14 +396,18 @@ class ResPartner(models.Model):
         check = int(10 - math.ceil(total % 10.0)) % 10
         return check
 
-    def check_ean(eancode):
+    @api.model
+    def check_ean(self, eancode):
         """Returns True if eancode is a valid ean13 string, or null"""
         if not eancode:
             return True
         if len(eancode) != 13:
             return False
-        int(eancode)
-        return eancode.ean_checksum(eancode) == int(eancode[-1])
+        try:
+            int(eancode)
+        except ValueError:
+            return False
+        return self.ean_checksum(eancode) == int(eancode[-1])
 
     def generate_ean(self, ean):
         """Creates and returns a valid ean13 from an invalid one"""
@@ -561,9 +564,10 @@ class ResPartner(models.Model):
     def create_sale_order_pharmacy(self, order):
         """Method for creating sale order for medicines"""
         medicine = []
-        op_record = self.env['hospital.outpatient'].sudo().search(
-            [('op_reference', '=', order), '|',
-             ('active', 'in', [False, True])])
+        op_record = self.env['hospital.outpatient'].sudo().with_context(
+            active_test=False).search([('op_reference', '=', order)], limit=1)
+        if not op_record:
+            return False
         for rec in op_record.prescription_ids:
             medicine.append([rec.medicine_id.id, rec.quantity])
         sale_order_pharmacy = self.env['sale.order'].sudo().create({
@@ -575,6 +579,7 @@ class ResPartner(models.Model):
                 'product_uom_qty': new[1],
                 'order_id': sale_order_pharmacy.id,
             })
+        return sale_order_pharmacy
 
     @api.model
     def create_patient(self, post):

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- Pharmacy dashboard template -->
-<template>
+<templates xml:space="preserve">
     <t t-name="PharmacyOrderLines">
         <tr class="tbl_row">
             <td>
@@ -45,4 +45,4 @@
             </td>
         </tr>
     </t>
-</template>
+</templates>

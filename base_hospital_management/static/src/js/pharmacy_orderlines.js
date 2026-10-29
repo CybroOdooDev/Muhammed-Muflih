@@ -50,7 +50,7 @@ export class PharmacyOrderLines extends Component {
             this.state.medicines = result;
             this.create_order();
         } catch (error) {
-            console.error('Error fetching products:', error);
+            // Error fetching products
         }
     }
 
@@ -61,7 +61,7 @@ export class PharmacyOrderLines extends Component {
             this.uom_lst = result;
             this.state.units = result;
         } catch (error) {
-            console.error('Error fetching UOM:', error);
+            // Error fetching UOM
         }
     }
 
@@ -71,7 +71,7 @@ export class PharmacyOrderLines extends Component {
             const result = await this.orm.call('account.tax', 'search_read', []);
             this.tax_lst = result;
         } catch (error) {
-            console.error('Error fetching tax:', error);
+            // Error fetching tax
         }
     }
 

@@ -58,7 +58,6 @@ export class LabDashBoard extends Component {
             alert('The test has been confirmed');
             await this._loadTestData();
         } catch (error) {
-            console.error('Error confirming lab test:', error);
             alert('Failed to confirm the test');
         }
     }

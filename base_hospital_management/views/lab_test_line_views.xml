@@ -56,12 +56,6 @@
             </list>
         </field>
     </record>
-    <!--Lab test line action-->
-    <record id="lab_test_line_action" model="ir.actions.act_window">
-        <field name="name">Add Lab Test</field>
-        <field name="res_model">lab.test.line</field>
-        <field name="view_mode">form</field>
-    </record>
     <!--    Test type menu action-->
     <record id="lab_test_line_action" model="ir.actions.act_window">
         <field name="name">Patient Test</field>

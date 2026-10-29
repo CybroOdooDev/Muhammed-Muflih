@@ -101,11 +101,11 @@
                                                 Patient Card :</label>
                                                     <select  id="select_type" class="form-control select_type" name="group" t-on-click="this.patient_card">
                                                         <option value="have_card">Have Patient Card</option>
-                                                        <option value="dont_have_card">Dont have Patient Card</option>
+                                                        <option value="dont_have_card">Don't have Patient Card</option>
                                                     </select>
                                                 <label id="patient_label" for ="sl_patient" >Patient ID* :</label>
                                                 <select type="text" id="sl_patient" class="form-control select_patient" autofocus="autofocus" placeholder="Select Out Patient" t-on-change="this.fetch_patient_id">
-                                                    <option value=""></option>  <!-- Add this as a default empty option if needed -->
+                                                    <option value=""></option>
                                                     <t t-foreach="this.state.patient_lst" t-as="patient" t-key="patient.id">
                                                         <option t-att-value="patient.id">
                                                             <t t-esc="patient.patient_seq + '-' + patient.name"/>

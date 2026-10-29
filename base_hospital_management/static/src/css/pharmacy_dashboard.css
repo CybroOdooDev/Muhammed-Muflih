@@ -12,7 +12,7 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    padding-top:1.6rem:
+    padding-top: 1.6rem;
 }
 .menu_link {
     text-decoration: none;
@@ -23,7 +23,7 @@
 }
 
 .menu_class {
-    margin-top: 20p;
+    margin-top: 20px;
 }
 .patient {
     padding-top: 100px;

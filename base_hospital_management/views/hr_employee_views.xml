@@ -38,7 +38,7 @@
         <field name="name">Nurse</field>
         <field name="res_model">hr.employee</field>
         <field name="view_mode">kanban,list,form,activity</field>
-        <field name="domain">[('job_id.name','=','Doctor')]</field>
+        <field name="domain">[('job_id.name','=','Nurse')]</field>
         <field name="view_id" eval="False"/>
     </record>
     <!--    Staff menu action-->

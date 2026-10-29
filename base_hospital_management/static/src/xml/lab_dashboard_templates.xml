@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--Lab dashboard template-->
-<template>
+<templates xml:space="preserve">
     <t t-name="LabDashboard">
         <div class="oh_dashboards">
             <div class="container-fluid o_pj_dashboard">
@@ -324,4 +324,4 @@
             </div>
         </div>
     </t>
-</template>
+</templates>

@@ -54,7 +54,7 @@ class HospitalPharmacy(models.Model):
                                     help='Choose the sales-team for the'
                                          ' pharmacy')
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals_list):
         """Method for creating CRM team"""
         for vals in vals_list:
@@ -167,7 +167,7 @@ class HospitalPharmacy(models.Model):
     @api.model
     def company_currency(self):
         """Currency symbol of current company"""
-        return self.env.user.company_id.currency_id.symbol
+        return self.env.company.currency_id.symbol
 
     @api.model
     def tax_amount(self, kw):

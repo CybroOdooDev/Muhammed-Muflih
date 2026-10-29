@@ -37,7 +37,6 @@ from . import hospital_ward
 from . import hr_employee
 from . import inpatient_payment
 from . import inpatient_surgery
-from . import ir_attachment
 from . import lab_medicine_line
 from . import lab_test
 from . import lab_test_line

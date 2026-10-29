@@ -29,7 +29,7 @@ class LabTest(models.Model):
     price = fields.Monetary(help="The cost for the test")
     currency_id = fields.Many2one('res.currency',
                                   default=lambda self:
-                                  self.env.user.company_id.currency_id.id,
+                                  self.env.company.currency_id.id,
                                   required=True, help='Currency in which '
                                                       'payments will be done')
     tax_ids = fields.Many2many('account.tax',

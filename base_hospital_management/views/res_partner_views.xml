@@ -288,7 +288,7 @@
                                             <field name="anti"/>
                                         </group>
                                     </group>
-                                    <group string="Other Sexual practises">
+                                    <group string="Other Sexual practices">
                                         <group>
                                             <field name="oral"/>
                                             <field name="anal"/>
@@ -421,7 +421,7 @@
                                     <field name="pause"/>
                                     <field name="pause_age"/>
                                     <field name="colposcopy"/>
-                                    <field name="self"/>
+                                    <field name="self_breast_exam"/>
                                 </group>
                                 <group>
                                     <field name="mommography"/>

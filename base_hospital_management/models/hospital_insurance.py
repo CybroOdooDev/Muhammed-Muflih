@@ -27,7 +27,7 @@ class HospitalInsurance(models.Model):
     currency_id = fields.Many2one('res.currency',
                                   help='Currency in which insurance will be '
                                        'calculated',
-                                  default=lambda self: self.env.user.company_id
+                                  default=lambda self: self.env.company
                                   .currency_id.id,
                                   required=True)
     total_coverage = fields.Monetary(help='Total coverage of the insurance')
