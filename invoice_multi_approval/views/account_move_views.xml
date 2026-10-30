@@ -2,8 +2,7 @@
 <odoo>
     <!--    Inherited form view of account.move model-->
     <record id="account_move_approval_view_form" model="ir.ui.view" >
-        <field name="name">account.move.view.form.inherit.invoice.multi.approval
-        </field>
+        <field name="name">account.move.view.form.inherit.invoice.multi.approval</field>
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
@@ -24,7 +23,7 @@
                 <page string="Approvals" name="approval_tab"
                       invisible="move_type not in ('in_invoice', 'out_invoice', 'in_refund', 'out_refund') or not page_visibility">
                     <field name="approval_ids" mode="list" nolabel="1"
-                           style="pointer-events:none;">
+                           readonly="1" class="pe-none">
                         <list string="Approval lines"
                               create="0" edit="0" delete="0">
                             <field name="approver_id"/>

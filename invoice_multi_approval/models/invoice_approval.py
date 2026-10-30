@@ -28,7 +28,6 @@ class InvoiceApproval(models.Model):
 
     name = fields.Char(
         default='Approval Configuration',
-        string="Name",
         help="Approval configuration.",
     )
     approve_customer_invoice = fields.Boolean(
@@ -40,7 +39,6 @@ class InvoiceApproval(models.Model):
         'invoice_approval_invoice_user_rel',
         'approval_id',
         'user_id',
-        string='Invoice Approver',
         domain=lambda self: [(
             'all_group_ids', 'in',
             self.env.ref('invoice_multi_approval.group_approver').id
@@ -56,7 +54,6 @@ class InvoiceApproval(models.Model):
         'invoice_approval_bill_user_rel',
         'approval_id',
         'user_id',
-        string='Bill Approver',
         domain=lambda self: [(
             'all_group_ids', 'in',
             self.env.ref('invoice_multi_approval.group_approver').id

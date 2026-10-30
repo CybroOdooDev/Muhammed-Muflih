@@ -19,8 +19,7 @@
     'name': "Invoice Multi Level Approval",
     'version': '20.0.1.0.0',
     'category': 'Accounting',
-    'summary': """This module adds multiple approval options for invoices,
-     bills, refunds, and credit notes with single or multiple approvals""",
+    'summary': "Multiple approval workflow for invoices, bills, and credit notes",
     'description': """This module adds multiple approval options for invoices,
      bills, refunds, and credit notes.""",
     'author': 'Cybrosys Techno Solutions',
@@ -37,5 +36,4 @@
     ],
     'images': ['static/description/banner.jpg'],
     'license': "LGPL-3",
-    'installable': True,
 }

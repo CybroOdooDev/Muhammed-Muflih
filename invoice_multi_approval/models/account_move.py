@@ -14,8 +14,8 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#############################################################################
-from odoo import api, fields, models, Command, _
+"""Account move model extension for multi approval workflow."""
+from odoo import api, fields, models, Command
 from odoo.exceptions import UserError
 
 
@@ -27,20 +27,18 @@ class AccountMove(models.Model):
         'approval.line',
         'move_id',
         string="Lines",
+        readonly=True,
         help="Approval lines",
     )
     document_fully_approved = fields.Boolean(
-        string="Document Fully Approved",
         compute='_compute_document_fully_approved',
         help="Enable/disable to approve document.",
     )
     check_approve_ability = fields.Boolean(
-        string="Check Approve Ability",
         compute='_compute_check_approve_ability',
         help="Enable/disable to check approve ability.",
     )
     is_approved = fields.Boolean(
-        string="Is Approved",
         compute='_compute_is_approved',
         help="Enable/disable to compute approved or not.",
     )
@@ -50,7 +48,6 @@ class AccountMove(models.Model):
         help="To compute page visibility.",
     )
     users_approved = fields.Boolean(
-        string="Users Approved",
         compute='_compute_users_approved',
         readonly=True,
         help="All the users approved the invoice",
@@ -101,13 +98,13 @@ class AccountMove(models.Model):
         for move in self:
             all_approvers, is_enabled = move._get_applicable_approvers()
             if not is_enabled:
-                move.approval_ids = [Command.clear()]
+                move.sudo().approval_ids = [Command.clear()]
                 continue
 
             invalid_lines = move.approval_ids.filtered(
                 lambda line: not line.approver_id
             )
-            commands = [Command.unlink(l.id) for l in invalid_lines if l.id]
+            commands = [Command.unlink(line.id) for line in invalid_lines if line.id]
 
             existing_approvers = move.approval_ids.filtered(
                 'approver_id'
@@ -119,7 +116,7 @@ class AccountMove(models.Model):
                     for user in new_approvers
                 ])
             if commands:
-                move.approval_ids = commands
+                move.sudo().approval_ids = commands
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
@@ -133,7 +130,12 @@ class AccountMove(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         """Super create to populate approvers when creating an account.move"""
-        records = super().create(vals_list)
+        clean_vals_list = []
+        for vals in vals_list:
+            vals_copy = dict(vals)
+            vals_copy.pop('approval_ids', None)
+            clean_vals_list.append(vals_copy)
+        records = super().create(clean_vals_list)
         for record in records:
             if (not record.approval_ids or
                     any(not line.approver_id for line in record.approval_ids)):
@@ -141,10 +143,22 @@ class AccountMove(models.Model):
         return records
 
     def write(self, vals):
-        """Prevent writing users_approved directly via RPC to bypass
-        approval."""
-        vals.pop('users_approved', None)
-        return super().write(vals)
+        """Prevent writing users_approved or approval_ids directly via RPC."""
+        vals_to_write = dict(vals)
+        vals_to_write.pop('users_approved', None)
+        if not self.env.su and not self.env.is_admin():
+            is_manager = self.env.user.has_group(
+                'invoice_multi_approval.group_approve_manager'
+            )
+            if not is_manager:
+                vals_to_write.pop('approval_ids', None)
+        res = super().write(vals_to_write)
+        if 'partner_id' in vals:
+            for record in self:
+                if (not record.approval_ids or
+                        any(not line.approver_id for line in record.approval_ids)):
+                    record._set_approval_lines()
+        return res
 
     @api.depends('approval_ids')
     def _compute_page_visibility(self):
@@ -155,14 +169,8 @@ class AccountMove(models.Model):
     @api.depends('approval_ids.approver_id', 'move_type')
     def _compute_check_approve_ability(self):
         """Checks if the logged-in user is eligible to approve"""
-        manager_group = self.env.ref(
-            'invoice_multi_approval.group_approve_manager',
-            raise_if_not_found=False,
-        )
-        is_manager = bool(
-            manager_group and self.env.user.has_group(
-                'invoice_multi_approval.group_approve_manager'
-            )
+        is_manager = self.env.user.has_group(
+            'invoice_multi_approval.group_approve_manager'
         )
         for rec in self:
             _approvers, is_enabled = rec._get_applicable_approvers()
@@ -187,14 +195,13 @@ class AccountMove(models.Model):
         elif current_user.has_group(
             'invoice_multi_approval.group_approve_manager'
         ):
-            pending = self.approval_ids.filtered(
-                lambda line: not line.approval_status
-            )
-            if pending:
-                pending[:1].approval_status = True
+            self.sudo().approval_ids = [Command.create({
+                'approver_id': current_user.id,
+                'approval_status': True,
+            })]
         else:
             raise UserError(
-                _("You are not authorized to approve this document.")
+                self.env._("You are not authorized to approve this document.")
             )
 
     @api.depends(
@@ -259,8 +266,12 @@ class AccountMove(models.Model):
         )
         for rec in self:
             _approvers, is_enabled = rec._get_applicable_approvers()
-            if not is_enabled or not rec.approval_ids:
+            if not is_enabled:
                 rec.document_fully_approved = True
+                continue
+
+            if not rec.approval_ids:
+                rec.document_fully_approved = False
                 continue
 
             approve_lines = rec.approval_ids.filtered('approval_status')
@@ -283,20 +294,21 @@ class AccountMove(models.Model):
 
             rec.document_fully_approved = False
 
-    @api.depends('document_fully_approved')
+    @api.depends('date', 'auto_post', 'document_fully_approved')
     def _compute_hide_post_button(self):
         """Hide post/confirm button until move is fully approved."""
-        super()._compute_hide_post_button()
+        res = super()._compute_hide_post_button()
         for record in self:
             if not record.document_fully_approved:
                 record.hide_post_button = True
+        return res
 
     def action_post(self):
         """Server-side check ensuring approval before posting"""
         for move in self:
             if not move.document_fully_approved:
                 raise UserError(
-                    _("You cannot confirm this document (%s) until it is "
-                      "fully approved.", move.display_name)
+                    self.env._("You cannot confirm this document (%s) until it is "
+                               "fully approved.", move.display_name)
                 )
         return super().action_post()

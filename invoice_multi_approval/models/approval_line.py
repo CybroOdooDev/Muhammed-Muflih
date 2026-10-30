@@ -14,8 +14,8 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#############################################################################
-from odoo import _, fields, models
+"""Approval line model."""
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -32,7 +32,6 @@ class ApprovalLine(models.Model):
     )
     approver_id = fields.Many2one(
         'res.users',
-        string='Approver',
         help="Approver of the invoice",
     )
     approval_status = fields.Boolean(
@@ -40,16 +39,46 @@ class ApprovalLine(models.Model):
         help="Status of approvals",
     )
 
-    def write(self, vals):
-        """Prevent approvers from modifying approval status of other users."""
-        if 'approval_status' in vals and not self.env.is_admin():
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Prevent unauthorized users from manually creating approval lines."""
+        if not self.env.su and not self.env.is_admin():
             is_manager = self.env.user.has_group(
                 'invoice_multi_approval.group_approve_manager'
             )
-            for line in self:
-                if line.approver_id != self.env.user and not is_manager:
+            if not is_manager:
+                raise UserError(
+                    self.env._("You are not authorized to create approval lines.")
+                )
+        return super().create(vals_list)
+
+    def unlink(self):
+        """Prevent unauthorized users from deleting approval lines."""
+        if not self.env.su and not self.env.is_admin():
+            is_manager = self.env.user.has_group(
+                'invoice_multi_approval.group_approve_manager'
+            )
+            if not is_manager:
+                raise UserError(  # pylint: disable=no-raise-unlink
+                    self.env._("You are not authorized to delete approval lines.")
+                )
+        return super().unlink()
+
+    def write(self, vals):
+        """Prevent approvers from modifying approval status of other users."""
+        if not self.env.su and not self.env.is_admin():
+            is_manager = self.env.user.has_group(
+                'invoice_multi_approval.group_approve_manager'
+            )
+            if not is_manager:
+                if any(field in vals for field in ('approver_id', 'move_id')):
                     raise UserError(
-                        _("You cannot approve or modify approval lines of "
-                          "other users.")
+                        self.env._("You cannot modify the approver or invoice on approval lines.")
                     )
+                for line in self:
+                    if line.approver_id != self.env.user:
+                        raise UserError(
+                            self.env._("You cannot approve or modify approval lines of "
+                                       "other users.")
+                        )
         return super().write(vals)

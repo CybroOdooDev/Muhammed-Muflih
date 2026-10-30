@@ -13,14 +13,6 @@
             rel="stylesheet"/>
     <!-- Bootstrap 5.0.2 CSS (used only to power the tab navigation) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <!--
-      NOTE: Everything that CAN be an inline style lives directly on the tag.
-      This block only holds what is impossible to write as an inline style="":
-        1) The @media rule for stacking columns on mobile.
-        2) Small overrides so Bootstrap's tab classes match the pill look.
-      Both are presentation-only. Every pane renders correctly with this whole
-      block removed — nothing here is load-bearing.
-    -->
     <style>
 
         /* Active tab pill. Must be !important: the pills carry their resting look
@@ -296,14 +288,7 @@
             </tr>
         </table>
 
-        <!-- 7. TAB STRIP — anchors, not form controls. The sanitizer removes a
-             form control along with its label text, but keeps an anchor. On apps.odoo.com Bootstrap
-             turns these into real tabs; in the Odoo Apps list, where the script
-             and stylesheet are stripped and every pane renders stacked, the same
-             anchors still show and jump to their section. Pill styling is inline
-             so it survives either way. The "nav" class is required: Bootstrap's
-             tab plugin walks closest(".nav, .list-group") to find the sibling
-             tabs, and silently throws without it. -->
+        <!-- Tab Strip -->
         <div id="cakTabs" class="nav" role="tablist"
              style="text-align: center; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
             <a href="#cak-pane-2" id="cak-tab-2-btn" class="nav-link active" data-bs-toggle="tab" data-bs-target="#cak-pane-2"
@@ -1039,7 +1024,6 @@
                 class="mob-stack">
                 <tr>
 
-                    <!-- KANBAN CARD — edit href, icon <path>, name and note -->
                     <td width="32%" valign="top" class="mob-space"
                         style="background-color: #ffffff; border: 1px solid #f1dcdf; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.13);">
                         <a href="https://apps.odoo.com/apps/modules/20.0/base_accounting_kit" target="_blank" rel="noopener" style="display: block; text-decoration: none;">
@@ -1064,7 +1048,7 @@
                             <div style="padding: 18px 20px 20px; min-height: 124px;">
                                 <div
                                     style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #5b6472; line-height: 1.7;">
-                                    Brings full accounting features back to Odoo 20 Community : Financial Reports, PDC, Assets, Bank Reconciliation, Lock Dates, etc..,
+                                    Brings full accounting features back to Odoo 20 Community: Financial Reports, PDC, Assets, Bank Reconciliation, Lock Dates, etc.,
                                 </div>
                                 <div
                                     style="border-top-width: 1px; border-top-style: solid; border-top-color: #f6e4e6; margin-top: 16px; padding-top: 14px;">
@@ -1076,7 +1060,6 @@
                         </a>
                     </td>
                     <td width="2%" style="font-size: 0; line-height: 18px; height: 18px;">&nbsp;</td>
-                    <!-- KANBAN CARD — edit href, icon <path>, name and note -->
                     <td width="32%" valign="top" class="mob-space"
                         style="background-color: #ffffff; border: 1px solid #f1dcdf; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.13);">
                         <a href="https://apps.odoo.com/apps/modules/20.0/dynamic_accounts_report" target="_blank" rel="noopener" style="display: block; text-decoration: none;">
@@ -1113,7 +1096,6 @@
                         </a>
                     </td>
                     <td width="2%" style="font-size: 0; line-height: 18px; height: 18px;">&nbsp;</td>
-                    <!-- KANBAN CARD — edit href, icon <path>, name and note -->
                     <td width="32%" valign="top" class="mob-space"
                         style="background-color: #ffffff; border: 1px solid #f1dcdf; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.13);">
                         <a href="https://apps.odoo.com/apps/modules/20.0/base_account_budget" target="_blank" rel="noopener" style="display: block; text-decoration: none;">
@@ -1138,7 +1120,7 @@
                             <div style="padding: 18px 20px 20px; min-height: 124px;">
                                 <div
                                     style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #5b6472; line-height: 1.7;">
-                                    Budget Management for Odoo 19 Community Edition.
+                                    Budget Management for Odoo 20 Community Edition.
                                 </div>
                                 <div
                                     style="border-top-width: 1px; border-top-style: solid; border-top-color: #f6e4e6; margin-top: 16px; padding-top: 14px;">

@@ -14,9 +14,9 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#############################################################################
+"""Invoice multi approval test suite."""
 from odoo import Command, fields
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 from odoo.tests.common import TransactionCase, tagged
 
 
@@ -26,6 +26,7 @@ class TestInvoiceMultiApproval(TransactionCase):
 
     @classmethod
     def setUpClass(cls):
+        """Set up test environment and users for approval tests."""
         super().setUpClass()
         cls.group_approver = cls.env.ref(
             'invoice_multi_approval.group_approver'
@@ -268,7 +269,7 @@ class TestInvoiceMultiApproval(TransactionCase):
         # Approver 1 approves
         invoice.with_user(self.user_approver_1).action_invoice_approve()
         appr1_line = invoice.approval_ids.filtered(
-            lambda l: l.approver_id == self.user_approver_1
+            lambda line: line.approver_id == self.user_approver_1
         )
         self.assertTrue(appr1_line.approval_status)
 
@@ -278,7 +279,7 @@ class TestInvoiceMultiApproval(TransactionCase):
 
         # Approval status of Approver 1 must remain True
         appr1_line_after = invoice.approval_ids.filtered(
-            lambda l: l.approver_id == self.user_approver_1
+            lambda line: line.approver_id == self.user_approver_1
         )
         self.assertTrue(
             appr1_line_after.approval_status,
@@ -313,7 +314,7 @@ class TestInvoiceMultiApproval(TransactionCase):
         })
         invoice = self._create_move('out_invoice')
         line_user_2 = invoice.approval_ids.filtered(
-            lambda l: l.approver_id == self.user_approver_2
+            lambda line: line.approver_id == self.user_approver_2
         )
 
         # Approver 1 tries to approve User 2's line directly
@@ -321,3 +322,129 @@ class TestInvoiceMultiApproval(TransactionCase):
             line_user_2.with_user(self.user_approver_1).write({
                 'approval_status': True
             })
+
+    def test_12_plain_user_cannot_create_or_unlink_approval_line(self):
+        """A regular user cannot create or unlink approval.line records."""
+        self.config.write({
+            'approve_customer_invoice': True,
+            'invoice_approver_ids': [Command.set([self.user_approver_1.id])],
+        })
+        invoice = self._create_move('out_invoice')
+        approval_line = invoice.approval_ids[:1]
+
+        # Regular user tries to unlink approval line
+        with self.assertRaises((UserError, AccessError)):
+            approval_line.with_user(self.user_approver_1).unlink()
+
+        # Regular user tries to create approval line
+        with self.assertRaises((UserError, AccessError)):
+            self.env['approval.line'].with_user(self.user_approver_1).create({
+                'move_id': invoice.id,
+                'approver_id': self.user_manager.id,
+                'approval_status': True,
+            })
+
+    def test_13_empty_approval_lines_when_enabled_blocks_posting(self):
+        """If approval is enabled, an invoice with no approval lines cannot post."""
+        self.config.write({
+            'approve_customer_invoice': True,
+            'invoice_approver_ids': [Command.set([self.user_approver_1.id])],
+        })
+        invoice = self._create_move('out_invoice')
+        # Even if approval_ids is cleared or empty, it must not be considered approved
+        invoice.sudo().approval_ids = [Command.clear()]
+        self.assertFalse(invoice.approval_ids)
+        self.assertFalse(
+            invoice.document_fully_approved,
+            "Invoice with empty approval lines must not be treated as fully approved."
+        )
+        with self.assertRaises(UserError):
+            invoice.action_post()
+
+    def test_14_manager_not_in_list_approves_preserves_audit_trail(self):
+        """A manager who is not in the approval lines list approves:
+        audit trail creates a line for the manager and leaves other users' lines
+        intact, while triggering manager override."""
+        self.config.write({
+            'approve_customer_invoice': True,
+            'invoice_approver_ids': [Command.set([
+                self.user_approver_1.id,
+                self.user_approver_2.id,
+            ])],
+        })
+        invoice = self._create_move('out_invoice')
+        # Remove manager from approval lines if present to test manager not in list
+        manager_lines = invoice.approval_ids.filtered(
+            lambda line: line.approver_id == self.user_manager
+        )
+        if manager_lines:
+            manager_lines.sudo().unlink()
+
+        self.assertNotIn(self.user_manager, invoice.approval_ids.approver_id)
+
+        # Manager approves
+        invoice.with_user(self.user_manager).action_invoice_approve()
+
+        # Check other users' lines are not marked as approved
+        user_1_line = invoice.approval_ids.filtered(
+            lambda line: line.approver_id == self.user_approver_1
+        )
+        user_2_line = invoice.approval_ids.filtered(
+            lambda line: line.approver_id == self.user_approver_2
+        )
+        self.assertFalse(user_1_line.approval_status)
+        self.assertFalse(user_2_line.approval_status)
+
+        # Check manager line was created with approval_status True
+        manager_line = invoice.approval_ids.filtered(
+            lambda line: line.approver_id == self.user_manager
+        )
+        self.assertTrue(bool(manager_line))
+        self.assertTrue(manager_line.approval_status)
+
+        # Manager override is triggered
+        self.assertTrue(invoice.document_fully_approved)
+        invoice.action_post()
+        self.assertEqual(invoice.state, 'posted')
+
+    def test_15_regular_user_can_create_invoice_and_approval_ids_sanitized(self):
+        """Regular user can create and save invoice without permission error,
+        and cannot forge approval lines via create or write."""
+        self.config.write({
+            'approve_customer_invoice': True,
+            'invoice_approver_ids': [Command.set([self.user_approver_1.id])],
+        })
+
+        # Regular billing user creates an invoice (even if UI passes approval_ids)
+        invoice = self.env['account.move'].with_user(self.user_approver_1).create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner.id,
+            'invoice_date': fields.Date.today(),
+            'invoice_line_ids': [Command.create({
+                'product_id': self.product.id,
+                'quantity': 1,
+                'price_unit': 100.0,
+            })],
+            # Attempt to forge an already-approved line via client payload
+            'approval_ids': [Command.create({
+                'approver_id': self.user_manager.id,
+                'approval_status': True,
+            })],
+        })
+        self.assertTrue(invoice.id)
+        # Verify forged approval_status=True was stripped and manager line is unapproved
+        manager_lines = invoice.approval_ids.filtered(
+            lambda line: line.approver_id == self.user_manager
+        )
+        self.assertTrue(bool(manager_lines))
+        self.assertFalse(manager_lines.approval_status)
+        self.assertIn(self.user_approver_1, invoice.approval_ids.approver_id)
+        self.assertFalse(invoice.document_fully_approved)
+
+        # Attempt to clear approval lines via write RPC as regular user
+        invoice.with_user(self.user_approver_1).write({
+            'approval_ids': [Command.clear()],
+        })
+        # Approval lines must still be present
+        self.assertTrue(invoice.approval_ids)
+        self.assertFalse(invoice.document_fully_approved)

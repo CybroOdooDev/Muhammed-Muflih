@@ -14,7 +14,7 @@
 
 Invoice Multi Level Approval
 ============================
-Enables the option for adding multiple approvals to the invoice documents
+Enables the option for adding multiple approvals to the invoice documents.
 
 Key Features
 ------------
@@ -35,10 +35,12 @@ To configure multi-level approvals:
 
 1. Navigate to **Invoicing > Configuration > Approvals > Invoice Approval** (or **Accounting > Configuration > Approvals > Invoice Approval**).
 2. Enable approval for the desired document types:
+
    * Customer Invoices
    * Vendor Bills
    * Customer Credit Notes
    * Vendor Credit Notes
+
 3. Assign the designated approvers for each enabled document type.
 4. Save the configuration.
 
