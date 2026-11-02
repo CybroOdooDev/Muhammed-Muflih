@@ -19,6 +19,8 @@
                     <div class="container">
                         <form action="/patient_card/success"
                               method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token"
+                                   t-att-value="request.csrf_token()"/>
                             <div class="row">
                                 <div class="mb-3 col-8">
                                     <label for="pname"
@@ -49,7 +51,7 @@
                                         <option value="male">Male</option>
                                         <option value="female">Female
                                         </option>
-                                        <option value="others">Other
+                                        <option value="other">Other
                                         </option>
                                     </select>
                                 </div>

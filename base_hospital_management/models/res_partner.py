@@ -119,7 +119,7 @@ class ResPartner(models.Model):
     hostile = fields.Boolean(string='Hostile Area',
                              help="Specify your house in a friendly "
                                   "neighbourhood ")
-    income = fields.Monetary(help="The in come of patient")
+    income = fields.Monetary(help="The income of the patient")
     currency_id = fields.Many2one('res.currency',
                                   help='Currency in which invoices and payments'
                                        ' will be generated',
@@ -210,7 +210,8 @@ class ResPartner(models.Model):
                                       help="A breast self-exam for breast awareness is "
                                            "in inspection "
                                            "of your breasts that women do on your own")
-    mommography = fields.Boolean(help="Mammograms can be used to look for "
+    mommography = fields.Boolean(string="Mammography",
+                                 help="Mammograms can be used to look for "
                                       "breast cancer")
     last_pap = fields.Date(string="Last PAP Test",
                            help='The date on which last PAP test has been done')

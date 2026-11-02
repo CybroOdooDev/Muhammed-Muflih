@@ -20,8 +20,8 @@
     'version': '20.0.1.0.0',
     'category': 'Accounting',
     'summary': """This module helps to manage Interest on Overdue Invoices.""",
-    'description': "This module helps to calculate daily, weekly or monthly"
-                   "Interest for Overdue Invoices based on payment term"
+    'description': "This module helps to calculate daily, weekly or monthly "
+                   "Interest for Overdue Invoices based on payment term "
                    "configuration.",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
@@ -36,4 +36,5 @@
     ],
     'images': ['static/description/banner.jpg'],
     'license': 'LGPL-3',
+    'installable': True,
 }

@@ -50,7 +50,7 @@ export class PharmacyOrderLines extends Component {
             this.state.medicines = result;
             this.create_order();
         } catch (error) {
-            // Error fetching products
+            console.error("Error fetching products:", error);
         }
     }
 
@@ -61,7 +61,7 @@ export class PharmacyOrderLines extends Component {
             this.uom_lst = result;
             this.state.units = result;
         } catch (error) {
-            // Error fetching UOM
+            console.error("Error fetching UOM:", error);
         }
     }
 
@@ -71,7 +71,7 @@ export class PharmacyOrderLines extends Component {
             const result = await this.orm.call('account.tax', 'search_read', []);
             this.tax_lst = result;
         } catch (error) {
-            // Error fetching tax
+            console.error("Error fetching tax:", error);
         }
     }
 
@@ -88,8 +88,8 @@ export class PharmacyOrderLines extends Component {
                 el.textContent = result || '';
             });
         });
-        this.state.medicines = await this.product_lst;
-        this.state.units = await this.uom_lst;
+        this.state.medicines = this.product_lst || [];
+        this.state.units = this.uom_lst || [];
     }
     calculateSubtotal(qty, price) {
         return qty * price;

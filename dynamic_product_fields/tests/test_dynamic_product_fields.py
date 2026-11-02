@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 from odoo.tests.common import TransactionCase, tagged
 
 
@@ -35,6 +35,8 @@ class TestDynamicProductFields(TransactionCase):
             ('model_id', '=', cls.product_model.id),
             ('name', '=', 'name'),
         ], limit=1)
+        group_user = cls.env.ref('dynamic_product_fields.dynamic_product_fields_user')
+        cls.env.user.group_ids = [(4, group_user.id)]
 
     def test_01_module_installed_and_widgets_loaded(self):
         """Verify module is installed and default widget data records exist."""
@@ -95,10 +97,11 @@ class TestDynamicProductFields(TransactionCase):
         attachment_model = self.env.ref('base.model_ir_attachment')
         self.assertEqual(wizard.ref_model_id, attachment_model)
 
-        # Trigger wrong model validation error
+        # Trigger wrong model validation warning
         wizard.ref_model_id = self.product_model
-        with self.assertRaises(UserError):
-            wizard._onchange_ref_model_id()
+        res = wizard._onchange_ref_model_id()
+        self.assertIsInstance(res, dict)
+        self.assertIn('warning', res)
 
     def test_04_create_dynamic_char_field(self):
         """Verify dynamic creation of a custom char field and inherited view."""
@@ -158,3 +161,51 @@ class TestDynamicProductFields(TransactionCase):
         category = self.env.ref('dynamic_product_fields.module_dynamic_product_field', raise_if_not_found=False)
         self.assertTrue(category, "Module category must exist.")
         self.assertIn("Product Custom Fields", category.description)
+
+    def test_07_unauthorized_user_cannot_create_fields(self):
+        """Verify user without dynamic_product_fields_user group cannot create fields."""
+        unauthorized_user = self.env['res.users'].create({
+            'name': 'Unauthorized User',
+            'login': 'unauthorized_dynamic_user',
+            'email': 'unauth@example.com',
+            'group_ids': [(6, 0, [self.env.ref('base.group_user').id])],
+        })
+        wizard = self.env['product.dynamic.fields'].create({
+            'name': 'test_unauth_field',
+            'field_description': 'Test Unauth Field',
+            'model_id': self.product_model.id,
+            'field_type': 'char',
+            'position_field': self.position_field.id,
+            'position': 'after',
+        })
+        with self.assertRaises(AccessError):
+            wizard.with_user(unauthorized_user).create_fields()
+
+        with self.assertRaises(AccessError):
+            self.env['product.dynamic.fields'].with_user(unauthorized_user).create({
+                'name': 'test_unauth_create',
+                'field_description': 'Test',
+                'model_id': self.product_model.id,
+                'field_type': 'char',
+                'position_field': self.position_field.id,
+                'position': 'after',
+            })
+
+    def test_08_invalid_model_rejected(self):
+        """Verify attempting to create fields on non-product model is rejected."""
+        partner_model = self.env['ir.model'].search([('model', '=', 'res.partner')], limit=1)
+        partner_field = self.env['ir.model.fields'].search([
+            ('model_id', '=', partner_model.id),
+            ('name', '=', 'name'),
+        ], limit=1)
+        wizard = self.env['product.dynamic.fields'].create({
+            'name': 'test_invalid_model_field',
+            'field_description': 'Test Invalid Model Field',
+            'model_id': partner_model.id,
+            'field_type': 'char',
+            'position_field': partner_field.id,
+            'position': 'after',
+        })
+        with self.assertRaises(UserError):
+            wizard.create_fields()
+

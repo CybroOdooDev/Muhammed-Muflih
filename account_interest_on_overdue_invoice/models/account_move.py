@@ -17,7 +17,7 @@
 #############################################################################
 import math
 from dateutil import relativedelta
-from odoo import api, fields, models, _
+from odoo import Command, api, fields, models, _
 from odoo.exceptions import ValidationError
 
 
@@ -57,121 +57,78 @@ class AccountMove(models.Model):
             period = (today_date - self.invoice_date_due).days
         return period
 
-    def action_interest_compute(self):
-        """ Action for computing Interest amount based on the chosen payment
-        term configurations"""
+    def _compute_interest(self, raise_error=True):
+        """Helper method to compute overdue interest for the invoice records."""
         today_date = fields.Date.today()
         for rec in self:
-            if rec.invoice_date_due \
-                    and rec.invoice_date_due < fields.Date.today() \
-                    and rec.state == 'draft' \
-                    and rec.move_type == 'out_invoice' \
-                    and rec.interest_overdue_act \
-                    and rec.invoice_payment_term_id.interest_percentage > 0:
+            if (rec.invoice_date_due
+                    and rec.invoice_date_due < today_date
+                    and rec.state == 'draft'
+                    and rec.move_type == 'out_invoice'
+                    and rec.interest_overdue_act
+                    and rec.invoice_payment_term_id.interest_percentage > 0):
                 period = rec.get_period_time(today_date)
-                if rec.invoice_payment_term_id.interest_type == 'monthly':
-                    if rec.interest_calculated_period \
-                            and rec.interest_calculated_period == str(period) \
-                            + "-m":
-                        raise ValidationError(_('Your payment term is '
-                                                'monthly, and you can update '
-                                                'it only once in a month.'))
-                    rec.interest_calculated_period = str(period) + "-m"
-                elif rec.invoice_payment_term_id.interest_type == 'weekly':
-                    if rec.interest_calculated_period \
-                            and rec.interest_calculated_period == str(period) \
-                            + "-w":
-                        raise ValidationError(_('Your payment term is weekly, '
-                                                'and you can update it only '
-                                                'once in a week.'))
-                    rec.interest_calculated_period = str(period) + "-w"
+                interest_type = rec.invoice_payment_term_id.interest_type
+                if interest_type == 'monthly':
+                    suffix = "-m"
+                    msg = _('Your payment term is monthly, and you can update it only once in a month.')
+                elif interest_type == 'weekly':
+                    suffix = "-w"
+                    msg = _('Your payment term is weekly, and you can update it only once in a week.')
                 else:
-                    if rec.interest_calculated_period \
-                            and rec.interest_calculated_period == str(period) \
-                            + "-d":
-                        raise ValidationError(_('Your payment term is daily, '
-                                                'and you can update it only '
-                                                'once in a day.'))
-                    rec.interest_calculated_period = str(period) + "-d"
-                interest_line = rec.invoice_line_ids.search(
-                    [('name', '=', 'Interest Amount for Overdue'),
-                     ('move_id', '=', rec.id)],
-                    limit=1)
+                    suffix = "-d"
+                    msg = _('Your payment term is daily, and you can update it only once in a day.')
+
+                if rec.interest_calculated_period == str(period) + suffix:
+                    if raise_error:
+                        raise ValidationError(msg)
+                    continue
+
+                rec.interest_calculated_period = str(period) + suffix
+                interest_line = rec.invoice_line_ids.filtered(
+                    lambda l: l.name == 'Interest Amount for Overdue'
+                )
                 if interest_line:
-                    rec.invoice_line_ids = ([(2, interest_line.id, 0)])
-                rec.interest_amount = rec.amount_total * rec \
-                    .invoice_payment_term_id.interest_percentage * period / 100
-                vals = {'name': 'Interest Amount for Overdue',
-                        'price_unit': rec.interest_amount,
-                        'quantity': 1,
-                        }
+                    rec.invoice_line_ids = [Command.delete(interest_line[0].id)]
+                rec.interest_amount = (
+                    rec.amount_total
+                    * rec.invoice_payment_term_id.interest_percentage
+                    * period / 100
+                )
+                vals = {
+                    'name': 'Interest Amount for Overdue',
+                    'price_unit': rec.interest_amount,
+                    'quantity': 1,
+                }
                 if rec.invoice_payment_term_id.interest_account_id:
-                    vals.update({
-                        'account_id': rec.invoice_payment_term_id
-                        .interest_account_id.id})
+                    vals['account_id'] = (
+                        rec.invoice_payment_term_id.interest_account_id.id
+                    )
                 if rec.interest_amount > 0:
-                    rec.invoice_line_ids = ([(0, 0, vals)])
+                    rec.invoice_line_ids = [Command.create(vals)]
             elif rec.interest_amount > 0:
                 rec.action_interest_reset()
 
+    def action_interest_compute(self):
+        """ Action for computing Interest amount based on the chosen payment
+        term configurations"""
+        self._compute_interest(raise_error=True)
+
     def _get_interest_check(self):
         """ Method for Interest computation via scheduled action """
-        today_date = fields.Date.today()
-        for rec in self.sudo().search([('state', '=', 'draft')]):
-            if rec.invoice_date_due and rec.invoice_date_due < today_date \
-                    and rec.state == 'draft' \
-                    and rec.move_type == 'out_invoice' \
-                    and rec.interest_overdue_act \
-                    and rec.invoice_payment_term_id.interest_percentage > 0:
-                period = rec.get_period_time(today_date)
-                if rec.invoice_payment_term_id.interest_type == 'monthly':
-                    if rec.interest_calculated_period \
-                            and rec.interest_calculated_period == str(period) \
-                            + "-m":
-                        continue
-                    rec.interest_calculated_period = str(period) + "-m"
-                elif rec.invoice_payment_term_id.interest_type == 'weekly':
-                    if rec.interest_calculated_period \
-                            and rec.interest_calculated_period == str(period) \
-                            + "-w":
-                        continue
-                    rec.interest_calculated_period = str(period) + "-w"
-                else:
-                    if rec.interest_calculated_period \
-                            and rec.interest_calculated_period == str(period) \
-                            + "-d":
-                        continue
-                    rec.interest_calculated_period = str(period) + "-d"
-                interest_line = rec.invoice_line_ids.search(
-                    [('name', '=', 'Interest Amount for Overdue'),
-                     ('move_id', '=', rec.id)], limit=1)
-                if interest_line:
-                    rec.invoice_line_ids = ([(2, interest_line.id, 0)])
-                rec.interest_amount = rec.amount_total * rec \
-                    .invoice_payment_term_id.interest_percentage * period / 100
-                vals = {'name': 'Interest Amount for Overdue',
-                        'price_unit': rec.interest_amount,
-                        'quantity': 1,
-                        }
-                if rec.invoice_payment_term_id.interest_account_id:
-                    vals.update({
-                        'account_id': rec.invoice_payment_term_id.
-                        interest_account_id.id})
-                if rec.interest_amount > 0:
-                    rec.invoice_line_ids = ([(0, 0, vals)])
-            elif rec.interest_amount > 0:
-                rec.action_interest_reset()
+        records = self.sudo().search([('state', '=', 'draft')])
+        records._compute_interest(raise_error=False)
 
     def action_interest_reset(self):
         """Method for resetting the interest lines and Interest amount in
         Invoice"""
-        self.interest_amount = 0
-        interest_line = self.invoice_line_ids.search(
-            [('name', '=', 'Interest Amount for Overdue'),
-             ('move_id', '=', self.id)], limit=1)
-        if interest_line:
-            self.invoice_line_ids = ([(2, interest_line.id, 0)])
-        self.interest_calculated_period = False
+        for rec in self:
+            rec.interest_amount = 0
+            interest_line = rec.invoice_line_ids.filtered(
+                lambda l: l.name == 'Interest Amount for Overdue')
+            if interest_line:
+                rec.invoice_line_ids = [Command.delete(interest_line[0].id)]
+            rec.interest_calculated_period = False
 
     @api.onchange('invoice_payment_term_id', 'invoice_line_ids',
                   'invoice_date_due')
@@ -181,9 +138,8 @@ class AccountMove(models.Model):
         for rec in self:
             if rec.move_type == 'out_invoice':
                 rec.interest_amount = 0
-                interest_line = rec.invoice_line_ids.search(
-                    [('name', '=', 'Interest Amount for Overdue')], limit=1)
+                interest_line = rec.invoice_line_ids.filtered(
+                    lambda l: l.name == 'Interest Amount for Overdue')
                 if interest_line:
-                    rec.invoice_line_ids = ([(2, interest_line.id, 0)])
+                    rec.invoice_line_ids = [Command.delete(interest_line[0].id)]
                 rec.interest_calculated_period = False
-            return

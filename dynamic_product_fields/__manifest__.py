@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+    # -*- coding: utf-8 -*-
 #############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
@@ -20,8 +20,8 @@
     'version': '20.0.1.0.0',
     'category': 'Extra Tools',
     'summary': """Custom fields in Products from user level""",
-    'description': """This module enables to generate custom fields in Products
-    from User Level without the need of coding.""",
+    'description': """This module allows users to generate custom fields in Products
+    from the user level without the need of coding.""",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',

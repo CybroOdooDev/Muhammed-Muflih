@@ -171,8 +171,7 @@ class HospitalInpatient(models.Model):
     def _compute_test_count(self):
         """Method for computing test count"""
         for rec in self:
-            rec.test_count = self.env['lab.test.line'].sudo().search_count(
-                [('id', 'in', rec.test_ids.ids)])
+            rec.test_count = len(rec.test_ids)
 
     @api.depends('hosp_date', 'discharge_date')
     def _compute_admit_days(self):

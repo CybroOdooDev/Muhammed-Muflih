@@ -16,7 +16,7 @@ Interest for Overdue Invoice
 ============================
 * Easy to calculate Interest for Overdue invoices.
 * It will manage journal items while you calculate amount in invoice.
-* you can use different accounts for interest journal entries from payment terms menu
+* You can use different accounts for interest journal entries from payment terms menu
 * Interest can be calculated for different period ratios (daily, weekly and monthly)
 
 Key Features

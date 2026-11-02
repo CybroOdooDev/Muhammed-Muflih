@@ -70,6 +70,11 @@ class LabTestResult(models.Model):
                 ('res_model', '=', 'lab.test.result'),
             ], limit=1)
             attachment_id = attachment.id if attachment else False
+            access_token = ''
+            if attachment:
+                if not attachment.access_token:
+                    attachment.generate_access_token()
+                access_token = attachment.access_token or ''
             context.append({
                 'id': rec.id,
                 'parent_id': rec.parent_id.test_id.name,
@@ -77,6 +82,7 @@ class LabTestResult(models.Model):
                                rec.parent_id.patient_id.name],
                 'test_id': rec.test_id.name,
                 'attachment_id': attachment_id,
+                'access_token': access_token,
                 'normal': rec.normal,
                 'result': rec.result,
                 'unit': rec.uom_id.name if rec.uom_id else ''

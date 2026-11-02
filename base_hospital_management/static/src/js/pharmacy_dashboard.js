@@ -5,17 +5,6 @@ import { useService } from "@web/core/utils/hooks";
 import { Component, onWillStart, proxy, signal } from "@odoo/owl";
 import { PharmacyOrderLines } from "./pharmacy_orderlines";
 
-let currency = 0;
-let quantity = 0;
-let amount = 0;
-let sub_t = 0;
-let sub_total = 0;
-let product_lst = [];
-let uom_lst = [];
-let invoice = 0;
-let invoice_id = 0;
-let tax = 0;
-
 export class PharmacyDashboard extends Component {
     setup() {
         super.setup();
@@ -31,7 +20,7 @@ export class PharmacyDashboard extends Component {
             product_lst: [],
             medicines: [],
             units: [],
-            sub_total,
+            sub_total: 0,
             vaccine: [],
             order_data: [],
             order_line: [],
@@ -64,8 +53,7 @@ export class PharmacyDashboard extends Component {
                     el.textContent = result || '';
                 });
             });
-        this.state.medicines = await this.product_lst;
-        this.state.units = await this.uom_lst;
+        this.state.medicines = this.state.product_lst || [];
     }
 
     // To update the orderline of sale order

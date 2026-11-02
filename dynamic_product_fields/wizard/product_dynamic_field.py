@@ -17,7 +17,7 @@
 #############################################################################
 import xml.etree.ElementTree as xee
 from odoo import api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 
 
 class ProductDynamicField(models.TransientModel):
@@ -25,6 +25,72 @@ class ProductDynamicField(models.TransientModel):
     _name = 'product.dynamic.fields'
     _description = 'Dynamic Fields'
     _inherit = 'ir.model.fields'
+
+    position_field = fields.Many2one(
+        'ir.model.fields',
+        domain=lambda self: self.set_domain(),
+        required=True,
+        help="The custom field is added before or after this field")
+    position = fields.Selection(
+        [('before', 'Before'), ('after', 'After')],
+        required=True,
+        help="Before/After")
+    model_id = fields.Many2one(
+        'ir.model',
+        required=True,
+        index=True,
+        ondelete='cascade',
+        domain=lambda self: self._get_model_domain(),
+        default=lambda self: self.env['ir.model'].sudo().search([('model', '=', 'product.template')], limit=1),
+        help="The model this field belongs to")
+    ref_model_id = fields.Many2one(
+        'ir.model',
+        string='Reference Model',
+        index=True,
+        help="Reference model for Many2one and Many2many field types")
+    selection_field = fields.Char(
+        string="Selection Values",
+        help="Field type Selection")
+    field_type = fields.Selection(
+        selection='get_possible_field_types',
+        required=True,
+        help="Type of field")
+    ttype = fields.Selection(
+        related='field_type',
+        help="Type of field")
+    widget = fields.Many2one(
+        'field.widget',
+        domain=lambda self: "[('data_type', '=', field_type)]",
+        help="Widget for the field type")
+    groups = fields.Many2many(
+        'res.groups',
+        'product_dynamic_fields_group_rel',
+        'field_id', 'group_id',
+        help="User group allows this operation")
+    extra_features = fields.Boolean(
+        string="Show Extra Properties",
+        help="Extra properties for field")
+
+    @api.onchange('widget')
+    def _onchange_widget(self):
+        """ Checking the selected model 'ir.attachment' for many2many_binary
+        widget."""
+        if self.widget.name == 'many2many_binary':
+            self.ref_model_id = self.env.ref('base.model_ir_attachment')
+
+    @api.onchange('ref_model_id')
+    def _onchange_ref_model_id(self):
+        """ Return a warning if the wrong model is chosen for the
+        'many2many_binary' widget."""
+        if (self.widget.name == 'many2many_binary' and
+                self.ref_model_id.name != 'Attachment'):
+            self.ref_model_id = self.env.ref('base.model_ir_attachment')
+            return {
+                'warning': {
+                    'title': self.env._('Invalid Model'),
+                    'message': self.env._('This widget is only available for model Attachment'),
+                }
+            }
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -82,12 +148,21 @@ class ProductDynamicField(models.TransientModel):
 
     def create_fields(self):
         """ Create custom fields."""
+        if not self.env.user.has_group('dynamic_product_fields.dynamic_product_fields_user'):
+            raise AccessError(self.env._("You do not have permission to create custom fields."))
+
+        product_model = self.env['ir.model'].sudo().search([
+            ('model', '=', 'product.template')
+        ], limit=1)
+        if not self.model_id or self.model_id != product_model:
+            raise UserError(self.env._("Custom fields can only be created for the Product model."))
+
         raw_name = self.name or ''
         field_name = raw_name if raw_name.startswith('x_') else f'x_{raw_name}'
         self.env['ir.model.fields'].sudo().create({
             'name': field_name,
             'field_description': self.field_description,
-            'model_id': self.model_id.id,
+            'model_id': product_model.id,
             'ttype': self.field_type,
             'relation': self.ref_model_id.model if self.ref_model_id else False,
             'required': self.required,
@@ -100,24 +175,18 @@ class ProductDynamicField(models.TransientModel):
             'is_dynamic': True,
         })
         inherit_id = self.env.ref('product.product_template_only_form_view')
-        if self.widget:
-            arch_base = (
-                '<?xml version="1.0"?>'
-                '<data>'
-                f'<field name="{self.position_field.name}" position="{self.position}">'
-                f'<field name="{field_name}" widget="{self.widget.name}"/>'
-                '</field>'
-                '</data>'
-            )
-        else:
-            arch_base = (
-                '<?xml version="1.0"?>'
-                '<data>'
-                f'<field name="{self.position_field.name}" position="{self.position}">'
-                f'<field name="{field_name}"/>'
-                '</field>'
-                '</data>'
-            )
+
+        data_elem = xee.Element('data')
+        pos_elem = xee.SubElement(data_elem, 'field', {
+            'name': self.position_field.name,
+            'position': self.position,
+        })
+        new_field_attrs = {'name': field_name}
+        if self.widget and self.widget.name:
+            new_field_attrs['widget'] = self.widget.name
+        xee.SubElement(pos_elem, 'field', new_field_attrs)
+        arch_base = f'<?xml version="1.0"?>\n{xee.tostring(data_elem, encoding="unicode")}'
+
         self.env['ir.ui.view'].sudo().create({
             'name': f'product.template.dynamic.{field_name}',
             'type': 'form',
@@ -131,65 +200,3 @@ class ProductDynamicField(models.TransientModel):
             'type': 'ir.actions.client',
             'tag': 'reload',
         }
-
-    position_field = fields.Many2one(
-        'ir.model.fields',
-        domain=lambda self: self.set_domain(),
-        required=True,
-        help="The custom field is added before or after this field")
-    position = fields.Selection(
-        [('before', 'Before'), ('after', 'After')],
-        required=True,
-        help="Before/After")
-    model_id = fields.Many2one(
-        'ir.model',
-        required=True,
-        index=True,
-        ondelete='cascade',
-        domain=lambda self: self._get_model_domain(),
-        default=lambda self: self.env['ir.model'].sudo().search([('model', '=', 'product.template')], limit=1),
-        help="The model this field belongs to")
-    ref_model_id = fields.Many2one(
-        'ir.model',
-        string='Reference Model',
-        index=True,
-        help="Reference model for Many2one and Many2many field types")
-    selection_field = fields.Char(
-        string="Selection Values",
-        help="Field type Selection")
-    field_type = fields.Selection(
-        selection='get_possible_field_types',
-        required=True,
-        help="Type of field")
-    ttype = fields.Selection(
-        related='field_type',
-        help="Type of field")
-    widget = fields.Many2one(
-        'field.widget',
-        domain=lambda self: "[('data_type', '=', field_type)]",
-        help="Widget for the field type")
-    groups = fields.Many2many(
-        'res.groups',
-        'product_dynamic_fields_group_rel',
-        'field_id', 'group_id',
-        help="User group allows this operation")
-    extra_features = fields.Boolean(
-        string="Show Extra Properties",
-        help="Extra properties for field")
-
-    @api.onchange('widget')
-    def _onchange_widget(self):
-        """ Checking the selected model 'ir.attachment' for many2many_binary
-        widget."""
-        if self.widget.name == 'many2many_binary':
-            self.ref_model_id = self.env.ref('base.model_ir_attachment')
-
-    @api.onchange('ref_model_id')
-    def _onchange_ref_model_id(self):
-        """ Raise a warning if the wrong model is chosen for the
-        'many2many_binary' widget."""
-        if (self.widget.name == 'many2many_binary' and
-                self.ref_model_id.name != 'Attachment'):
-            self.ref_model_id = self.env.ref('base.model_ir_attachment')
-            raise UserError(
-                self.env._('This widget is only available for model Attachment'))

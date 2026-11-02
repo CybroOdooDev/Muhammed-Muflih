@@ -89,7 +89,7 @@
                                         Submit
                                     </button>
                                     <t t-if="card">
-                                        <a t-attf-href="/web/content/{{attachment_id}}?download=true&amp;access_token="
+                                        <a t-attf-href="/web/content/{{attachment_id}}?download=true&amp;access_token={{access_token}}"
                                            style="text-decoration:underline; margin-left:10px;">
                                             Download Patient Card
                                         </a>

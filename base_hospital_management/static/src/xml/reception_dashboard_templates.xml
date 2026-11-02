@@ -84,7 +84,7 @@
                                                 </div>
                                                 </td></tr>
                                                 <tr><td>Marital Status :</td><td><select id="patient-m-status" class="form-control marital_status" name="status">
-                                                                                    <option value="married">Married</option><option value="unmarried">Unmarried</option><option value="widow">Widow</option><option value="widower">Widower</option><option value="divorcee">Divorce</option>
+                                                                                    <option value="married">Married</option><option value="unmarried">Unmarried</option><option value="widow">Widow</option><option value="widower">Widower</option><option value="divorcee">Divorcee</option>
                                                                                 </select></td></tr>
                                                 </div>
                                             </div>

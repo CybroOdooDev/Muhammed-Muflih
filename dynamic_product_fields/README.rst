@@ -11,6 +11,7 @@
     :alt: Maintainer: Cybrosys Techno Solutions
 
 |license| |odoo| |maintainer|
+
 Product Custom Fields
 =====================
 Custom fields in Products from user level

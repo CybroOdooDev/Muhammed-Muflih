@@ -150,4 +150,4 @@ class ViewPortal(http.Controller):
         partner_id = request.env.user.partner_id.id
         if op.patient_id.id != partner_id and request.uid not in op.patient_id.user_ids.ids:
             return {'error': 'Unauthorized'}
-        return op.create_file(op.id)
+        return op._create_prescription_file()

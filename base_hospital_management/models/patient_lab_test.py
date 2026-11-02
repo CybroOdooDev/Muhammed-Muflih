@@ -86,11 +86,11 @@ class PatientLabTest(models.Model):
     inpatient_id = fields.Many2one('hospital.inpatient',
                                    help='Choose the inpatient')
 
-    @api.depends('test_id')
+    @api.depends('test_id', 'test_id.test_ids.medicine_ids')
     def _compute_medicine_ids(self):
         """Method for computing medicine_ids"""
         for record in self:
-            record.medicine_ids = self.test_ids.medicine_ids
+            record.medicine_ids = record.test_ids.medicine_ids
 
     def _compute_invoice_count(self):
         """Method for computing invoice_count"""

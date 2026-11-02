@@ -44,11 +44,23 @@ class PatientBooking(http.Controller):
                     dep_info = {'id': rec.department_id.id, 'name': rec.department_id.name}
                     if dep_info not in departments:
                         departments.append(dep_info)
+        attachment = request.env['ir.attachment'].sudo().search([
+            ('res_id', '=', current_partner.id),
+            ('res_model', '=', 'res.partner'),
+        ], limit=1)
+        access_token = ''
+        if attachment:
+            if not attachment.access_token:
+                attachment.generate_access_token()
+            access_token = attachment.access_token or ''
         values = {
             'user': request.env.user.name,
             'date': today,
             'doctors': doctors,
             'departments': departments,
+            'card': bool(attachment),
+            'attachment_id': attachment.id if attachment else False,
+            'access_token': access_token,
         }
         return request.render(
             "base_hospital_management.patient_booking_form", values)
@@ -96,19 +108,24 @@ class PatientBooking(http.Controller):
                         departments.append(dep_info)
         return {'doctors': doctors, 'departments': departments}
 
-    @http.route('/patient_card', type='http', auth="public", website=True)
+    @http.route('/patient_card', type='http', auth="user", website=True)
     def patient_card(self):
         """Render patient card registration form."""
         return request.render("base_hospital_management.patient_card_form")
 
-    @http.route('/patient_card/success', type='http', auth="public",
-                website=True, csrf=False, methods=['POST'])
+    @http.route('/patient_card/success', type='http', auth="user",
+                website=True, methods=['POST'])
     def patient_card_submit(self, **kw):
         """Submit patient card form and create patient record."""
+        gender = kw.get('gender')
+        if gender == 'others':
+            gender = 'other'
+        elif gender not in ['male', 'female', 'other']:
+            gender = False
         partner_vals = {
             'name': kw.get('pname'),
             'date_of_birth': kw.get('dob') or False,
-            'gender': kw.get('gender') or False,
+            'gender': gender,
             'email': kw.get('mail') or False,
             'phone': kw.get('phone') or False,
             'city': kw.get('place') or False,

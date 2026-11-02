@@ -32,7 +32,7 @@ class AccountPaymentTerms(models.Model):
                    ('weekly', 'Weekly'),
                    ('monthly', 'Monthly')], default='daily', copy=False)
     interest_percentage = fields.Float(string="Interest Percentage",
-                                       default="0", digits=(12, 6),
+                                       default=0.0, digits=(12, 6),
                                        help="Interest percentage ratio per"
                                             " selected Interest type duration.")
     interest_account_id = fields.Many2one('account.account',

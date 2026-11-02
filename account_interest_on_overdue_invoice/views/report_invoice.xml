@@ -8,13 +8,13 @@
                 <table border="0">
                     <tr>
                         <td>Interest Type :</td>
-                        <td class="text-right">
+                        <td class="text-end">
                             <span t-field="o.interest_type"/>
                         </td>
                     </tr>
                     <tr>
                         <td>Interest Ratio :</td>
-                        <td class="text-right">
+                        <td class="text-end">
                             <span t-field="o.interest_percentage"/>
                             %
                         </td>

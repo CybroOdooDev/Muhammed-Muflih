@@ -52,14 +52,13 @@ class HospitalWard(models.Model):
         """Method for computing bed count"""
         for rec in self:
             rec.bed_count = rec.env['hospital.bed'].sudo().search_count([(
-                'ward_id', '=', rec.ward_no)])
-
+                'ward_id', '=', rec.id)])
 
     def action_get_open_bed(self):
         """Returns form view of bed"""
         return {
             'name': 'Bed',
-            'domain': [('ward_id', '=', self.ward_no)],
+            'domain': [('ward_id', '=', self.id)],
             'type': 'ir.actions.act_window',
             'res_model': 'hospital.bed',
             'view_mode': 'list',

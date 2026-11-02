@@ -307,7 +307,7 @@
                                                         </td>
                                                         <td style="text-align:-webkit-center;">
                                                             <t t-if="published_data.attachment_id">
-                                                                <a t-attf-href="/web/content/#{published_data.attachment_id}?download=true&amp;access_token="
+                                                                <a t-attf-href="/web/content/#{published_data.attachment_id}?download=true&amp;access_token=#{published_data.access_token}"
                                                                    class='btn btn-outline-primary fa fa-download'/>
                                                             </t>
                                                         </td>

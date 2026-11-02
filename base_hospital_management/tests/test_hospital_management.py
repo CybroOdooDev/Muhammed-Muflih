@@ -132,6 +132,15 @@ class TestHospitalManagement(TransactionCase):
         self.assertTrue(self.patient_john.barcode)
         self.assertTrue(self.patient_john.barcode_png)
 
+        # Test patient card generation for gender 'other'
+        patient_other = self.env['res.partner'].create({
+            'name': 'Other Gender Patient',
+            'gender': 'other',
+            'date_of_birth': fields.Date.today(),
+        })
+        card_res = patient_other.action_generate_patient_card()
+        self.assertTrue(card_res)
+
         # Test reception_op_barcode
         patient_data = self.env['res.partner'].reception_op_barcode({'patient_data': self.patient_john.id})
         self.assertEqual(patient_data.get('name'), self.patient_john.name)
@@ -189,6 +198,12 @@ class TestHospitalManagement(TransactionCase):
         self.bed.state = 'not'
         self.assertEqual(self.bed.state, 'not')
         self.bed.state = 'avail'
+
+        # Test ward bed_count compute and open beds action domain
+        self.ward._compute_bed_count()
+        self.assertEqual(self.ward.bed_count, 1)
+        bed_act = self.ward.action_get_open_bed()
+        self.assertEqual(bed_act.get('domain'), [('ward_id', '=', self.ward.id)])
 
     def test_04_outpatient_workflow(self):
         """Test outpatient consultation creation, actions, duplicate check, and prescription lines."""
@@ -361,6 +376,8 @@ class TestHospitalManagement(TransactionCase):
         # Test print results
         results = self.env['lab.test.result'].print_test_results()
         self.assertIsInstance(results, list)
+        if results:
+            self.assertIn('access_token', results[0])
 
     def test_07_pharmacy_and_medicines(self):
         """Test pharmacy, medicine stock, and product helper methods."""
@@ -587,10 +604,20 @@ class TestHospitalManagement(TransactionCase):
             'attending_doctor_id': self.doctor_employee.id,
             'hosp_date': fields.Date.today(),
             'is_ward': 'ward',
-            'ward_id': self.ward.ward_no,
+            'ward_id': self.ward.id,
             'bed_id': self.bed.id,
         })
         inpatient.action_reserve()
+
+        # Inpatient test_count compute
+        self.assertEqual(inpatient.test_count, 0)
+        self.env['patient.lab.test'].create({
+            'patient_id': self.patient_john.id,
+            'inpatient_id': inpatient.id,
+            'date': fields.Date.today(),
+        })
+        inpatient._compute_test_count()
+        self.assertEqual(inpatient.test_count, 1)
 
         # Add prescription to inpatient and print
         self.env['prescription.line'].create({
@@ -635,6 +662,20 @@ class TestHospitalManagement(TransactionCase):
         self.assertTrue(outpatient.invoice_id)
         view_inv = outpatient.action_view_invoice()
         self.assertEqual(view_inv.get('res_model'), 'account.move')
+
+        # Outpatient prescription file generation
+        self.env['prescription.line'].create({
+            'outpatient_id': outpatient.id,
+            'medicine_id': self.medicine_product.id,
+            'quantity': 2,
+            'time': 'morning',
+            'no_intakes': 1,
+            'note': 'before',
+        })
+        file_res = outpatient._create_prescription_file()
+        self.assertTrue(file_res)
+        self.assertIn('url', file_res)
+        self.assertTrue(outpatient.attachment_id)
 
     def test_14_doctor_allocation_slots_and_infrastructure(self):
         """Test doctor allocations, slots, building, and ward helpers."""

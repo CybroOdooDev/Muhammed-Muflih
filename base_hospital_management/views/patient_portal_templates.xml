@@ -80,19 +80,19 @@
                 <t t-foreach="vaccinations" t-as="vaccine">
                     <tr>
                         <td>
-                            <t t-esc="vaccine['name']"/>
+                            <t t-out="vaccine['name']"/>
                         </td>
                         <td class="text-right">
-                            <span t-esc="vaccine['vaccine_product_id']"/>
+                            <span t-out="vaccine['vaccine_product_id']"/>
                         </td>
                         <td class="text-right">
-                            <span t-esc="vaccine['dose']"/>
+                            <span t-out="vaccine['dose']"/>
                         </td>
                         <td class="text-right">
-                            <span t-esc="vaccine['vaccine_date']"/>
+                            <span t-out="vaccine['vaccine_date']"/>
                         </td>
                         <td class="text-right">
-                            <span t-esc="vaccine['vaccine_price']"/>
+                            <span t-out="vaccine['vaccine_price']"/>
                         </td>
                          <td class="text-right">
                             <t t-if="vaccine['attachment_id']">
@@ -129,11 +129,11 @@
                     <tr>
                         <td>
                             <a t-attf-href="/my/tests/{{data['id']}}">
-                                <t t-esc="data['name']"/>
+                                <t t-out="data['name']"/>
                             </a>
                         </td>
                         <td class="text-right">
-                            <span t-esc="data['date']"/>
+                            <span t-out="data['date']"/>
                         </td>
                     </tr>
                 </t>
@@ -164,13 +164,13 @@
                 <t t-foreach="results" t-as="data">
                     <tr>
                         <td>
-                            <t t-esc="data['name']"/>
+                            <t t-out="data['name']"/>
                         </td>
                         <td class="text-right">
-                            <span t-esc="data['result']"/>
+                            <span t-out="data['result']"/>
                         </td>
                         <td class="text-right">
-                            <span t-esc="data['price']"/>
+                            <span t-out="data['price']"/>
                         </td>
                         <td class="text-right">
                             <t t-if="data['attachment_id']">
@@ -186,7 +186,7 @@
             </t>
         </t>
     </template>
-    <!--    OP template-->
+    <!--OP template-->
     <template id="portal_my_op" name="My OP">
         <t t-call="portal.portal_layout">
             <div id="my_prescriptions">
@@ -210,16 +210,16 @@
                     <t t-foreach="op" t-as="data">
                         <tr>
                             <td>
-                                <span t-esc="data['op_reference']"/>
+                                <span t-out="data['op_reference']"/>
                             </td>
                             <td class="text-right">
-                                <span t-esc="data['op_date']"/>
+                                <span t-out="data['op_date']"/>
                             </td>
                             <td class="text-right">
-                                <span t-esc="data['doctor_id'][1]"/>
+                                <span t-out="data['doctor_id'][1]"/>
                             </td>
                             <td class="text-right">
-                                <span t-esc="data['slot']"/>
+                                <span t-out="data['slot']"/>
                             </td>
                             <td>
                                 <t t-if="data['prescription_ids']">

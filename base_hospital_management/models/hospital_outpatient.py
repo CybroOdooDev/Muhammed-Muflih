@@ -140,12 +140,11 @@ class HospitalOutpatient(models.Model):
             })
             self.create_invoice()
 
-    @api.model
-    def create_file(self, rec_id):
-        """Method for creating prescription"""
-        record = self.env['hospital.outpatient'].sudo().browse(rec_id)
+    def _create_prescription_file(self):
+        """Method for creating prescription attachment"""
+        self.ensure_one()
         prescription_list = []
-        for rec in record.prescription_ids:
+        for rec in self.prescription_ids:
             prescription_list.append({
                 'medicine': rec.medicine_id.name,
                 'intake': rec.no_intakes,
@@ -155,24 +154,24 @@ class HospitalOutpatient(models.Model):
             })
         data = {
             'datas': prescription_list,
-            'date': record.op_date,
-            'patient_name': record.patient_id.name or '',
-            'doctor_name': record.doctor_id.doctor_id.name if record.doctor_id and record.doctor_id.doctor_id else '',
+            'date': self.op_date,
+            'patient_name': self.patient_id.name or '',
+            'doctor_name': self.doctor_id.doctor_id.name if self.doctor_id and self.doctor_id.doctor_id else '',
         }
         pdf = self.env['ir.actions.report'].sudo()._render_qweb_pdf(
             'base_hospital_management.action_report_patient_prescription',
-            rec_id, data=data)
-        record.attachment_id = self.env['ir.attachment'].sudo().create({
-            'datas': base64.b64encode(pdf[0]).decode('utf-8'),
+            self.id, data=data)
+        self.attachment_id = self.env['ir.attachment'].sudo().create({
+            'raw': pdf[0],
             'name': "Prescription.pdf",
             'type': 'binary',
             'res_model': 'hospital.outpatient',
-            'res_id': rec_id,
+            'res_id': self.id,
             'mimetype': 'application/pdf',
         })
-        record.attachment_id.generate_access_token()
+        self.attachment_id.generate_access_token()
         return {
-            'url': f'/web/content/{record.attachment_id.id}?download=true&access_token={record.attachment_id.access_token}',
+            'url': f'/web/content/{self.attachment_id.id}?download=true&access_token={self.attachment_id.access_token}',
         }
 
     @api.model

@@ -63,7 +63,7 @@
                     <group readonly="state in ['invoice','dis']">
                         <group>
                             <field name="patient_id" widget="selection"
-                                   placeholder="Patient'S Name"/>
+                                   placeholder="Patient's Name"/>
                             <field name="is_invoice" invisible="1"/>
                             <field name="enable_outpatient"/>
                         </group>
