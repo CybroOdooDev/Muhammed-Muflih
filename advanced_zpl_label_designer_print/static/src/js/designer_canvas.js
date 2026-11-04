@@ -1,9 +1,18 @@
 /** @odoo-module **/
 
+function getFabric() {
+    return (typeof window !== "undefined" && window.fabric) || null;
+}
+
 export class ZplDesignerCanvas {
-    constructor(canvasId, width = 500, height = 600, onSelection = null) {
-        this.fabric = window.fabric;
-        this.canvas = new this.fabric.Canvas(canvasId, {
+    constructor(canvasTarget, width = 500, height = 600, onSelection = null) {
+        const fabric = getFabric();
+        if (!fabric) {
+            throw new Error("Fabric.js is not loaded.");
+        }
+        this.fabric = fabric;
+        const canvasEl = typeof canvasTarget === "string" ? canvasTarget : canvasTarget;
+        this.canvas = new this.fabric.Canvas(canvasEl, {
             width: width,
             height: height,
             backgroundColor: '#ffffff',

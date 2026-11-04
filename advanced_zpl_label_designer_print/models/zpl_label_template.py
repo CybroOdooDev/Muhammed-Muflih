@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import api,fields,models
+from odoo import api, fields, models
 
 
 class ZplLabelTemplate(models.Model):
@@ -31,18 +31,18 @@ class ZplLabelTemplate(models.Model):
         help="Name used to identify this ZPL template, shown in the "
              "'Choose Labels Layout' wizard when printing labels.")
     model_id = fields.Many2one(
-        'ir.model', string='Model', required=True, ondelete='cascade',
+        'ir.model', required=True, ondelete='cascade',
         help="Odoo model this template is designed for (e.g. Product "
              "Variant or Product Template). Determines which records and "
              "fields can be used to fill this template's elements.")
     width = fields.Float(
-        string='Width', default=101.6,
+        default=101.6,
         help="Label width, in the unit selected below.")
     height = fields.Float(
-        string='Height', default=152.4,
+        default=152.4,
         help="Label height, in the unit selected below.")
     unit = fields.Selection(
-        [('mm', 'mm'), ('in', 'inches')], string='Unit', default='mm',
+        [('mm', 'mm'), ('in', 'inches')], default='mm',
         required=True, help="Unit used for the Width and Height fields.")
     dpi = fields.Selection(
         [('203', '203 DPI'), ('300', '300 DPI'), ('600', '600 DPI')],
@@ -183,7 +183,7 @@ class ZplLabelTemplate(models.Model):
             template.element_ids.unlink()
 
             for el in elements:
-                created = self.env['zpl.label.element'].create({
+                self.env['zpl.label.element'].create({
                     'template_id': template.id,
                     'name': el.get('name', 'New Element'),
                     'x_pos': el.get('x_pos', 0),

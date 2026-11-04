@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import fields,models
+from odoo import _, fields, models
 from odoo.exceptions import UserError
 
 
@@ -37,7 +37,7 @@ class ProductLabelLayout(models.TransientModel):
         ('zpl_label_designer', 'ZPL Label Designer')
     ], ondelete={'zpl_label_designer': 'set default'},
         help="Layout used to print the labels. Choose 'ZPL Label Designer' "
-             "to print using a custom ZPL Custom Template.")
+             "to print using a custom ZPL template.")
 
     def process(self):
         """Build and return the ZPL report action when the ZPL Label
@@ -47,7 +47,7 @@ class ProductLabelLayout(models.TransientModel):
          behaviour."""
         if self.print_format == 'zpl_label_designer':
             if not self.zpl_template_id:
-                raise UserError("Please select a ZPL Template before printing.")
+                raise UserError(_("Please select a ZPL Template before printing."))
 
             target_model = self.zpl_template_id.model_id.model
             if target_model == 'product.template':
@@ -68,4 +68,4 @@ class ProductLabelLayout(models.TransientModel):
                 }
             )
 
-        return super(ProductLabelLayout, self).process()
+        return super().process()

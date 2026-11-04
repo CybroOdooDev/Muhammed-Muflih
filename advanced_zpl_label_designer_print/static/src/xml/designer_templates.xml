@@ -78,8 +78,8 @@
             <div class="o_zpl_designer_main d-flex flex-grow-1 overflow-hidden">
                 <div class="o_zpl_canvas_container flex-grow-1 position-relative p-0 d-flex align-items-center justify-content-center bg-light overflow-auto">
                     <!-- CANVAS AREA -->
-                    <div class="shadow-lg bg-white p-0 border" style="width: 502px; height: 602px;">
-                        <canvas id="zpl_designer_canvas"/>
+                    <div class="shadow-lg bg-white p-0 border">
+                        <canvas t-ref="canvas" id="zpl_designer_canvas"/>
                     </div>
                 </div>
 

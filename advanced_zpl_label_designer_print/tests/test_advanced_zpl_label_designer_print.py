@@ -21,9 +21,11 @@
 #############################################################################
 from odoo import Command
 from odoo.exceptions import UserError
+from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
 
 
+@tagged('post_install', '-at_install')
 class TestAdvancedZplLabelDesignerPrint(TransactionCase):
 
     @classmethod
@@ -202,7 +204,7 @@ class TestAdvancedZplLabelDesignerPrint(TransactionCase):
 
     def test_product_label_layout_requires_template_for_zpl(self):
         wizard = self.env["product.label.layout"].create({
-            "print_format": "advanced_zpl_label_designer_print",
+            "print_format": "zpl_label_designer",
             "product_ids": [Command.set(self.product.ids)],
         })
 
@@ -222,7 +224,7 @@ class TestAdvancedZplLabelDesignerPrint(TransactionCase):
         action = wizard.process()
 
         self.assertEqual(action["type"], "ir.actions.report")
-        self.assertEqual(action["report_name"], "zpl_label_designer.report_zpl_view")
+        self.assertEqual(action["report_name"], "advanced_zpl_label_designer_print.report_zpl_view")
         self.assertEqual(action["data"]["zpl_template_id"], self.template.id)
         self.assertEqual(action["data"]["product_ids"], self.product.ids)
         self.assertEqual(action["data"]["quantity"], 3)

@@ -30,9 +30,11 @@
         - Real-time ZPL generation.
     """,
     'author': 'Cybrosys Technologies',
+    'company': 'Cybrosys Techno Solutions',
+    'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
     'category': 'Tools',
-    'depends': ['base', 'web', 'product','stock'],
+    'depends': ['base', 'web', 'product', 'stock'],
     'data': [
         'security/ir.model.access.csv',
         'data/label_paper_formats.xml',
@@ -43,11 +45,11 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js',
+            'advanced_zpl_label_designer_print/static/src/lib/fabric.min.js',
+            'advanced_zpl_label_designer_print/static/src/scss/designer.scss',
             'advanced_zpl_label_designer_print/static/src/js/designer_canvas.js',
             'advanced_zpl_label_designer_print/static/src/js/designer_widget.js',
             'advanced_zpl_label_designer_print/static/src/xml/designer_templates.xml',
-
         ],
     },
     'images': [

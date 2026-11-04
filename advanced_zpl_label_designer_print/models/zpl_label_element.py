@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import fields,models
+from odoo import fields, models
 
 class ZplLabelElement(models.Model):
     _name = 'zpl.label.element'
@@ -27,13 +27,13 @@ class ZplLabelElement(models.Model):
     _order = 'sequence'
 
     template_id = fields.Many2one(
-        'zpl.label.template', string='Template', ondelete='cascade',
+        'zpl.label.template', ondelete='cascade',
         required=True, help="ZPL label template this element belongs to.")
     sequence = fields.Integer(
-        string='Sequence', default=10,
+        default=10,
         help="Determines the order in which elements are drawn on the label.")
     name = fields.Char(
-        string='Name', required=True,
+        required=True,
         help="Label/name of the element shown in the designer, and used as "
              "fallback text when no Odoo field is configured.")
     type = fields.Selection([
@@ -43,7 +43,7 @@ class ZplLabelElement(models.Model):
         ('image', 'Image'),
         ('line', 'Line'),
         ('rect', 'Rectangle')
-    ], string='Type', default='text', required=True,
+    ], default='text', required=True,
         help="Kind of element to draw on the label (text, barcode, QR code, "
              "image, line or rectangle).")
 
@@ -56,20 +56,20 @@ class ZplLabelElement(models.Model):
         help="Vertical position of the element on the design canvas, in "
              "pixels from the top edge.")
     width = fields.Integer(
-        string='Width', default=100,
+        default=100,
         help="Width of the element on the design canvas, in pixels.")
     height = fields.Integer(
-        string='Height', default=50,
+        default=50,
         help="Height of the element on the design canvas, in pixels.")
     thickness = fields.Integer(
-        string='Thickness', default=2,
+        default=2,
         help="Line thickness used when drawing rectangle/line elements.")
     rounding = fields.Integer(
-        string='Rounding', default=0,
+        default=0,
         help="Corner rounding radius used when drawing rectangle elements.")
 
     font_size = fields.Integer(
-        string='Font Size', default=20,
+        default=20,
         help="Font size for text elements, or bar height for barcode "
              "elements.")
     rotation = fields.Selection([
@@ -77,24 +77,23 @@ class ZplLabelElement(models.Model):
         ('90', '90°'),
         ('180', '180°'),
         ('270', '270°')
-    ], string='Rotation', default='0',
+    ], default='0',
         help="Rotation angle applied to the element when printed.")
 
     model_id = fields.Many2one(
-        'ir.model', related='template_id.model_id', string='Model',
+        'ir.model', related='template_id.model_id',
         readonly=True,
         help="Model configured on the parent template, used to restrict "
              "the Odoo Field selection below.")
     field_id = fields.Many2one('ir.model.fields', string='Odoo Field', ondelete='cascade', domain="[('model_id', '=', model_id)]", help="The Odoo field to pull data from (e.g., default_code for barcode)")
-    data_format = fields.Char(string='Data Format', help="A string placeholder like Price: {{price}}")
+    data_format = fields.Char(help="A string placeholder like Price: {{price}}")
 
     barcode_type = fields.Selection([
         ('code128', 'Code 128'),
         ('code39', 'Code 39'),
         ('ean13', 'EAN 13'),
         ('upca', 'UPC-A')
-    ], string='Barcode Type',
-        help="Barcode symbology to use when the element type is Barcode.")
+    ], help="Barcode symbology to use when the element type is Barcode.")
 
     active = fields.Boolean(
         default=True,

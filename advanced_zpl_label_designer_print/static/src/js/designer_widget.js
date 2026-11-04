@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { Component, onMounted, useState, onWillStart, useEffect } from "@odoo/owl";
+import { Component, onMounted, useState, onWillStart, useEffect, useRef, useExternalListener } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { ZplDesignerCanvas } from "./designer_canvas";
 
@@ -9,6 +9,7 @@ export class ZplDesignerWidget extends Component {
     static template = "zpl_label_designer.DesignerWidget";
 
     setup() {
+        this.canvasRef = useRef("canvas");
         this.orm = useService("orm");
         this.notification = useService("notification");
 
@@ -20,20 +21,14 @@ export class ZplDesignerWidget extends Component {
             selectedObject: null,
         });
 
+        useExternalListener(window, "click", this.onWindowClick.bind(this));
+
         onWillStart(async () => {
             await this.loadModelFields(this.props.record);
         });
 
-        onMounted(async () => {
+        onMounted(() => {
             this.initCanvas();
-
-            const clickOutside = (ev) => {
-                if (this.state.showDropdown && !ev.target.closest('.o_zpl_field_selector_wrapper')) {
-                    this.state.showDropdown = false;
-                }
-            };
-            window.addEventListener('click', clickOutside);
-            return () => window.removeEventListener('click', clickOutside);
         });
 
         let lastModelId = this.extractModelId(this.props.record);
@@ -47,6 +42,12 @@ export class ZplDesignerWidget extends Component {
             },
             () => [this.props.record.data.model_id]
         );
+    }
+
+    onWindowClick(ev) {
+        if (this.state.showDropdown && !ev.target.closest('.o_zpl_field_selector_wrapper')) {
+            this.state.showDropdown = false;
+        }
     }
 
     getFilteredFields() {
@@ -179,7 +180,11 @@ export class ZplDesignerWidget extends Component {
     }
 
     async initCanvas() {
-        this.canvas = new ZplDesignerCanvas("zpl_designer_canvas", 500, 600, (obj) => {
+        const canvasTarget = this.canvasRef.el || "zpl_designer_canvas";
+        const width = 500;
+        const height = 600;
+
+        this.canvas = new ZplDesignerCanvas(canvasTarget, width, height, (obj) => {
             if (obj) {
                 this.state.selectedObject = {
                     type: obj.zplType || (obj.type === 'i-text' ? 'text' : (obj.type === 'rect' ? 'rect' : obj.type)),

@@ -4,7 +4,7 @@
 
 ZPL Label Designer
 ====================
-Design professional ZPL labels directly in Odoo with a powerful click and add interface, dynamic field mapping, and real-time preview.
+Design professional ZPL labels directly in Odoo with a powerful click-and-add interface, dynamic field mapping, and real-time preview.
 
 
 License
@@ -22,13 +22,13 @@ Company
 
 Credits
 -------
-Developer:   (V17) Akhil Ashok
+Developer: (V17) Akhil Ashok
 
 Contact: odoo@cybrosys.com
 
 Contacts
 --------
-* Mail Contact : odoo@cybrosys.com
+* Mail Contact: odoo@cybrosys.com
 * Website : https://cybrosys.com
 
 Bug Tracker
