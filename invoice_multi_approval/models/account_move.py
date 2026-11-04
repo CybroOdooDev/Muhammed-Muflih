@@ -264,6 +264,9 @@ class AccountMove(models.Model):
             'invoice_multi_approval.group_approve_manager',
             raise_if_not_found=False,
         )
+        manager_ids = set(self.env['res.users'].search([
+            ('all_group_ids', 'in', manager_group.id)
+        ]).ids) if manager_group else set()
         for rec in self:
             _approvers, is_enabled = rec._get_applicable_approvers()
             if not is_enabled:
@@ -279,14 +282,10 @@ class AccountMove(models.Model):
                 rec.document_fully_approved = True
                 continue
 
-            if manager_group:
-                manager_ids = self.env['res.users'].search([
-                    ('all_group_ids', 'in', manager_group.id)
-                ]).ids
-                if any(line.approver_id.id in manager_ids
-                       for line in approve_lines):
-                    rec.document_fully_approved = True
-                    continue
+            if manager_ids and any(line.approver_id.id in manager_ids
+                                   for line in approve_lines):
+                rec.document_fully_approved = True
+                continue
 
             if rec.users_approved:
                 rec.document_fully_approved = True
@@ -294,7 +293,7 @@ class AccountMove(models.Model):
 
             rec.document_fully_approved = False
 
-    @api.depends('date', 'auto_post', 'document_fully_approved')
+    @api.depends('state', 'date', 'auto_post', 'document_fully_approved')
     def _compute_hide_post_button(self):
         """Hide post/confirm button until move is fully approved."""
         res = super()._compute_hide_post_button()

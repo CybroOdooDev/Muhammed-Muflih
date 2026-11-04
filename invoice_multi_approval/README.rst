@@ -20,8 +20,8 @@ Key Features
 ------------
 
 * Role-Based Access & Manager Override
-*  Auto Approver List
-*  Document-Specific Approval Configuration
+* Auto Approver List
+* Document-Specific Approval Configuration
 
 
 
@@ -70,5 +70,5 @@ Maintainer
 
 This module is maintained by Cybrosys Technologies.
 
-For support and more information, please visit `Our Website <https://cybrosys.com/>`__
+For support and more information, please visit `Our Website <https://cybrosys.com/>`__.
 

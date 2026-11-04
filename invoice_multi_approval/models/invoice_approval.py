@@ -93,24 +93,3 @@ class InvoiceApproval(models.Model):
         )],
         help='In this field you can add approvers for vendor credit notes.',
     )
-    no_approve = fields.Boolean(
-        string='No Approval',
-        help='Approval is not needed',
-        compute="_compute_no_approve",
-    )
-
-    @api.depends(
-        'approve_vendor_credit',
-        'approve_customer_invoice',
-        'approve_vendor_bill',
-        'approve_customer_credit',
-    )
-    def _compute_no_approve(self):
-        """Method _compute_no_approve to compute value for no_approve"""
-        for rec in self:
-            rec.no_approve = any([
-                rec.approve_customer_invoice,
-                rec.approve_customer_credit,
-                rec.approve_vendor_credit,
-                rec.approve_vendor_bill,
-            ])
