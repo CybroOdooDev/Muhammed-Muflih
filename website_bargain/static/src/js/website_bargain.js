@@ -8,7 +8,6 @@ patch(ProductPage.prototype, {
         super.start();
 
         /** function to add timer and check the time **/
-        const product_name = this.el.querySelector('input[name="auction_product_id"]')?.value;
         const auction_id_status = this.el.querySelector('input[name="auction_id"]')?.value;
         const bellIcon = this.el.querySelector('#subscribe_bid');
 
@@ -50,25 +49,31 @@ patch(ProductPage.prototype, {
                 product_id,
                 auction_id
             }).then((data) => {
+                const parseDate = (d) => {
+                    if (!d) return null;
+                    if (typeof d === 'string' && !d.endsWith('Z') && !d.includes('+') && !d.includes('T')) {
+                        return new Date(d.replace(' ', 'T') + 'Z');
+                    }
+                    return new Date(d);
+                };
+
                 const closeAuction = () => {
                     rpc('/auction/close', { product_id, auction_id }).then(() => {
                         window.location.href = '/shop';
                     });
                 };
 
-                if (new Date() > new Date(data['end_time'])) {
-                    if (data['extend_time']) {
-                        if (new Date() > new Date(data['extend_time'])) {
-                            closeAuction();
-                        }
-                    } else {
-                        closeAuction();
-                    }
-                } else {
+                const endTime = parseDate(data['end_time']);
+                const extendTime = parseDate(data['extend_time']);
+                const effectiveEnd = extendTime || endTime;
+
+                if (effectiveEnd && new Date() >= effectiveEnd) {
+                    closeAuction();
+                } else if (effectiveEnd) {
                     const self = this;
                     timerId = setInterval(function () {
-                        const time_key = data['extend_time'] ? 'extend_time' : 'end_time';
-                        const time_remaining = new Date(data[time_key]) - new Date();
+                        const targetTime = parseDate(data['extend_time']) || parseDate(data['end_time']);
+                        const time_remaining = targetTime - new Date();
                         const days = Math.floor(time_remaining / (1000 * 60 * 60 * 24));
                         const hours = Math.floor((time_remaining / (1000 * 60 * 60)) % 24);
                         const minutes = Math.floor((time_remaining / (1000 * 60)) % 60);
@@ -200,31 +205,40 @@ patch(ProductPage.prototype, {
         if (!bid_amount_input.value || isNaN(bid_amount) || bid_amount <= 0) {
             modal_title.innerHTML = "Invalid Bid!";
             modal_message.innerHTML = "Please enter a valid bid amount before placing a bid.";
-            let m = document.getElementById('modal_product_warning'); document.body.appendChild(m); new window.Modal(m).show();
+            const m = document.getElementById('modal_product_warning');
+            document.body.appendChild(m);
+            new window.Modal(m).show();
             return;
         }
 
         if (min_amount >= bid_amount) {
             modal_title.innerHTML = "Warning!";
             modal_message.innerHTML = "Please check the minimum bid amount";
-            let m = document.getElementById('modal_product_warning'); document.body.appendChild(m); new window.Modal(m).show();
-
+            const m = document.getElementById('modal_product_warning');
+            document.body.appendChild(m);
+            new window.Modal(m).show();
         } else {
             rpc('/place_bid', {
                 bid_amount,
                 product_id,
                 auction_id
             }).then((data) => {
-                if (data) {
-                    messages.innerHTML = data['bid_placed'];
+                if (data && data.success) {
+                    messages.innerHTML = data.bid_placed || 'Bid Placed';
                     messages.style.display = "block";
                     this.timeout();
                     window.location.reload();
                 } else {
-                    modal_title.innerHTML = "Same amount placed";
-                    modal_message.innerHTML =
-                        "You have already placed this amount. Please reconsider your bid amount";
-                    let m = document.getElementById('modal_product_warning'); document.body.appendChild(m); new window.Modal(m).show();
+                    if (data && data.error === 'duplicate_bid') {
+                        modal_title.innerHTML = "Same amount placed";
+                    } else {
+                        modal_title.innerHTML = "Warning!";
+                    }
+                    modal_message.innerHTML = data?.message ||
+                        "Unable to place bid. Please reconsider your bid amount.";
+                    const m = document.getElementById('modal_product_warning');
+                    document.body.appendChild(m);
+                    new window.Modal(m).show();
                 }
             });
         }
@@ -232,7 +246,10 @@ patch(ProductPage.prototype, {
 
     /** Hide modal **/
     _hideModal() {
-        let m = window.Modal.getInstance(document.getElementById('modal_product_warning')); if (m) m.hide();
+        const m = window.Modal.getInstance(document.getElementById('modal_product_warning'));
+        if (m) {
+            m.hide();
+        }
     },
 
     /** Buy now button **/
@@ -248,17 +265,21 @@ patch(ProductPage.prototype, {
             auction_id: auction_id,
             auction_product_id: product_id,
             add_qty: 1
-        }).then(() => {});
-        rpc('/auction/close', {
-            product_id: product_id,
-            auction_id: auction_id
+        }).then((success) => {
+            if (success) {
+                modal_title.innerHTML = "Success";
+                modal_message.innerHTML =
+                    "You will get an email, please confirm and pay now. You will be redirected to the home page.";
+                new window.Modal(document.getElementById('modal_product_warning')).show();
+                setTimeout(() => {
+                    window.location.href = '/shop';
+                }, 5000);
+            } else {
+                modal_title.innerHTML = "Warning!";
+                modal_message.innerHTML =
+                    "Unable to process Buy Now. The auction may have ended or is no longer available.";
+                new window.Modal(document.getElementById('modal_product_warning')).show();
+            }
         });
-        modal_title.innerHTML = "Success";
-        modal_message.innerHTML =
-            "You will get an email, please confirm and pay now. You will be redirected to the home page.";
-        new window.Modal(document.getElementById('modal_product_warning')).show();
-        setTimeout(() => {
-            window.location.href = '/shop';
-        }, 5000);
     },
 });

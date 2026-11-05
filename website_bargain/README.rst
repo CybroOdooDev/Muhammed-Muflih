@@ -21,14 +21,14 @@ Key Features
 ------------
 
 *  Timer On Product Until End Of Auction
-*  Subscription Available.
-*  Option To See Bidders.
+*  Subscription Available
+*  Option To See Bidders
 *  Different Email Notifications
-*  Option For Buy Now.
+*  Option For Buy Now
 
 Installation
 ------------
-* No external dependencies.
+* No external dependencies
 
 
 Configuration

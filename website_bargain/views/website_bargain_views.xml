@@ -49,7 +49,7 @@
                                    readonly="state not in ['draft']"/>
                             <field name="price_buy_now" widget="monetary"
                                    force_save="1"
-                                   invisible="is_buy_now == False"
+                                   invisible="not is_buy_now"
                                    />
                         </group>
                         <group name="time_configuration"
@@ -85,9 +85,9 @@
                                     <field name="is_activate"/>
                                     <label for="notify_on"
                                            string="Notify before"
-                                           invisible="is_activate == False"/>
+                                           invisible="not is_activate"/>
                                     <div class="o_checkbox_optional_field"
-                                         invisible="is_activate == False">
+                                         invisible="not is_activate">
                                         <field name="notify_on"
                                                class="oe_inline"/>
                                         <div class="oe_inline">
@@ -95,7 +95,7 @@
                                         </div>
                                     </div>
                                     <field name="is_notification_send"
-                                           invisible="is_activate == False"
+                                           invisible="not is_activate"
                                            />
                                 </group>
                                 <group string="Miscellaneous Notification Settings">
@@ -114,7 +114,7 @@
                         <page name="product_info" string="Product Info">
                             <group string="Product Information">
                                 <field name="product_img" widget="image"
-                                       style="padding: 0px;" nolabel="1"/>
+                                       class="p-0" nolabel="1"/>
                             </group>
                             <group>
                                 <field name="product_id"

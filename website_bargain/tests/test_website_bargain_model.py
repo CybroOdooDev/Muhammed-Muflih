@@ -15,15 +15,14 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-# -*- coding: utf-8 -*-
 
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import TransactionCase, tagged
 from odoo.exceptions import ValidationError
 from odoo import fields
 from datetime import timedelta
 
 
-
+@tagged('post_install', '-at_install')
 class TestWebsiteBargainModel(TransactionCase):
 
     @classmethod
@@ -222,3 +221,21 @@ class TestWebsiteBargainModel(TransactionCase):
         ], limit=1)
         self.assertTrue(order, "Sale order must be created for the winning bidder")
         self.assertEqual(order.order_line.price_unit, 150)
+
+    def test_11_send_email_notification(self):
+        """Test cron admin notification before auction ends"""
+        auction = self.env['website.bargain'].create({
+            'website_id': self.website.id,
+            'auction_manager_id': self.user.id,
+            'product_id': self.product.id,
+            'initial_price': 80,
+            'start_time': fields.Datetime.now() - timedelta(hours=2),
+            'end_time': fields.Datetime.now() + timedelta(minutes=4),
+            'state': 'running',
+            'is_activate': True,
+            'notify_on': 5,
+            'notify_selection': 'minutes',
+            'is_notification_send': False,
+        })
+        self.env['website.bargain'].send_email_notification()
+        self.assertTrue(auction.is_notification_send)

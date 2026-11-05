@@ -15,10 +15,12 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
+import logging
 from datetime import timedelta
 from odoo import api, fields, models
-from odoo.tools.translate import _
 from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
 
 
 class WebsiteBargain(models.Model):
@@ -156,27 +158,38 @@ class WebsiteBargain(models.Model):
         for record in self:
             if record.end_time and record.start_time and record.end_time <= record.start_time:
                 raise ValidationError(
-                    _('End time should be greater than start time'))
+                    record.env._('End time should be greater than start time'))
 
     @api.constrains('extend_time')
     def _check_extend_time(self):
         """Summary:
                 function to validate extended time whether it is greater than
-                end time and after saving will send notification to subscribers
-                 if enabled"""
+                end time."""
         for record in self:
             if record.extend_time:
                 if record.end_time and record.extend_time <= record.end_time:
                     raise ValidationError(
-                        _('This time is not greater than the old time (%s)', record.end_time))
-                if record.is_extend_auction_notification:
-                    template_id = self.env.ref(
-                        'website_bargain.email_template_auction_extended', raise_if_not_found=False)
-                    if template_id and record.bargain_subscribers_ids:
-                        emails = [s.email for s in record.bargain_subscribers_ids if s.email]
-                        if emails:
-                            template_id.email_to = ','.join(emails)
-                            template_id.send_mail(record.id, force_send=True)
+                        record.env._('This time is not greater than the old time (%s)', record.end_time))
+
+    def _send_extend_notification(self):
+        """Send notification to subscribers when extended time is updated."""
+        template_id = self.env.ref(
+            'website_bargain.email_template_auction_extended', raise_if_not_found=False)
+        for record in self:
+            if record.is_extend_auction_notification and template_id and record.bargain_subscribers_ids:
+                emails = [s.email for s in record.bargain_subscribers_ids if s.email]
+                if emails:
+                    template_id.send_mail(
+                        record.id,
+                        email_values={'email_to': ','.join(emails)},
+                        force_send=True,
+                    )
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'extend_time' in vals:
+            self._send_extend_notification()
+        return res
 
     def action_confirm(self):
         """
@@ -184,37 +197,40 @@ class WebsiteBargain(models.Model):
                    button function to confirm auction and will
                    make product as published
         """
-        if self.search([('product_id', '=', self.product_id.id),
-                        ('state', '=', 'running')]):
-            raise ValidationError(
-                _('Already an auction is running for this product please'
-                  ' close it to continue'))
-        if self.end_time <= fields.Datetime.now():
-            raise ValidationError(_('End time is already over'))
-        self.product_id.is_published = True
-        self.product_id.website_id = self.website_id
-        self.write({'state': 'confirmed'})
+        for auction in self:
+            if self.search([('product_id', '=', auction.product_id.id),
+                            ('state', '=', 'running')]):
+                raise ValidationError(
+                    auction.env._('Already an auction is running for this product please'
+                                  ' close it to continue'))
+            if auction.end_time <= fields.Datetime.now():
+                raise ValidationError(auction.env._('End time is already over'))
+            auction.product_id.is_published = True
+            auction.product_id.website_id = auction.website_id
+            auction.write({'state': 'confirmed'})
 
     def action_reset_to_draft(self):
         """
             Summary:
                 button function to reset the auction to draft
         """
-        self.product_id.is_auction = False
-        self.write({'state': 'draft'})
+        for auction in self:
+            auction.product_id.is_auction = False
+            auction.write({'state': 'draft'})
 
     def action_run_auction(self):
         """
             Summary:
                 button function to start auction manually
         """
-        if self.search([('product_id', '=', self.product_id.id),
-                        ('state', '=', 'running')]):
-            raise ValidationError(
-                _('Already an auction is running for this product '
-                  'please close it to continue'))
-        self.product_id.is_auction = True
-        self.write({'state': 'running'})
+        for auction in self:
+            if self.search([('product_id', '=', auction.product_id.id),
+                            ('state', '=', 'running')]):
+                raise ValidationError(
+                    auction.env._('Already an auction is running for this product '
+                                  'please close it to continue'))
+            auction.product_id.is_auction = True
+            auction.write({'state': 'running'})
 
     def action_complete(self):
         """
@@ -229,9 +245,10 @@ class WebsiteBargain(models.Model):
             Summary:
                 button function to close auction
         """
-        self.product_id.is_auction = False
-        self.product_id.is_published = False
-        self.write({'state': 'closed'})
+        for auction in self:
+            auction.product_id.is_auction = False
+            auction.product_id.is_published = False
+            auction.write({'state': 'closed'})
 
     def send_email_notification(self):
         """
@@ -250,10 +267,7 @@ class WebsiteBargain(models.Model):
                                 ('is_notification_send', '=', False)])
         # Loop through the auctions that need to be notified
         for auction in auctions:
-            # Map the time unit to a string for timedelta
-            time_unit_map = {'days': 'days', 'hours': 'hours',
-                             'minutes': 'minutes', 'seconds': 'seconds'}
-            time_unit = time_unit_map.get(auction.notify_selection)
+            time_unit = auction.notify_selection if auction.notify_selection in ('days', 'hours', 'minutes', 'seconds') else None
             # Check if it's time to send the notification
             if time_unit:
                 next_notification = auction.end_time - timedelta(
@@ -276,8 +290,9 @@ class WebsiteBargain(models.Model):
         template_id = self.env.ref(
             'website_bargain.email_template_auction_start')
         # Get the emails of all the bidders and sale order partners
-        bidders = self.env['bargain.information'].search([]).mapped(
-            'bidder_id.email')
+        bidders = self.env['bargain.information'].search(
+            [('bidder_id', '!=', False)]
+        ).mapped('bidder_id.email')
         sale_orders_partner = self.env['sale.order'].search(
             [('state', '=', 'sale')]).mapped('partner_id.email')
         # Loop through the auctions and check if any auction's start time has arrived
@@ -290,8 +305,11 @@ class WebsiteBargain(models.Model):
                 # Send email notifications to all the bidders and sale order partners
                 emails = [email for email in set(sale_orders_partner + bidders) if email]
                 if template_id and emails:
-                    template_id.email_to = ','.join(emails)
-                    template_id.send_mail(auction.id, force_send=True)
+                    template_id.send_mail(
+                        auction.id,
+                        email_values={'email_to': ','.join(emails)},
+                        force_send=True,
+                    )
 
     def _process_auction_end(self):
         """Process auction end: determine winner, create draft quotation, and send notifications."""
@@ -346,13 +364,32 @@ class WebsiteBargain(models.Model):
                     'name': '(auction won) ' + (auction.name or ''),
                 })]
             })
-            try:
-                mail_compose_message = self.env['mail.compose.message']
-                so_mcm_vals = sale_order.sudo().action_quotation_send().get('context', {})
-                compose_msg = mail_compose_message.sudo().with_context(so_mcm_vals).create({})
-                compose_msg.sudo().action_send_mail()
-            except Exception:
-                pass
+            # Send quotation email to winner
+            template = (
+                sale_order._find_mail_template()
+                or self.env.ref('sale.email_template_edi_sale', raise_if_not_found=False)
+            )
+            if template:
+                try:
+                    sale_order.sudo()._portal_ensure_token()
+                except Exception as e:
+                    _logger.warning("Failed to ensure portal token for sale order %s: %s", sale_order.id, e)
+                email_values = {}
+                if bid_record.bidder_id.email:
+                    email_values['email_to'] = bid_record.bidder_id.email
+                if bid_record.bidder_id:
+                    email_values['recipient_ids'] = [(4, bid_record.bidder_id.id)]
+                if sender_email:
+                    email_values['email_from'] = sender_email
+                try:
+                    template.sudo().send_mail(
+                        sale_order.id,
+                        force_send=True,
+                        email_values=email_values,
+                    )
+                    sale_order.sudo().write({'state': 'sent'})
+                except Exception as e:
+                    _logger.warning("Failed to send quotation email for sale order %s: %s", sale_order.id, e)
 
             # Send winner notification
             if auction.is_winner_notification and bid_record.bidder_id.email and sender_email:

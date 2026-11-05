@@ -13,8 +13,7 @@
                 <div class="product_price" itemprop="offers"
                      itemscope="itemscope" itemtype="http://schema.org/Offer">
                     <t t-if="'base_price' in template_price_vals">
-                        <del t-attf-class="text-muted me-1 h6 mb-0"
-                             style="white-space: nowrap;">
+                        <del t-attf-class="text-muted me-1 h6 mb-0 text-nowrap">
                             <!-- Display the original price with a strikethrough -->
                             <em class="small"
                                 t-out="template_price_vals['base_price']"
@@ -25,9 +24,9 @@
                           t-out="template_price_vals['price_reduce']"
                           t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
                     <!-- Set the price and currency information for the schema.org metadata -->
-                    <span itemprop="price" style="display:none;"
+                    <span itemprop="price" class="d-none"
                           t-out="template_price_vals['price_reduce']"/>
-                    <span itemprop="priceCurrency" style="display:none;"
+                    <span itemprop="priceCurrency" class="d-none"
                           t-out="website.currency_id.name"/>
                 </div>
             </t>

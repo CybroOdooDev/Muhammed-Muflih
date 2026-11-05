@@ -19,9 +19,12 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import logging
 from odoo import fields, http
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.http import request
+
+_logger = logging.getLogger(__name__)
 
 
 class WebsiteAuction(WebsiteSale):
@@ -72,6 +75,17 @@ class WebsiteAuction(WebsiteSale):
         if current_website:
             domain.append(('website_id', 'in', (current_website.id, False)))
         auction = request.env['website.bargain'].sudo().search_read(domain)
+        for a in auction:
+            if a.get('end_time'):
+                a['end_time'] = fields.Datetime.context_timestamp(
+                    request.env['website.bargain'],
+                    fields.Datetime.to_datetime(a['end_time'])
+                ).strftime('%Y-%m-%d %H:%M:%S')
+            if a.get('extend_time'):
+                a['extend_time'] = fields.Datetime.context_timestamp(
+                    request.env['website.bargain'],
+                    fields.Datetime.to_datetime(a['extend_time'])
+                ).strftime('%Y-%m-%d %H:%M:%S')
         values.update({
             'auction': auction,
             'website': current_website,
@@ -79,7 +93,7 @@ class WebsiteAuction(WebsiteSale):
         return values
 
     @http.route('/auction/timer', type='jsonrpc', auth='user', csrf=False)
-    def auction_timer(self, auction_id):
+    def auction_timer(self, auction_id, **post):
         """Summary:
                 Function to pass timer details from auction like start
                  time,end time,extended time
@@ -90,15 +104,12 @@ class WebsiteAuction(WebsiteSale):
                  time and state id"""
         auction = request.env['website.bargain'].sudo().browse(int(auction_id))
         values = {
-            'start_time': fields.Datetime.context_timestamp(auction,
-                                                          auction.start_time),
-            'end_time': fields.Datetime.context_timestamp(auction,
-                                                          auction.end_time),
+            'start_time': auction.start_time.strftime('%Y-%m-%dT%H:%M:%SZ') if auction.start_time else False,
+            'end_time': auction.end_time.strftime('%Y-%m-%dT%H:%M:%SZ') if auction.end_time else False,
             'state': auction.state,
         }
         if auction.extend_time:
-            values['extend_time'] = fields.Datetime.context_timestamp(auction,
-                                                                      auction.extend_time)
+            values['extend_time'] = auction.extend_time.strftime('%Y-%m-%dT%H:%M:%SZ')
         return values
 
     @http.route('/auction/close', type='jsonrpc', auth='user', csrf=False)
@@ -141,22 +152,29 @@ class WebsiteAuction(WebsiteSale):
                 A message bid placed and auction details"""
         auction = request.env['website.bargain'].sudo().browse(int(auction_id))
         if not auction.exists() or auction.state != 'running':
-            return False
+            return {'error': 'not_running', 'message': request.env._('This auction is no longer running.')}
 
         # Server-side validation: check if auction has expired
         now = fields.Datetime.now()
         effective_end = auction.extend_time or auction.end_time
         if effective_end and effective_end <= now:
-            return False
+            return {'error': 'expired', 'message': request.env._('This auction has already ended.')}
 
         # Server-side validation: bid amount
         try:
             bid_amount = float(post.get('bid_amount'))
         except (ValueError, TypeError):
-            return False
+            return {'error': 'invalid_amount', 'message': request.env._('Please enter a valid bid amount.')}
 
         if bid_amount <= 0 or bid_amount <= auction.initial_price:
-            return False
+            return {'error': 'low_initial', 'message': request.env._('Bid amount must be greater than the initial price.')}
+
+        bidder_total = auction.bargain_information_ids.search_count(
+            [('bidder_id', '=', request.env.user.partner_id.id),
+             ('bid_offer', '=', bid_amount),
+             ('auction_id', '=', auction.id)])
+        if bidder_total >= 1:
+            return {'error': 'duplicate_bid', 'message': request.env._('You have already placed this amount. Please reconsider your bid amount.')}
 
         placed_bids = auction.bargain_information_ids.filtered(
             lambda r: r.status == 'Bid Placed'
@@ -164,14 +182,7 @@ class WebsiteAuction(WebsiteSale):
         if placed_bids:
             highest_bid = max(placed_bids.mapped('bid_offer'))
             if bid_amount <= highest_bid:
-                return False
-
-        bidder_total = auction.bargain_information_ids.search_count(
-            [('bidder_id', '=', request.env.user.partner_id.id),
-             ('bid_offer', '=', bid_amount),
-             ('auction_id', '=', auction.id)])
-        if bidder_total >= 1:
-            return False
+                return {'error': 'low_bid', 'message': request.env._('Your bid must be higher than the current highest bid.')}
 
         auction.bargain_information_ids.sudo().create({
             'bidder_id': request.env.user.partner_id.id,
@@ -201,10 +212,10 @@ class WebsiteAuction(WebsiteSale):
                                 'subject': 'New Bid Placed on ' + (auction.name or ''),
                                 'email_to': subscribers, 'body_html': data}
                 request.env['mail.mail'].sudo().create(email_values).send()
-        values = ({
+        values = {
+            'success': True,
             'bid_placed': 'Bid Placed',
-            'auction': auction
-        })
+        }
 
         return values
 
@@ -348,13 +359,39 @@ class WebsiteAuction(WebsiteSale):
                 'price_unit': auction.price_buy_now,
             })]
         })
-        # Send a notification email to the winner
-        mail_compose_message = request.env['mail.compose.message']
-        so_mcm_vals = sale_order.sudo().action_quotation_send().get('context',
-                                                                    {})
-        compose_msg = mail_compose_message.sudo().with_context(
-            so_mcm_vals).create({})
-        compose_msg.sudo().action_send_mail()
+        # Send quotation email to winner
+        template = (
+            sale_order._find_mail_template()
+            or request.env.ref('sale.email_template_edi_sale',
+                               raise_if_not_found=False)
+        )
+        if template:
+            try:
+                sale_order.sudo()._portal_ensure_token()
+            except Exception as e:
+                _logger.warning("Failed to ensure portal token for buy now sale order %s: %s", sale_order.id, e)
+            email_values = {}
+            bidder_partner = request.env.user.partner_id
+            if bidder_partner.email:
+                email_values['email_to'] = bidder_partner.email
+            if bidder_partner:
+                email_values['recipient_ids'] = [(4, bidder_partner.id)]
+            sender_email = (
+                auction.auction_manager_id.email
+                or request.env.user.email
+                or request.env.company.email
+            )
+            if sender_email:
+                email_values['email_from'] = sender_email
+            try:
+                template.sudo().send_mail(
+                    sale_order.id,
+                    force_send=True,
+                    email_values=email_values,
+                )
+                sale_order.sudo().write({'state': 'sent'})
+            except Exception as e:
+                _logger.warning("Failed to send quotation email for buy now sale order %s: %s", sale_order.id, e)
 
         # Mark auction finished upon instant buy
         auction.write({'state': 'finished'})

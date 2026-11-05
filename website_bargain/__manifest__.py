@@ -28,7 +28,7 @@
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['website_sale', 'contacts'],
+    'depends': ['website_sale'],
     'data': [
         'security/ir.access.csv',
         'data/ir_cron_data.xml',
@@ -50,5 +50,6 @@
         ]},
     'images': ['static/description/banner.jpg'],
     'license': 'LGPL-3',
-
+    'installable': True,
+    'application': True,
 }
