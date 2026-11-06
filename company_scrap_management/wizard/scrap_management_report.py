@@ -27,7 +27,7 @@ class ScrapManagementReport(models.TransientModel):
     filter = fields.Selection(
         default="product_wise", selection=[('product_wise', 'Product Wise'),
                                            ('state_wise', 'State Wise')],
-        help="field to choose filter of report", string="Based On")
+        help="Field to choose filter of report", string="Based On")
     product_ids = fields.Many2many('product.product',
                                    string="Product",
                                    help="Field to choose product for report")
@@ -41,80 +41,66 @@ class ScrapManagementReport(models.TransientModel):
                           help="Field to end date filter of report")
 
     def action_print_pdf(self):
-        """
-        Summary:
-           function to print pdf
-        Return:
-           pdf report
-        """
+        """Print PDF report based on wizard filters."""
+        self.ensure_one()
         if self.filter == 'product_wise':
-            query = """SELECT scrap_management.scrap_management_number,
-            scrap_management.scrap_order_id,
-            COALESCE(product_template.name->>'en_US', product_template.name::text) AS product,
-            scrap_management.state,
-            stock_move.product_id,
-            scrap_management.date,
-            COALESCE(stock_move.reference, '') AS name
-            FROM scrap_management
-            INNER JOIN stock_move ON scrap_management.scrap_order_id = stock_move.id
-            INNER JOIN product_product ON product_product.id = stock_move.product_id
-            INNER JOIN product_template ON product_template.id = product_product.product_tmpl_id
-            WHERE 1=1
-            """
-            params = []
+            domain = []
             if self.product_ids:
-                query += " AND stock_move.product_id IN %s"
-                params.append(tuple(self.product_ids.ids))
+                domain.append(('product_id', 'in', self.product_ids.ids))
             if self.from_date:
-                query += " AND scrap_management.date >= %s"
-                params.append(self.from_date)
+                domain.append(('date', '>=', self.from_date))
             if self.to_date:
-                query += " AND scrap_management.date <= %s"
-                params.append(self.to_date)
-            self.env.cr.execute(query, params)
-            datas = self.env.cr.dictfetchall()
+                domain.append(('date', '<=', self.to_date))
+
+            records = self.env['scrap.management'].search(domain)
+            datas = [{
+                'scrap_management_number': rec.scrap_management_number,
+                'scrap_order_id': rec.scrap_order_id.id,
+                'product': rec.product_id.display_name,
+                'state': dict(rec._fields['state'].selection).get(rec.state, rec.state),
+                'product_id': rec.product_id.id,
+                'date': rec.date,
+                'name': rec.scrap_order_id.reference or '',
+            } for rec in records]
+
             data = {
                 'form': self.read()[0],
                 'datas': datas,
                 'from_date': self.from_date,
-                'to_date': self.to_date
+                'to_date': self.to_date,
             }
             return self.env.ref(
                 'company_scrap_management'
-                '.action_scrap_management_product_wise').report_action(
-                None,
-                data=data)
+                '.action_scrap_management_product_wise'
+            ).report_action(None, data=data, config=False)
+
         if self.filter == 'state_wise':
-            query = """SELECT scrap_management.scrap_management_number,
-            COALESCE(stock_move.reference, '') AS name,
-            scrap_management.scrap_order_id,
-            scrap_management.state,
-            stock_move.product_id,
-            scrap_management.date
-            FROM scrap_management
-            INNER JOIN stock_move ON scrap_management.scrap_order_id = stock_move.id
-            WHERE 1=1
-            """
-            params = []
+            domain = []
             if self.state:
-                query += " AND scrap_management.state = %s"
-                params.append(self.state)
+                domain.append(('state', '=', self.state))
             if self.from_date:
-                query += " AND scrap_management.date >= %s"
-                params.append(self.from_date)
+                domain.append(('date', '>=', self.from_date))
             if self.to_date:
-                query += " AND scrap_management.date <= %s"
-                params.append(self.to_date)
-            self.env.cr.execute(query, params)
-            datas = self.env.cr.dictfetchall()
+                domain.append(('date', '<=', self.to_date))
+
+            records = self.env['scrap.management'].search(domain)
+            datas = [{
+                'scrap_management_number': rec.scrap_management_number,
+                'name': rec.scrap_order_id.reference or '',
+                'scrap_order_id': rec.scrap_order_id.id,
+                'state': dict(rec._fields['state'].selection).get(rec.state, rec.state),
+                'product_id': rec.product_id.id,
+                'date': rec.date,
+            } for rec in records]
+
             data = {
                 'form': self.read()[0],
                 'datas': datas,
                 'state': self.state,
                 'from_date': self.from_date,
-                'to_date': self.to_date
+                'to_date': self.to_date,
             }
             return self.env.ref(
                 'company_scrap_management'
-                '.action_scrap_management_state_wise').report_action(None,
-                                                                     data=data)
+                '.action_scrap_management_state_wise'
+            ).report_action(None, data=data, config=False)

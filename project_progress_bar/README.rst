@@ -53,7 +53,7 @@ Maintainer
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
 
-This module is maintained by Cybrosys Technologies.
+This module is maintained by Cybrosys Techno Solutions.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
 

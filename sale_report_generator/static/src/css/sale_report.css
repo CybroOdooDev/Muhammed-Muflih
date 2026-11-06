@@ -21,16 +21,22 @@ a.dropdown-toggle.report-type {
     width: 100%;
     border: 1px solid #000;
 }
-element.style {
-    top: 0px;
-    height: 42px;
-    color: white;
-    background-color: #7c7bad;
-    border-color: #7c7bad;
-    width: 100px;
+.sub_container_left {
+    width: 285px;
+    margin-left: 36px;
+}
+.report-scroll-container {
+    height: 70vh;
+}
+.date-error-msg {
+    display: none;
+    color: var(--danger, #dc3545);
+    font-size: 12px;
+    margin-top: 6px;
 }
 tr.so-line {
     height: 48px;
+    border: 1.5px solid black;
 }
 tr.table_sale_head th {
     font-size: 18px;
@@ -83,28 +89,6 @@ a.dropdown-toggle.report-type {
 }
 .print-btns {
     margin-bottom: 30px;
-}
-.table_pr_head {
-    background-color: #7c7bad;
-    color: #fff;
-    padding: 20px;
-    margin: 20px;
-    height: 57px;
-    width: 100%;
-    border: 1px solid #000;
-}
-tr.pr-line {
-    height: 48px;
-}
-tr.table_pr_head th {
-    font-size: 18px;
-    text-align: center;
-}
-.table_view_pr {
-    overflow-y: scroll;
-    position: relative;
-    height: 500px;
-    max-width: 100%;
 }
 .my_custom_dropdown{
     min-width:200px;

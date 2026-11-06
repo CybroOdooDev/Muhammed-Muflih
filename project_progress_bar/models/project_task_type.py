@@ -15,7 +15,7 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
 
@@ -28,38 +28,39 @@ class ProjectTaskType(models.Model):
                                 help='Set your progress of the stage')
     is_progress_stage = fields.Boolean(string='Is Progress Bar',
                                        help='You can only see the progress '
-                                            'if you enable this ')
+                                            'if you enable this')
 
-    @api.constrains('progress_bar', 'sequence')
+    @api.constrains('progress_bar', 'sequence', 'is_progress_stage', 'project_ids')
     def project_progress_bar(self):
         """The Constraints for the project Task Type Model"""
-        all_progress = self.env['project.task.type'].search([]).filtered(
-            lambda
-                progress: progress.is_progress_stage == True and progress.id != self.id)
-        progress_sequence_map = {}
-        for rec in all_progress:
-            progress_sequence_map[rec.progress_bar] = rec.sequence
-        if self.progress_bar in progress_sequence_map.keys():
-            raise UserError('Ensure that the progress is not duplicated.')
-        for rec in self.env['project.task.type'].search([]).filtered(
-                lambda progress: progress.is_progress_stage == True and progress.id != self.id).mapped(
-            'progress_bar'):
-            value = [i for i in progress_sequence_map if i == rec]
-            if self.progress_bar < rec:
-                if float(self.sequence) >= progress_sequence_map[value[0]]:
-                    raise UserError(
-                        'The progress in this stage must greater than that of the '
-                        'other stages progress bars. Alternatively, reassess '
-                        'the priority assigned to this stage.')
-                else:
-                    continue
+        for rec in self:
+            if not rec.is_progress_stage:
+                continue
+            if rec.progress_bar < 0.0 or rec.progress_bar > 100.0:
+                raise UserError(_('The progress must be less than or equal to 100 and greater than or equal to 0.'))
+
+            domain = [
+                ('is_progress_stage', '=', True),
+                ('id', '!=', rec.id),
+            ]
+            if rec.project_ids:
+                domain.append(('project_ids', 'in', rec.project_ids.ids))
             else:
-                if float(self.sequence) < progress_sequence_map[value[0]]:
-                    raise UserError(
-                        'The progress in this stage must less than that of the'
-                        'other stages progress bars. Alternatively, reassess '
-                        'the priority assigned to this stage.')
+                domain.append(('project_ids', '=', False))
+
+            other_stages = self.search(domain)
+            for other in other_stages:
+                if rec.progress_bar == other.progress_bar:
+                    raise UserError(_('Ensure that the progress is not duplicated.'))
+                if rec.progress_bar < other.progress_bar:
+                    if float(rec.sequence) >= float(other.sequence):
+                        raise UserError(
+                            _('The progress in this stage must be greater than that of the '
+                              'other stages progress bars. Alternatively, reassess '
+                              'the priority assigned to this stage.'))
                 else:
-                    continue
-        if self.progress_bar > 100:
-            raise UserError('The progress must be less than or equal to 100')
+                    if float(rec.sequence) <= float(other.sequence):
+                        raise UserError(
+                            _('The progress in this stage must be less than that of the '
+                              'other stages progress bars. Alternatively, reassess '
+                              'the priority assigned to this stage.'))

@@ -19,7 +19,7 @@
     'name': 'Project and Task Progress Status',
     'version': '20.0.1.0.0',
     'category': 'Project',
-    'summary': 'Keep your finger on the projects pulse with this module. '
+    'summary': "Keep your finger on the project's pulse with this module. "
                'Featuring a dynamic progress bar, it provides a visual snapshot '
                'of project and task advancement. Toggle effortlessly between '
                'Kanban and list views for a personalized project tracking '
@@ -27,13 +27,13 @@
     'description': 'Dive into project progression with a sleek module offering'
                    ' a task-focused progress bar. Switch between Kanban and '
                    'list views seamlessly, ensuring a comprehensive '
-                   'understanding of your projects evolving landscape. '
+                   "understanding of your project's evolving landscape. "
                    'Streamline your workflow and meet deadlines with ease.',
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['hr_timesheet', 'project'],
+    'depends': ['project'],
     'data': [
         'views/project_task_types_views.xml',
         'views/project_project_views.xml',

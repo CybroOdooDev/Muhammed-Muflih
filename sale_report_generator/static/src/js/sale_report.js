@@ -54,15 +54,11 @@ class SaleReport extends Component {
     }
 
     async load_data(wizard_id = null) {
-        try {
-            if (wizard_id == null) {
-                this.state.wizard_id = await this.orm.create("sales.report", [{}]);
-            }
-            this.state.data = await this.orm.call("sales.report", "sale_report", [this.state.wizard_id]);
-            this.state.order_line = this.state.data.report_lines;
-        } catch (el) {
-            console.error(el);
+        if (wizard_id == null) {
+            this.state.wizard_id = await this.orm.create("sales.report", [{}]);
         }
+        this.state.data = await this.orm.call("sales.report", "sale_report", [this.state.wizard_id]);
+        this.state.order_line = this.state.data.report_lines;
     }
 
     async apply_filter(ev) {
@@ -82,7 +78,7 @@ class SaleReport extends Component {
         this.load_data(this.state.wizard_id);
     }
 
-    async PrintPdf(ev) {
+    async printPdf(ev) {
         ev.preventDefault();
         return this.action.doAction({
             'type': 'ir.actions.report',
@@ -99,9 +95,9 @@ class SaleReport extends Component {
         });
     }
 
-    async PrintXlsx() {
-        var data = this.state.data;
-        var action = {
+    async printXlsx() {
+        const data = this.state.data;
+        const action = {
             'data': {
                 'model': 'sales.report',
                 'options': JSON.stringify(data['orders']),

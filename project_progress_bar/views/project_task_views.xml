@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!--    Added progress bar in project task form,tree and kanban-->
-    <record id="view_task_kanban" model="ir.ui.view">
-        <field name="name">
-            project.task.view.card.inherit.project.progress.bar
-        </field>
+    <!--    Added progress bar in project task form, list and kanban-->
+    <record id="view_task_card_inherit_project_progress_bar" model="ir.ui.view">
+        <field name="name">project.task.view.card.inherit.project.progress.bar</field>
         <field name="model">project.task</field>
         <field name="inherit_id" ref="project.view_task_card"/>
         <field name="arch" type="xml">
@@ -16,9 +14,8 @@
             </xpath>
         </field>
     </record>
-    <record id="view_task_tree2" model="ir.ui.view">
-        <field name="name">project.task.view.tree.inherit.project_progress_bar
-        </field>
+    <record id="view_task_tree2_inherit_project_progress_bar" model="ir.ui.view">
+        <field name="name">project.task.view.list.inherit.project.progress.bar</field>
         <field name="model">project.task</field>
         <field name="inherit_id" ref="project.view_task_tree2"/>
         <field name="arch" type="xml">
@@ -29,9 +26,8 @@
             </xpath>
         </field>
     </record>
-    <record id="view_task_form2" model="ir.ui.view">
-        <field name="name">project.task.view.form.inherit.project.progress.bar
-        </field>
+    <record id="view_task_form2_inherit_project_progress_bar" model="ir.ui.view">
+        <field name="name">project.task.view.form.inherit.project.progress.bar</field>
         <field name="model">project.task</field>
         <field name="inherit_id" ref="project.view_task_form2"/>
         <field name="arch" type="xml">

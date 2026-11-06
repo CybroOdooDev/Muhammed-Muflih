@@ -15,7 +15,8 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-from odoo import fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class ScrapManagementLine(models.Model):
@@ -34,3 +35,14 @@ class ScrapManagementLine(models.Model):
                                  help="Field to specify total quantity")
     useful_qty = fields.Float(string="Useful Product Quantity",
                               help="Field to specify useful quantity")
+
+    @api.constrains('useful_qty', 'dismantle_qty')
+    def _check_useful_qty(self):
+        """Validate useful_qty does not exceed dismantle_qty and is non-negative."""
+        for line in self:
+            if line.useful_qty < 0:
+                raise ValidationError(_("Useful quantity cannot be negative."))
+            if line.useful_qty > line.dismantle_qty:
+                raise ValidationError(
+                    _("Useful quantity cannot exceed the available dismantle quantity.")
+                )

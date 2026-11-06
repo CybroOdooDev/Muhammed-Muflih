@@ -4,21 +4,19 @@
         <div class="SalesReportMaker">
             <div>
                 <center>
-                    <h1 style="margin: 20px;">Sales Dynamic Report</h1>
+                    <h1 class="my-3">Sales Dynamic Report</h1>
                 </center>
             </div>
         </div>
         <div class="print-btns">
-            <div class="sub_container_left"
-                 style="width: 285px; margin-left: 36px;">
+            <div class="sub_container_left">
                 <div class=" report_print">
-                    <button type="button" class="btn btn-primary" id="pdf"
-                            t-on-click="this.PrintPdf"
-                            style="float: left; margin-right: 9px;">
+                    <button type="button" class="btn btn-primary me-2" id="pdf"
+                            t-on-click="this.printPdf">
                         Print (PDF)
                     </button>
                     <button type="button" class="btn btn-primary" id="xlsx"
-                            t-on-click="this.PrintXlsx">
+                            t-on-click="this.printXlsx">
                         Export (XLSX)
                     </button>
                 </div>
@@ -26,13 +24,11 @@
             <br/>
             <div class="print-btns">
                 <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle time_range_pr"
+                    <button class="btn btn-secondary dropdown-toggle time_range_pr d-flex align-items-center"
                             type="button" id="date_chose"
-                            data-bs-toggle="dropdown" aria-expanded="false"
-                            style="height:33px;width:150px;align-items:center;display:flex;">
-                        <span class="fa fa-calendar" title="Dates" role="img"
-                              aria-label="Dates"
-                              style="display:block;margin-right:5px;"/>
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="fa fa-calendar d-block me-1" title="Dates" role="img"
+                              aria-label="Dates"/>
                         Date Range
                     </button>
                     <div class="dropdown-menu my_custom_dropdown" role="menu"
@@ -46,10 +42,9 @@
                                        class="form-control datetimepicker-input"
                                        data-target="#date_from"
                                        t-att-name="prefix"/>
-                                <div class="input-group-append"
+                                <div class="input-group-append pe-none"
                                      data-target="#date_from"
-                                     data-toggle="datetimepicker"
-                                     style="pointer-events: none;">
+                                     data-toggle="datetimepicker">
                                 </div>
                             </div>
                             <label class="" for="date_to">End Date :</label>
@@ -60,15 +55,14 @@
                                        class="form-control datetimepicker-input"
                                        data-target="#date_to"
                                        t-att-name="prefix"/>
-                                <div class="input-group-append"
+                                <div class="input-group-append pe-none"
                                      data-target="#date_to"
-                                     data-toggle="datetimepicker"
-                                     style="pointer-events: none;">
+                                     data-toggle="datetimepicker">
                                 </div>
                             </div>
                             <!-- Date validation error -->
                             <div t-ref="this.date_error"
-                                 style="display:none; color: var(--danger); font-size: 12px; margin-top: 6px;">
+                                 class="date-error-msg">
                                 <i class="fa fa-exclamation-circle"/> End date must be greater than start date.
                             </div>
                         </div>
@@ -114,7 +108,7 @@
             </div>
         </div>
         <!--   Report By Order -->
-        <div class="overflow-auto" style="height: 70vh; padding:10px">
+        <div class="overflow-auto report-scroll-container p-2">
             <div t-if="this.state.order_by == 'report_by_order'">
                 <div class="table_main_view">
                     <table cellspacing="0" width="100%">
@@ -131,7 +125,7 @@
                         <tbody>
                             <t t-foreach="this.state.order_line" t-as="sale_report"
                                t-key="sale_report_index">
-                                <tr style="border: 1.5px solid black;"
+                                <tr
                                     class="so-line"
                                     t-att-data-account-id="sale_report['id']"
                                     t-attf-data-target=".a{{sale_report['id']}}">
@@ -164,27 +158,27 @@
                                             </div>
                                         </t>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['date_order']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['customer']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['sales_man']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['sum']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['amount_total']"/>
                                         </span>
@@ -216,7 +210,7 @@
                         <tbody>
                             <t t-foreach="this.state.order_line" t-as="sale_report"
                                t-key="sale_report_index">
-                                <tr style="border: 1.5px solid black;"
+                                <tr
                                     class="so-line"
                                     data-toggle="collapse"
                                     t-att-data-account-id="sale_report['id']"
@@ -250,47 +244,47 @@
                                             </div>
                                         </t>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['date_order']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['customer']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['company']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['salesman']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="typeof sale_report.product === 'object' ? (sale_report.product?.en_US || Object.values(sale_report.product)[0]) : sale_report['product']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['default_code']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['product_uom_qty']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['price_subtotal']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['amount_total']"/>
                                         </span>
@@ -318,12 +312,12 @@
                         <tbody>
                             <t t-foreach="this.state.order_line" t-as="sale_report"
                                t-key="sate_report_index">
-                                <tr style="border: 1.5px solid black;"
+                                <tr
                                     class="so-line"
                                     data-toggle="collapse"
                                     t-att-data-account-id="sale_report['id']"
                                     t-attf-data-target=".a{{sale_report['id']}}">
-                                    <td style="border: 0px solid black;">
+                                    <td class="border-0">
                                         <i class="fa fa-caret-down" role="img"
                                            aria-label="Unfolded"
                                            title="Unfolded"/>
@@ -331,7 +325,7 @@
                                             <t t-esc="typeof sale_report.product === 'object' ? (sale_report.product?.en_US || Object.values(sale_report.product)[0]) : sale_report['product']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-if="sale_report['id']">
                                                 <div>
@@ -362,22 +356,22 @@
                                             </t>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="typeof sale_report['category'] === 'object' ? (sale_report['category']?.en_US || Object.values(sale_report['category'])[0]) : sale_report['category']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['default_code']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['product_uom_qty']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['amount_total']"/>
                                         </span>
@@ -402,22 +396,22 @@
                         <tbody>
                             <t t-foreach="this.state.order_line" t-as="sale_report"
                                t-key="sale_report_index">
-                                <tr style="border: 1.5px solid black;"
+                                <tr
                                     class="so-line"
                                     data-toggle="collapse"
                                     t-att-data-account-id="sale_report['id']"
                                     t-attf-data-target=".a{{sale_report['id']}}">
-                                    <td style="border: 0px solid black;">
+                                    <td class="border-0">
                                         <span>
                                             <t t-esc="typeof sale_report['name'] === 'object' ? (sale_report['name']?.en_US || Object.values(sale_report['name'])[0]) : sale_report['name']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['qty']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['amount_total']"/>
                                         </span>
@@ -443,27 +437,27 @@
                         <tbody>
                             <t t-foreach="this.state.order_line" t-as="sale_report"
                                t-key="sale_report_index">
-                                <tr style="border: 1.5px solid black;"
+                                <tr
                                     class="so-line"
                                     data-toggle="collapse"
                                     t-att-data-account-id="sale_report['id']"
                                     t-attf-data-target=".a{{sale_report['id']}}">
-                                    <td style="border: 0px solid black;">
+                                    <td class="border-0">
                                         <span>
                                             <t t-esc="sale_report['name']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['order']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['qty']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['amount']"/>
                                         </span>
@@ -489,12 +483,12 @@
                         <tbody>
                             <t t-foreach="this.state.order_line" t-as="sale_report"
                                t-key="sale_report_index">
-                                <tr style="border: 1.5px solid black;"
+                                <tr
                                     class="so-line"
                                     data-toggle="collapse"
                                     t-att-data-account-id="sale_report['id']"
                                     t-attf-data-target=".a{{sale_report['id']}}">
-                                    <td style="border: 0px solid black;">
+                                    <td class="border-0">
                                         <span>
                                             <t t-if="sale_report['state'] == 'draft'">
                                                 Quotation
@@ -513,17 +507,17 @@
                                             </t>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['count']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['qty']"/>
                                         </span>
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="text-center">
                                         <span>
                                             <t t-esc="sale_report['amount']"/>
                                         </span>

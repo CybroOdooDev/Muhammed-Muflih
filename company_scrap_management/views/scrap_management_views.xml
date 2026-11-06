@@ -33,7 +33,7 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_product_moves" type="object"
-                                class="oe_stat_button" icon="sync_alt"
+                                class="oe_stat_button" icon="fa-arrows-h"
                                 invisible="state != 'done'">
                             <div class="o_stat_info">
                                 <span class="o_stat_text">Product Moves</span>

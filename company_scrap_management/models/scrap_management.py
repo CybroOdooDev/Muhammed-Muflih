@@ -15,7 +15,6 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-from datetime import date
 from odoo import api, fields, models
 
 
@@ -43,7 +42,7 @@ class ScrapManagement(models.Model):
         'product.product',
         string="Product", related="scrap_order_id.product_id",
         help="Field to choose product")
-    date = fields.Date(string="Date", help="field to give the date")
+    date = fields.Date(string="Date", help="Field to give the date")
     qty = fields.Float(string="Quantity", related="scrap_order_id.quantity",
                        help="Field to specify quantity")
     scrap_management_line_ids = fields.One2many(
@@ -92,26 +91,13 @@ class ScrapManagement(models.Model):
             })
 
     def action_done(self):
-        """Function to done the Scrap Management and
-        add product move and stock quantity"""
+        """Function to complete the Scrap Management and
+        process stock moves for recovered and scrapped components"""
         for record in self:
             scrap_loc = record.scrap_order_id.location_dest_id
-            if record.product_id.is_storable:
-                record.env['stock.quant'].create({
-                    'location_id': scrap_loc.id,
-                    'product_id': record.product_id.id,
-                    'quantity': 0 - record.qty
-                })
-
             for line in record.scrap_management_line_ids:
                 scrap_qty = line.dismantle_qty - line.useful_qty
                 if line.useful_qty > 0:
-                    if line.product_id.is_storable:
-                        record.env['stock.quant'].create({
-                            'location_id': record.location_id.id,
-                            'product_id': line.product_id.id,
-                            'quantity': line.useful_qty
-                        })
                     move_vals = {
                         'origin': record.scrap_management_number,
                         'company_id': record.env.company.id,
@@ -129,14 +115,8 @@ class ScrapManagement(models.Model):
                         })],
                     }
                     move = record.env['stock.move'].create(move_vals)
-                    move.state = 'done'
+                    move._action_done()
                 if scrap_qty > 0:
-                    if line.product_id.is_storable:
-                        record.env['stock.quant'].create({
-                            'location_id': scrap_loc.id,
-                            'product_id': line.product_id.id,
-                            'quantity': scrap_qty
-                        })
                     move_vals = {
                         'origin': record.scrap_management_number,
                         'company_id': record.env.company.id,
@@ -162,7 +142,7 @@ class ScrapManagement(models.Model):
             record.scrap_order_id.write({
                 'state_management': "dismantled"
             })
-            record.date = date.today()
+            record.date = fields.Date.context_today(record)
 
     def action_product_moves(self):
         """Function to return the product moves"""

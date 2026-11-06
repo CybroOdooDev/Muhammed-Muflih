@@ -39,8 +39,8 @@
                 <t t-out="Filters['date_to']"/>
             </span>
             <div>
-                <div style="width:100%;">
-                    <div style="text-align:centre;" class="row">
+                <div class="w-100">
+                    <div class="row text-center">
                         <div class="col-4">
                             <strong>Report Type:</strong>
                             <t t-out="Filters.get('report_type')"/>
@@ -61,7 +61,7 @@
                     </thead>
                     <tbody class="text-left">
                         <t t-foreach="report_main_line_data" t-as="main">
-                            <tr style="font-weight: bold;">
+                            <tr class="fw-bold">
                                 <td colspan="6">
                                     <span t-out="main['number']"/>
                                 </td>
@@ -102,8 +102,8 @@
                 <t t-out="Filters['date_to']"/>
             </span>
             <div>
-                <div style="width:100%;">
-                    <div style="text-align:centre;" class="row">
+                <div class="w-100">
+                    <div class="row text-center">
                         <div class="col-4">
                             <strong>Report Type:</strong>
                             <t t-out="Filters.get('report_type')"/>
@@ -128,7 +128,7 @@
                     </thead>
                     <tbody>
                         <t t-foreach="report_main_line_data" t-as="main">
-                            <tr style="font-weight: bold;">
+                            <tr class="fw-bold">
                                 <td colspan="6">
                                     <span t-out="main['number']"/>
                                 </td>
@@ -181,8 +181,8 @@
                 <t t-out="Filters['date_to']"/>
             </span>
             <div>
-                <div style="width:100%;">
-                    <div style="text-align:centre;" class="row">
+                <div class="w-100">
+                    <div class="row text-center">
                         <div class="col-4">
                             <strong>Report Type:</strong>
                             <t t-out="Filters.get('report_type')"/>
@@ -203,7 +203,7 @@
                     </thead>
                     <tbody>
                         <t t-foreach="report_main_line_data" t-as="main">
-                            <tr style="font-weight: bold;">
+                            <tr class="fw-bold">
                                 <td colspan="6">
                                     <span t-out="main['product'] if isinstance(main['product'], str) else main['product'].get('en_US')"/>
                                 </td>
@@ -241,8 +241,8 @@
                 <t t-out="Filters['date_to']"/>
             </span>
             <div>
-                <div style="width:100%;">
-                    <div style="text-align:centre;" class="row">
+                <div class="w-100">
+                    <div class="row text-center">
                         <div class="col-4">
                             <strong>Report Type:</strong>
                             <t t-out="Filters.get('report_type')"/>
@@ -261,7 +261,7 @@
                     <tbody>
                         <t t-foreach="report_main_line_data"
                            t-as="sale_category">
-                            <tr style="font-weight: bold;">
+                            <tr class="fw-bold">
                                 <td colspan="6">
                                     <span t-out="sale_category['name']"/>
                                 </td>
@@ -293,8 +293,8 @@
                 <t t-out="Filters['date_to']"/>
             </span>
             <div>
-                <div style="width:100%;">
-                    <div style="text-align:centre;" class="row">
+                <div class="w-100">
+                    <div class="row text-center">
                         <div class="col-4">
                             <strong>Report Type:</strong>
                             <t t-out="Filters.get('report_type')"/>
@@ -313,7 +313,7 @@
                     </thead>
                     <tbody>
                         <t t-foreach="report_main_line_data" t-as="main">
-                            <tr style="font-weight: bold;">
+                            <tr class="fw-bold">
                                 <td colspan="6">
                                     <span t-out="main['name']"/>
                                 </td>
@@ -348,8 +348,8 @@
                 <t t-out="Filters['date_to']"/>
             </span>
             <div>
-                <div style="width:100%;">
-                    <div style="text-align:centre;" class="row">
+                <div class="w-100">
+                    <div class="row text-center">
                         <div class="col-4">
                             <strong>Report Type:</strong>
                             <t t-out="Filters.get('report_type')"/>
@@ -368,7 +368,7 @@
                     </thead>
                     <tbody>
                         <t t-foreach="report_main_line_data" t-as="main">
-                            <tr style="font-weight: bold;">
+                            <tr class="fw-bold">
                                 <td colspan="6">
                                     <t t-if="main['state'] == 'draft'">
                                         <span>Quotation</span>

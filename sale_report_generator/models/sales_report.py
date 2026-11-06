@@ -1,24 +1,20 @@
 # -*- coding: utf-8 -*-
-###############################################################################
+#############################################################################
 #
-# Cybrosys Technologies Pvt. Ltd.
+#    Cybrosys Technologies Pvt. Ltd.
 #
-# Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
-# Author: Ayana KP (odoo@cybrosys.com)
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
-# You can modify it under the terms of the GNU AFFERO
-# GENERAL PUBLIC LICENSE (AGPL v3), Version 3.
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU AFFERO GENERAL PUBLIC LICENSE (AGPL v3) for more details.
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-# You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
-# (AGPL v3) along with this program.
-# If not, see <http://www.gnu.org/licenses/>.
-#
-###############################################################################
+#############################################################################
 import io
 import json
 from odoo import api, fields, models
@@ -28,8 +24,8 @@ except ImportError:
     import xlsxwriter
 
 
-class SalesReport(models.Model):
-    """Model for generating sales reports.
+class SalesReport(models.TransientModel):  # pylint: disable=no-wizard-in-models
+    """Wizard model for generating dynamic sales reports.
     Methods:
         sale_report : Generate a sales report based on the provided option.
         get_filter :This method relies on the 'get_filter_data' method to
@@ -52,8 +48,6 @@ class SalesReport(models.Model):
     _name = "sales.report"
     _description = "Generate Sales Report"
 
-    sale_report = fields.Char(string="Sale Report",
-                              help="The generated sales report")
     date_from = fields.Datetime(string="Start Date",
                                 help="The starting date for the report")
     date_to = fields.Datetime(string="End Date",
@@ -64,7 +58,7 @@ class SalesReport(models.Model):
         ('report_by_product', 'Report By Product'),
         ('report_by_categories', 'Report By Categories'),
         ('report_by_salesperson', 'Report By Sales Person'),
-        ('report_by_state', 'Report By State')], string='Report Type',
+        ('report_by_state', 'Report By State')],
         default='report_by_order', help="Select the type of report to generate")
 
     @api.model
@@ -144,32 +138,32 @@ class SalesReport(models.Model):
         type and date range and append to report_sub_lines"""
         report_sub_lines = []
         if data.get('report_type') == 'report_by_order':
-            query = '''select so.id,so.name as number,so.date_order,
-                     so.partner_id,so.amount_total,so.user_id,
-                     res_partner.name as customer,res_users.partner_id as 
-                     user_partner,so.id as id,sum(sale_order_line.product_uom_qty),
-                    (SELECT res_partner.name as sales_man FROM res_partner 
-                    WHERE res_partner.id = res_users.partner_id)
-                    from sale_order as so
-                    inner join res_partner on so.partner_id = res_partner.id
-                    inner join res_users on so.user_id = res_users.id
-                    inner join sale_order_line on so.id = sale_order_line.order_id
-                                 '''
-            term = 'Where '
+            query = """SELECT so.id, so.name as number, so.date_order,
+                        so.partner_id, so.amount_total, so.user_id,
+                        res_partner.name as customer, res_users.partner_id as user_partner,
+                        so.id as id, sum(sale_order_line.product_uom_qty),
+                        (SELECT res_partner.name as sales_man FROM res_partner 
+                         WHERE res_partner.id = res_users.partner_id)
+                     FROM sale_order as so
+                     INNER JOIN res_partner on so.partner_id = res_partner.id
+                     INNER JOIN res_users on so.user_id = res_users.id
+                     INNER JOIN sale_order_line on so.id = sale_order_line.order_id
+                     WHERE so.company_id = %s """
+            params = [self.env.company.id]
             if data.get('date_from'):
-                query += "Where so.date_order >= '%s' " % data.get('date_from')
-                term = 'AND '
+                query += " AND so.date_order >= %s "
+                params.append(data.get('date_from'))
             if data.get('date_to'):
-                query += term + "so.date_order <= '%s' " % data.get('date_to')
-            query += "AND so.company_id = '%s' " % self.env.company.id
-            query += "group by so.user_id,res_users.partner_id," \
-                     "res_partner.name,so.partner_id,so.date_order," \
-                     "so.name,so.amount_total,so.id"
-            self.env.cr.execute(query)
+                query += " AND so.date_order <= %s "
+                params.append(data.get('date_to'))
+            query += """ GROUP BY so.user_id, res_users.partner_id,
+                         res_partner.name, so.partner_id, so.date_order,
+                         so.name, so.amount_total, so.id"""
+            self.env.cr.execute(query, params)
             report_by_order = self._clean_translated_dict(self.env.cr.dictfetchall())
             report_sub_lines.append(report_by_order)
         elif data.get('report_type') == 'report_by_order_detail':
-            query = '''SELECT
+            query = """SELECT
                         so.id,
                         so.name AS number,
                         so.date_order,
@@ -203,102 +197,106 @@ class SalesReport(models.Model):
                     JOIN
                         res_partner AS res_partner_salesman ON res_users.partner_id = res_partner_salesman.id
                     WHERE
-                        1=1 '''
+                        so.company_id = %s """
+            params = [self.env.company.id]
             if data.get('date_from'):
-                query += "AND so.date_order >= '%s' " % data.get('date_from')
+                query += " AND so.date_order >= %s "
+                params.append(data.get('date_from'))
             if data.get('date_to'):
-                query += """ AND so.date_order <= '%s' """ % data.get('date_to')
-            query += "AND so.company_id = '%s' " % self.env.company.id
-            query += ''' GROUP BY
+                query += " AND so.date_order <= %s "
+                params.append(data.get('date_to'))
+            query += """ GROUP BY
                             so.id, so.name, so.user_id, so.date_order,
                             res_partner.name, rc.name, product_template.name,
                             product_product.default_code, so_line.product_uom_qty,
                             so_line.price_subtotal, so.amount_total, so.partner_id,
                             so.user_id, ru.id, res_users.partner_id, res_partner_salesman.name
-                        ORDER BY so.id asc;
-                     '''
-            self.env.cr.execute(query)
+                        ORDER BY so.id asc;"""
+            self.env.cr.execute(query, params)
             report_by_order_details = self._clean_translated_dict(self.env.cr.dictfetchall())
             report_sub_lines.append(report_by_order_details)
         elif data.get('report_type') == 'report_by_product':
-            query = '''SELECT  so.id,so.date_order,
+            query = """SELECT so.id, so.date_order,
                         product_template.name as product,
                         product_category.name as category,
-                        product_product.default_code,so_line.product_uom_qty,
-                        so.amount_total,so.name as number                              
-                        From sale_order as so
-                        inner join sale_order_line as so_line on 
-                        so.id = so_line.order_id inner join product_product ON 
-                        so_line.product_id=product_product.id inner join 
-                        product_template ON product_product.product_tmpl_id = 
-                        product_template.id inner join product_category on 
-                        product_category.id = product_template.categ_id Where 1=1 '''
-
+                        product_product.default_code, so_line.product_uom_qty,
+                        so.amount_total, so.name as number
+                    FROM sale_order as so
+                    INNER JOIN sale_order_line as so_line on so.id = so_line.order_id
+                    INNER JOIN product_product ON so_line.product_id = product_product.id
+                    INNER JOIN product_template ON product_product.product_tmpl_id = product_template.id
+                    INNER JOIN product_category on product_category.id = product_template.categ_id
+                    WHERE so.company_id = %s """
+            params = [self.env.company.id]
             if data.get('date_from'):
-                query += "AND so.date_order >= '%s' " % data.get('date_from')
+                query += " AND so.date_order >= %s "
+                params.append(data.get('date_from'))
             if data.get('date_to'):
-                query += " AND so.date_order <= '%s' " % data.get('date_to')
-            query += "AND so.company_id = '%s' " % self.env.company.id
-            query += ("group by so.id,so.date_order,product_template.name,"
-                      "product_category.name,product_product.default_code,"
-                      "so_line.product_uom_qty")
-            self.env.cr.execute(query)
+                query += " AND so.date_order <= %s "
+                params.append(data.get('date_to'))
+            query += """ GROUP BY so.id, so.date_order, product_template.name,
+                         product_category.name, product_product.default_code,
+                         so_line.product_uom_qty"""
+            self.env.cr.execute(query, params)
             report_by_product = self._clean_translated_dict(self.env.cr.dictfetchall())
             report_sub_lines.append(report_by_product)
         elif data.get('report_type') == 'report_by_categories':
-            query = '''select product_category.name,
-            sum(so_line.product_uom_qty) as qty,sum(so_line.price_subtotal) as 
-            amount_total from sale_order_line as so_line inner join 
-            product_template on so_line.product_id = product_template.id
-            inner join product_category on product_category.id = 
-            product_template.categ_id inner join sale_order on so_line.order_id 
-            = sale_order.id '''
-            term = 'Where '
+            query = """SELECT product_category.name,
+                        sum(so_line.product_uom_qty) as qty,
+                        sum(so_line.price_subtotal) as amount_total
+                    FROM sale_order_line as so_line
+                    INNER JOIN product_template on so_line.product_id = product_template.id
+                    INNER JOIN product_category on product_category.id = product_template.categ_id
+                    INNER JOIN sale_order on so_line.order_id = sale_order.id
+                    WHERE sale_order.company_id = %s """
+            params = [self.env.company.id]
             if data.get('date_from'):
-                query += "Where sale_order.date_order >= '%s' " % data.get(
-                    'date_from')
-                term = 'AND '
+                query += " AND sale_order.date_order >= %s "
+                params.append(data.get('date_from'))
             if data.get('date_to'):
-                query += term + "sale_order.date_order <= '%s' " % data.get(
-                    'date_to')
-            query += "AND sale_order.company_id = '%s' " % self.env.company.id
-            query += "group by product_category.name"
-            self.env.cr.execute(query)
+                query += " AND sale_order.date_order <= %s "
+                params.append(data.get('date_to'))
+            query += " GROUP BY product_category.name"
+            self.env.cr.execute(query, params)
             report_by_categories = self._clean_translated_dict(self.env.cr.dictfetchall())
             report_sub_lines.append(report_by_categories)
         elif data.get('report_type') == 'report_by_salesperson':
-            query = '''
-            select res_partner.name,sum(sale_order_line.product_uom_qty) as qty,
-            sum(sale_order_line.price_subtotal) as amount,count(so.id) as order
-            from sale_order as so
-            inner join res_users on so.user_id = res_users.id
-            inner join res_partner on res_users.partner_id = res_partner.id
-            inner join sale_order_line on so.id = sale_order_line.order_id '''
-            term = 'Where '
+            query = """SELECT res_partner.name,
+                        sum(sale_order_line.product_uom_qty) as qty,
+                        sum(sale_order_line.price_subtotal) as amount,
+                        count(so.id) as order
+                    FROM sale_order as so
+                    INNER JOIN res_users on so.user_id = res_users.id
+                    INNER JOIN res_partner on res_users.partner_id = res_partner.id
+                    INNER JOIN sale_order_line on so.id = sale_order_line.order_id
+                    WHERE so.company_id = %s """
+            params = [self.env.company.id]
             if data.get('date_from'):
-                query += "Where so.date_order >= '%s' " % data.get('date_from')
-                term = 'AND '
+                query += " AND so.date_order >= %s "
+                params.append(data.get('date_from'))
             if data.get('date_to'):
-                query += term + "so.date_order <= '%s' " % data.get('date_to')
-            query += "AND so.company_id = '%s' " % self.env.company.id
-            query += "group by res_partner.name"
-            self.env.cr.execute(query)
+                query += " AND so.date_order <= %s "
+                params.append(data.get('date_to'))
+            query += " GROUP BY res_partner.name"
+            self.env.cr.execute(query, params)
             report_by_salesperson = self._clean_translated_dict(self.env.cr.dictfetchall())
             report_sub_lines.append(report_by_salesperson)
         elif data.get('report_type') == 'report_by_state':
-            query = '''
-            select so.state,count(so.id),sum(sale_order_line.product_uom_qty) as qty,
-            sum(sale_order_line.price_subtotal) as amount from sale_order as so 
-            inner join sale_order_line on so.id = sale_order_line.order_id '''
-            term = 'Where '
+            query = """SELECT so.state, count(so.id),
+                        sum(sale_order_line.product_uom_qty) as qty,
+                        sum(sale_order_line.price_subtotal) as amount
+                    FROM sale_order as so
+                    INNER JOIN sale_order_line on so.id = sale_order_line.order_id
+                    WHERE so.company_id = %s """
+            params = [self.env.company.id]
             if data.get('date_from'):
-                query += "Where so.date_order >= '%s' " % data.get('date_from')
-                term = 'AND '
+                query += " AND so.date_order >= %s "
+                params.append(data.get('date_from'))
             if data.get('date_to'):
-                query += term + "so.date_order <= '%s' " % data.get('date_to')
-            query += "AND so.company_id = '%s' " % self.env.company.id
-            query += "group by so.state"
-            self.env.cr.execute(query)
+                query += " AND so.date_order <= %s "
+                params.append(data.get('date_to'))
+            query += " GROUP BY so.state"
+            self.env.cr.execute(query, params)
             report_by_state = self._clean_translated_dict(self.env.cr.dictfetchall())
             report_sub_lines.append(report_by_state)
         return report_sub_lines

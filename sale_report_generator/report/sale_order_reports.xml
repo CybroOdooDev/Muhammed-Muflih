@@ -6,6 +6,5 @@
         <field name="model">sales.report</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">sale_report_generator.sale_order_report</field>
-<!--        <field name="report_file">sale_report_generator.sale_order_report</field>-->
     </record>
 </odoo>

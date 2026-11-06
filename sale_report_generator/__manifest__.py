@@ -1,33 +1,28 @@
 # -*- coding: utf-8 -*-
-###############################################################################
+#############################################################################
 #
-# Cybrosys Technologies Pvt. Ltd.
+#    Cybrosys Technologies Pvt. Ltd.
 #
-# Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
-# Author:  Ayana KP (odoo@cybrosys.com)
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
-# You can modify it under the terms of the GNU AFFERO
-# GENERAL PUBLIC LICENSE (AGPL v3), Version 3.
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU AFFERO GENERAL PUBLIC LICENSE (AGPL v3) for more details.
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-# You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
-# (AGPL v3) along with this program.
-# If not, see <http://www.gnu.org/licenses/>.
-#
-###############################################################################
+#############################################################################
 {
     'name': 'Sales All In One Report Generator',
     'version': '20.0.1.0.0',
     'category': 'Sales',
-    'summary': """This module Helps to Generate All in One Dynamic 
-    Sale Report""",
-    'description': """This module facilitates comprehensive Sale Reports, 
-     offering insights into a company's procurement analysis from various 
-     angles, including orders, order details, sales representatives, and the 
+    'summary': 'Generates All in One Dynamic Sales Reports',
+    'description': """This module facilitates comprehensive Sale Reports,
+     offering insights into a company's sales analysis from various
+     angles, including orders, order details, sales representatives, and the
      ability to filter data by different date ranges.""",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
@@ -48,7 +43,7 @@
         ],
     },
     'images': ['static/description/banner.jpg'],
-    'license': 'AGPL-3',
+    'license': 'LGPL-3',
     'installable': True,
     'auto_install': False,
     'application': False,

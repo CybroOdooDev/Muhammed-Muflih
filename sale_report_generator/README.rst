@@ -1,38 +1,52 @@
-.. image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
-    :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
-    :alt: License: AGPL-3
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+    :alt: License: LGPL-3
+
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |maintainer|
 
 Sales All In One Report Generator
 =================================
-This module Helps to Generate All in One Dynamic Sale Report
+Generates comprehensive and dynamic all-in-one sales reports.
+
+Key Features
+------------
+
+* Multi-perspective sales grouping and analysis (by Order, Order Detail, Product, Category, Salesperson, and State).
+* Flexible date filtering for specific reporting periods.
+* One-click print-ready PDF report generation.
+* Formatted Excel (XLSX) report export.
+* Quick drill-down navigation to original sales orders directly from the report view.
+
+Installation
+------------
+No external dependencies.
 
 Configuration
 =============
-* No additional configurations needed
-
-License
--------
-General Public License, Version 3 (AGPL v3).
-(https://www.gnu.org/licenses/agpl-3.0-standalone.html)
+* No additional configurations needed.
 
 Company
 -------
 * `Cybrosys Techno Solutions <https://cybrosys.com/>`__
 
-Credits
+License
 -------
-Developer: (V17, V19) Ayana KP,
-           (V18) Farook Al Ameen
-Contact: odoo@cybrosys.com
+Lesser General Public License, Version 3 (LGPL v3).
+(http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
 
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
 
 Maintainer
 ==========
@@ -43,6 +57,4 @@ This module is maintained by Cybrosys Technologies.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
 
-Further information
-===================
-HTML Description: `<static/description/index.html>`__
+

@@ -25,14 +25,13 @@ class ProjectTask(models.Model):
     progress_bar = fields.Float(string='Progress Bar',
                                 help='Calculate the progress of the task '
                                      'based on the task stage',
-                                compute='_compute_task__progress_bar')
+                                compute='_compute_progress_bar')
     stage_is_progress = fields.Boolean(related='stage_id.is_progress_stage',
-                                       help='Status of the task based the '
+                                       help='Status of the task based on the '
                                             'stage')
 
-    @api.depends('stage_id')
-    @api.onchange('stage_id')
-    def _compute_task__progress_bar(self):
+    @api.depends('stage_id.progress_bar')
+    def _compute_progress_bar(self):
         """Compute functionality for the task based on the progress bar"""
         for rec in self:
             rec.progress_bar = rec.stage_id.progress_bar

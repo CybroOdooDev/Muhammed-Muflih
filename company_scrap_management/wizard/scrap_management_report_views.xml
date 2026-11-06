@@ -9,8 +9,6 @@
                 <group>
                     <group>
                         <field name="filter" widget="radio"/>
-                    </group>
-                    <group>
                         <field name="product_ids"
                                widget="many2many_tags"
                                invisible="filter == 'state_wise'"/>
@@ -19,17 +17,14 @@
                     </group>
                     <group>
                         <field name="from_date"/>
-                    </group>
-                    <group>
                         <field name="to_date"/>
                     </group>
-                    <group>
-                        <footer>
-                            <button name="action_print_pdf" string="Print pdf"
-                                    type="object" class="oe_highlight"/>
-                        </footer>
-                    </group>
                 </group>
+                <footer>
+                    <button name="action_print_pdf" string="Print PDF"
+                            type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
             </form>
         </field>
     </record>
