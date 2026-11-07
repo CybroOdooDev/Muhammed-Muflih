@@ -19,7 +19,7 @@
 #    THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 ################################################################################
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class Goals(models.Model):
@@ -38,12 +38,15 @@ class Goals(models.Model):
         help='Target Achievement Percentage')
     incentive = fields.Float(string='Incentive')
 
+    @api.depends('current', 'target_goal')
     def _compute_target_achievement_percentage(self):
         """
-            Calculates target_achievement_percentage
+        Calculates target_achievement_percentage.
         """
         for rec in self:
-            rec.target_achievement_percentage = False
-            if rec.target_goal != 0:
+            if rec.target_goal:
                 rec.target_achievement_percentage = (
-                        rec.current/rec.target_goal)*100
+                    rec.current / rec.target_goal
+                ) * 100.0
+            else:
+                rec.target_achievement_percentage = 0.0

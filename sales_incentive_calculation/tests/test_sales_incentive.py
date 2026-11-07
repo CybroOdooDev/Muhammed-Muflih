@@ -16,13 +16,12 @@
 #    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 #    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 #    OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
-#    OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
 #    THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 ################################################################################
 from datetime import timedelta
 from odoo import fields
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests.common import TransactionCase, tagged
 
 
@@ -81,6 +80,13 @@ class TestSalesIncentive(TransactionCase):
 
         # Find or create journal and accounts for approval testing
         cls.journal = cls.env['account.journal'].search([], limit=1)
+        if not cls.journal:
+            cls.journal = cls.env['account.journal'].create({
+                'name': 'Incentive General Journal',
+                'type': 'general',
+                'code': 'INCJ',
+                'company_id': cls.env.company.id,
+            })
 
         accounts = cls.env['account.account'].search([
             ('active', '=', True),
@@ -118,7 +124,7 @@ class TestSalesIncentive(TransactionCase):
             'current': 500.0,
             'end_date': self.end_date,
         })
-        self.assertFalse(zero_goal.target_achievement_percentage)
+        self.assertEqual(zero_goal.target_achievement_percentage, 0.0)
 
     def test_challenge_incentive_calculation_onchange(self):
         """Test onchange validation for gamification.challenge when another is active."""
@@ -377,3 +383,135 @@ class TestSalesIncentive(TransactionCase):
 
         scheme.unlink_expired_calc_records(unlink_ids)
         self.assertFalse(same_date_calc.exists(), "Same date records should be unlinked")
+
+    def test_challenge_incentive_calculation_db_constrains(self):
+        """Test database constraint on gamification.challenge for incentive_calculation."""
+        # self.challenge already has incentive_calculation=True
+        with self.assertRaises(ValidationError):
+            self.env['gamification.challenge'].create({
+                'name': 'Duplicate Active Challenge DB',
+                'incentive_calculation': True,
+            })
+
+        inactive_challenge = self.env['gamification.challenge'].create({
+            'name': 'Inactive Challenge DB',
+            'incentive_calculation': False,
+        })
+        with self.assertRaises(ValidationError):
+            inactive_challenge.write({'incentive_calculation': True})
+
+    def test_sales_incentive_active_calculation_db_constrains(self):
+        """Test database constraint on sales.incentive for active_calculation."""
+        self.env['sales.incentive'].search([]).write({'active_calculation': False})
+        self.env['sales.incentive'].create({
+            'name': 'Active Scheme DB 1',
+            'active_calculation': True,
+        })
+        with self.assertRaises(ValidationError):
+            self.env['sales.incentive'].create({
+                'name': 'Active Scheme DB 2',
+                'active_calculation': True,
+            })
+
+        inactive_scheme = self.env['sales.incentive'].create({
+            'name': 'Inactive Scheme DB',
+            'active_calculation': False,
+        })
+        with self.assertRaises(ValidationError):
+            inactive_scheme.write({'active_calculation': True})
+
+    def test_multi_recordset_goal_computation(self):
+        """Test target_achievement_percentage computation across multi-recordset."""
+        salesperson2 = self.env['res.users'].create({
+            'name': 'Salesperson Two',
+            'login': 'salesperson_two_inc',
+            'email': 'sp2@test.com',
+        })
+        goal1 = self.env['gamification.goal'].create({
+            'definition_id': self.goal_definition.id,
+            'user_id': self.salesperson.id,
+            'target_goal': 1000.0,
+            'current': 500.0,
+            'end_date': self.end_date,
+        })
+        goal2 = self.env['gamification.goal'].create({
+            'definition_id': self.goal_definition.id,
+            'user_id': salesperson2.id,
+            'target_goal': 2000.0,
+            'current': 1500.0,
+            'end_date': self.end_date,
+        })
+        goal3 = self.env['gamification.goal'].create({
+            'definition_id': self.goal_definition.id,
+            'user_id': self.salesperson.id,
+            'target_goal': 0.0,
+            'current': 100.0,
+            'end_date': self.end_date,
+        })
+        goals = goal1 | goal2 | goal3
+        goals._compute_target_achievement_percentage()
+        self.assertEqual(goal1.target_achievement_percentage, 50.0)
+        self.assertEqual(goal2.target_achievement_percentage, 75.0)
+        self.assertEqual(goal3.target_achievement_percentage, 0.0)
+
+    def test_multi_recordset_calculate_incentive_date_check(self):
+        """Test date_check computed field across multi-recordset."""
+        calc_past = self.env['calculate.incentive'].create({
+            'salesperson_id': self.salesperson.id,
+            'end_date': self.today - timedelta(days=5),
+            'incentive': 100.0,
+        })
+        calc_today = self.env['calculate.incentive'].create({
+            'salesperson_id': self.salesperson.id,
+            'end_date': self.today,
+            'incentive': 150.0,
+        })
+        calc_future = self.env['calculate.incentive'].create({
+            'salesperson_id': self.salesperson.id,
+            'end_date': self.today + timedelta(days=5),
+            'incentive': 200.0,
+        })
+        multi_calc = calc_past | calc_today | calc_future
+        multi_calc._compute_date_check()
+        self.assertTrue(calc_past.date_check)
+        self.assertTrue(calc_today.date_check)
+        self.assertFalse(calc_future.date_check)
+
+    def test_multi_recordset_compute_incentive_multiple_goals(self):
+        """Test action_incentive_compute processing multiple goals for multiple salespeople."""
+        self.env['sales.incentive'].search([]).write({'active_calculation': False})
+        scheme = self.env['sales.incentive'].create({
+            'name': 'Multi Goal Linear Scheme',
+            'calculation_method': 'linear',
+            'active_calculation': True,
+            'select_incentive_ids': [
+                (0, 0, {
+                    'upto_percent': 50.0,
+                    'reward': 100.0,
+                    'incentive_type': 'amount',
+                }),
+            ],
+        })
+
+        salesperson2 = self.env['res.users'].create({
+            'name': 'Second Salesperson Goal',
+            'login': 'second_salesperson_goal_inc',
+            'email': 'sp_goal2@test.com',
+        })
+        self.env['gamification.goal'].create({
+            'definition_id': self.goal_definition.id,
+            'challenge_id': self.challenge.id,
+            'user_id': salesperson2.id,
+            'line_id': self.challenge_line.id,
+            'target_goal': 1000.0,
+            'current': 600.0,
+            'start_date': self.start_date,
+            'end_date': self.end_date,
+        })
+
+        scheme.action_incentive_compute()
+
+        calcs = self.env['calculate.incentive'].search([
+            ('salesperson_id', 'in', [self.salesperson.id, salesperson2.id]),
+        ])
+        self.assertGreaterEqual(len(calcs), 2, "Records should be computed for both salespeople")

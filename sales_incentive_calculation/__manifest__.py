@@ -32,7 +32,7 @@
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['crm', 'sales_team', 'gamification', 'account'],
+    'depends': ['crm', 'gamification', 'account'],
     'data': [
         'security/ir.access.csv',
         'views/sales_incentive_views.xml',

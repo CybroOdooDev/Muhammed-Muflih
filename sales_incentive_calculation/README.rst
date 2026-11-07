@@ -1,16 +1,6 @@
-.. |license| image:: https://img.shields.io/badge/license-OPL--1-red.svg
-    :target: https://www.odoo.com/documentation/20.0/legal/licenses.html#odoo-apps
+.. image:: https://img.shields.io/badge/license-OPL--1-red.svg
+    :target: https://www.odoo.com/documentation/18.0/legal/licenses.html#odoo-apps
     :alt: License: OPL-1
-
-.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
-    :target: https://www.odoo.com
-    :alt: Odoo 20.0
-
-.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
-    :target: https://cybrosys.com
-    :alt: Maintainer: Cybrosys Techno Solutions
-
-|license| |odoo| |maintainer|
 
 Sales Incentives
 ================
@@ -40,7 +30,8 @@ Company
 License
 -------
 Odoo Proprietary License v1.0 (OPL-1)
-(https://www.odoo.com/documentation/20.0/legal/licenses.html#odoo-apps)
+(https://www.odoo.com/documentation/user/12.0/legal/licenses/licenses.html)
+
 
 Contacts
 --------

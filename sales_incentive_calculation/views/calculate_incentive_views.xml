@@ -17,7 +17,7 @@
                 <field name="check" column_invisible="True"/>
                 <field name="date_check" column_invisible="True"/>
                 <button name="action_submit_to_accountant" type="object"
-                        string="Submit for approval"/>
+                        string="Submit for approval" invisible="check"/>
             </list>
         </field>
     </record>

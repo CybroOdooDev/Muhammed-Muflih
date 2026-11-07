@@ -23,7 +23,7 @@ from odoo import fields, models, _
 from odoo.exceptions import UserError
 
 
-class SalesIncentive(models.Model):
+class ApproveIncentive(models.Model):
     """
     This class represents the 'approve.incentive' model, which is used to
     approve and manage sales incentives for salespersons. It includes fields for

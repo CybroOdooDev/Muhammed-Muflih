@@ -78,12 +78,15 @@ class SalesIncentive(models.Model):
             Computes calculate_incentive and returns it.
         """
         self.ensure_one()
-        calc = self.env['calculate.incentive'].search([])
         challenge = self.env['gamification.challenge'].search(
             [('incentive_calculation', '=', True)])
         docs = self.env['gamification.goal'].search(
             [('challenge_id', 'in', challenge.ids)])
         self.send_warnings(challenge, docs)
+        calc = self.env['calculate.incentive'].search([
+            ('status', '=', 'unpaid'),
+            ('salesperson_id', 'in', docs.mapped('user_id').ids),
+        ])
         unlink_date_list = self.filter_expired_calc_records(calc, docs)
         self.unlink_expired_calc_records(unlink_date_list)
         for goal in docs:
@@ -135,17 +138,25 @@ class SalesIncentive(models.Model):
             raise UserError(_('There is no active challenge and goal for calculation'))
         if docs.filtered(lambda goal: not goal.end_date):
             error_users = "'s,  ".join(docs.mapped('user_id.name'))
-            raise UserError(_("The goal %s's %s has no end date.") % (error_users, docs[0].display_name))
+            raise UserError(
+                _("The goal %(users)s's %(name)s has no end date.") % {
+                    'users': error_users,
+                    'name': docs[0].display_name,
+                }
+            )
 
     def filter_expired_calc_records(self, calc, docs):
         """
         Filter calculate_incentive records based on expiration date.
         """
         unlink_date_list = []
+        today = fields.Date.today()
         for record in calc:
-            if record.end_date >= (fields.Date.today()):
+            if record.status != 'unpaid':
+                continue
+            if record.end_date and record.end_date >= today:
                 record.unlink()
-            elif docs[0].end_date == record.end_date:
+            elif docs and docs[0].end_date and docs[0].end_date == record.end_date:
                 unlink_date_list.append(record.id)
         return unlink_date_list
 
