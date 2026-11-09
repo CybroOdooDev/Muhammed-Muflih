@@ -19,8 +19,9 @@
                         <div t-attf-class="oe_kanban_global_click">
                             <div class="oe_kanban_details">
                                 <strong>
-                                    <field name="risk_incident"
-                                           style="font-size:20px;"/>
+                                    <span class="fs-5 fw-bold">
+                                        <field name="risk_incident"/>
+                                    </span>
                                     <br/>
                                     <field name="project_id"/>
                                     <br/>
@@ -88,7 +89,11 @@
                            options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
-                    <field name="risk_incident" style="font-size:30px;"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="risk_incident" placeholder="e.g. Risk Incident Title"/>
+                        </h1>
+                    </div>
                     <group>
                         <group>
                             <field name="project_id"/>
@@ -114,6 +119,29 @@
                 </sheet>
                 <chatter reload_on_post="True"/>
             </form>
+        </field>
+    </record>
+    <!--    Risk Incident Search View -->
+    <record id="risk_incident_view_search" model="ir.ui.view">
+        <field name="name">risk.incident.view.search</field>
+        <field name="model">risk.incident</field>
+        <field name="arch" type="xml">
+            <search string="Search Risk Incidents">
+                <field name="risk_incident" string="Incident"/>
+                <field name="project_id"/>
+                <field name="user_id"/>
+                <field name="partner_id"/>
+                <field name="tag_ids"/>
+                <separator/>
+                <filter string="New" name="filter_new" domain="[('state', '=', 'new')]"/>
+                <filter string="In Progress" name="filter_progress" domain="[('state', '=', 'progress')]"/>
+                <filter string="Done" name="filter_done" domain="[('state', '=', 'done')]"/>
+                <group>
+                    <filter string="Project" name="group_project" context="{'group_by': 'project_id'}"/>
+                    <filter string="Assigned to" name="group_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
         </field>
     </record>
 </odoo>

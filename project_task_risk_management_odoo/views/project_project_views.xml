@@ -2,7 +2,7 @@
 <odoo>
     <data>
 <!--    Project Form View    -->
-        <record id="edit_project" model="ir.ui.view">
+        <record id="edit_project_inherit_project_task_risk_management_odoo" model="ir.ui.view">
             <field name="name">project.project.view.form.inherit.project.task.risk.management.odoo</field>
             <field name="model">project.project</field>
             <field name="inherit_id" ref="project.edit_project"/>

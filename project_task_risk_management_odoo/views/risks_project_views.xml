@@ -48,4 +48,28 @@
             </form>
         </field>
     </record>
+    <!--    Risk Project Search View-->
+    <record id="risks_project_view_search" model="ir.ui.view">
+        <field name="name">risks.project.view.search</field>
+        <field name="model">risks.project</field>
+        <field name="arch" type="xml">
+            <search string="Search Risks">
+                <field name="risk_name" string="Risk"/>
+                <field name="code"/>
+                <field name="category_id"/>
+                <field name="risk_type_id"/>
+                <field name="risk_response_id"/>
+                <field name="tag_ids"/>
+                <separator/>
+                <filter string="High Risk" name="filter_high_risk" domain="[('risk_quantification', '=', 'high')]"/>
+                <filter string="Medium Risk" name="filter_medium_risk" domain="[('risk_quantification', '=', 'medium')]"/>
+                <filter string="Low Risk" name="filter_low_risk" domain="[('risk_quantification', '=', 'low')]"/>
+                <group>
+                    <filter string="Category" name="group_category" context="{'group_by': 'category_id'}"/>
+                    <filter string="Risk Type" name="group_type" context="{'group_by': 'risk_type_id'}"/>
+                    <filter string="Quantification" name="group_quantification" context="{'group_by': 'risk_quantification'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
 </odoo>

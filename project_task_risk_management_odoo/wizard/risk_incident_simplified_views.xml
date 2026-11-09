@@ -3,7 +3,6 @@
     <record id="risk_incident_simplified_view_form" model="ir.ui.view">
         <field name="name">risk.incident.simplified.view.form</field>
         <field name="model">risk.incident.simplified</field>
-        <field name="type">form</field>
         <field name="arch" type="xml">
             <form string="Create Incident">
                 <group>

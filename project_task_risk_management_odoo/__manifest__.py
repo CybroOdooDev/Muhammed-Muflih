@@ -27,7 +27,7 @@
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['project','project_sms'],
+    'depends': ['project'],
     'data': [
         'security/project_task_risk_management_odoo_groups.xml',
         'security/ir.access.csv',

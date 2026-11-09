@@ -40,4 +40,23 @@
             </graph>
         </field>
     </record>
+<!--    Project Risk Incident Line Search View-->
+    <record id="project_risk_incident_line_view_search" model="ir.ui.view">
+        <field name="name">project.risk.incident.line.view.search</field>
+        <field name="model">project.risk.incident.line</field>
+        <field name="arch" type="xml">
+            <search string="Search Project Risks Analysis">
+                <field name="risk_id"/>
+                <field name="incident_order_id" string="Project"/>
+                <field name="category_id"/>
+                <field name="risk_type_id"/>
+                <field name="tag_ids"/>
+                <group>
+                    <filter string="Project" name="group_project" context="{'group_by': 'incident_order_id'}"/>
+                    <filter string="Risk" name="group_risk" context="{'group_by': 'risk_id'}"/>
+                    <filter string="Category" name="group_category" context="{'group_by': 'category_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
 </odoo>

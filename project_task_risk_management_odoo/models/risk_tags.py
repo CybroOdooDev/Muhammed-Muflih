@@ -34,5 +34,5 @@ class RiskTags(models.Model):
 
     name = fields.Char('Tag Name', required=True, translate=True,
                        help='Name of Risk tag')
-    color = fields.Integer('Color', default=_get_default_color,
+    color = fields.Integer('Color', default=lambda self: self._get_default_color(),
                            help='Select Color of Risk Tag')
