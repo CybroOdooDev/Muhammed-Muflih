@@ -17,10 +17,9 @@
 #############################################################################
 import json
 import logging
-import requests
 from datetime import timedelta
-from odoo import fields, models
-from odoo.http import request
+import requests
+from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -40,7 +39,7 @@ class OneDriveDashboard(models.Model):
         string="OneDrive Refresh Token",
         help="Refresh token for obtaining a new access token when the current "
              "one expires.")
-    token_expiry_date = fields.Char(
+    token_expiry_date = fields.Datetime(
         string="OneDrive Token Validity",
         help="Validity period of the access token, indicating until when it is"
              " valid.")
@@ -68,15 +67,16 @@ class OneDriveDashboard(models.Model):
             res = requests.post(
                 "https://login.microsoftonline.com/common/oauth2/v2.0/token",
                 data=data,
-                headers={"content-type": "application/x-www-form-urlencoded"})
+                headers={"content-type": "application/x-www-form-urlencoded"},
+                timeout=10)
             res.raise_for_status()
             response = res.content and res.json() or {}
             if response:
                 expires_in = response.get('expires_in')
                 access_token = response.get('access_token')
                 refresh_token = response.get('refresh_token')
-                token_expiry_date =  fields.Datetime.now() + timedelta(
-                        seconds=expires_in) if expires_in else False
+                token_expiry_date = fields.Datetime.now() + timedelta(
+                    seconds=expires_in) if expires_in else False
                 if access_token:
                     self.env['onedrive.dashboard'].create([{
                         'onedrive_access_token': access_token,
@@ -92,6 +92,9 @@ class OneDriveDashboard(models.Model):
         """
         Generate onedrive access token from refresh token if expired
         """
+        self.ensure_one()
+        if not self.onedrive_refresh_token:
+            return False
         ir_config = self.env['ir.config_parameter'].sudo()
         data = {
             'client_id': ir_config.get_str(
@@ -108,7 +111,8 @@ class OneDriveDashboard(models.Model):
             res = requests.post(
                 "https://login.microsoftonline.com/common/oauth2/v2.0/token",
                 data=data,
-                headers={"Content-type": "application/x-www-form-urlencoded"})
+                headers={"Content-type": "application/x-www-form-urlencoded"},
+                timeout=10)
             res.raise_for_status()
             response = res.content and res.json() or {}
             if response:
@@ -124,31 +128,40 @@ class OneDriveDashboard(models.Model):
                               error.response.content)
             raise error
 
+    @api.model
     def action_synchronize_onedrive(self):
         """
         Pass the files to JavaScript
         """
         record = self.search([], order='id desc', limit=1)
-        if not record:
+        if not record or (not record.onedrive_access_token and not record.onedrive_refresh_token):
             return False
-        if record.token_expiry_date <= str(fields.Datetime.now()):
-            record.generate_onedrive_refresh_token()
+        if not record.token_expiry_date or record.token_expiry_date <= fields.Datetime.now():
+            if record.onedrive_refresh_token:
+                record.generate_onedrive_refresh_token()
+            else:
+                return False
         folder = self.env['ir.config_parameter'].sudo().get_str(
             'onedrive_integration_odoo.onedrive_folder', '')
         if not folder:
             return False
-        url=f"https://graph.microsoft.com/v1.0/me/drive/root:/{folder}:/children"
+        url = f"https://graph.microsoft.com/v1.0/me/drive/root:/{folder}:/children"
         headers = {
             'Authorization': f'Bearer {record.onedrive_access_token}',
             'Content-Type': 'application/json'
         }
-        response = requests.get(url, headers=headers)
-        message = json.loads(response.content)
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            message = json.loads(response.content) if response.content else {}
+        except Exception as e:
+            _logger.exception("OneDrive sync request failed: %s", e)
+            return ['error', 'connectionError', str(e)]
+
         if 'error' in message:
-            return ['error', message['error']['code'],
-                    message['error']['message']]
+            return ['error', message['error'].get('code', 'error'),
+                    message['error'].get('message', 'Unknown error')]
         files = {}
-        for file in response.json().get('value'):
-            if list(file.keys())[0] == '@microsoft.graph.downloadUrl':
+        for file in message.get('value', []):
+            if '@microsoft.graph.downloadUrl' in file and 'name' in file:
                 files[file['name']] = file['@microsoft.graph.downloadUrl']
         return files

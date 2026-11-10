@@ -14,17 +14,12 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    (LGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
 #############################################################################
 {
     'name': 'Website Geolocation Based Language and Currency',
     'version': '20.0.1.0.0',
     'category': 'eCommerce, Productivity',
-    'summary': """Website Geolocation Based Language and Currency Application
-     for Odoo 19""",
+    'summary': 'Website Geolocation Based Language and Currency for Odoo 20',
     'description': """The module helps you to map currency and language
     based on User's IP address""",
     'author': 'Cybrosys Techno Solutions',
@@ -42,8 +37,8 @@
         'python': ['countryinfo'],
     },
     'images': ['static/description/banner.jpg'],
+    'post_init_hook': '_post_init_hook',
     'license': 'LGPL-3',
     'installable': True,
-    'auto_install': False,
-    'application': False,
+   
 }

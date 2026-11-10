@@ -16,25 +16,47 @@
 #
 #############################################################################
 import json
+import logging
+from urllib.parse import urlparse
+
 from odoo import http
 from odoo.http import request
 
+_logger = logging.getLogger(__name__)
+
 
 class OnedriveAuth(http.Controller):
-    """
-    Return URL
-    """
+    """Handle OAuth2 callback from Microsoft OneDrive."""
 
-    @http.route('/onedrive/authentication', type='http', auth="public")
+    @http.route('/onedrive/authentication', type='http', auth='user')
     def oauth2callback(self, **kw):
-        """
-    This is a controller that defines a route for handling HTTP requests
-  . In this case, it's defining a route at the URL path
-   '/onedrive/authentication'. The route is accessible via HTTP, and the
-   authentication method used is set to "public.
-        """
-        state = json.loads(kw['state'])
-        onedrive_config_id = request.env['onedrive.dashboard'].sudo().browse(
-            state.get('onedrive_config_id'))
-        onedrive_config_id.get_tokens(kw.get('code'))
-        return request.redirect(state.get('url_return'))
+        """Handle Microsoft OAuth2 redirect callback and obtain tokens."""
+        if 'error' in kw:
+            _logger.error(
+                "OneDrive OAuth error: %s - %s",
+                kw.get('error'),
+                kw.get('error_description'),
+            )
+            return request.redirect('/web')
+
+        code = kw.get('code')
+        state_raw = kw.get('state')
+        if not code or not state_raw:
+            return request.redirect('/web')
+
+        try:
+            state = json.loads(state_raw)
+        except (ValueError, TypeError):
+            state = {}
+
+        dashboard_pool = request.env['onedrive.dashboard']
+        dashboard_pool.check_access('create')
+        dashboard_pool.get_tokens(code)
+
+        url_return = state.get('url_return', '/web')
+        parsed = urlparse(url_return)
+        # Ensure url_return is a safe local relative URL to prevent open redirect
+        if parsed.netloc or not url_return.startswith('/'):
+            url_return = '/web'
+
+        return request.redirect(url_return)

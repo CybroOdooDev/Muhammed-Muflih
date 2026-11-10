@@ -1,18 +1,37 @@
-.. image:: https://img.shields.io/badge/license-LGPL--3-green.svg
-    :target: https://www.gnu.org/licenses/lgpl-3.0-standalone.html
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
     :alt: License: LGPL-3
+
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |maintainer|
 
 Website Geolocation Based Language and Currency
 ===============================================
-* This module allow to view the website content according to login user's country details.
+This module enables users to view website content according to the logged-in user's country details.
+
+Key Features
+------------
+
+* Customer's IP Address
+* Website in Native Language
+* Country-Specific Currency
 
 Installation
 =============
-* Install external python package countryinfo.
+Install the external Python package countryinfo.
 
 Configuration
 =============
-* No additional configurations needed.
+* Install desired languages in Settings -> Translations -> Languages and add them to Website Languages.
+* Activate desired currencies in Invoicing -> Configuration -> Currencies.
+* Ensure a Pricelist is configured for each supported currency under Website -> eCommerce -> Pricelists. The module automatically applies the matching pricelist based on the visitor's detected country.
 
 Company
 -------
@@ -20,26 +39,15 @@ Company
 
 License
 -------
-General Public License, Version 3 (LGPL-3).
-(https://www.gnu.org/licenses/lgpl-3.0-standalone.html)
+Lesser General Public License, Version 3 (LGPL v3).
+(http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
-Credits
--------
-* Developer: (V18, V19) Henna Mehjabin
-             (V17) Ashwin A,
-             (V16) Ayisha Sumayya K,
-             (V15) Mohammed Dilshad Tk,
-             (V14) Mohammed Dilshad Tk
-* Contact: odoo@cybrosys.com
 
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
 
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
 
 Maintainer
 ==========
@@ -50,6 +58,3 @@ This module is maintained by Cybrosys Technologies.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
 
-Further information
-===================
-HTML Description: `<static/description/index.html>`__

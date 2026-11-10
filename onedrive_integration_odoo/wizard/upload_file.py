@@ -17,8 +17,8 @@
 #############################################################################
 import base64
 import requests
+from odoo import fields, models, _
 from odoo.exceptions import UserError
-from odoo import exceptions, fields, models, _
 
 
 class UploadFile(models.TransientModel):
@@ -35,49 +35,53 @@ class UploadFile(models.TransientModel):
         """
         Upload file to onedrive
         """
+        self.ensure_one()
         if not self.file:
-            raise exceptions.UserError(_('Please Attach a file to upload.'))
+            raise UserError(_('Please Attach a file to upload.'))
         token = self.env['onedrive.dashboard'].search([], order='id desc',
                                                       limit=1)
-        if isinstance(self.file, (str, bytes)):
+        if hasattr(self.file, 'content'):
+            file_content = self.file.content
+        elif isinstance(self.file, str):
             try:
                 file_content = base64.b64decode(self.file)
             except Exception:
-                file_content = self.file if isinstance(self.file, bytes) else self.file.encode('utf-8')
+                file_content = self.file.encode('utf-8')
+        elif isinstance(self.file, bytes):
+            file_content = self.file
         else:
             attachment = self.env["ir.attachment"].search(
                 [('res_id', '=', self.id), ('res_model', '=', 'upload.file')],
                 limit=1)
-            file_content = attachment.raw if attachment else b''
+            raw = attachment.raw if attachment else b''
+            file_content = raw.content if hasattr(raw, 'content') else raw
         folder = self.env['ir.config_parameter'].sudo().get_str(
             'onedrive_integration_odoo.onedrive_folder', '')
         if not token or not folder:
-            raise exceptions.UserError(
+            raise UserError(
                 _('Please setup Access Token and Folder Name.'))
-        if token.token_expiry_date <= str(fields.Datetime.now()):
+        if not token.token_expiry_date or token.token_expiry_date <= fields.Datetime.now():
             token.generate_onedrive_refresh_token()
 
         url = f"https://graph.microsoft.com/v1.0/me/drive/root:/{folder}/{self.file_name}:/content"
         headers = {
-                'Authorization': f'Bearer {token.onedrive_access_token }',
-                'Content-Type': 'application/octet-stream'
-            }
+            'Authorization': f'Bearer {token.onedrive_access_token}',
+            'Content-Type': 'application/octet-stream'
+        }
         try:
-            response = requests.put(url, headers=headers, data=file_content)
+            response = requests.put(url, headers=headers, data=file_content, timeout=10)
             if response.status_code in [200, 201]:
                 return {
                     'type': 'ir.actions.client',
                     'tag': 'display_notification',
                     'params': {
                         'type': 'success',
-                        'message': 'File uploaded successfully to OneDrive.'
-                                   'Please refresh',
+                        'message': _('File uploaded successfully to OneDrive. Please refresh'),
                     }
                 }
-            else:
-                raise UserError(
-                    _("Upload failed: %s - %s") %
-                    (response.status_code, response.text)
-                )
+            raise UserError(
+                _("Upload failed: %(status)s - %(text)s",
+                  status=response.status_code, text=response.text)
+            )
         except requests.RequestException as e:
-            raise UserError(_("Network error: %s") % str(e))
+            raise UserError(_("Network error: %s", str(e)))

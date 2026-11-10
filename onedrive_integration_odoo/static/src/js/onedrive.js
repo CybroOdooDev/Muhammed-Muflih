@@ -1,112 +1,101 @@
 /** @odoo-modules */
+import { Component, onMounted, proxy } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { Component, signal, onMounted } from "@odoo/owl";
-import { rpc } from "@web/core/network/rpc";
-class OnedriveDashboard extends Component {
-    // OWL 2: refs are class-level signals bound via t-ref="this.inputRef" in the template
-    inputRef = signal.ref();
+
+export class OnedriveDashboard extends Component {
+    static template = "onedrive_integration_odoo.OnedriveDashboard";
 
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
+        this.notification = useService("notification");
+        this.state = proxy({
+            allFiles: [],
+            displayedFiles: [],
+            activeFilter: "allfiles",
+        });
+
         onMounted(() => {
             this.synchronize();
         });
     }
-//         * Opens a file upload dialog on click of the "Upload" button.
-//         * @param {Object} ev - The click event object.
-//         */
-        async upload(){
-            this.action.doAction({
-                name: "Upload File",
-                type: 'ir.actions.act_window',
-                res_model: 'upload.file',
-                view_mode: 'form',
-                view_type: 'form',
-                views: [[false, 'form']],
-                target: 'new',
+
+    /**
+     * Opens a file upload wizard.
+     */
+    async upload() {
+        this.action.doAction({
+            name: "Upload File",
+            type: "ir.actions.act_window",
+            res_model: "upload.file",
+            view_mode: "form",
+            views: [[false, "form"]],
+            target: "new",
+        });
+    }
+
+    /**
+     * Retrieves and displays files from OneDrive.
+     */
+    async synchronize() {
+        const result = await this.orm.call(
+            "onedrive.dashboard",
+            "action_synchronize_onedrive",
+            []
+        );
+
+        if (!result) {
+            this.notification.add("Please setup credentials.", {
+                type: "warning",
             });
+            return;
         }
-        /**
-         * Retrieves and displays files from OneDrive on click of the "Import" button.
-         *
-         * @param {Object} ev - The click event object.
-         */
-        async synchronize(){
-            var self = this;
-            var result = await this.orm.call('onedrive.dashboard',
-             "action_synchronize_onedrive",[' '])
-            if (!result) {
-                        this.action.doAction({
-                        'type': 'ir.actions.client',
-                        'tag': 'display_notification',
-                        'params': {
-                            'message': 'Please setup credentials',
-                            'type': 'warning',
-                            'sticky': false,
-                        }
-                    });
-                    }
-                 else if (result[0] === 'error') {
-                    if (result[1] === 'itemNotFound') {
-                        // Display a notification if the folder is not found
-                        this.action.doAction({
-                            'type': 'ir.actions.client',
-                            'tag': 'display_notification',
-                            'params': {
-                                'message': 'Error: Folder not found.',
-                                'type': 'warning',
-                                'sticky': false,
-                            }
-                        });
-                    }
-                    else {
-                        // Display a notification for other errors
-                        this.action.doAction({
-                            'type': 'ir.actions.client',
-                            'tag': 'display_notification',
-                            'params': {
-                                'message': 'Error:' + result[2],
-                                'type': 'warning',
-                                'sticky': false,
-                            }
-                        });
-                    }
-                } else {
-                    // Empty the onedrive_files div and append the files retrieved
-                    if (this.inputRef()) {
-                        this.inputRef().innerHTML = '';
-                    }
-                    var alt_src = "'/onedrive_integration_odoo/static/src/img/file_icon.png'";
-                    $.each(Object.keys(result), function (index, name) {
-                        $('#onedrive_files').append('<div class="col-sm-6 card" align="center"><a href="' + result[name] + '"><img class="card-img top" src="' + result[name] + '" onerror="this.src=' + alt_src + ';"/>' + name + '</div>');
-                    });
-                }
-            }
-        /**
-         * Filters files displayed based on file type (e.g., image, all files).
-         *
-         * @param {Object} ev - The click event object.
-         */
-        async filter_file_type(ev) {
-            var value = ev.currentTarget.getAttribute('value');
-            $.each($('.card'), function (index, name) {
-                $(this).hide();
-                var file_type = (name.textContent).slice(((name.textContent).lastIndexOf(".") - 1 >>> 0) + 2);
-                if (file_type == value) {
-                    $(this).show();
-                }
-                if (value == 'allfiles') {
-                    $(this).show();
-                }
-                if (value == 'image') {
-                    if (file_type == 'jpeg' || file_type == 'jpg' || file_type == 'png') {
-                        $(this).show();
-                    }
-                }
+
+        if (Array.isArray(result) && result[0] === "error") {
+            const message =
+                result[1] === "itemNotFound"
+                    ? "Error: Folder not found."
+                    : `Error: ${result[2]}`;
+            this.notification.add(message, {
+                type: "warning",
             });
+            return;
+        }
+
+        const files = Object.entries(result).map(([name, url]) => ({
+            name,
+            url,
+            extension: name.split(".").pop().toLowerCase(),
+        }));
+
+        this.state.allFiles = files;
+        this.applyFilter(this.state.activeFilter);
+    }
+
+    /**
+     * Filters files displayed based on file type.
+     * @param {string} filter
+     */
+    filterFileType(filter) {
+        this.state.activeFilter = filter;
+        this.applyFilter(filter);
+    }
+
+    applyFilter(filter) {
+        if (filter === "allfiles") {
+            this.state.displayedFiles = this.state.allFiles;
+        } else if (filter === "image") {
+            const imageExts = ["jpg", "jpeg", "png", "gif", "webp", "svg"];
+            this.state.displayedFiles = this.state.allFiles.filter((f) =>
+                imageExts.includes(f.extension)
+            );
+        } else {
+            this.state.displayedFiles = this.state.allFiles.filter(
+                (f) => f.extension === filter
+            );
         }
     }
-OnedriveDashboard.template = "OnedriveDashboard";
-registry.category("actions").add("onedrive_dashboard", OnedriveDashboard)
+}
+
+registry.category("actions").add("onedrive_dashboard", OnedriveDashboard);

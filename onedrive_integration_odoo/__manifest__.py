@@ -20,7 +20,7 @@
     'version': "20.0.1.0.0",
     'category': "Productivity",
     'summary': """Upload and download files in Onedrive using odoo """,
-    'description': """This module was developed to upload files to Onedrive as 
+    'description': """This module was developed to upload files to Onedrive as
     well as access files from Onedrive in Odoo.""",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
@@ -35,14 +35,13 @@
     ],
     'assets': {
         'web.assets_backend': [
-            '/onedrive_integration_odoo/static/src/js/onedrive.js',
-            '/onedrive_integration_odoo/static/src/scss/onedrive.scss',
-            '/onedrive_integration_odoo/static/src/xml/onedrive_dashboard.xml',
-            'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js'
+            'onedrive_integration_odoo/static/src/js/onedrive.js',
+            'onedrive_integration_odoo/static/src/scss/onedrive.scss',
+            'onedrive_integration_odoo/static/src/xml/onedrive_dashboard.xml',
         ],
     },
     'images': ['static/description/banner.jpg'],
-    'license': 'AGPL-3',
+    'license': 'LGPL-3',
     'installable': True,
     'auto_install': False,
     'application': True,

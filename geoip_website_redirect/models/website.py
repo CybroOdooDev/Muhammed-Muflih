@@ -14,10 +14,6 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    (LGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
 #############################################################################
 import logging
 import requests
@@ -41,13 +37,17 @@ class Website(models.Model):
         if not user_ip:
             try:
                 user_ip = self.env.user.ip_address
-            except Exception:
-                pass
+            except Exception as e:
+                _logger.debug("Could not read user IP address: %s", e)
+        if not user_ip and request and hasattr(request, 'httprequest'):
+            addr = getattr(request.httprequest, 'remote_addr', None)
+            if addr and addr not in ('127.0.0.1', '::1', 'localhost'):
+                user_ip = addr
         if not user_ip:
             return None
         try:
             resp = requests.get(
-                f'http://ip-api.com/json/{user_ip}', timeout=5
+                f'http://ip-api.com/json/{user_ip}', timeout=2
             ).json()
             return resp.get('country')
         except Exception as e:
@@ -63,27 +63,29 @@ class Website(models.Model):
         For public (not-logged-in) visitors we additionally auto-detect their
         location and apply the matching pricelist the first time they arrive.
         """
-        # Let Odoo's own logic run first — it checks the session key and
-        # the partner's property_product_pricelist.
-        res = super()._get_and_cache_current_pricelist()
-
         try:
             public_user = self.env.ref('base.public_user', raise_if_not_found=False)
-            is_public = public_user and (self.env.user.id == public_user.id)
+            is_public = (
+                (public_user and self.env.user.id == public_user.id)
+                or self.env.user._is_public()
+            )
 
-            if is_public and PRICELIST_SESSION_KEY not in request.session:
+            if is_public and request and hasattr(request, 'session') and PRICELIST_SESSION_KEY not in request.session:
                 # Public visitor with no session pricelist yet → GeoIP detect
-                user_ip = None
-                if request and hasattr(request, 'session'):
-                    user_ip = request.session.get('user_ip')
+                user_ip = request.session.get('user_ip')
+                if not user_ip and hasattr(request, 'httprequest'):
+                    addr = getattr(request.httprequest, 'remote_addr', None)
+                    if addr and addr not in ('127.0.0.1', '::1', 'localhost'):
+                        user_ip = addr
+                        request.session['user_ip'] = user_ip
                 if not user_ip:
                     try:
                         resp = requests.get(
-                            'https://api.ipify.org?format=json', timeout=5
+                            'https://api.ipify.org?format=json', timeout=2
                         )
                         if resp.status_code == 200:
                             user_ip = resp.json().get('ip')
-                            if user_ip and hasattr(request, 'session'):
+                            if user_ip:
                                 request.session['user_ip'] = user_ip
                     except Exception as e:
                         _logger.debug('ipify lookup failed: %s', e)
@@ -91,42 +93,51 @@ class Website(models.Model):
                 if user_ip:
                     try:
                         geo = requests.get(
-                            f'http://ip-api.com/json/{user_ip}', timeout=5
+                            f'http://ip-api.com/json/{user_ip}', timeout=2
                         ).json()
                         country_name = geo.get('country')
                         if country_name:
                             pricelist = self._pricelist_for_country(country_name)
                             if pricelist:
                                 request.session[PRICELIST_SESSION_KEY] = pricelist.id
-                                res = pricelist
                     except Exception as e:
                         _logger.warning('Public GeoIP pricelist lookup failed: %s', e)
 
         except Exception as e:
             _logger.warning('Error in GeoIP pricelist override: %s', e)
 
-        return res
+        return super()._get_and_cache_current_pricelist()
 
     def _pricelist_for_country(self, country_name):
         """
         Return the best available pricelist for a country name.
-        Uses countryinfo to get the currency, then finds a matching
-        pricelist — no currency names are hardcoded.
+        Uses countryinfo and res.country to get the currency dynamically,
+        then finds a matching pricelist — no currency names are hardcoded.
         """
         try:
-            from countryinfo import CountryInfo
-            info = CountryInfo(country_name)
-            currencies = info.currencies()
-            if not currencies:
-                return None
+            currencies = []
+            try:
+                from countryinfo import CountryInfo
+                info = CountryInfo(country_name)
+                currencies = info.currencies() or []
+            except Exception as e:
+                _logger.debug('CountryInfo currencies lookup failed for %s: %s', country_name, e)
 
-            currency = self.env['res.currency'].sudo().search(
-                [('name', '=', currencies[0]),
-                 ('active', 'in', [True, False])], limit=1
-            )
+            currency = None
+            if currencies:
+                currency = self.env['res.currency'].sudo().search(
+                    [('name', '=', currencies[0]),
+                     ('active', '=', True)], limit=1
+                )
+            if not currency:
+                country_rec = self.env['res.country'].sudo().search(
+                    [('name', '=ilike', country_name)], limit=1
+                )
+                if country_rec and country_rec.currency_id and country_rec.currency_id.active:
+                    currency = country_rec.currency_id
+
             if not currency:
                 return None
-            currency.sudo().write({'active': True})
 
             # Prefer pricelists available on this website
             available = self.get_pricelist_available()

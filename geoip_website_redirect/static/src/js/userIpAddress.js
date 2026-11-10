@@ -71,9 +71,8 @@ export class GeoipLangChange extends Interaction {
             await rpc("/geoip/set_currency_by_lang", {
                 lang_url_code: urlCode,
             });
-        } catch (e) {
+        } catch (_e) {
             // Non-fatal; proceed with lang switch anyway
-            console.warn("[GeoIP] Currency update failed:", e);
         }
 
         redirect(finalRedirect);

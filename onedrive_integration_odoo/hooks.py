@@ -15,19 +15,13 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-from odoo import SUPERUSER_ID, api
-
-
-def uninstall_hook(cr, registry):
-    """
-    Delete System Parameters
-    """
-    env = api.Environment(cr, SUPERUSER_ID, {})
-    env['ir.config_parameter'].sudo().search(
-        [('key', '=', 'onedrive_integration_odoo.client_id')]).unlink()
-    env['ir.config_parameter'].sudo().search(
-        [('key', '=', 'onedrive_integration_odoo.client_secret')]).unlink()
-    env['ir.config_parameter'].sudo().search(
-        [('key', '=', 'onedrive_integration_odoo.folder_id')]).unlink()
-    env['ir.config_parameter'].sudo().search(
-        [('key', '=', 'onedrive_integration_odoo.onedrive_button')]).unlink()
+def uninstall_hook(env):
+    """Delete OneDrive system parameters on module uninstallation."""
+    keys = [
+        'onedrive_integration_odoo.client_id',
+        'onedrive_integration_odoo.client_secret',
+        'onedrive_integration_odoo.tenant_id',
+        'onedrive_integration_odoo.onedrive_folder',
+        'onedrive_integration_odoo.onedrive_button',
+    ]
+    env['ir.config_parameter'].sudo().search([('key', 'in', keys)]).unlink()

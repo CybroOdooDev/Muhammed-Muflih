@@ -14,12 +14,7 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    (LGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
 #############################################################################
-import json
 import logging
 import requests
 from odoo import http
@@ -56,18 +51,18 @@ class Geolocation(Home):
         """
         Given a country name (from countryinfo / ip-api):
         1. Activate the country's primary language and add it to the website.
-        2. Activate the country's currency.
-        3. Find (or use the first available) pricelist whose currency matches.
+        2. Activate the country's currency dynamically (no hardcoding).
+        3. Find or auto-create a selectable pricelist for this currency.
         4. Store the pricelist id in the session (shop) and on the partner (portal).
 
         Returns (language_record, pricelist_record) — either can be empty.
         """
+        country_info = None
         try:
             from countryinfo import CountryInfo
             country_info = CountryInfo(country_name)
         except Exception as e:
             _logger.warning('CountryInfo lookup failed for %s: %s', country_name, e)
-            return None, None
 
         env = request.env
         language = None
@@ -75,72 +70,110 @@ class Geolocation(Home):
 
         # --- Language ---
         try:
-            langs = country_info.languages()
+            langs = []
+            if country_info:
+                try:
+                    langs = country_info.languages()
+                except Exception as e:
+                    _logger.debug('Country languages lookup failed: %s', e)
+
             if langs:
                 language = env['res.lang'].sudo().search(
                     [('iso_code', '=', langs[0]),
                      ('active', 'in', [True, False])], limit=1
                 )
-                if language:
+            if not language:
+                country_rec = env['res.country'].sudo().search(
+                    [('name', '=ilike', country_name)], limit=1
+                )
+                if country_rec and country_rec.lang_ids:
+                    language = country_rec.lang_ids[0]
+
+            if language:
+                if not language.active:
                     language.sudo().write({'active': True})
-                    website = (
-                        request.website.sudo()
-                        if getattr(request, 'website', None)
-                        else env['website'].sudo().search([], limit=1)
-                    )
-                    if website:
-                        website.sudo().write({'language_ids': [(4, language.id)]})
-                    if user:
-                        user.sudo().write({'lang': language.code})
-                    # Push lang into session context
-                    ctx = dict(request.session.get('context', {}))
-                    ctx['lang'] = language.code
-                    request.session['context'] = ctx
+                website = (
+                    request.website.sudo()
+                    if getattr(getattr(request, 'website', None), '_name', None) == 'website'
+                    else env['website'].sudo().search([], limit=1)
+                )
+                if website and language.id not in website.language_ids.ids:
+                    website.sudo().write({'language_ids': [(4, language.id)]})
+                if user:
+                    user.sudo().write({'lang': language.code})
+                # Push lang into session context
+                ctx = dict(request.session.get('context', {}))
+                ctx['lang'] = language.code
+                request.session['context'] = ctx
         except Exception as e:
             _logger.warning('Language resolution failed for %s: %s', country_name, e)
 
         # --- Currency + Pricelist ---
         try:
-            currencies = country_info.currencies()
+            currency = None
+            currencies = []
+            if country_info:
+                try:
+                    currencies = country_info.currencies()
+                except Exception as e:
+                    _logger.debug('Country currencies lookup failed: %s', e)
+
             if currencies:
                 currency = env['res.currency'].sudo().search(
                     [('name', '=', currencies[0]),
                      ('active', 'in', [True, False])], limit=1
                 )
-                if currency:
+            if not currency:
+                country_rec = env['res.country'].sudo().search(
+                    [('name', '=ilike', country_name)], limit=1
+                )
+                if country_rec and country_rec.currency_id:
+                    currency = country_rec.currency_id
+
+            if currency:
+                if not currency.active:
                     currency.sudo().write({'active': True})
 
-                    # Find a pricelist that uses this currency (no hardcoding)
-                    website_obj = (
-                        request.website.sudo()
-                        if getattr(request, 'website', None)
-                        else env['website'].sudo().search([], limit=1)
-                    )
-                    available = (
-                        website_obj.get_pricelist_available()
-                        if website_obj
-                        else env['product.pricelist'].sudo().search([])
-                    )
-                    pricelist = next(
-                        (pl for pl in available if pl.currency_id == currency),
-                        None
-                    )
-                    # Fall back: any pricelist with that currency
-                    if not pricelist:
-                        pricelist = env['product.pricelist'].sudo().search(
-                            [('currency_id', '=', currency.id)], limit=1
-                        )
+                # Find a pricelist that uses this currency (no hardcoding)
+                website_obj = (
+                    request.website.sudo()
+                    if getattr(getattr(request, 'website', None), '_name', None) == 'website'
+                    else env['website'].sudo().search([], limit=1)
+                )
+                available = (
+                    website_obj.get_pricelist_available()
+                    if website_obj
+                    else env['product.pricelist'].sudo().search([])
+                )
+                pricelist = next(
+                    (pl for pl in available if pl.currency_id == currency),
+                    None
+                )
+                # Fall back: any pricelist with that currency
+                if not pricelist:
+                    pricelist = env['product.pricelist'].sudo().search([
+                        ('currency_id', '=', currency.id),
+                        '|', ('website_id', '=', website_obj.id if website_obj else False),
+                        ('website_id', '=', False),
+                    ], limit=1)
+                # Auto-create website pricelist if missing
+                if not pricelist:
+                    website_id = website_obj.id if website_obj else False
+                    pricelist = env['product.pricelist'].sudo().create({
+                        'name': f'{currency.name} Pricelist',
+                        'currency_id': currency.id,
+                        'website_id': website_id,
+                        'selectable': True,
+                    })
 
-                    if pricelist:
-                        # Update shop session
-                        request.session[PRICELIST_SESSION_KEY] = pricelist.id
-                        # Update portal (partner's property pricelist)
-                        if user:
-                            partner = user.sudo().partner_id
-                            if partner:
-                                partner.sudo().write(
-                                    {'property_product_pricelist': pricelist.id}
-                                )
+                if pricelist:
+                    # Update shop session
+                    request.session[PRICELIST_SESSION_KEY] = pricelist.id
+                    # Update portal (partner's property pricelist)
+                    if user and user.sudo().partner_id:
+                        user.sudo().partner_id.sudo().write(
+                            {'property_product_pricelist': pricelist.id}
+                        )
         except Exception as e:
             _logger.warning('Currency/pricelist resolution failed for %s: %s', country_name, e)
 
@@ -150,7 +183,7 @@ class Geolocation(Home):
     # Login override — apply GeoIP settings right after login
     # ------------------------------------------------------------------
 
-    @http.route()
+    @http.route(type='http', auth='none')
     def web_login(self, redirect=None, **kw):
         """On login: detect country from IP → set language, currency & pricelist."""
         user_ip = kw.get('user_ip')
@@ -234,34 +267,41 @@ class Geolocation(Home):
             # Strategy: find a res.country whose language code (iso) matches lang iso_code
             iso_code = lang_rec.iso_code  # e.g. 'hi', 'en', 'fr'
 
-            country_rec = env['res.country'].sudo().search([], limit=0)
             target_country = None
 
-            # Use countryinfo to find which country matches this ISO language
-            try:
-                from countryinfo import CountryInfo
-                # CountryInfo doesn't provide reverse lookup, so we iterate
-                # on Odoo res.country records and check via their alpha2 code
-                all_countries = env['res.country'].sudo().search([('code', '!=', False)])
-                for c in all_countries:
-                    try:
-                        ci = CountryInfo(c.name)
-                        langs = ci.languages()
-                        if langs and langs[0] == iso_code:
-                            target_country = c.name
-                            break
-                    except Exception:
-                        continue
-            except Exception as e:
-                _logger.warning('CountryInfo reverse lookup failed: %s', e)
+            # 1. Fast O(1) indexed lookup from language code (e.g. 'en_US' -> 'US')
+            if '_' in (lang_rec.code or ''):
+                country_code = lang_rec.code.split('_')[-1]
+                country = env['res.country'].sudo().search(
+                    [('code', '=ilike', country_code)], limit=1
+                )
+                if country:
+                    target_country = country.name
 
+            # 2. Relational lookup via res.country lang_ids
             if not target_country:
-                # Fallback: use the lang itself to find currency via res.country lang_id field
                 country_by_lang = env['res.country'].sudo().search(
                     [('lang_ids.code', '=', lang_rec.code)], limit=1
                 )
                 if country_by_lang:
                     target_country = country_by_lang.name
+
+            # 3. Fallback: match via CountryInfo for other ISO languages
+            if not target_country:
+                try:
+                    from countryinfo import CountryInfo
+                    all_countries = env['res.country'].sudo().search([('code', '!=', False)])
+                    for c in all_countries:
+                        try:
+                            ci = CountryInfo(c.name)
+                            langs = ci.languages()
+                            if langs and langs[0] == iso_code:
+                                target_country = c.name
+                                break
+                        except Exception:
+                            continue
+                except Exception as e:
+                    _logger.warning('CountryInfo reverse lookup failed: %s', e)
 
             if not target_country:
                 return {'success': False, 'error': f'No country found for language: {iso_code}'}

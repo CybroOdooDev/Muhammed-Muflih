@@ -6,16 +6,16 @@
 #   Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
 #    Author: Cybrosys Techno Solutions (Contact : odoo@cybrosys.com)
 #
-#   You can modify it under the terms of the GNU AFFERO
-#   GENERAL PUBLIC LICENSE (AGPL v3), Version 3.
+#   You can modify it under the terms of the GNU LESSER
+#   GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
 #   This program is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU AFFERO GENERAL PUBLIC LICENSE (AGPL v3) for more details.
+#   GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
-#   (AGPL v3) along with this program.
+#   You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#   (LGPL v3) along with this program.
 #   If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
@@ -26,7 +26,6 @@ from werkzeug import urls
 
 from odoo import fields, models, _
 from odoo.exceptions import UserError
-from odoo.http import request
 
 
 class ResConfigSettings(models.TransientModel):
@@ -87,7 +86,8 @@ class ResConfigSettings(models.TransientModel):
         res = requests.post(
             f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token",
             data=data,
-            headers={"content-type": "application/x-www-form-urlencoded"})
+            headers={"content-type": "application/x-www-form-urlencoded"},
+            timeout=10)
         response = res.content and res.json() or {}
         # If client_credentials returns invalid_client, secret or ID is wrong
         if response.get('error') == 'invalid_client':
@@ -97,8 +97,8 @@ class ResConfigSettings(models.TransientModel):
             authority = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
             action = self.env["ir.actions.client"].sudo()._for_xml_id(
                 "onedrive_integration_odoo.onedrive_dashboard_action")
-            url_return = base_url + '/web#id=%d&action=%d&view_type=form&model=%s' \
-                         % (self.id, action['id'], 'onedrive.dashboard')
+            record_id = self.id or 0
+            url_return = f"{base_url}/web#id={record_id}&action={action['id']}&model=onedrive.dashboard"
             encoded_params = urls.url_encode({
                 'response_type': 'code',
                 'client_id': client_id,

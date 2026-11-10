@@ -24,7 +24,7 @@ Key Features
 
 * Integrating OneDrive with Odoo
 * Store and access their files within the Odoo platform
-* Upload files to Onedrive
+* Upload files to OneDrive
 
 Installation
 ------------
@@ -32,9 +32,9 @@ No external dependencies.
 
 Configuration
 =============
-The user should create onedrive client id, client secret from microsoft azure
-with scope 'offline_access, openid, Files.ReadWrite.All' to get access token.
-Folder id is the id on onedrive folder url
+The user should create a OneDrive Client ID and Client Secret from Microsoft Azure
+with scope 'offline_access, openid, Files.ReadWrite.All' to get an access token.
+Folder ID is the ID found in the OneDrive folder URL.
 
 Company
 -------
