@@ -24,7 +24,7 @@ class PosOrder(models.Model):
     _inherit = 'pos.order'
 
     booking_ref_id = fields.Many2one(
-        'book.order', string='Booking Ref',
+        'book.order',
         help="Booked order reference for the pos order")
     is_booked = fields.Boolean(
         string='Is Booked Order',
@@ -56,7 +56,7 @@ class PosOrder(models.Model):
             :param existing_order: Existing POS order record or False
             :return int: ID of the processed pos.order record
         """
-        is_booked = order.pop('is_booked', None)
+        order.pop('is_booked', None)
         booked_data = order.pop('booked_data', None)
         booked_ref_id = order.get('booking_ref_id') or (booked_data and booked_data.get('id'))
 
@@ -91,7 +91,7 @@ class PosOrder(models.Model):
             :param dict ui_order: Dictionary containing UI order details
             :return dict: Processed order fields dictionary
         """
-        order_fields = super(PosOrder, self)._order_fields(ui_order) if hasattr(super(PosOrder, self), '_order_fields') else {}
+        order_fields = super()._order_fields(ui_order) if hasattr(super(), '_order_fields') else {}
         if ui_order.get('is_booked'):
             booked_id = ui_order.get('booking_ref_id') or ui_order.get('booked_data', {}).get('id')
             if isinstance(booked_id, int):

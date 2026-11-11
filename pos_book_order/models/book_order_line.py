@@ -24,17 +24,16 @@ class BookOrderLine(models.Model):
     _description = "Lines of Point of Sale Booked Order"
     _rec_name = "product_id"
 
-    company_id = fields.Many2one('res.company', string='Company',
+    company_id = fields.Many2one('res.company',
                                  help="Company of the booked order",
-                                 default=lambda self: self.env.user.company_id)
+                                 default=lambda self: self.env.company)
     product_id = fields.Many2one('product.product',
                                  help="Select products for ordering",
-                                 string='Product',
                                  domain=[('sale_ok', '=', True)],
                                  required=True, change_default=True)
     price_unit = fields.Float(string='Unit Price',
                               help="Unit price of selected product", digits=0)
-    qty = fields.Float(string='Quantity', default=1,
+    qty = fields.Float(string='Quantity', default=1.0,
                        help="Enter how much quantity of product want ")
     price_subtotal = fields.Float(compute='_compute_amount_line_all',
                                   digits=0,
@@ -53,30 +52,32 @@ class BookOrderLine(models.Model):
     tax_ids = fields.Many2many('account.tax', string='Taxes',
                                readonly=True, help="Taxes for each line")
     tax_after_fiscal_position_ids = fields.Many2many(
-        'account.tax', 'account_tax_rel', 'uid',
-        'tag_id', string='Taxes', help="Fiscal position after entering "
-                                       "the tax")
+        'account.tax',
+        compute='_compute_amount_line_all',
+        string='Taxes (Fiscal Position)',
+        help="Fiscal position taxes after mapping",
+    )
 
-    @api.depends('price_unit', 'tax_ids', 'qty', 'discount', 'product_id')
+    @api.depends('price_unit', 'tax_ids', 'qty', 'discount', 'product_id', 'order_id.fiscal_position_id')
     def _compute_amount_line_all(self):
-        """ To compute tax included and excluded subtotal in each line"""
+        """ To compute tax included and excluded subtotal and mapped taxes in each line"""
         for line in self:
             currency = self.env.company.currency_id
             taxes = line.tax_ids.filtered(
                 lambda tax: tax.company_id.id == line.order_id.company_id.id)
             fiscal_position_id = line.order_id.fiscal_position_id
             if fiscal_position_id:
-                taxes = fiscal_position_id.map_tax(taxes, line.product_id,
-                                                   line.order_id.partner_id)
+                taxes = fiscal_position_id.map_tax(taxes)
+            line.tax_after_fiscal_position_ids = taxes
             price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
             line.price_subtotal = line.price_subtotal_incl = price * line.qty
             if taxes:
-                taxes = taxes.compute_all(price, currency, line.qty,
-                                          product=line.product_id,
-                                          partner=line.order_id.partner_id or
-                                                  False)
-                line.price_subtotal = taxes['total_excluded']
-                line.price_subtotal_incl = taxes['total_included']
+                taxes_data = taxes.compute_all(price, currency, line.qty,
+                                               product=line.product_id,
+                                               partner=line.order_id.partner_id or
+                                                       False)
+                line.price_subtotal = taxes_data['total_excluded']
+                line.price_subtotal_incl = taxes_data['total_included']
 
             line.price_subtotal = currency.round(line.price_subtotal)
             line.price_subtotal_incl = currency.round(line.price_subtotal_incl)

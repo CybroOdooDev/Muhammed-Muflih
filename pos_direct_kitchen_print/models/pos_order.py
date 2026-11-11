@@ -16,7 +16,7 @@
 #
 #############################################################################
 import logging
-from odoo import api, models, _
+from odoo import api, models
 from printnodeapi.gateway import Gateway
 
 _logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ class PosOrder(models.Model):
             _logger.info("No kitchen printers configured for POS %s", pos_config_id)
             return {
                 "success": False,
-                "message": _("No kitchen printers configured for this Point of Sale."),
+                "message": self.env._("No kitchen printers configured for this Point of Sale."),
             }
 
         api_key = self._get_printnode_api_key()
@@ -54,7 +54,7 @@ class PosOrder(models.Model):
             _logger.warning("PrintNode API key not configured in Settings.")
             return {
                 "success": False,
-                "message": _("PrintNode API Key is not configured. Please check POS settings."),
+                "message": self.env._("PrintNode API Key is not configured. Please check POS settings."),
             }
 
         tickets = self._prepare_kitchen_tickets(order_data, printers)
@@ -62,7 +62,7 @@ class PosOrder(models.Model):
             _logger.info("No order lines match configured kitchen printer categories.")
             return {
                 "success": False,
-                "message": _("No order items match the configured kitchen printer categories."),
+                "message": self.env._("No order items match the configured kitchen printer categories."),
             }
 
         order_name = order_data.get("name", "New")
@@ -79,21 +79,25 @@ class PosOrder(models.Model):
         if failed_printers and not success_printers:
             return {
                 "success": False,
-                "message": _("Failed to send print job: %s") % "; ".join(failed_printers),
+                "message": self.env._("Failed to send print job: %(failed)s", failed="; ".join(failed_printers)),
             }
         elif failed_printers and success_printers:
             return {
                 "success": True,
                 "partial": True,
-                "message": _("Printed to: %s. Failed: %s") % (
-                    ", ".join(success_printers),
-                    "; ".join(failed_printers),
+                "message": self.env._(
+                    "Printed to: %(success)s. Failed: %(failed)s",
+                    success=", ".join(success_printers),
+                    failed="; ".join(failed_printers),
                 ),
             }
         else:
             return {
                 "success": True,
-                "message": _("Kitchen order printed successfully on: %s") % ", ".join(success_printers),
+                "message": self.env._(
+                    "Kitchen order printed successfully on: %(printers)s",
+                    printers=", ".join(success_printers),
+                ),
             }
 
     def _prepare_kitchen_tickets(self, order_data, printers):
@@ -127,16 +131,16 @@ class PosOrder(models.Model):
         Returns tuple of (bool, str) representing success and error message.
         """
         if not lines:
-            return False, _("No lines to print.")
+            return False, self.env._("No lines to print.")
 
         api_key = self._get_printnode_api_key()
         if not api_key:
             _logger.error("PrintNode API Key not configured.")
-            return False, _("PrintNode API Key not configured in Settings.")
+            return False, self.env._("PrintNode API Key not configured in Settings.")
 
         if not printer.printer_id or not printer.printer_id.id_of_printer:
             _logger.error("Printer '%s' has no mapped PrintNode printer.", printer.name)
-            return False, _("Printer '%s' has no mapped PrintNode printer.") % printer.name
+            return False, self.env._("Printer '%(name)s' has no mapped PrintNode printer.", name=printer.name)
 
         # Helper to parse internal note JSON
         def parse_internal_note(note_str):
@@ -147,8 +151,8 @@ class PosOrder(models.Model):
                 note_data = json.loads(note_str)
                 if isinstance(note_data, list):
                     return "\n".join([n.get('text', '') for n in note_data if n.get('text')])
-            except Exception:
-                pass
+            except Exception as e:
+                _logger.debug("Could not parse internal note as JSON: %s", e)
             return note_str
 
         # Format the ticket message

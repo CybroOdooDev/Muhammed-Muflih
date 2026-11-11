@@ -25,7 +25,7 @@
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['base', 'mail'],
+    'depends': ['mail'],
     'data': [
         'security/media_repository_groups.xml',
         'security/ir.access.csv',

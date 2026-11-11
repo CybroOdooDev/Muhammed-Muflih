@@ -1,252 +1,245 @@
 /** @odoo-module **/
-import { Dialog } from "@web/core/dialog/dialog";
+
 import { CommandPalette } from "@web/core/commands/command_palette";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-//Patching the CommandPalette for adding condition while using "!" command
-patch(CommandPalette.prototype,{
-        setup() {
-        super.setup()
+
+/**
+ * Helper to safely extract display name from ir.model response.
+ */
+function getModelDisplayName(modelData) {
+    if (!modelData || !modelData.name) {
+        return modelData?.model || "";
+    }
+    if (typeof modelData.name === "object") {
+        return modelData.name.en_US || Object.values(modelData.name)[0] || modelData.model;
+    }
+    return String(modelData.name);
+}
+
+// Patching the CommandPalette for adding condition while using "!" command
+patch(CommandPalette.prototype, {
+    setup() {
+        super.setup();
         this.orm = useService("orm");
         this.action = useService("action");
-        this.dialog = useService("dialog")
+        this.dialog = useService("dialog");
     },
-    //Here we patch the CommandPalette to access commands from the user
+
+    // Access custom commands from the user
     async onKeyDown(ev) {
-            if (ev.key == 'Enter' && this.state.namespace == '!'){
-                var self = this
-                if (this.state.searchValue.split(" ")[0] == 'Open'){
-                    const regex = /^Open.*\/.*$/;
-                    const regex1 = /^Open.*(?:of|in).*$/;
-                    const regex2 = /^Open.*/
-                    var searchValue = this.state.searchValue
-                    if (regex.test(searchValue)){
-                        var parts = searchValue.split("/");
-                        var model = parts[0].replace("Open ", "");
-                        const res = await this.orm.call('ir.model', 'check_model', [model])
-                            if(res.length!=0){
-                                self.model = res[0]['model']
-                                self.model_name = res[0]['name']['en_US']
-                                var data = {
-                                    'model':self.model,
-                                    'record':parts[1],
-                                    'regex':1,
-                                }
-                                this.orm.call(
-                                    'ir.model',
-                                    'get_records',
-                                    [data],{}
-                                ).then(function(res){
-                                    if (res.length !=1){
-                                        self.action.doAction({
-                                        name:self.model_name,
-                                        type: 'ir.actions.act_window',
-                                        res_model: self.model,
-                                        domain: [["id", "in", res]],
-                                        views: [[false, "list"], [false, "form"]],
-                                        view_mode: "list,form",
-                                        target: "current",
-                                    });
-                                    }
-                                    else{
-                                         self.action.doAction({
-                                            type: "ir.actions.act_window",
-                                            res_model: self.model,
-                                            views: [[false, 'form']],
-                                            target: 'current',
-                                            res_id:res[0]
-                                        });
-                                    }
-                                    self.props.close()
-                                })
-                            }
-                            else{
-                                self.props.close()
-                                this.dialog.add(AlertDialog,
-                                {
-                                    body: _t("model not found"),
-                                },
+        if (ev.key === "Enter" && this.state.namespace === "!") {
+            const searchValue = this.state.searchValue.trim();
+            const firstWord = searchValue.split(/\s+/)[0].toLowerCase();
 
-                            );
-                            }
-                    }
-                    else if(regex1.test(searchValue)){
-                    const pattern = /^Open\s(.*)\s(?:of|in).*$/
-                    const match = searchValue.match(pattern);
-                    if (match){
-                        const result = await this.orm.call(
-                        'ir.model',
-                        'check_model',
-                        [match[1]],{}
-                        )
-                        if (result.length!=0){
-                            self.model = result[0]['model']
-                            self._fields_check(self.model)
-                            var data = {
-                                'model':self.model,
-                            }
-                        }
-                        else{
+            if (firstWord === "open") {
+                const regexSlash = /^Open.*\/.*$/i;
+                const regexOfIn = /^Open\s+(.*?)\s+\b(?:of|in)\b\s+(.*)$/i;
+                const regexSimple = /^Open\s+(.*)$/i;
 
-                            self.props.close()
-                            this.dialog.add(AlertDialog,
-                            {
-                                body: _t("command not found"),
-                            },
+                if (regexSlash.test(searchValue)) {
+                    const parts = searchValue.split("/");
+                    const modelName = parts[0].replace(/^Open\s*/i, "").trim();
+                    const res = await this.orm.call("ir.model", "check_model", [modelName]);
 
-                        );
-                        }
-                    }
-                }
-                    else if(regex2.test(searchValue)){
-                        const reg = /^Open\s*/i;
-                        const parts = searchValue.split(reg);
-                        const res = await this.orm.call(
-                            'ir.model',
-                            'check_model',
-                            [parts[1]],{
-                        })
-                        if (res.length!=0){
-                            self.action.doAction({
-                                name:res[0]['name']['en_US'],
-                                type: 'ir.actions.act_window',
-                                res_model: res[0]['model'],
+                    if (res.length !== 0) {
+                        this.model = res[0].model;
+                        this.model_name = getModelDisplayName(res[0]);
+                        const data = {
+                            model: this.model,
+                            record: parts[1].trim(),
+                            regex: 1,
+                        };
+                        const recordIds = await this.orm.call("ir.model", "get_records", [data], {});
+                        if (!Array.isArray(recordIds) || recordIds.length === 0) {
+                            this.props.close();
+                            this.dialog.add(AlertDialog, {
+                                body: _t("No records found."),
+                            });
+                        } else if (recordIds.length === 1) {
+                            this.action.doAction({
+                                type: "ir.actions.act_window",
+                                res_model: this.model,
+                                views: [[false, "form"]],
+                                target: "current",
+                                res_id: recordIds[0],
+                            });
+                            this.props.close();
+                        } else {
+                            this.action.doAction({
+                                name: this.model_name || "Records",
+                                type: "ir.actions.act_window",
+                                res_model: this.model,
+                                domain: [["id", "in", recordIds]],
                                 views: [[false, "list"], [false, "form"]],
                                 view_mode: "list,form",
                                 target: "current",
                             });
-                            self.props.close();
+                            this.props.close();
                         }
-                        else{
-                            self.props.close()
-                            this.dialog.add(AlertDialog,
-                            {
-                                body: _t("command not found"),
-                            },
-
-                        );
-                        }
+                    } else {
+                        this.props.close();
+                        this.dialog.add(AlertDialog, {
+                            body: _t("Model not found."),
+                        });
                     }
-                else{
-                    self.props.close()
-                    this.dialog.add(AlertDialog,
-                        {
-                            body: _t("command not found"),
-                        },
-
-                    );
-
-                }
-                }
-                else if(this.state.searchValue.split(" ")[0] == 'Create'){
-                    const regex = /^Create.*/
-                    const searchValue = this.state.searchValue
-                    if (regex.test(searchValue)){
-                        const reg = /^Create\s*/i;
-                        const parts = searchValue.split(reg);
-                        const res = await this.orm.call(
-                            'ir.model',
-                            'check_model',
-                            [parts[1]],{
-                        })
-                        if (res.length!=0){
-                            self.action.doAction({
+                } else if (regexOfIn.test(searchValue)) {
+                    const match = searchValue.match(regexOfIn);
+                    const modelStr = match[1].trim();
+                    const queryStr = match[2].trim();
+                    const result = await this.orm.call("ir.model", "check_model", [modelStr], {});
+                    if (result.length !== 0) {
+                        this.model = result[0].model;
+                        this.model_name = getModelDisplayName(result[0]);
+                        await this._fields_check(this.model, queryStr);
+                    } else {
+                        // Fallback: in case the entire query is a model name containing "of" or "in" (e.g. "Point of Sale")
+                        const fullModelStr = searchValue.replace(/^Open\s+/i, "").trim();
+                        const fullResult = await this.orm.call("ir.model", "check_model", [fullModelStr], {});
+                        if (fullResult.length !== 0) {
+                            this.action.doAction({
+                                name: getModelDisplayName(fullResult[0]),
                                 type: "ir.actions.act_window",
-                                res_model: res[0]['model'],
-                                views: [[false, 'form']],
-                                target: 'current',
-                            });
-                            self.props.close();
-                        }
-                        else{
-                            self.props.close()
-                            this.dialog.add(AlertDialog,
-                            {
-                                body: _t("model not found"),
-                            },
-
-                        );
-                        }
-                    }
-                    else{
-                        self.props.close()
-                        this.dialog.add(AlertDialog,
-                        {
-                            body: _t("command not found"),
-                        },
-
-                        );
-
-                    }
-                }
-                else{
-                    self.props.close()
-                    this.dialog.add(AlertDialog,
-                    {
-                        body: _t("command not found"),
-                    },
-
-                );
-                }
-            }
-    },
-    //Check fields
-    async _fields_check(model){
-        var self = this
-        const searchValue = this.state.searchValue
-        const pattern = /^Open\s.*\s(of|in)\s(.*)$/
-        const match = searchValue.match(pattern)
-        if (match){
-            const string = match[2].split(" ")
-            var field_string = ""
-            var data = {
-                'model':model,
-                'field_string':string,
-                'regex':2,
-            }
-            const res = await this.orm.call('ir.model','check_fields_model',[data], {})
-                if (res.length!=0){
-                    data['field_string'] = match[2].replace(res[0]['del'],"")
-                    data['field'] = res[0]['name']
-                    data['field_type'] = res[0]['ttype']
-                    data['field_relation'] = res[0]['relation']
-                    const record = await this.orm.call(
-                        'ir.model',
-                        'get_records',
-                        [data],{})
-                        self.action.doAction({
-                                name:'Records',
-                                type: 'ir.actions.act_window',
-                                res_model: model,
-                                domain: [["id", "in", record]],
+                                res_model: fullResult[0].model,
                                 views: [[false, "list"], [false, "form"]],
+                                view_mode: "list,form",
                                 target: "current",
-                            })
-                    self.props.close()
+                            });
+                            this.props.close();
+                        } else {
+                            this.props.close();
+                            this.dialog.add(AlertDialog, {
+                                body: _t("Command not found."),
+                            });
+                        }
+                    }
+                } else if (regexSimple.test(searchValue)) {
+                    const match = searchValue.match(regexSimple);
+                    const modelStr = match[1].trim();
+                    const res = await this.orm.call("ir.model", "check_model", [modelStr], {});
+                    if (res.length !== 0) {
+                        this.action.doAction({
+                            name: getModelDisplayName(res[0]),
+                            type: "ir.actions.act_window",
+                            res_model: res[0].model,
+                            views: [[false, "list"], [false, "form"]],
+                            view_mode: "list,form",
+                            target: "current",
+                        });
+                        this.props.close();
+                    } else {
+                        this.props.close();
+                        this.dialog.add(AlertDialog, {
+                            body: _t("Command not found."),
+                        });
+                    }
+                } else {
+                    this.props.close();
+                    this.dialog.add(AlertDialog, {
+                        body: _t("Command not found."),
+                    });
                 }
-                else{
-                    self.props.close()
-                    this.dialog.add(AlertDialog,
-                        {
-                            body: _t("command not found"),
-                        },
-
-                    );
+            } else if (firstWord === "create") {
+                const regexCreate = /^Create\s+(.*)$/i;
+                const match = searchValue.match(regexCreate);
+                if (match) {
+                    const modelStr = match[1].trim();
+                    const res = await this.orm.call("ir.model", "check_model", [modelStr], {});
+                    if (res.length !== 0) {
+                        this.action.doAction({
+                            type: "ir.actions.act_window",
+                            res_model: res[0].model,
+                            views: [[false, "form"]],
+                            target: "current",
+                        });
+                        this.props.close();
+                    } else {
+                        this.props.close();
+                        this.dialog.add(AlertDialog, {
+                            body: _t("Model not found."),
+                        });
+                    }
+                } else {
+                    this.props.close();
+                    this.dialog.add(AlertDialog, {
+                        body: _t("Command not found."),
+                    });
                 }
+            } else {
+                this.props.close();
+                this.dialog.add(AlertDialog, {
+                    body: _t("Command not found."),
+                });
+            }
         }
     },
-    //Executing the command
+
+    // Check fields for condition-based commands
+    async _fields_check(model, queryStr) {
+        const stringTokens = queryStr.split(/\s+/);
+        const data = {
+            model: model,
+            field_string: stringTokens,
+            regex: 2,
+        };
+        const res = await this.orm.call("ir.model", "check_fields_model", [data], {});
+        if (res.length !== 0) {
+            const delLen = res[0].del.length;
+            if (queryStr.toLowerCase().startsWith(res[0].del.toLowerCase())) {
+                data.field_string = queryStr.slice(delLen).trim();
+            } else {
+                const escapedDel = res[0].del.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+                data.field_string = queryStr.replace(new RegExp(`^${escapedDel}\\s*`, "i"), "").trim();
+            }
+            data.field = res[0].name;
+            data.field_type = res[0].ttype;
+            data.field_relation = res[0].relation;
+            const recordIds = await this.orm.call("ir.model", "get_records", [data], {});
+            if (!Array.isArray(recordIds) || recordIds.length === 0) {
+                this.props.close();
+                this.dialog.add(AlertDialog, {
+                    body: _t("No records found."),
+                });
+            } else if (recordIds.length === 1) {
+                this.action.doAction({
+                    type: "ir.actions.act_window",
+                    res_model: model,
+                    views: [[false, "form"]],
+                    target: "current",
+                    res_id: recordIds[0],
+                });
+                this.props.close();
+            } else {
+                this.action.doAction({
+                    name: this.model_name || "Records",
+                    type: "ir.actions.act_window",
+                    res_model: model,
+                    domain: [["id", "in", recordIds]],
+                    views: [[false, "list"], [false, "form"]],
+                    view_mode: "list,form",
+                    target: "current",
+                });
+                this.props.close();
+            }
+        } else {
+            this.props.close();
+            this.dialog.add(AlertDialog, {
+                body: _t("Command not found."),
+            });
+        }
+    },
+
+    // Executing the command
     async executeCommand(command) {
-        if (this.state.namespace != '!'){
+        if (this.state.namespace !== "!") {
             const config = await command.action();
             if (config) {
                 this.setCommandPaletteConfig(config);
-            }
-            else {
+            } else {
                 this.props.close();
             }
         }
-    }
+    },
 });

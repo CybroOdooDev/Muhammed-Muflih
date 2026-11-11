@@ -24,11 +24,18 @@ Key Features
 
 Installation
 ============
- pip install printnodeapi
+
+.. code-block:: bash
+
+    pip install printnodeapi
 
 Configuration
 =============
-Configure the PrintNode API
+
+* Navigate to **Point of Sale** -> **Configuration** -> **Settings**.
+* Under **Pos Kitchen Direct Print**, enter your **PrintNode API Key**.
+* Click **Check available printers** to synchronize connected printers.
+* Go to **Point of Sale** -> **Products** -> **Kitchen Printers** to map printers and categories to POS stations.
 
 Company
 -------
@@ -50,7 +57,7 @@ Maintainer
    :target: https://cybrosys.com
 
 
-This module is maintained by Cybrosys Technologies.
+This module is maintained by Cybrosys Techno Solutions.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
 

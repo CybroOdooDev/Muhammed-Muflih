@@ -35,15 +35,18 @@ class PosKitchenPrinter(models.Model):
 
     @api.depends('pos_config_ids')
     def _compute_allowed_pos_category_ids(self):
-        """Restrict categories by selected POS"""
+        """Restrict categories by selected POS."""
+        all_categories = None
         for record in self:
             if not record.pos_config_ids:
-                record.allowed_pos_category_ids = self.env['pos.category']
+                record.allowed_pos_category_ids = False
                 continue
 
             # If any selected POS allows all categories, show all categories
             if any(not config.limit_categories for config in record.pos_config_ids):
-                record.allowed_pos_category_ids = self.env['pos.category'].search([])
+                if all_categories is None:
+                    all_categories = self.env['pos.category'].search([('id', '!=', False)])
+                record.allowed_pos_category_ids = all_categories
             else:
                 # Otherwise, show the union of restricted categories
                 record.allowed_pos_category_ids = record.pos_config_ids.mapped('iface_available_categ_ids')

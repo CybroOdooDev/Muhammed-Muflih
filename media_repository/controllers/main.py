@@ -16,7 +16,7 @@
 #
 #############################################################################
 import unicodedata
-from odoo import _, http
+from odoo import http
 from odoo.exceptions import AccessError
 from odoo.http import request
 
@@ -32,14 +32,26 @@ class MediaAssetUploadController(http.Controller):
     @http.route('/media_repository/asset/upload_file', type='http', auth='user', methods=['POST'])
     def upload_media_asset_file(self, model, id, ufile, **kwargs):
         if model != 'media.asset':
-            return request.make_json_response({'error': _("Invalid model.")})
+            return request.make_json_response({'error': request.env._("Invalid model.")})
 
-        asset = request.env['media.asset'].browse(int(id))
+        try:
+            record_id = int(id)
+            if record_id <= 0:
+                raise ValueError
+        except (TypeError, ValueError):
+            return request.make_json_response(
+                {'error': request.env._("A valid saved record ID is required.")})
+
+        asset = request.env['media.asset'].browse(record_id)
+        if not asset.exists():
+            return request.make_json_response(
+                {'error': request.env._("The requested record does not exist.")})
+
         try:
             asset.check_access('write')
         except AccessError:
             return request.make_json_response(
-                {'error': _("You are not allowed to upload a file on this record.")})
+                {'error': request.env._("You are not allowed to upload a file on this record.")})
 
         filename = ufile.filename
         if request.httprequest.user_agent.browser == 'safari':

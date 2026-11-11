@@ -14,8 +14,8 @@
 
 Text Commander
 ===============
-This module helps you to open models or single model record and create record
-of a model through command palette.
+This module helps you open models or a single model record and create a record
+of a model through the command palette.
 
 Key Features
 ------------

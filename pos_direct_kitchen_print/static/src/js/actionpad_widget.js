@@ -67,7 +67,6 @@ async function printKitchenOrder(pos, order) {
             );
         }
     } catch (error) {
-        console.error("Kitchen printing failed", error);
         pos.notification.add(
             _t("Kitchen printing error: %s", error?.data?.message || error?.message || error),
             {

@@ -14,24 +14,23 @@
 
 POS Booking Order
 =================
-From a POS session, users can create pickup or 
-    delivery orders, which they can then confirm as POS orders.
+From a POS session, users can create pickup or delivery orders, which they can then confirm as POS orders.
 
 Key Features
 ------------
 
-* Can choose type order both pickup and delivery.
-* Details of the booking are printed in receipt.
-* Option to enter booking from customers in pos.
-
+* Choose order type: both pickup and delivery are supported.
+* Details of the booking are printed on POS customer receipt.
+* Option to enter advance booking orders directly from POS.
+* Dedicated screen to view and confirm booked orders into active POS carts.
 
 Installation
 ============
-No external dependencies.
+No external dependencies required.
 
 Configuration
 =============
- No additional configuration is required.
+Go to Point of Sale -> Configuration -> Settings, and enable "Booking Orders".
 
 Company
 -------

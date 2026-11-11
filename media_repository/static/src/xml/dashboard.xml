@@ -2,7 +2,7 @@
 <templates>
     <!-- dashboard -->
     <t t-name="media_type_dashboard.MediaTypeDashboard">
-        <div class="container-fluid p-4 bg-light min-vh-100" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+        <div class="container-fluid p-4 bg-light min-vh-100">
             <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
                 <div>
                     <h1 class="h3 fw-bold text-dark mb-1">Media Dashboard</h1>
@@ -17,10 +17,8 @@
 
             <div class="row g-4">
                 <div class="col-12 col-sm-6 col-lg">
-                    <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden"
-                         style="border-top: 4px solid #3b82f6 !important; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
-                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(59, 130, 246, 0.15)';"
-                         onmouseout="this.style.transform='none'; this.style.boxShadow='none';"
+                    <div class="card h-100 shadow-sm border-0 border-top border-4 border-primary position-relative overflow-hidden"
+                         role="button"
                          t-on-click.prevent="() => this.actionService.doAction({
                              name: 'Image',
                              res_model: 'media.asset',
@@ -29,25 +27,22 @@
                              domain: [['media_type', '=', 'image']],
                          })">
                         <div class="card-body text-center d-flex flex-column align-items-center p-4">
-                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-3"
-                                 style="width: 60px; height: 60px; background-color: #eff6ff;">
-                                <i class="oi oi-2x text-primary" data-icon="image" style="font-size: 28px; --oi-font-size: 28px;"/>
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 bg-primary-subtle p-3">
+                                <i class="oi oi-2x text-primary" data-icon="image"/>
                             </div>
                             <h5 class="fw-bold text-dark mb-1">Images</h5>
                             <p class="text-muted small mb-3">Photos, graphics, and illustrations</p>
                             <h2 class="fw-bold text-dark mb-3" t-out="this.result.count[0]"/>
                             <div class="mt-auto text-primary fw-semibold small">
-                                Browse files <i class="oi ms-1" data-icon="arrow_forward" style="font-size: 14px; --oi-font-size: 14px; vertical-align: middle;"/>
+                                Browse files <i class="oi ms-1 align-middle" data-icon="arrow_forward"/>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-12 col-sm-6 col-lg">
-                    <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden"
-                         style="border-top: 4px solid #f43f5e !important; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
-                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(244, 63, 94, 0.15)';"
-                         onmouseout="this.style.transform='none'; this.style.boxShadow='none';"
+                    <div class="card h-100 shadow-sm border-0 border-top border-4 border-danger position-relative overflow-hidden"
+                         role="button"
                          t-on-click.prevent="() => this.actionService.doAction({
                              name: 'Video',
                              res_model: 'media.asset',
@@ -56,25 +51,22 @@
                              domain: [['media_type', '=', 'video']],
                          })">
                         <div class="card-body text-center d-flex flex-column align-items-center p-4">
-                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-3"
-                                 style="width: 60px; height: 60px; background-color: #fff1f2;">
-                                <i class="oi oi-2x" data-icon="videocam" style="font-size: 28px; --oi-font-size: 28px; color: #f43f5e;"/>
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 bg-danger-subtle p-3">
+                                <i class="oi oi-2x text-danger" data-icon="videocam"/>
                             </div>
                             <h5 class="fw-bold text-dark mb-1">Videos</h5>
                             <p class="text-muted small mb-3">Video clips, animations, and movies</p>
                             <h2 class="fw-bold text-dark mb-3" t-out="this.result.count[1]"/>
-                            <div class="mt-auto fw-semibold small" style="color: #f43f5e;">
-                                Browse files <i class="oi ms-1" data-icon="arrow_forward" style="font-size: 14px; --oi-font-size: 14px; vertical-align: middle;"/>
+                            <div class="mt-auto text-danger fw-semibold small">
+                                Browse files <i class="oi ms-1 align-middle" data-icon="arrow_forward"/>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-12 col-sm-6 col-lg">
-                    <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden"
-                         style="border-top: 4px solid #10b981 !important; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
-                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(16, 185, 129, 0.15)';"
-                         onmouseout="this.style.transform='none'; this.style.boxShadow='none';"
+                    <div class="card h-100 shadow-sm border-0 border-top border-4 border-success position-relative overflow-hidden"
+                         role="button"
                          t-on-click.prevent="() => this.actionService.doAction({
                              name: 'Document',
                              res_model: 'media.asset',
@@ -83,25 +75,22 @@
                              domain: [['media_type', '=', 'document']],
                          })">
                         <div class="card-body text-center d-flex flex-column align-items-center p-4">
-                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-3"
-                                 style="width: 60px; height: 60px; background-color: #ecfdf5;">
-                                <i class="oi oi-2x" data-icon="description" style="font-size: 28px; --oi-font-size: 28px; color: #10b981;"/>
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 bg-success-subtle p-3">
+                                <i class="oi oi-2x text-success" data-icon="description"/>
                             </div>
                             <h5 class="fw-bold text-dark mb-1">Documents</h5>
                             <p class="text-muted small mb-3">PDFs, text files, and spreadsheets</p>
                             <h2 class="fw-bold text-dark mb-3" t-out="this.result.count[2]"/>
-                            <div class="mt-auto fw-semibold small" style="color: #10b981;">
-                                Browse files <i class="oi ms-1" data-icon="arrow_forward" style="font-size: 14px; --oi-font-size: 14px; vertical-align: middle;"/>
+                            <div class="mt-auto text-success fw-semibold small">
+                                Browse files <i class="oi ms-1 align-middle" data-icon="arrow_forward"/>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-12 col-sm-6 col-lg">
-                    <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden"
-                         style="border-top: 4px solid #f59e0b !important; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
-                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(245, 158, 11, 0.15)';"
-                         onmouseout="this.style.transform='none'; this.style.boxShadow='none';"
+                    <div class="card h-100 shadow-sm border-0 border-top border-4 border-warning position-relative overflow-hidden"
+                         role="button"
                          t-on-click.prevent="() => this.actionService.doAction({
                              name: 'Url',
                              res_model: 'media.asset',
@@ -110,25 +99,22 @@
                              domain: [['media_type', '=', 'url']],
                          })">
                         <div class="card-body text-center d-flex flex-column align-items-center p-4">
-                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-3"
-                                 style="width: 60px; height: 60px; background-color: #fffbeb;">
-                                <i class="oi oi-2x" data-icon="link" style="font-size: 28px; --oi-font-size: 28px; color: #f59e0b;"/>
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 bg-warning-subtle p-3">
+                                <i class="oi oi-2x text-warning" data-icon="link"/>
                             </div>
                             <h5 class="fw-bold text-dark mb-1">URLs</h5>
                             <p class="text-muted small mb-3">Websites and external links</p>
                             <h2 class="fw-bold text-dark mb-3" t-out="this.result.count[3]"/>
-                            <div class="mt-auto fw-semibold small" style="color: #f59e0b;">
-                                Browse files <i class="oi ms-1" data-icon="arrow_forward" style="font-size: 14px; --oi-font-size: 14px; vertical-align: middle;"/>
+                            <div class="mt-auto text-warning fw-semibold small">
+                                Browse files <i class="oi ms-1 align-middle" data-icon="arrow_forward"/>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-12 col-sm-6 col-lg">
-                    <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden"
-                         style="border-top: 4px solid #8b5cf6 !important; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
-                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(139, 92, 246, 0.15)';"
-                         onmouseout="this.style.transform='none'; this.style.boxShadow='none';"
+                    <div class="card h-100 shadow-sm border-0 border-top border-4 border-info position-relative overflow-hidden"
+                         role="button"
                          t-on-click.prevent="() => this.actionService.doAction({
                              name: 'Audio',
                              res_model: 'media.asset',
@@ -137,15 +123,14 @@
                              domain: [['media_type', '=', 'audio']],
                          })">
                         <div class="card-body text-center d-flex flex-column align-items-center p-4">
-                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-3"
-                                 style="width: 60px; height: 60px; background-color: #f5f3ff;">
-                                <i class="oi oi-2x" data-icon="music_note" style="font-size: 28px; --oi-font-size: 28px; color: #8b5cf6;"/>
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 bg-info-subtle p-3">
+                                <i class="oi oi-2x text-info" data-icon="music_note"/>
                             </div>
                             <h5 class="fw-bold text-dark mb-1">Audio</h5>
                             <p class="text-muted small mb-3">Audio tracks, music, and voice notes</p>
                             <h2 class="fw-bold text-dark mb-3" t-out="this.result.count[4]"/>
-                            <div class="mt-auto fw-semibold small" style="color: #8b5cf6;">
-                                Browse files <i class="oi ms-1" data-icon="arrow_forward" style="font-size: 14px; --oi-font-size: 14px; vertical-align: middle;"/>
+                            <div class="mt-auto text-info fw-semibold small">
+                                Browse files <i class="oi ms-1 align-middle" data-icon="arrow_forward"/>
                             </div>
                         </div>
                     </div>
@@ -154,4 +139,3 @@
         </div>
     </t>
 </templates>
-

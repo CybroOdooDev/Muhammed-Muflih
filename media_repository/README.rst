@@ -20,7 +20,7 @@ Key Features
 ------------
 
 * Upload and manage images, videos, documents, audio files, and URLs.
-* Dashboard view with media type-wise asset statistics..
+* Dashboard view with media type-wise asset statistics.
 * Organize media assets using categories and tags.
 
 Installation
@@ -31,7 +31,7 @@ Configuration
 =============
 * Add users to the two user groups
     - User: can create and upload the media assets.
-    - Manager: can create and delete the media assets
+    - Manager: can create and delete the media assets.
 
 Company
 -------

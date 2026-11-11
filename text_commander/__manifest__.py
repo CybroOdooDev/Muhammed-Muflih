@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
@@ -19,7 +18,7 @@
     'name': 'Text Commander',
     'version': '20.0.1.0.0',
     'category': 'Extra tools',
-    'summary': 'Customized command palette ',
+    'summary': 'Customized command palette',
     'description': 'This module helps you to open models or single model '
                    'record and create record of a model through command '
                    'palette',
@@ -27,18 +26,16 @@
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['base_setup'],
+    'depends': ['web'],
     'assets': {
-        "web.assets_backend": [
-            '/text_commander/static/src/xml/model_command_item.xml',
-            '/text_commander/static/src/js/command_palette.js',
-            '/text_commander/static/src/js/model_providers.js',
-        ]
+        'web.assets_backend': [
+            'text_commander/static/src/xml/model_command_item.xml',
+            'text_commander/static/src/js/command_palette.js',
+            'text_commander/static/src/js/model_providers.js',
+        ],
     },
     'images': [
         'static/description/banner.jpg'],
     'license': 'LGPL-3',
     'installable': True,
-    'auto_install': False,
-    'application': False,
 }

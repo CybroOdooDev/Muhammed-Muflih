@@ -77,17 +77,11 @@ class MediaAsset(models.Model):
 
     @api.model
     def get_media_type_data(self):
-        """Get all records from this model and groups based on media type and return to the orm call"""
-        assets = self.search([])
-        image = len(assets.filtered(lambda rec: rec.media_type=='image'))
-        video = len(assets.filtered(lambda rec: rec.media_type=='video'))
-        document = len(assets.filtered(lambda rec: rec.media_type=='document'))
-        url = len(assets.filtered(lambda rec: rec.media_type=='url'))
-        audio = len(assets.filtered(lambda rec: rec.media_type=='audio'))
-
+        """Get counts grouped by media type for dashboard aggregation."""
+        types = ['image', 'video', 'document', 'url', 'audio']
         return {
-            'count': [image, video, document, url, audio],
-            'name':['Image', 'Video', 'Document', 'Url', 'Audio']
+            'count': [self.search_count([('media_type', '=', t)]) for t in types],
+            'name': ['Image', 'Video', 'Document', 'Url', 'Audio'],
         }
 
 
@@ -121,6 +115,8 @@ class MediaAsset(models.Model):
             self.file_size = 0.0
 
     def confirm(self):
-        """ Confirm the file has been uploaded."""
-        if self.state == 'draft':
-            self.state = 'confirmed'
+        """Confirm the file has been uploaded."""
+        for rec in self:
+            if rec.state == 'draft':
+                rec.state = 'confirmed'
+

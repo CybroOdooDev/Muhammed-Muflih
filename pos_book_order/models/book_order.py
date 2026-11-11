@@ -29,19 +29,19 @@ class BookOrder(models.Model):
     name = fields.Char(string='Booking Ref', readonly=True,
                        help="Name of the booked order",
                        copy=False, default='/')
-    company_id = fields.Many2one('res.company', string='Company',
+    company_id = fields.Many2one('res.company',
                                  help="Company of the booked order",
-                                 default=lambda self: self.env.user.company_id)
+                                 default=lambda self: self.env.company)
     date_quotation = fields.Datetime(string='Quotation Date',
                                      help="Quotation created date",
                                      readonly=True, index=True,
                                      default=fields.Datetime.now)
     date_order = fields.Date(string='Order Date', help="Order created date",
                              readonly=True, index=True,
-                             default=fields.Date.today())
+                             default=fields.Date.context_today)
     amount_tax = fields.Float(compute='_compute_amount_all', string='Taxes',
                               help="Tax amount for the order",
-                              digits=0, default=1.2)
+                              digits=0)
     amount_total = fields.Float(compute='_compute_amount_all', string='Total',
                                 help="Total amount of the order",
                                 digits=0)
@@ -62,19 +62,16 @@ class BookOrder(models.Model):
                        help="Enter any notes regarding order")
     fiscal_position_id = fields.Many2one('account.fiscal.position',
                                          help="Fiscal position account "
-                                              "for order",
-                                         string='Fiscal Position')
+                                              "for order")
     pos_order_uid = fields.Char(help="Related Pos order",
-                                         string='Related Pos Order')
-    pickup_date = fields.Datetime(string='Pickup Date', readonly=True,
+                                string='Related Pos Order')
+    pickup_date = fields.Datetime(readonly=True,
                                   help="Picking date of the order")
-    deliver_date = fields.Datetime(string='Deliver Date', readonly=True,
+    deliver_date = fields.Datetime(readonly=True,
                                    help="Delivering date of the order")
     phone = fields.Char('Contact No', help='Phone of customer for delivery')
-    delivery_address = fields.Char(string='Delivery Address',
-                                   help='Address of customer for delivery')
+    delivery_address = fields.Char(help='Address of customer for delivery')
     pricelist_id = fields.Many2one('product.pricelist',
-                                   string='Pricelist',
                                    help="Pricelist of the order")
 
     @api.model
@@ -110,27 +107,29 @@ class BookOrder(models.Model):
             order.amount_total = order.amount_tax + amount_untaxed
 
 
-    def create(self, vals):
+    @api.model_create_multi
+    def create(self, vals_list):
         """ Inherited create function to generate sequence number
-            for booker orders
+            for booked orders
             :return record: created record
         """
-        if vals.get('name', '/') == '/':
-            vals['name'] = self.env['ir.sequence'].next_by_code(
-                'book.order') or '/'
-        return super(BookOrder, self).create(vals)
+        for vals in vals_list:
+            if vals.get('name', '/') == '/':
+                vals['name'] = self.env['ir.sequence'].next_by_code(
+                    'book.order') or '/'
+        return super().create(vals_list)
 
     def action_confirm(self):
         """ Function to confirm the book order"""
         self.write({
             'state': 'confirmed',
         })
-        return self.pos_order_uid
+        return self.pos_order_uid if len(self) == 1 else self.mapped('pos_order_uid')
 
 
     @api.model
     def create_booked_order(self, partner, phone, address, date, price_list,
-                            product, note, pickup_date, delivery_date,pos_order):
+                            product, note, pickup_date, delivery_date, pos_order):
         """ It creates a booked order based on the value in the booking popup
              in PoS ui.
              partner(int): id of partner
@@ -140,67 +139,70 @@ class BookOrder(models.Model):
              price_list(int): price list id of order
              product(dict): dictionary values with product ids and quantity
              note(string): Order note
-             pickup(date): pickup date of the booked order
-             delivery(date): delivery date of the booked order
+             pickup_date(string): pickup date of the booked order
+             delivery_date(string): delivery date of the booked order
+             pos_order(string): POS order UID
         """
         order = self.create({
             'partner_id': partner,
             'phone': phone,
             'delivery_address': address,
             'pricelist_id': price_list if price_list else False,
-            'date_quotation': fields.Date.today() if not date else date,
-            'pos_order_uid':pos_order,
+            'date_quotation': fields.Date.context_today(self) if not date else date,
+            'pos_order_uid': pos_order,
             'book_line_ids': [Command.create({
                 'product_id': product['product_id'][i],
                 'qty': product['qty'][i],
                 'price_unit': float(product['price'][i]),
-                'tax_ids': [(6, 0, product['tax_ids'][i])]
-
+                'tax_ids': [Command.set(product['tax_ids'][i])],
             }) for i in range(len(product['product_id']))],
             'note': note,
         })
         if pickup_date:
-            order.write({'pickup_date': pickup_date + ' 00:00:00'})
+            order.write({'pickup_date': pickup_date + ' 00:00:00' if ' ' not in str(pickup_date) else pickup_date})
         if delivery_date:
-            order.write({'deliver_date': delivery_date + ' 00:00:00'})
+            order.write({'deliver_date': delivery_date + ' 00:00:00' if ' ' not in str(delivery_date) else delivery_date})
         return {
             'id': order.id,
             'name': order.name,
         }
 
     @api.model
-    def all_orders(self, state=None):
+    def all_orders(self, state=None, limit=200):
         """ To fetch booked orders to PoS Booked orders screen
             :param state: Optional filter ('draft', 'confirmed', or 'all')
-            :return dict: A list of dictionaries containing information
+            :param limit: Maximum number of records to return (default: 200)
+            :return list: A list of dictionaries containing information
                         about each order
         """
         values = []
-        domain = []
-        if state and state != 'all':
-            domain = [('state', '=', state)]
-        for rec in self.search(domain, order='date_quotation desc, id desc'):
-            products = []
-            for line in rec.book_line_ids:
-                products.append({
+        domain = ['|', ('company_id', '=', False), ('company_id', '=', self.env.company.id)]
+        if state and state in ('draft', 'confirmed'):
+            domain.append(('state', '=', state))
+        for rec in self.search(domain, order='state asc, date_quotation desc, id desc', limit=limit):
+            products = [
+                {
                     'id': line.product_id.id,
                     'qty': line.qty,
-                    'price': line.price_unit
-                })
-            values.append({'id': rec.id,
-                           'name': rec.name,
-                           'state': rec.state,
-                           'partner_id': rec.partner_id.id,
-                           'partner_name': rec.partner_id.name,
-                           'address': rec.delivery_address,
-                           'note': rec.note,
-                           'phone': rec.phone,
-                           'date': rec.date_quotation,
-                           'pickup': rec.pickup_date,
-                           'deliver': rec.deliver_date,
-                           'products': products,
-                           'total': rec.amount_total,
-                           'pos_order_uid': rec.pos_order_uid,
-                           })
+                    'price': line.price_unit,
+                }
+                for line in rec.book_line_ids
+            ]
+            values.append({
+                'id': rec.id,
+                'name': rec.name,
+                'state': rec.state,
+                'partner_id': rec.partner_id.id,
+                'partner_name': rec.partner_id.name,
+                'address': rec.delivery_address,
+                'note': rec.note,
+                'phone': rec.phone,
+                'date': rec.date_quotation,
+                'pickup': rec.pickup_date,
+                'deliver': rec.deliver_date,
+                'products': products,
+                'total': rec.amount_total,
+                'pos_order_uid': rec.pos_order_uid,
+            })
 
         return values

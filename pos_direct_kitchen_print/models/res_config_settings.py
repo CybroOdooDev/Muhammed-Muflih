@@ -18,7 +18,6 @@
 import logging
 
 from odoo import fields, models
-from odoo.tools.translate import _
 from printnodeapi.auth import ApiError, NetworkError
 from printnodeapi.gateway import Gateway
 
@@ -27,12 +26,8 @@ _logger = logging.getLogger(__name__)
 
 class ResConfigSettings(models.TransientModel):
     """
-    This class is Inheriting the model res.config.setting.
-    add some extra fields and functions for the model.
-    Methods:
-    get_values(self): super the  function for getting the printer details.
-    set_values(self): super the  function for setting the printer details
-    action_check_printers(self): checking the available printers in the system
+    Inherit res.config.settings to configure PrintNode API settings
+    and synchronize available kitchen printers.
     """
     _inherit = 'res.config.settings'
 
@@ -40,7 +35,6 @@ class ResConfigSettings(models.TransientModel):
                                      config_parameter='pos_direct_kitchen_print.api_key_print_node',
                                      help='API Key of the print-node')
     available_printers_id = fields.Many2one('printer.details',
-                                            string="Available Printers",
                                             config_parameter='pos_direct_kitchen_print.available_printers_id',
                                             help='Available printers',
                                             readonly=False)
@@ -51,7 +45,7 @@ class ResConfigSettings(models.TransientModel):
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('PrintNode Printer Check'),
+                'title': self.env._('PrintNode Printer Check'),
                 'message': message,
                 'type': notification_type,
                 'sticky': notification_type in ('danger', 'warning'),
@@ -63,14 +57,14 @@ class ResConfigSettings(models.TransientModel):
         print_node_api = self.api_key_print_node
         if not print_node_api:
             return self._printer_notification(
-                _('Please provide a PrintNode API Key first.'))
+                self.env._('Please provide a PrintNode API Key first.'))
 
         try:
             gateway = Gateway(url="https://api.printnode.com",
                               apikey=print_node_api)
             computers = gateway.computers()
             if not computers:
-                return self._printer_notification(_(
+                return self._printer_notification(self.env._(
                     'No computers found in your PrintNode account. Please '
                     'connect a computer first.'))
 
@@ -78,7 +72,7 @@ class ResConfigSettings(models.TransientModel):
             printers = gateway.printers(computer=computer_id)
             if not printers:
                 return self._printer_notification(
-                    _('No printers found for the connected computer.'))
+                    self.env._('No printers found for the connected computer.'))
 
             for printer in printers:
                 prints = self.env['printer.details'].search(
@@ -91,15 +85,15 @@ class ResConfigSettings(models.TransientModel):
                         'state': printer.state,
                     })
             return self._printer_notification(
-                _('Available printers have been checked successfully.'),
+                self.env._('Available printers have been checked successfully.'),
                 notification_type='success')
         except (ApiError, NetworkError) as error:
             _logger.warning("PrintNode printer check failed: %s", error)
             return self._printer_notification(
-                _('Connection failed: %s') % str(error),
+                self.env._('Connection failed: %(error)s', error=str(error)),
                 notification_type='danger')
         except (TypeError, ValueError) as error:
             _logger.warning("Invalid PrintNode printer response: %s", error)
             return self._printer_notification(
-                _('Invalid response received from PrintNode.'),
+                self.env._('Invalid response received from PrintNode.'),
                 notification_type='danger')

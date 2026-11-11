@@ -38,7 +38,7 @@ Key Features:
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['point_of_sale', 'pos_restaurant'],
+    'depends': ['pos_restaurant'],
     'external_dependencies': {'python': ['printnodeapi']},
     'data': [
         'security/ir.access.csv',

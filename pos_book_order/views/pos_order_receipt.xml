@@ -2,10 +2,10 @@
 <odoo>
     <data>
     <!-- Inherit pos order receipt to add booking information -->
-        <template id="pos_order_receipt" inherit_id="point_of_sale.pos_order_receipt">
+        <template id="pos_order_receipt_inherit_pos_book_order" inherit_id="point_of_sale.pos_order_receipt">
             <xpath expr="//div[@name='before-footer']" position="before">
                 <t t-if="extra_data.get('booking_info')">
-                    <hr style="border: none; border-top: 1px dashed black; margin: 10px 0;"/>
+                    <hr class="my-2 border-top"/>
                     <table class="w-100 my-2">
                         <tbody>
                             <tr t-if="extra_data['booking_info'].get('name')">
