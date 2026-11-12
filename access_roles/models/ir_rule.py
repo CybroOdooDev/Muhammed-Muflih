@@ -15,9 +15,12 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
+import logging
 from odoo import api, models
 from odoo.fields import Domain
 from odoo.tools.safe_eval import safe_eval
+
+_logger = logging.getLogger(__name__)
 
 
 class Base(models.AbstractModel):
@@ -49,8 +52,8 @@ class Base(models.AbstractModel):
                         domain_val = safe_eval(access.name, eval_context)
                         if domain_val:
                             role_domains.append(Domain(domain_val))
-                    except Exception:
-                        pass
+                    except Exception as err:
+                        _logger.debug("Failed to evaluate domain expression for %s: %s", self._name, err)
         if role_domains:
             role_domain_combined = Domain.OR(role_domains)
             return base_domain & role_domain_combined

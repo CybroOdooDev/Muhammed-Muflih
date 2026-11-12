@@ -161,13 +161,12 @@ export class EasyChatGPTDialog extends Component {
                     title: 'Text copied',
                     sticky: false,
                 });
-            } catch (err) {
+            } catch (_err) {
                 this.notificationService.add("Failed to copy text", {
                     type: 'danger',
                     title: 'Copy Failed',
                     sticky: false,
                 });
-                console.error("Clipboard copy failed", err);
             }
         }
     }

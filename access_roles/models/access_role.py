@@ -64,7 +64,7 @@ class AccessRole(models.Model):
     _description = 'Access Role'
     _inherit = ['mail.thread']
 
-    name = fields.Char(string='Name', required=True)
+    name = fields.Char(required=True)
     user_ids = fields.Many2many('res.users')
     role_management_id = fields.Many2one('role.management')
     groups_ids = fields.Many2many('res.groups',
@@ -135,9 +135,7 @@ class AccessRole(models.Model):
 
     @property
     def SELF_READABLE_FIELDS(self):
-        """ The list of fields a user can read on their own user record.
-        In order to add fields, please override this property on model extensions.
-        """
+        """The list of fields readable for role definition views."""
         return [
             'signature', 'company_id', 'login', 'email', 'name', 'image_1920',
             'image_1024', 'image_512', 'image_256', 'image_128', 'lang', 'tz',
@@ -148,9 +146,7 @@ class AccessRole(models.Model):
 
     @property
     def SELF_WRITEABLE_FIELDS(self):
-        """ The list of fields a user can write on their own user record.
-        In order to add fields, please override this property on model extensions.
-        """
+        """The list of writable fields for role definition views."""
         return ['signature', 'action_id', 'company_id', 'email', 'name', 'image_1920',
                 'lang', 'tz']
 

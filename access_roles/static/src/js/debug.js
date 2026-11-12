@@ -9,6 +9,7 @@ import { onWillStart } from "@odoo/owl";
 patch(LoadingIndicator.prototype, {
     setup() {
         this.orm = useService("orm");
+        this.notification = useService("notification");
         if (odoo.debug) {
             onWillStart(async () => {
                 try {
@@ -17,11 +18,14 @@ patch(LoadingIndicator.prototype, {
                         "get_role_restrictions",
                     );
                     if (result.is_debug) {
-                        alert('You are not allowed to enter debug mode. Please contact Administration.');
+                        this.notification.add(
+                            "You are not allowed to enter debug mode. Please contact Administration.",
+                            { type: "danger" }
+                        );
                         router.pushState({ debug: 0 }, { reload: true });
                     }
-                } catch (error) {
-                    console.error("Error checking debug permission:", error);
+                } catch {
+                    // Fail gracefully when restriction cannot be fetched
                 }
             });
         }

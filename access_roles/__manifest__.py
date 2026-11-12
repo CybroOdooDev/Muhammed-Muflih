@@ -18,23 +18,23 @@
 {
     'name': 'Access Roles',
     'version': '20.0.1.0.0',
-    'category':'Security',
+    'category': 'Security',
     'sequence': 1,
     'summary': 'Access Roles for users',
-    'description': """Access Roles for users""",
+    'description': """Manage user access roles and role-based permissions in Odoo.""",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['base', 'mail', 'web'],
+    'depends': ['mail', 'web'],
     'data': [
-            'security/access_roles_security.xml',
-            'security/ir.access.csv',
-            'views/access_role_views.xml',
-            'views/role_management_views.xml',
-            'views/res_users_views.xml',
-            'views/domain_model_views.xml',
-            'views/access_role_menus.xml'
+        'security/access_roles_security.xml',
+        'security/ir.access.csv',
+        'views/access_role_views.xml',
+        'views/role_management_views.xml',
+        'views/res_users_views.xml',
+        'views/domain_model_views.xml',
+        'views/access_role_menus.xml',
     ],
     'assets': {
         'web.assets_backend': [
@@ -49,7 +49,5 @@
     'images': ['static/description/banner.jpg'],
     'license': 'LGPL-3',
     'installable': True,
-    'auto_install': False,
     'application': True,
 }
-

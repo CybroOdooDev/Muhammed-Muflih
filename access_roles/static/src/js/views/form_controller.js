@@ -25,8 +25,8 @@ patch(FormController.prototype, {
                         }
                     }
                 });
-            } catch (error) {
-                console.error("Error checking form view restrictions:", error);
+            } catch {
+                // Fail gracefully when checking form view restrictions
             }
         });
         // Patch getStaticActionMenuItems to conditionally exclude archive/unarchive

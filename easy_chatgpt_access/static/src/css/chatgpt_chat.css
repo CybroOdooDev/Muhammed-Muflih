@@ -8,7 +8,7 @@
 }
 
 #chatgpt_btn:hover {
-    color: #10a37f !important;
+    color: #10a37f;
     opacity: 1;
     transform: scale(1.15);
 }

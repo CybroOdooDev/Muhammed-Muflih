@@ -27,8 +27,8 @@ class ButtonRegistry(models.Model):
 
     name = fields.Char(string='Button Name', required=True)
     action_name = fields.Char(string='Action/Method Name')
-    model_id = fields.Many2one('ir.model', string='Model', ondelete='cascade')
-    view_ids = fields.Many2many('ir.ui.view', string='View')
+    model_id = fields.Many2one('ir.model', ondelete='cascade')
+    view_ids = fields.Many2many('ir.ui.view')
 
     @api.model
     def _register_hook(self):
@@ -42,7 +42,7 @@ class ButtonRegistry(models.Model):
 
     def get_all_buttons(self):
         """Finds buttons from views and stores them."""
-        views = self.env['ir.ui.view'].search([])
+        views = self.env['ir.ui.view'].search([('type', 'in', ['form', 'list', 'kanban'])])
         button_model = {}
         # Collect buttons per model, along with the view IDs where they appear.
         for view in views:

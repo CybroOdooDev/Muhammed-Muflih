@@ -51,7 +51,7 @@ class IrUiView(models.Model):
                 button_name = button_node.get('name')
                 for record in button.button_ids:
                     if current_model == record.model_id.model and button_name == record.action_name:
-                        button_node.set('invisible', 'True')
+                        button_node.set('invisible', '1')
         return tree
 
     def _process_tab_access(self, tree, button_access_records, current_model):
@@ -61,7 +61,7 @@ class IrUiView(models.Model):
                 tab_name = tab_node.get('string')
                 for record in tab.tab_ids:
                     if current_model == record.model_id.model and tab_name == record.name:
-                        tab_node.set('invisible', 'True')
+                        tab_node.set('invisible', '1')
         return tree
 
     def _process_filter_access(self, tree, filter_access_records, current_model):
@@ -71,10 +71,10 @@ class IrUiView(models.Model):
                 filter_name = filter_node.get('string')
                 for record in groupby.filter_ids:
                     if current_model == record.model_id.model and filter_name == record.name:
-                        filter_node.set('invisible', 'True')
+                        filter_node.set('invisible', '1')
                 for record in groupby.group_ids:
                     if current_model == record.model_id.model and filter_name == record.name:
-                        filter_node.set('invisible', 'True')
+                        filter_node.set('invisible', '1')
         return tree
 
     def _process_field_access(self, tree, field_access_records, current_model):
@@ -124,7 +124,7 @@ class IrUiView(models.Model):
                         model_node.set("edit", "false")
                         model_node.set("create", "false")
                         for button_node in model_node.xpath('//button'):
-                            button_node.set('invisible', 'True')
+                            button_node.set('invisible', '1')
                     if model.is_hide_create:
                         model_node.set("create", "false")
                     if model.is_hide_delete:

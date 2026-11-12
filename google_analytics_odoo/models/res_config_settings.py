@@ -23,17 +23,13 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     measurement_id_analytics = fields.Char(
-        config_parameter=
-        'google_analytics_odoo.measurement_id_analytics',
+        config_parameter='google_analytics_odoo.measurement_id_analytics',
         string='Measurement ID',
-        help='Measurement id of the google analytics')
+        help='Measurement ID of Google Analytics')
     api_secret = fields.Char(
-        config_parameter=
-        'google_analytics_odoo.api_secret',
+        config_parameter='google_analytics_odoo.api_secret',
         string='API Secret',
-        help='API secret of the google analytics')
-    enable_analytics = fields.Boolean(config_parameter=
-                                      'google_analytics_odoo.enable_analytics',
-                                      string='Enable Analytics',
-                                      help='Enable to send events to'
-                                           'google analytics')
+        help='API secret of Google Analytics')
+    enable_analytics = fields.Boolean(
+        config_parameter='google_analytics_odoo.enable_analytics',
+        help='Enable to send events to Google Analytics')

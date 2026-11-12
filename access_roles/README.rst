@@ -12,8 +12,8 @@
 
 |license| |odoo| |maintainer|
 
-Your Module Name
-================
+Access Roles
+============
 
 This module helps manage user access rights and role-based group assignments in Odoo.
 

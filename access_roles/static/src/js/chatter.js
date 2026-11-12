@@ -16,7 +16,6 @@ const ChatterPatch = {
                     "role.management",
                     "get_role_restrictions",
                 );
-                const el = typeof this.rootRef === "function" ? this.rootRef() : this.rootRef?.el;
                 if (userData.is_chatter === true) {
                     const hide = () => {
                         const targetEl = typeof this.rootRef === "function" ? this.rootRef() : this.rootRef?.el;
@@ -33,8 +32,8 @@ const ChatterPatch = {
                     hide();
                     setTimeout(hide, 0);
                 }
-            } catch (error) {
-                console.error("Failed to check chatter visibility preference:", error);
+            } catch {
+                // Fail gracefully when checking chatter preference
             }
         });
     },

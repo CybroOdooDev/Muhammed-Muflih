@@ -24,7 +24,7 @@ class RoleManagement(models.Model):
     _description = 'Role Management'
     _inherit = ['mail.thread']
 
-    name = fields.Char(string='Name', required=True)
+    name = fields.Char(required=True)
     domain_ids = fields.Many2many('domain.model')
     is_debug = fields.Boolean(
         string='Disable Debug Mode',
@@ -52,16 +52,17 @@ class RoleManagement(models.Model):
     @api.depends('role_ids')
     def _compute_selected_role_ids(self):
         """Compute selected roles to prevent duplicate role assignments."""
+        all_selected = self.search([('id', 'not in', self.ids)]).mapped('role_ids').ids
         for record in self:
-            record.selected_role_ids = self.search([]).mapped('role_ids').ids
-            for role in record.role_ids:
-                role.role_management_id = record.id
+            record.selected_role_ids = all_selected
 
     @api.depends('menu_ids')
     def _compute_access_role_menu_ids(self):
         """Compute access roles menu id to prevent the menu from hiding."""
-        menu_id = self.env.ref('access_roles.access_role_menu_root').id
-        self.access_role_menu_ids = [fields.Command.link(menu_id)]
+        menu = self.env.ref('access_roles.access_role_menu_root', raise_if_not_found=False)
+        menu_id = menu.id if menu else False
+        for record in self:
+            record.access_role_menu_ids = [fields.Command.link(menu_id)] if menu_id else []
 
     @api.model
     def get_role_restrictions(self):
@@ -116,6 +117,16 @@ class RoleManagement(models.Model):
                     model_access.mapped('is_model_readonly'))
         return access_data
 
+    def write(self, vals):
+        """Override write to maintain role_management_id on linked roles."""
+        res = super().write(vals)
+        if 'role_ids' in vals:
+            for record in self:
+                for role in record.role_ids:
+                    if role.role_management_id != record:
+                        role.role_management_id = record.id
+        return res
+
     @api.model_create_multi
     def create(self, vals_list):
         """Override create to automatically link roles with role management records."""
@@ -128,11 +139,13 @@ class RoleManagement(models.Model):
 
     def action_open_domain_form(self):
         """Opens the domain form when clicking on domain_id"""
+        self.ensure_one()
+        domain_id = self.domain_access_ids.domain_id[:1].id if self.domain_access_ids else False
         return {
             'type': 'ir.actions.act_window',
             'name': 'Domain Configuration',
             'res_model': 'domain.model',
             'view_mode': 'form',
-            'res_id': self.domain_access_ids.domain_id.id,
-            'target': 'new'
+            'res_id': domain_id,
+            'target': 'new',
         }

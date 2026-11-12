@@ -28,13 +28,13 @@ class Login(Home):
     """Extends the functionality of the web login process by adding
       additional analytics tracking upon successful login."""
 
-    @http.route('/web/login', type='http', auth='none')
-    def web_login(self, redirect=None, **kw):
+    @http.route('/web/login', type='http', auth='public', website=True, sitemap=False)
+    def web_login(self, *args, **kw):
         """Controller for the web login process.
-           :param redirect: URL to redirect after login.
+           :param args: Positional arguments.
            :param kw: Additional keyword arguments.
            :return: Result of the web login process."""
-        res = super().web_login(redirect=None, **kw)
+        res = super().web_login(*args, **kw)
         login_success = request.params.get('login_success')
         if login_success:
             try:
@@ -56,7 +56,7 @@ class Login(Home):
                         "events": [{
                             "name": "Login_Information",
                             "params": {
-                                "User_login": kw.get('login', request.env.user.login),
+                                "User_login": kw.get('login') or request.params.get('login') or request.env.user.login,
                                 "Name": request.env.user.name,
                                 "Email": request.env.user.partner_id.email or '',
                             }

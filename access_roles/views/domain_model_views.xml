@@ -9,7 +9,7 @@
                 <sheet>
                     <group>
                         <field name="domain_model_id"/>
-                        <field name="domain_model_name" invisible="True"/>
+                        <field name="domain_model_name" invisible="1"/>
                         <field name="name" widget="domain" options="{'model': 'domain_model_name'}"/>
                     </group>
                 </sheet>
@@ -19,6 +19,7 @@
 
     <!-- List View for Model Domain-->
     <record id="domain_model_view_list" model="ir.ui.view">
+        <field name="name">domain.model.view.list</field>
         <field name="model">domain.model</field>
         <field name="arch" type="xml">
             <list string="Domains">

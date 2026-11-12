@@ -187,7 +187,7 @@ class ResGroups(models.Model):
             new_context = dict(self.env.context)
             new_context.pop('install_filename', None)
             new_context['lang'] = None
-            view.with_context(new_context).write({'arch': xml_content})
+            view.with_context(**new_context).write({'arch': xml_content})
 
     def get_application_groups(self, domain):
         """Return the non-share groups that satisfy ``domain``."""

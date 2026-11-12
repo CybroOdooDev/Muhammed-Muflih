@@ -29,8 +29,8 @@ class FilterRegistry(models.Model):
     domain = fields.Char(string='Domain')
     string = fields.Char(string='Display Name')
     active = fields.Boolean(default=True)
-    model_id = fields.Many2one('ir.model', string='Model', ondelete='cascade')
-    view_ids = fields.Many2many('ir.ui.view', string='View')
+    model_id = fields.Many2one('ir.model', ondelete='cascade')
+    view_ids = fields.Many2many('ir.ui.view')
 
     @api.model
     def _register_hook(self):

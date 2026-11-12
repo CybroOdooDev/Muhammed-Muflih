@@ -15,7 +15,7 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.fields import Command
 
 
@@ -28,63 +28,62 @@ class ResUsers(models.Model):
 
     @api.onchange('access_role_id')
     def _onchange_access_role_id(self):
-        """Warn users to save before assigning a role and update user-role relationships."""
-        if not self._origin.id and self.access_role_id:  # Record is new (not saved)
+        """Warn users to save before assigning a role."""
+        if not self._origin.id and self.access_role_id:
             self.access_role_id = False
             return {
                 'warning': {
-                    'title': _("Warning"),
-                    'message': _("Please save the user before assigning an Access Role."),
+                    'title': self.env._("Warning"),
+                    'message': self.env._("Please save the user before assigning an Access Role."),
                 }
             }
-        if not self.user_id:
-            if self._origin.access_role_id:
-                self._origin.access_role_id.write(
-                    {'user_ids': [(fields.Command.unlink(self._origin.id))]})
-            # Assign user to the new role
-            if self.access_role_id:
-                self.access_role_id.write(
-                    {'user_ids': [(fields.Command.link(self._origin.id))]})
-        else:
-            # Remove user from the previous role
-            if self._origin.access_role_id:
-                self._origin.access_role_id.write(
-                    {'user_ids': [(fields.Command.unlink(self.user_id.id))]})
-            # Assign user to the new role
-            if self.access_role_id:
-                self.access_role_id.write(
-                    {'user_ids': [(fields.Command.link(self.user_id.id))]})
 
     @api.model_create_multi
     def create(self, vals_list):
-        """Override create to assign groups based on the selected access role and creation of new users."""
+        """Override create to assign groups based on the selected access role."""
         users = super(ResUsers, self).create(vals_list)
         for user in users:
             if user.access_role_id:
                 user.write({
                     'group_ids': [Command.set(user.access_role_id.groups_ids.ids)]
                 })
+                if user.id not in user.access_role_id.user_ids.ids:
+                    user.access_role_id.write({'user_ids': [Command.link(user.id)]})
         return users
 
     def write(self, vals):
         """Override write to manage role-based group assignment"""
-        groups_to_remove = None
-        # Handle role removal
-        if 'access_role_id' in vals and not vals['access_role_id']:
-            if self.access_role_id:
-                groups_to_remove = self.access_role_id.groups_ids
+        groups_to_remove_per_user = {}
+        old_roles_per_user = {}
+        if 'access_role_id' in vals:
+            for user in self:
+                if user.access_role_id:
+                    groups_to_remove_per_user[user.id] = user.access_role_id.groups_ids
+                    old_roles_per_user[user.id] = user.access_role_id
         result = super(ResUsers, self).write(vals)
         if 'access_role_id' in vals:
             if vals['access_role_id']:
                 new_role = self.env['access.role'].browse(vals['access_role_id'])
-                self.write({
-                    'group_ids': [Command.set(new_role.groups_ids.ids)]
-                })
-            elif groups_to_remove:
-                groups_list = groups_to_remove.ids
-                if 1 in groups_list:
-                    groups_list.remove(1)
-                self.write({
-                    'group_ids': [Command.unlink(gid) for gid in groups_list]
-                })
+                for user in self:
+                    user.write({
+                        'group_ids': [Command.set(new_role.groups_ids.ids)]
+                    })
+                    old_role = old_roles_per_user.get(user.id)
+                    if old_role and old_role != new_role:
+                        old_role.write({'user_ids': [Command.unlink(user.id)]})
+                    if user.id not in new_role.user_ids.ids:
+                        new_role.write({'user_ids': [Command.link(user.id)]})
+            elif groups_to_remove_per_user:
+                for user in self:
+                    groups_to_remove = groups_to_remove_per_user.get(user.id)
+                    old_role = old_roles_per_user.get(user.id)
+                    if old_role:
+                        old_role.write({'user_ids': [Command.unlink(user.id)]})
+                    if groups_to_remove:
+                        groups_list = list(groups_to_remove.ids)
+                        if 1 in groups_list:
+                            groups_list.remove(1)
+                        user.write({
+                            'group_ids': [Command.unlink(gid) for gid in groups_list]
+                        })
         return result

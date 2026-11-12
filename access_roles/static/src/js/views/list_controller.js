@@ -22,8 +22,8 @@ patch(ListController.prototype, {
                         this.archiveEnabled = false;
                     }
                 });
-            } catch (error) {
-                console.error("Error checking list view restrictions:", error);
+            } catch {
+                // Fail gracefully when checking list view restrictions
             }
         });
     }

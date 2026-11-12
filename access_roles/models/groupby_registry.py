@@ -26,11 +26,11 @@ class GroupByRegistry(models.Model):
     _description = 'GroupBy Registry'
 
     name = fields.Char(string='GroupBy Name', required=True)
-    context = fields.Char(string='Context')
+    context = fields.Char()
     string = fields.Char(string='Display Name')
     active = fields.Boolean(default=True)
-    model_id = fields.Many2one('ir.model', string='Model', ondelete='cascade')
-    view_ids = fields.Many2many('ir.ui.view', string='View')
+    model_id = fields.Many2one('ir.model', ondelete='cascade')
+    view_ids = fields.Many2many('ir.ui.view')
 
     @api.model
     def _register_hook(self):

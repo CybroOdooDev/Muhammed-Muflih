@@ -64,6 +64,7 @@
 
     <!-- List View for Access Role  -->
     <record id="access_role_view_list" model="ir.ui.view">
+        <field name="name">access.role.view.list</field>
         <field name="model">access.role</field>
         <field name="arch" type="xml">
             <list string="Roles">

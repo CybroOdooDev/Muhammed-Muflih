@@ -13,8 +13,8 @@
 |license| |odoo| |maintainer|
 
 All In One Google Analytics
-=============================
-* Integrating Odoo with Google Analytics allows businesses to track user interactions and events within the Odoo application and send that data to their Google Analytics account
+===========================
+Integrating Odoo with Google Analytics allows businesses to track user interactions and events within the Odoo application and send that data to their Google Analytics account.
 
 Key Features
 ------------
@@ -30,8 +30,11 @@ Installation
 * No external dependencies.
 
 Configuration
-=============
-* No additional configurations needed
+-------------
+* Navigate to **Settings > General Settings**.
+* Locate the **Google Analytics** section and check **Enable Analytics**.
+* Enter your Google Analytics **Measurement ID** and **API Secret**.
+* Click **Save** to enable event tracking.
 
 Company
 -------
@@ -48,12 +51,12 @@ Contacts
 * Website : https://cybrosys.com
 
 Maintainer
-==========
+----------
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
 
 
 This module is maintained by Cybrosys Technologies.
 
-For support and more information, please visit `Our Website <https://cybrosys.com/>`__
+For support and more information, please visit `Our Website <https://cybrosys.com/>`__.
 

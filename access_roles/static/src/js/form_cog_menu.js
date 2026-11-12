@@ -41,8 +41,8 @@ patch(ActionMenus.prototype, {
                     .flatMap(r => r.action_id)
                 )
             ];
-        } catch (error) {
-            console.error("Error fetching restrictions:", error);
+        } catch {
+            // Fail gracefully when fetching restrictions
         }
     },
     async getActionItems(props) {
@@ -65,4 +65,3 @@ patch(ActionMenus.prototype, {
         });
     }
 });
-

@@ -18,8 +18,8 @@ This module enables easy access to the ChatGPT dialog box from the systray icon.
 
 Features
 ========
-* Access ChatGPT from systray icon.
-* Able to copy the AI generated text into clipboard.
+* Access ChatGPT from the systray icon.
+* Copy AI-generated text to the clipboard.
 
 Installation
 ------------
@@ -27,7 +27,7 @@ No external dependencies.
 
 Configuration
 =============
-No Additional configuration is needed.
+No additional configuration is needed.
 
 Company
 -------
@@ -50,7 +50,7 @@ Maintainer
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
 
-This module is maintained by Cybrosys Technologies.
+This module is maintained by Cybrosys Techno Solutions.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
 

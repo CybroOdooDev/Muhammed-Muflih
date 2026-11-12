@@ -19,7 +19,6 @@ import requests
 from unittest.mock import patch
 
 from odoo import Command
-from odoo.exceptions import UserError
 from odoo.tests.common import TransactionCase, tagged
 
 
@@ -196,7 +195,7 @@ class TestSaleOrderGoogleAnalytics(TransactionCase):
         order_line = draft_order.order_line[0]
         sale_order_class = type(draft_order)
         fake_return = {'line_id': order_line.id, 'quantity': 3.0}
-        with patch('requests.post') as mock_post, \
+        with patch('requests.post'), \
                 patch.object(sale_order_class, '_cart_add', return_value=fake_return):
             res = draft_order._cart_update(product_id=self.product.id, add_qty=3)
             self.assertEqual(res['line_id'], order_line.id)

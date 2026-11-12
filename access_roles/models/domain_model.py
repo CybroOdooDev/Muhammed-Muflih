@@ -31,4 +31,4 @@ class DomainModel(models.Model):
     def _compute_domain_model_name(self):
         """Computes the technical name of the selected model."""
         for record in self:
-            record.domain_model_name = record.domain_model_id.model if record.domain_model_id else None
+            record.domain_model_name = record.domain_model_id.model if record.domain_model_id else False
