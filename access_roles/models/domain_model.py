@@ -24,7 +24,7 @@ class DomainModel(models.Model):
     _description = 'Model Domain'
 
     name = fields.Text(string='Domain', default='[]', required=True)
-    domain_model_name = fields.Char(string='Model', compute='_compute_domain_model_name')
+    domain_model_name = fields.Char(string='Model Name', compute='_compute_domain_model_name', store=True)
     domain_model_id = fields.Many2one('ir.model', string='Model', domain="[('model', '!=', 'access.role')]")
 
     @api.depends('domain_model_id')
@@ -32,3 +32,9 @@ class DomainModel(models.Model):
         """Computes the technical name of the selected model."""
         for record in self:
             record.domain_model_name = record.domain_model_id.model if record.domain_model_id else False
+
+    @api.depends('domain_model_id', 'name')
+    def _compute_display_name(self):
+        for record in self:
+            model_name = record.domain_model_id.name or record.domain_model_name or ''
+            record.display_name = f"{model_name} ({record.name})" if model_name else (record.name or '')

@@ -14,7 +14,7 @@
 
 Catch Weight Management: Accounting
 ===================================
-This Module to enable Catch Weight Management System in Accounting Module
+This module enables the Catch Weight Management System in the Accounting module.
 
 Company
 -------
@@ -22,8 +22,8 @@ Company
 
 License
 -------
-GNU AFFERO GENERAL PUBLIC LICENSE (AGPL v3)
-(https://www.gnu.org/licenses/agpl-3.0-standalone.html)
+Lesser General Public License, Version 3 (LGPL v3).
+(http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
 
 Contacts

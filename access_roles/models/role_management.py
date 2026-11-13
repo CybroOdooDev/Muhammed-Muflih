@@ -28,7 +28,8 @@ class RoleManagement(models.Model):
     domain_ids = fields.Many2many('domain.model')
     is_debug = fields.Boolean(
         string='Disable Debug Mode',
-        help='Disable the option to enable debug mode for the user')
+        help='Disable the option to enable debug mode for the user'
+    )
     is_chatter = fields.Boolean(
         string='Disable chatter',
         help='Disable chatter for the role'
@@ -67,16 +68,21 @@ class RoleManagement(models.Model):
     @api.model
     def get_role_restrictions(self):
         user = self.env.user
-        role_management = user.access_role_id.role_management_id
-        if role_management:
+        role = user.access_role_id
+        if not role:
+            return {}
+        rms = self.search([('role_ids', 'in', role.id)])
+        if role.role_management_id:
+            rms |= role.role_management_id
+        if rms:
             return {
-                'is_debug': role_management.is_debug,
-                'is_chatter': role_management.is_chatter,
+                'is_debug': any(rms.mapped('is_debug')),
+                'is_chatter': any(rms.mapped('is_chatter')),
             }
         return {}
 
     @api.model
-    def get_export_restrictions(self, user_id):
+    def get_export_restrictions(self, user_id=None):
         """Retrieve model-based restrictions for a user.
         This function is used to determine which export, archive, reports,
         and actions should be hidden for the user based on their assigned
@@ -86,10 +92,16 @@ class RoleManagement(models.Model):
         :return: A list of dictionaries containing model-specific restrictions.
         :rtype: list of dict
         """
-        user = self.env.user
-        if not user.access_role_id or not user.access_role_id.role_management_id:
+        user = self.env['res.users'].browse(user_id) if user_id else self.env.user
+        role = user.access_role_id
+        if not role:
             return []
-        return user.access_role_id.role_management_id.model_access_ids.mapped(
+        rms = self.search([('role_ids', 'in', role.id)])
+        if role.role_management_id:
+            rms |= role.role_management_id
+        if not rms:
+            return []
+        return rms.model_access_ids.mapped(
             lambda r: {"model": r.model_id.model, "is_hide_export": r.is_hide_export,
                        "is_hide_archive": r.is_hide_archive,
                        "report_id": r.hide_report_ids.ids,
@@ -97,18 +109,23 @@ class RoleManagement(models.Model):
         )
 
     @api.model
-    def check_model_access_restrictions(self, user_id, model_name):
+    def check_model_access_restrictions(self, user_id=None, model_name=None):
         """
         Check if create access and readonly mode are restricted for the user on a specific model.
         :param user_id: ID of the user to check
         :param model_name: Technical name of the model to check
         :return: Dictionary containing is_hide_create and is_model_readonly
         """
-        user = self.env.user
-        role_management = user.access_role_id.role_management_id
+        user = self.env['res.users'].browse(user_id) if user_id else self.env.user
+        role = user.access_role_id
         access_data = {}
-        if role_management:
-            model_access = role_management.model_access_ids.filtered(
+        if not role:
+            return access_data
+        rms = self.search([('role_ids', 'in', role.id)])
+        if role.role_management_id:
+            rms |= role.role_management_id
+        if rms:
+            model_access = rms.model_access_ids.filtered(
                 lambda r: r.model_id.model == model_name
             )
             if model_access:
@@ -118,24 +135,38 @@ class RoleManagement(models.Model):
         return access_data
 
     def write(self, vals):
-        """Override write to maintain role_management_id on linked roles."""
+        """Override write to maintain role_management_id on linked roles and clear caches."""
         res = super().write(vals)
         if 'role_ids' in vals:
             for record in self:
                 for role in record.role_ids:
                     if role.role_management_id != record:
                         role.role_management_id = record.id
+        self.env.invalidate_all()
+        self.env.transaction.invalidate_ormcache()
+        self.env.transaction.invalidate_ormcache('templates')
         return res
 
     @api.model_create_multi
     def create(self, vals_list):
-        """Override create to automatically link roles with role management records."""
+        """Override create to automatically link roles with role management records and clear caches."""
         records = super(RoleManagement, self).create(vals_list)
         for record in records:
             for role in record.role_ids:
                 if not role.role_management_id:
                     role.write({'role_management_id': record.id})
+        self.env.invalidate_all()
+        self.env.transaction.invalidate_ormcache()
+        self.env.transaction.invalidate_ormcache('templates')
         return records
+
+    def unlink(self):
+        """Override unlink to clear menu caches."""
+        res = super().unlink()
+        self.env.invalidate_all()
+        self.env.transaction.invalidate_ormcache()
+        self.env.transaction.invalidate_ormcache('templates')
+        return res
 
     def action_open_domain_form(self):
         """Opens the domain form when clicking on domain_id"""

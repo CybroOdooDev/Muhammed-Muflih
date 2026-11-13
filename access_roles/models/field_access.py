@@ -25,11 +25,11 @@ class FieldAccess(models.Model):
 
     model_id = fields.Many2one('ir.model', domain="[('model', '!=', 'access.role')]")
     button_invisible = fields.Char(help='Field for setting button visibility')
-    is_field_readonly = fields.Boolean(string='Readonly')
+    is_field_readonly = fields.Boolean(string='Field Readonly')
     is_field_invisible = fields.Boolean(string='Invisible')
     is_field_required = fields.Boolean(string='Required')
     is_remove_link = fields.Boolean(string='Remove External link')
-    is_model_readonly = fields.Boolean(string='Readonly')
+    is_model_readonly = fields.Boolean(string='Model Readonly')
     is_hide_create = fields.Boolean(string='Hide Create')
     is_hide_delete = fields.Boolean(string='Hide Delete')
     is_hide_duplicate = fields.Boolean(string='Hide Duplicate')
@@ -57,6 +57,28 @@ class FieldAccess(models.Model):
                                domain="[('model_id', '=', model_id)]")
     domain_access_id = fields.Many2one('role.management')
     domain_id = fields.Many2one('domain.model')
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        self.env.invalidate_all()
+        self.env.transaction.invalidate_ormcache()
+        self.env.transaction.invalidate_ormcache('templates')
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        self.env.invalidate_all()
+        self.env.transaction.invalidate_ormcache()
+        self.env.transaction.invalidate_ormcache('templates')
+        return res
+
+    def unlink(self):
+        res = super().unlink()
+        self.env.invalidate_all()
+        self.env.transaction.invalidate_ormcache()
+        self.env.transaction.invalidate_ormcache('templates')
+        return res
 
     @api.onchange('model_id')
     def _onchange_model_id(self):

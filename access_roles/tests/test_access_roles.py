@@ -312,19 +312,51 @@ class TestAccessRoles(TransactionCase):
         # GroupBy registry
         self.env['groupby.registry']._register_hook()
         tag = '<filter name="grp_name" string="Group Name" context="{\'group_by\': \'name\'}"/>'
-        tech_name, disp_name, ctx = self.env['groupby.registry']._extract_groupby_attributes(tag)
-        self.assertEqual(tech_name, 'grp_name')
-        self.assertEqual(disp_name, 'Group Name')
+        grp_attrs = self.env['groupby.registry']._extract_groupby_attributes(tag)
+        self.assertEqual(grp_attrs.get('name'), 'grp_name')
+        self.assertEqual(grp_attrs.get('string'), 'Group Name')
+
+        # Test deduplication on repeated extraction
+        self.env['groupby.registry']._create_or_update_groupby(
+            'vendor', self.partner_model.id, [], "{'group_by': 'partner_id'}", 'Vendor'
+        )
+        self.env['groupby.registry']._create_or_update_groupby(
+            'vendor', self.partner_model.id, [], "{'group_by': 'partner_id'}", 'Vendor'
+        )
+        vendor_records = self.env['groupby.registry'].search([
+            ('name', '=', 'Vendor'),
+            ('model_id', '=', self.partner_model.id)
+        ])
+        self.assertEqual(len(vendor_records), 1)
+
+        self.env['filter.registry']._create_or_update_filter(
+            'my_purchases', self.partner_model.id, [], "[('user_id', '=', uid)]", 'My Purchases'
+        )
+        self.env['filter.registry']._create_or_update_filter(
+            'my_purchases', self.partner_model.id, [], "[('user_id', '=', uid)]", 'My Purchases'
+        )
+        filter_records = self.env['filter.registry'].search([
+            ('name', '=', 'My Purchases'),
+            ('model_id', '=', self.partner_model.id)
+        ])
+        self.assertEqual(len(filter_records), 1)
 
     def test_12_ir_ui_menu_filtering(self):
         """Test ir.ui.menu visibility filtering for users with hidden menus."""
         root_menu = self.env.ref('access_roles.access_role_menu_root', raise_if_not_found=False)
         if root_menu:
+            child_menu = self.env['ir.ui.menu'].create({
+                'name': 'Test Child Menu',
+                'parent_id': root_menu.id,
+            })
             self.role_management.write({'menu_ids': [Command.set([root_menu.id])]})
             self.test_user.write({'access_role_id': self.test_role.id})
             Menu = self.env['ir.ui.menu'].with_user(self.test_user)
             visible_menus = Menu._visible_menu_ids()
             self.assertNotIn(root_menu.id, visible_menus)
+            blacklist = Menu._load_menus_blacklist()
+            self.assertIn(root_menu.id, blacklist)
+            self.assertIn(child_menu.id, blacklist)
 
     def test_13_ir_ui_view_postprocessing(self):
         """Test ir.ui.view postprocess modifications (buttons, fields, forms, lists)."""
@@ -349,6 +381,20 @@ class TestAccessRoles(TransactionCase):
         self.assertEqual(btn_node.get('invisible'), '1')
 
         # Process form and list access
+        name_field = self.env['ir.model.fields'].search([
+            ('model_id', '=', self.partner_model.id),
+            ('name', '=', 'name')
+        ], limit=1)
+        fa_field = self.env['field.access'].create({
+            'model_id': self.partner_model.id,
+            'access_field_id': self.role_management.id,
+            'fields_ids': [Command.set([name_field.id])],
+            'is_field_readonly': True,
+        })
+        field_tree = etree.fromstring('<form><field name="name"/></form>')
+        processed_field = view._process_field_access(field_tree, fa_field, 'res.partner')
+        self.assertEqual(processed_field.xpath('//field[@name="name"]')[0].get('readonly'), '1')
+
         fa_model = self.env['field.access'].create({
             'model_id': self.partner_model.id,
             'access_model_id': self.role_management.id,

@@ -26,8 +26,8 @@ class FilterRegistry(models.Model):
     _description = 'Filter Registry'
 
     name = fields.Char(string='Filter Name', required=True)
-    domain = fields.Char(string='Domain')
-    string = fields.Char(string='Display Name')
+    domain = fields.Char()
+    string = fields.Char(string='Filter Label')
     active = fields.Boolean(default=True)
     model_id = fields.Many2one('ir.model', ondelete='cascade')
     view_ids = fields.Many2many('ir.ui.view')
@@ -107,12 +107,12 @@ class FilterRegistry(models.Model):
         return filter_model
 
     def _create_or_update_filter(self, name, model_id, view_ids, domain, string):
-        """Create or update a filter registry record."""
+        """Create or update a filter registry record, preventing and cleaning duplicates."""
         display_name = string if string else name
         existing_filter = self.search([
-            ('name', '=', name),
+            ('name', 'in', [display_name, name]),
             ('model_id', '=', model_id)
-        ], limit=1)
+        ])
         vals = {
             'name': display_name,
             'model_id': model_id,
@@ -121,6 +121,13 @@ class FilterRegistry(models.Model):
             'string': string
         }
         if existing_filter:
-            existing_filter.write(vals)
+            main_record = existing_filter[0]
+            main_record.write(vals)
+            if len(existing_filter) > 1:
+                duplicates = existing_filter[1:]
+                field_accesses = self.env['field.access'].search([('filter_ids', 'in', duplicates.ids)])
+                for fa in field_accesses:
+                    fa.write({'filter_ids': [Command.link(main_record.id)]})
+                duplicates.unlink()
         else:
             self.create(vals)

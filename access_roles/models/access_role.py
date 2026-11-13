@@ -169,6 +169,10 @@ class AccessRole(models.Model):
         result = super(AccessRole, self).write(values)
         if 'groups_ids' in values:
             self._update_users_groups()
+        if any(k in values for k in ('groups_ids', 'role_management_id', 'user_ids')):
+            self.env.invalidate_all()
+            self.env.transaction.invalidate_ormcache()
+            self.env.transaction.invalidate_ormcache('templates')
         return result
 
     def read(self, fields=None, load='_classic_read'):

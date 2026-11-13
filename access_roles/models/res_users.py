@@ -49,6 +49,10 @@ class ResUsers(models.Model):
                 })
                 if user.id not in user.access_role_id.user_ids.ids:
                     user.access_role_id.write({'user_ids': [Command.link(user.id)]})
+        if any(u.access_role_id for u in users):
+            self.env.invalidate_all()
+            self.env.transaction.invalidate_ormcache()
+            self.env.transaction.invalidate_ormcache('templates')
         return users
 
     def write(self, vals):
@@ -86,4 +90,7 @@ class ResUsers(models.Model):
                         user.write({
                             'group_ids': [Command.unlink(gid) for gid in groups_list]
                         })
+            self.env.invalidate_all()
+            self.env.transaction.invalidate_ormcache()
+            self.env.transaction.invalidate_ormcache('templates')
         return result

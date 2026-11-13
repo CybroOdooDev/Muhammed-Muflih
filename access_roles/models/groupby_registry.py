@@ -27,7 +27,7 @@ class GroupByRegistry(models.Model):
 
     name = fields.Char(string='GroupBy Name', required=True)
     context = fields.Char()
-    string = fields.Char(string='Display Name')
+    string = fields.Char(string='GroupBy Label')
     active = fields.Boolean(default=True)
     model_id = fields.Many2one('ir.model', ondelete='cascade')
     view_ids = fields.Many2many('ir.ui.view')
@@ -100,12 +100,12 @@ class GroupByRegistry(models.Model):
         return groupby_model
 
     def _create_or_update_groupby(self, name, model_id, view_ids, context, string):
-        """Create or update a groupby registry record."""
+        """Create or update a groupby registry record, preventing and cleaning duplicates."""
         display_name = string if string else name
         existing_groupby = self.search([
-            ('name', '=', name),
+            ('name', 'in', [display_name, name]),
             ('model_id', '=', model_id)
-        ], limit=1)
+        ])
         vals = {
             'name': display_name,
             'model_id': model_id,
@@ -114,6 +114,13 @@ class GroupByRegistry(models.Model):
             'string': string
         }
         if existing_groupby:
-            existing_groupby.write(vals)
+            main_record = existing_groupby[0]
+            main_record.write(vals)
+            if len(existing_groupby) > 1:
+                duplicates = existing_groupby[1:]
+                field_accesses = self.env['field.access'].search([('group_ids', 'in', duplicates.ids)])
+                for fa in field_accesses:
+                    fa.write({'group_ids': [Command.link(main_record.id)]})
+                duplicates.unlink()
         else:
             self.create(vals)

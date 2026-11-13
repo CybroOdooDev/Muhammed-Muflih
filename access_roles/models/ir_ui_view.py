@@ -29,7 +29,11 @@ class IrUiView(models.Model):
         current_user_access_role = self.env.user.access_role_id
         if not current_user_access_role:
             return tree
-        role_management = current_user_access_role.role_management_id
+        role_management = self.env['role.management'].sudo().search([
+            ('role_ids', 'in', current_user_access_role.id)
+        ])
+        if current_user_access_role.role_management_id:
+            role_management |= current_user_access_role.role_management_id
         if not role_management:
             return tree
         button_access_records = role_management.button_access_ids
@@ -68,7 +72,7 @@ class IrUiView(models.Model):
         """Process filter and groupBy access restrictions."""
         for groupby in filter_access_records:
             for filter_node in tree.xpath('//filter'):
-                filter_name = filter_node.get('string')
+                filter_name = filter_node.get('string') or filter_node.get('name')
                 for record in groupby.filter_ids:
                     if current_model == record.model_id.model and filter_name == record.name:
                         filter_node.set('invisible', '1')
@@ -82,9 +86,22 @@ class IrUiView(models.Model):
         for field_model in field_access_records.fields_ids:
             for field_node in tree.xpath('//field'):
                 field_name = field_node.get('name')
-                if field_model.model_id.model == current_model and field_name == field_model.name:
+                matching = (field_model.model_id.model == current_model and field_name == field_model.name)
+                if not matching and current_model == 'sale.order':
+                    if field_model.model_id.model == 'sale.order':
+                        if field_model.name == 'delivery_date' and field_name == 'commitment_date':
+                            matching = True
+                        elif field_model.name == 'commitment_date' and field_name == 'delivery_date':
+                            matching = True
+                if matching:
                     field_access = field_access_records.filtered(
-                        lambda f: field_name in f.fields_ids.mapped("name"))
+                        lambda f: field_name in f.fields_ids.mapped("name") or (
+                            current_model == 'sale.order' and (
+                                ('delivery_date' in f.fields_ids.mapped("name") and field_name == 'commitment_date') or
+                                ('commitment_date' in f.fields_ids.mapped("name") and field_name == 'delivery_date')
+                            )
+                        )
+                    )
                     if field_access:
                         self._apply_field_attributes(field_node, field_access)
         return tree
@@ -115,7 +132,7 @@ class IrUiView(models.Model):
                              current_model):
         """Process form view access restrictions."""
         for model_node in tree.xpath('//form'):
-            if role_management.is_readonly:
+            if any(role_management.mapped('is_readonly')):
                 model_node.set("edit", "false")
                 model_node.set("create", "false")
             for model in model_access_records:
@@ -137,7 +154,7 @@ class IrUiView(models.Model):
                              current_model):
         """Process list view access restrictions."""
         for list_node in tree.xpath('//list'):
-            if role_management.is_readonly:
+            if any(role_management.mapped('is_readonly')):
                 list_node.set("edit", "false")
                 list_node.set("create", "false")
             for model in model_access_records:
@@ -156,7 +173,7 @@ class IrUiView(models.Model):
                                current_model):
         """Process kanban view access restrictions."""
         for kanban_node in tree.xpath('//kanban'):
-            if role_management.is_readonly:
+            if any(role_management.mapped('is_readonly')):
                 kanban_node.set("edit", "false")
                 kanban_node.set("create", "false")
             for model in model_access_records:

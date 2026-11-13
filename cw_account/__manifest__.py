@@ -19,15 +19,14 @@
     'name': 'Catch Weight Management: Accounting',
     'version': '20.0.1.0.0',
     'category': 'Accounting',
-    'summary': """The module helps to manage Catch Weight
-                Management in Accounting.""",
+    'summary': 'The module helps to manage Catch Weight Management in Accounting.',
     'description': """This Module lets us to enable Catch Weight 
                     Management System in Accounting Module.""",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['base', 'account', 'cw_stock', 'uom'],
+    'depends': ['account', 'cw_stock'],
     'data': [
         'views/account_move_views.xml',
     ],

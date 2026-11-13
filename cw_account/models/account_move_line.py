@@ -32,8 +32,8 @@ class AccountMoveLine(models.Model):
                                 help="Catch weight unit of measure")
     cw_hide = fields.Boolean(string='CW-Hide', default=False,
                              compute='_compute_cw_hide',
-                             help="Boolean field to hide the"
-                                  " field 'category_id'")
+                             help="Technical field to hide catch weight fields"
+                                  " when the product is not catch weight enabled")
 
     @api.depends('product_id')
     def _compute_cw_hide(self):
@@ -54,7 +54,7 @@ class AccountMoveLine(models.Model):
             if rec.product_id.catch_weigth_ok:
                 rec.cw_uom_id = rec.product_id.cw_uom_id
                 if rec.cw_uom_id == rec.product_uom_id:
-                    rec.quantity = rec.cw_qty
+                    rec.cw_qty = rec.quantity
                 else:
                     rec.cw_qty = rec.product_id.average_cw_qty * rec.quantity
 
@@ -62,16 +62,21 @@ class AccountMoveLine(models.Model):
     def _onchange_cw_qty(self):
         """Calculate the product qty based on the cw_qty"""
         for rec in self:
-            if rec.product_id.catch_weigth_ok and \
-                    rec.product_id.average_cw_qty != 0:
-                rec.quantity = rec.cw_qty / rec.product_id.average_cw_qty
+            if rec.product_id.catch_weigth_ok:
+                if rec.cw_uom_id and rec.product_uom_id and rec.cw_uom_id == rec.product_uom_id:
+                    rec.quantity = rec.cw_qty
+                elif rec.product_id.average_cw_qty != 0:
+                    rec.quantity = rec.cw_qty / rec.product_id.average_cw_qty
 
-    @api.depends('product_id', 'quantity')
+    @api.depends('product_id', 'quantity', 'product_uom_id')
     def _compute_cw_qty(self):
         """Computing the cw_qty"""
         for rec in self:
             if rec.product_id.catch_weigth_ok:
-                rec.cw_qty = rec.product_id.average_cw_qty * rec.quantity
+                if rec.cw_uom_id and rec.product_uom_id and rec.cw_uom_id == rec.product_uom_id:
+                    rec.cw_qty = rec.quantity
+                else:
+                    rec.cw_qty = rec.product_id.average_cw_qty * rec.quantity
             else:
                 rec.cw_qty = 0.0
 
@@ -79,6 +84,8 @@ class AccountMoveLine(models.Model):
     def _onchange_product_uom_id_cw_uom_id(self):
         """Calculate the cw weight"""
         for rec in self:
-            if (rec.product_id.catch_weigth_ok and rec.cw_uom_id and
-                    rec.product_uom_id == rec.cw_uom_id):
-                rec.cw_qty = rec.cw_uom_id.factor / rec.product_uom_id.factor
+            if rec.product_id.catch_weigth_ok and rec.cw_uom_id:
+                if rec.product_uom_id == rec.cw_uom_id:
+                    rec.cw_qty = rec.quantity
+                else:
+                    rec.cw_qty = rec.product_id.average_cw_qty * rec.quantity

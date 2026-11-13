@@ -16,7 +16,7 @@
                     <button name="action_button_to_print_pdf" string="PDF"
                             type="object"
                             class="oe_highlight"/>
-                    <button string="Cancel" class="btn btn-default"
+                    <button string="Cancel" class="btn btn-secondary"
                             special="cancel"/>
                 </footer>
             </form>

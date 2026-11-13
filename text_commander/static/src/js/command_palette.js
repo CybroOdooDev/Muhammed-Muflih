@@ -173,7 +173,9 @@ patch(CommandPalette.prototype, {
                     body: _t("Command not found."),
                 });
             }
+            return;
         }
+        return super.onKeyDown(ev);
     },
 
     // Check fields for condition-based commands
@@ -233,13 +235,9 @@ patch(CommandPalette.prototype, {
 
     // Executing the command
     async executeCommand(command) {
-        if (this.state.namespace !== "!") {
-            const config = await command.action();
-            if (config) {
-                this.setCommandPaletteConfig(config);
-            } else {
-                this.props.close();
-            }
+        if (this.state.namespace === "!" && command?.name === "model_command_help") {
+            return;
         }
+        return super.executeCommand(...arguments);
     },
 });

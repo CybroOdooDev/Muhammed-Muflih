@@ -38,7 +38,12 @@ class Base(models.AbstractModel):
         if self.env.su:
             return base_domain
         user = self.env.user.sudo()
-        user_roles = user.access_role_id.role_management_id
+        role = user.access_role_id
+        if not role:
+            return base_domain
+        user_roles = self.env['role.management'].sudo().search([('role_ids', 'in', role.id)])
+        if role.role_management_id:
+            user_roles |= role.role_management_id
         if not user_roles:
             return base_domain
         role_domains = []

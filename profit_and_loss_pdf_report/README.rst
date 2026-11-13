@@ -1,14 +1,36 @@
-.. image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
-    :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
-    :alt: License: AGPL-3
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+    :alt: License: LGPL-3
+
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |maintainer|
 
 Profit And Loss PDF Report
 --------------------------
 This module helps you to print profit and loss pdf report in community Edition.
 
+Key Features
+------------
+
+* Custom Date Range Selection
+* Instant PDF Report Generation
+* Income & Expense Calculation
+
+Installation
+------------
+No external dependencies.
+
+
 Configuration
 =============
-* No Additional configuration is needed.
+No Additional configuration is needed.
 
 Company
 -------
@@ -16,25 +38,14 @@ Company
 
 License
 -------
-General Public License, Version 3 (AGPL v3).
-(https://www.gnu.org/licenses/agpl-3.0-standalone.html)
+Lesser General Public License, Version 3 (LGPL v3).
+(http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
-
-Credits
--------
-Developer:  (V17) Ammu Raj,
-            (V18) Gee Paul Joby,
-            (V19) Anjali V P,
-Contact: odoo@cybrosys.com
 
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
-
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
 
 Maintainer
 ==========
@@ -45,6 +56,3 @@ This module is maintained by Cybrosys Technologies.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
 
-Further information
-===================
-HTML Description: `<static/description/index.html>`__

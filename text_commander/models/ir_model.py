@@ -14,8 +14,6 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-from psycopg2 import Error as DatabaseError
-
 from odoo import api, models
 from odoo.exceptions import AccessError, UserError
 
@@ -32,12 +30,12 @@ class IrModel(models.Model):
             return []
         data_str = str(data).strip()
         # 1. Search by model description using ORM
-        model_rec = self.env['ir.model'].sudo().search(
+        model_rec = self.env['ir.model'].search(
             [('name', '=ilike', data_str)], limit=1,
         )
         if not model_rec:
             # 2. Search by technical model name (e.g. sale.order)
-            model_rec = self.env['ir.model'].sudo().search(
+            model_rec = self.env['ir.model'].search(
                 [('model', '=ilike', data_str)], limit=1,
             )
         if not model_rec:
@@ -73,36 +71,32 @@ class IrModel(models.Model):
 
         if data.get('regex') == 1:
             search_val = (data.get('record') or '').strip()
+            if not search_val:
+                return []
             rec_name = model_pool._rec_name or 'name'
 
             # 1. ORM search by rec_name
             if rec_name in model_pool._fields:
-                res_ids = model_pool.sudo().search(
-                    [(rec_name, 'ilike', search_val)],
-                ).ids
-                if res_ids:
-                    return res_ids
-            # 2. ORM search by display_name
-            if 'display_name' in model_pool._fields:
-                res_ids = model_pool.sudo().search(
-                    [('display_name', 'ilike', search_val)],
-                ).ids
-                if res_ids:
-                    return res_ids
+                try:
+                    res_ids = model_pool.search(
+                        [(rec_name, 'ilike', search_val)],
+                    ).ids
+                    if res_ids:
+                        return res_ids
+                except (AccessError, UserError):
+                    pass
 
-            # 3. Safe parameterized SQL fallback
-            table_name = model_name.replace('.', '_')
-            try:
-                self.env.cr.execute(
-                    f"""SELECT id FROM "{table_name}"
-                        WHERE lower(name) LIKE %s""",
-                    (f"%{search_val.lower()}%",),
-                )
-                res = [d[0] for d in self.env.cr.fetchall()]
-                if res:
-                    return res
-            except DatabaseError:
-                pass
+            # 2. ORM search by display_name
+            if 'display_name' in model_pool._fields and rec_name != 'display_name':
+                try:
+                    res_ids = model_pool.search(
+                        [('display_name', 'ilike', search_val)],
+                    ).ids
+                    if res_ids:
+                        return res_ids
+                except (AccessError, UserError):
+                    pass
+
             return []
 
         if data.get('regex') == 2:
@@ -110,21 +104,21 @@ class IrModel(models.Model):
             field_type = data.get('field_type')
             field_string = (data.get('field_string') or '').strip()
 
-            if field_type == 'many2one':
-                rel_model_name = data.get('field_relation') or ''
+            # Strict validation: field must exist on target model
+            if not field_name or field_name not in model_pool._fields:
+                return []
 
-                # Fallback: resolve comodel name if missing or empty
-                if not rel_model_name and field_name in model_pool._fields:
-                    fld = model_pool._fields[field_name]
-                    rel_model_name = (
-                        getattr(fld, 'comodel_name', None)
-                        or getattr(fld, 'relation', None)
-                        or (getattr(fld, '_args__', None) or {})
-                        .get('comodel_name')
-                        or ''
-                    )
+            fld = model_pool._fields[field_name]
+
+            if field_type == 'many2one' or fld.type == 'many2one':
+                rel_model_name = (
+                    getattr(fld, 'comodel_name', None)
+                    or data.get('field_relation')
+                    or ''
+                )
+
                 if not rel_model_name:
-                    field_rec = self.env['ir.model.fields'].sudo().search([
+                    field_rec = self.env['ir.model.fields'].search([
                         ('model', '=', model_name),
                         ('name', '=', field_name),
                     ], limit=1)
@@ -133,7 +127,7 @@ class IrModel(models.Model):
 
                 rel_ids = set()
                 if rel_model_name and rel_model_name in self.env:
-                    rel_pool = self.env[rel_model_name].sudo()
+                    rel_pool = self.env[rel_model_name]
 
                     # ORM search on related model
                     for col in ('name', 'display_name', 'complete_name'):
@@ -146,20 +140,6 @@ class IrModel(models.Model):
                                 )
                             except (AccessError, UserError):
                                 pass
-
-                    # Direct parameterized SQL on related table
-                    rel_table = rel_model_name.replace('.', '_')
-                    try:
-                        self.env.cr.execute(
-                            f"""SELECT id FROM "{rel_table}"
-                                WHERE lower(name) LIKE %s""",
-                            (f"%{field_string.lower()}%",),
-                        )
-                        rel_ids.update(
-                            r[0] for r in self.env.cr.fetchall()
-                        )
-                    except DatabaseError:
-                        pass
 
                     # For res.partner include child/commercial contacts
                     if rel_model_name == 'res.partner' and rel_ids:
@@ -174,15 +154,18 @@ class IrModel(models.Model):
                         except (AccessError, UserError):
                             pass
 
-                # Search target model by related record IDs
+                # Search target model by related record IDs using ORM
                 if rel_ids:
-                    res_ids = model_pool.sudo().search(
-                        [(field_name, 'in', list(rel_ids))],
-                    ).ids
-                    if res_ids:
-                        return res_ids
+                    try:
+                        res_ids = model_pool.search(
+                            [(field_name, 'in', list(rel_ids))],
+                        ).ids
+                        if res_ids:
+                            return res_ids
+                    except (AccessError, UserError):
+                        pass
 
-                # Fallback direct relational searches on target model
+                # Direct relational searches on target model via ORM dotted paths
                 search_domains = [
                     [(f"{field_name}.name", 'ilike', field_string)],
                     [(f"{field_name}.display_name", 'ilike', field_string)],
@@ -197,7 +180,7 @@ class IrModel(models.Model):
                     ])
                 for domain in search_domains:
                     try:
-                        res_ids = model_pool.sudo().search(domain).ids
+                        res_ids = model_pool.search(domain).ids
                         if res_ids:
                             return res_ids
                     except (AccessError, UserError):
@@ -205,37 +188,27 @@ class IrModel(models.Model):
 
                 return []
 
-            if field_type == 'selection':
+            if field_type == 'selection' or fld.type == 'selection':
                 target_val = field_string
                 for state, label in self._get_selection_values(data):
                     if (target_val.lower() == str(label).lower()
                             or target_val.lower() == str(state).lower()):
                         target_val = state
                         break
-                return model_pool.sudo().search(
-                    [(field_name, '=', target_val)],
-                ).ids
-
-            if field_name in model_pool._fields:
                 try:
-                    return model_pool.sudo().search(
-                        [(field_name, 'ilike', field_string)],
+                    return model_pool.search(
+                        [(field_name, '=', target_val)],
                     ).ids
                 except (AccessError, UserError):
-                    pass
+                    return []
 
-            # Parameterized SQL fallback
-            table_name = model_name.replace('.', '_')
+            # Standard ORM search for other field types
             try:
-                self.env.cr.execute(
-                    f"""SELECT id FROM "{table_name}"
-                        WHERE lower("{field_name}") LIKE %s""",
-                    (f"%{field_string.lower()}%",),
-                )
-                return [r[0] for r in self.env.cr.fetchall()]
-            except DatabaseError:
-                pass
-            return []
+                return model_pool.search(
+                    [(field_name, 'ilike', field_string)],
+                ).ids
+            except (AccessError, UserError):
+                return []
 
         return []
 
@@ -271,8 +244,8 @@ class IrModel(models.Model):
             else:
                 string += field_tokens[rec]
 
-            # 1. Check ir.model.fields via ORM (exact relation from DB)
-            field_rec = self.env['ir.model.fields'].sudo().search([
+            # 1. Check ir.model.fields via ORM
+            field_rec = self.env['ir.model.fields'].search([
                 ('model', '=', model_name),
                 '|',
                 ('field_description', '=ilike', string),
@@ -312,7 +285,7 @@ class IrModel(models.Model):
                         'del': string,
                     }]
 
-            # 3. Fallback raw SQL with parameterized execute
+            # 3. Fallback parameterized SQL for translated field description
             self.env.cr.execute(
                 """SELECT name, ttype, relation FROM ir_model_fields
                    WHERE model = %s
@@ -334,13 +307,12 @@ class IrModel(models.Model):
             getattr(fld, 'comodel_name', None)
             or getattr(fld, 'relation', None)
             or getattr(fld, '_description_relation', None)
-            or (getattr(fld, '_args__', None) or {}).get('comodel_name')
             or ''
         )
         if rel:
             return rel
-        # Last resort: check ir.model.fields
-        field_rec = self.env['ir.model.fields'].sudo().search([
+        # Fallback: check ir.model.fields
+        field_rec = self.env['ir.model.fields'].search([
             ('model', '=', model_name),
             ('name', '=', field_name),
         ], limit=1)

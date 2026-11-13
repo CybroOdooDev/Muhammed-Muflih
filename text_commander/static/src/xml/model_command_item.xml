@@ -7,7 +7,7 @@
                 <strong>Open Record:</strong>
             </div>
             <div class="ms-4">!Open &lt;Model Name&gt;/Value</div>
-            <div class="ms-4">!Open &lt;Model Name&gt; &lt;of/in&gt; &lt;field name&gt; &gt;value&gt;</div>
+            <div class="ms-4">!Open &lt;Model Name&gt; &lt;of/in&gt; &lt;field name&gt; &lt;value&gt;</div>
             <div class="ms-4">Eg: !Open sales order/S00016</div>
             <div class="ms-5">!Open sales order of customer azure</div>
             <div class="mt-2">

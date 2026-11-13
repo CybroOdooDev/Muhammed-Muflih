@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <!-- Root Menu for Access Role module -->
-    <menuitem id="access_role_menu_root" name="Access Role" groups="access_roles.access_role_group_administrator"/>
+    <menuitem id="access_role_menu_root" name="Access Role"
+              groups="access_roles.access_role_group_administrator"
+              web_icon="access_roles,static/description/icon.png"/>
 
     <!-- Category Menu: Role Management -->
     <menuitem id="access_role_menu" name="Role Management"

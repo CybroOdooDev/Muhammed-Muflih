@@ -20,7 +20,7 @@ ModelItemCommandRegistry.add("!", {
 const ModelItemCommandProvider = registry.category("command_provider");
 ModelItemCommandProvider.add("model", {
     namespace: "!",
-    async provide(env, options) {
+    async provide(options = {}) {
         const suggestion = [];
         suggestion.push({
             Component: ModelItemCommand,
