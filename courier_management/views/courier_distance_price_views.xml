@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--Courier distance price list view-->
+    <record id="courier_distance_price_view_list" model="ir.ui.view">
+        <field name="name">courier.distance.price.view.list</field>
+        <field name="model">courier.distance.price</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="minimum_distance"/>
+                <field name="maximum_distance"/>
+                <field name="price"/>
+            </list>
+        </field>
+    </record>
+    <!--Courier distance price form view-->
+    <record id="courier_distance_price_view_form" model="ir.ui.view">
+        <field name="name">courier.distance.price.view.form</field>
+        <field name="model">courier.distance.price</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <h1 style="width:100%">
+                        <field name="name"/>
+                    </h1>
+                    <group>
+                        <group>
+                            <label for="minimum_distance"
+                                   string="Distance Between(km)"/>
+                            <div class="o_row no-gutters d-flex">
+                                <div class="o_row">
+                                    <field name="minimum_distance"/>To
+                                    <field name="maximum_distance"/>
+                                </div>
+                            </div>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="company_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="price" widget="monetary"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--Courier Distance menu action-->
+    <record id="courier_distance_price_action" model="ir.actions.act_window">
+        <field name="name">Distance Price Rules</field>
+        <field name="res_model">courier.distance.price</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

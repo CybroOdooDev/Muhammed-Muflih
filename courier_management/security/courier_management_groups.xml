@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--Courier management groups-->
+
+        <record id="courier_management" model="ir.module.category">
+            <field name="name">Courier Management</field>
+            <field name="description">Access For Courier Management Module</field>
+            <field name="sequence">11</field>
+        </record>
+        <record id="courier_management_privilege" model="res.groups.privilege">
+            <field name="name">Courier Management Privilege</field>
+            <field name="category_id" ref="courier_management"/>
+        </record>
+
+        <record id="courier_management_group_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="privilege_id" ref="courier_management.courier_management_privilege"/>
+        </record>
+        <record id="courier_management_group_administrator" model="res.groups">
+            <field name="name">Administrator</field>
+            <field name="privilege_id" ref="courier_management.courier_management_privilege"/>
+            <field name="implied_ids"
+                   eval="[(4, ref('courier_management_group_user'))]"/>
+        </record>
+        <record id="base.user_admin" model="res.users">
+            <field name="group_ids"
+                   eval="[(4,ref('courier_management_group_administrator'))]"/>
+        </record>
+</odoo>

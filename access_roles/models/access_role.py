@@ -133,23 +133,6 @@ class AccessRole(models.Model):
             result['value'].pop('groups_ids', None)
         return result
 
-    @property
-    def SELF_READABLE_FIELDS(self):
-        """The list of fields readable for role definition views."""
-        return [
-            'signature', 'company_id', 'login', 'email', 'name', 'image_1920',
-            'image_1024', 'image_512', 'image_256', 'image_128', 'lang', 'tz',
-            'tz_offset', 'groups_ids', 'partner_id', 'write_date', 'action_id',
-            'avatar_1920', 'avatar_1024', 'avatar_512', 'avatar_256', 'avatar_128',
-            'share', 'device_ids',
-        ]
-
-    @property
-    def SELF_WRITEABLE_FIELDS(self):
-        """The list of writable fields for role definition views."""
-        return ['signature', 'action_id', 'company_id', 'email', 'name', 'image_1920',
-                'lang', 'tz']
-
     @api.model_create_multi
     def create(self, vals_list):
         """Set default group if none provided and clean up group data"""
@@ -351,17 +334,6 @@ class AccessRole(models.Model):
                         'exportable': False,
                         'selectable': False,
                     }
-        missing = set(self.SELF_WRITEABLE_FIELDS).union(
-            self.SELF_READABLE_FIELDS).difference(res.keys())
-        if allfields:
-            missing = missing.intersection(allfields)
-        if missing:
-            res.update({
-                key: dict(values, readonly=key not in self.SELF_WRITEABLE_FIELDS,
-                          searchable=False)
-                for key, values in
-                super(AccessRole, self.sudo()).fields_get(missing, attributes).items()
-            })
         return res
 
 

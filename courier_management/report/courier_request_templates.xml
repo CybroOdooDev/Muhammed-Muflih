@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Courier requests pdf template -->
+    <template id="report_courier_request">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <!-- Page 1: Header and Primary Courier Information -->
+                        <h2 class="mb-1">Courier Request Report</h2>
+                        <h3 class="mb-3">
+                            <span t-field="doc.name"/>
+                        </h3>
+
+                        <table class="table table-bordered table-sm">
+                            <tbody>
+                                <tr>
+                                    <td class="w-50"><strong>Sender Name</strong></td>
+                                    <td><span t-field="doc.sender_id.name"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Sender Mobile Number</strong></td>
+                                    <td><span t-field="doc.sender_mobile_number"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Sender Email</strong></td>
+                                    <td><span t-field="doc.sender_email"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Receiver Name</strong></td>
+                                    <td><span t-field="doc.receiver_id.name"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Receiver Mobile Number</strong></td>
+                                    <td><span t-field="doc.receiver_mobile_number"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Receiver Email</strong></td>
+                                    <td><span t-field="doc.receiver_email"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Registration Date</strong></td>
+                                    <td><span t-field="doc.registration_date"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Delivery Date</strong></td>
+                                    <td><span t-field="doc.delivery_date"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Total Kilometres</strong></td>
+                                    <td><span t-field="doc.total_kilometres"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Distance Amount</strong></td>
+                                    <td><span t-field="doc.distance_amount"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>L x W x H</strong></td>
+                                    <td><span t-field="doc.l_w_h_id.name"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Volumetric Weight</strong></td>
+                                    <td><span t-field="doc.volumetric_weight"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Volumetric Weight Price</strong></td>
+                                    <td><span t-field="doc.volumetric_weight_price"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Priority</strong></td>
+                                    <td><span t-field="doc.priority_id.name"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Priority Amount</strong></td>
+                                    <td><span t-field="doc.priority_amount"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Type</strong></td>
+                                    <td><span t-field="doc.type_id.courier_type"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Category</strong></td>
+                                    <td><span t-field="doc.category_id.courier_category"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Responsible User</strong></td>
+                                    <td><span t-field="doc.responsible_user_id.name"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Page Break to Page 2 -->
+                        <div style="page-break-before: always;"/>
+
+                        <!-- Page 2: Company, Courier Details, Notes, and Totals -->
+                        <table class="table table-bordered table-sm mb-4">
+                            <tbody>
+                                <tr>
+                                    <td class="w-50"><strong>Company</strong></td>
+                                    <td><span t-field="doc.company_id.name"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h5 class="mt-4 mb-2">Courier Details</h5>
+                        <table class="table table-bordered table-sm o_main_table mb-4">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Weight</th>
+                                    <th>Total Weight</th>
+                                    <th>Weight Price</th>
+                                    <th>Sub Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.courier_details_ids" t-as="details">
+                                    <tr>
+                                        <td><span t-field="details.product_id.name"/></td>
+                                        <td><span t-field="details.quantity"/></td>
+                                        <td><span t-field="details.weight"/></td>
+                                        <td><span t-field="details.total_weight"/></td>
+                                        <td><span t-field="details.weight_price"/></td>
+                                        <td><span t-field="details.sub_total"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <div><strong>Description</strong></div>
+                                <div><span t-field="doc.description"/></div>
+                                <div class="mt-2"><strong>Internal Note</strong></div>
+                                <div><span t-field="doc.internal_note"/></div>
+                            </div>
+                            <div class="col-6 text-end">
+                                <div>
+                                    <span>Total Courier Charges: </span>
+                                    <span t-field="doc.total_courier_charges"/>
+                                </div>
+                                <div class="mt-2 fw-bold">
+                                    <span>Total: </span>
+                                    <span t-field="doc.total"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

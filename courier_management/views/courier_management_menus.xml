@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--        Courier management menus-->
+    <menuitem id="courier_request_menu"
+              name="Courier"
+              web_icon="courier_management,static/description/icon.png"
+              sequence="1"/>
+    <menuitem id="courier_request_menu_first_submenu"
+              name="Courier Requests"
+              parent="courier_request_menu"
+              action="courier_request_action"
+              sequence="2"/>
+    <menuitem id="courier_tag_menu_configuration"
+              name="Configuration"
+              parent="courier_request_menu"
+              action="courier_tag_action"
+              sequence="2"/>
+    <menuitem id="menu_basic" name="Basic"
+              parent="courier_tag_menu_configuration" sequence="1"/>
+    <menuitem id="courier_tag_menu_second_submenu"
+              name="Tags"
+              parent="menu_basic"
+              action="courier_tag_action"
+              sequence="3"/>
+    <menuitem id="courier_type_menu_first_submenu"
+              name="Types"
+              parent="menu_basic"
+              action="courier_type_action"
+              sequence="3"/>
+    <menuitem id="courier_category_menu_first_submenu"
+              name="Categories"
+              parent="menu_basic"
+              action="courier_category_action"
+              sequence="4"/>
+    <menuitem id="menu_pricing" name="Pricing"
+              parent="courier_tag_menu_configuration" sequence="2"/>
+    <menuitem id="courier_priority_menu_first_submenu"
+              name="Priorities"
+              parent="menu_pricing"
+              groups="courier_management.courier_management_group_administrator"
+              action="courier_priority_action"
+              sequence="5"/>
+    <menuitem id="courier_weight_price_menu_first_submenu"
+              name="Weight Price Rules"
+              parent="menu_pricing"
+              groups="courier_management.courier_management_group_administrator"
+              action="courier_weight_price_action"
+              sequence="5"/>
+    <menuitem id="courier_dimension_price_menu_first_submenu"
+              name="Dimension Price Rules"
+              parent="menu_pricing"
+              groups="courier_management.courier_management_group_administrator"
+              action="courier_dimension_price_action"
+              sequence="6"/>
+    <menuitem id="courier_distance_price_menu_first_submenu"
+              name="Distance Price Rules"
+              parent="menu_pricing"
+              groups="courier_management.courier_management_group_administrator"
+              action="courier_distance_price_action"
+              sequence="7"/>
+</odoo>

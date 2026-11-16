@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+    <!--    Sequence number for courier requests-->
+    <record id="sequence_courier_requests" model="ir.sequence">
+        <field name="name">Courier Requests</field>
+        <field name="code">courier.request</field>
+        <field name="active">TRUE</field>
+        <field name="prefix">COURIER/</field>
+        <field name="padding">5</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+</odoo>

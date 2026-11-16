@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--    Product product demo data-->
+    <data noupdate="1">
+        <record id="additional_charges_priority_product"
+                model="product.product">
+            <field name="name">Additional Charges</field>
+            <field name="default_code">COURIER 001</field>
+            <field name="list_price">0.00</field>
+            <field name="type">consu</field>
+            <field name="active" eval="False"/>
+            <field name="sale_ok">False</field>
+            <field name="purchase_ok">False</field>
+        </record>
+        <record id="distance_charges_product" model="product.product">
+            <field name="name">Distance Charges</field>
+            <field name="default_code">COURIER 002</field>
+            <field name="list_price">0.00</field>
+            <field name="type">consu</field>
+            <field name="active" eval="False"/>
+            <field name="sale_ok">False</field>
+            <field name="purchase_ok">False</field>
+        </record>
+        <record id="volumetric_weight_charges_product" model="product.product">
+            <field name="name">Volumetric Weight Charges</field>
+            <field name="default_code">COURIER 003</field>
+            <field name="list_price">0.00</field>
+            <field name="type">consu</field>
+            <field name="active" eval="False"/>
+            <field name="sale_ok">False</field>
+            <field name="purchase_ok">False</field>
+        </record>
+    </data>
+</odoo>

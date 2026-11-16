@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--        Courier requests list view-->
+    <record id="courier_request_view_tree" model="ir.ui.view">
+        <field name="name">courier.request.view.tree</field>
+        <field name="model">courier.request</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="sender_id"/>
+                <field name="sender_street" optional="hide"/>
+                <field name="sender_street2" optional="hide"/>
+                <field name="sender_city" optional="hide"/>
+                <field name="sender_zip" optional="hide"/>
+                <field name="sender_state_id" optional="hide"/>
+                <field name="sender_address_country_id" optional="hide"/>
+                <field name="sender_mobile_number" optional="hide"/>
+                <field name="sender_email" optional="hide"/>
+                <field name="receiver_id"/>
+                <field name="receiver_street" optional="hide"/>
+                <field name="receiver_street2" optional="hide"/>
+                <field name="receiver_city" optional="hide"/>
+                <field name="receiver_zip" optional="hide"/>
+                <field name="receiver_state_id" optional="hide"/>
+                <field name="receiver_address_country_id" optional="hide"/>
+                <field name="receiver_mobile_number" optional="hide"/>
+                <field name="receiver_email" optional="hide"/>
+                <field name="registration_date"/>
+                <field name="delivery_date"/>
+                <field name="type_id"/>
+                <field name="category_id"/>
+                <field name="priority_id"/>
+                <field name="tag_ids" optional="hide" widget="many2many_tags"
+                       options="{'color_field': 'color'}"/>
+                <field name="total_kilometres" optional="hide"/>
+                <field name="responsible_user_id" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'new'"
+                       decoration-warning="state in ['in_transit', 'dispatched', 'arrived_at_destination','out_for_delivery']"
+                       decoration-danger="state == 'cancelled'"
+                       decoration-success="state in ['collected', 'delivered','invoiced']"/>
+            </list>
+        </field>
+    </record>
+    <!--        Courier requests form view-->
+    <record id="courier_request_view_form" model="ir.ui.view">
+        <field name="name">courier.request.view.form</field>
+        <field name="model">courier.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="new,dispatched,arrived_at_destination,delivered"/>
+                    <button name="action_create_invoice" class="btn btn-primary"
+                            type="object" invisible="state != 'collected'"
+                            groups="courier_management.courier_management_group_administrator"
+                            string="Invoice"/>
+                    <button name="action_collected" class="btn btn-primary"
+                            type="object"
+                            invisible="state not in ('new', 'cancel')"
+                            groups="courier_management.courier_management_group_administrator"
+                            string="Collected"/>
+                    <button name="action_dispatched" class="btn btn-primary"
+                            type="object" invisible="state not in ('invoiced', 'cancel')"
+                            groups="courier_management.courier_management_group_administrator"
+                            string="Dispatched"/>
+                    <button name="action_in_transit" class="btn btn-primary"
+                            type="object" invisible="state not in ('dispatched', 'cancel')"
+                            groups="courier_management.courier_management_group_administrator"
+                            string="In Transit"/>
+                    <button name="action_arrived_at_destination"
+                            class="btn btn-primary" type="object"
+                            invisible="state not in ('in_transit', 'cancel')"
+                            groups="courier_management.courier_management_group_administrator"
+                            string="Arrived"/>
+                    <button name="action_out_for_delivery"
+                            class="btn btn-primary" type="object"
+                            invisible="state not in ('arrived_at_destination', 'cancel')"
+                            groups="courier_management.courier_management_group_administrator"
+                            string="Out For Delivery"/>
+                    <button name="action_delivered" class="btn btn-primary"
+                            type="object"
+                            invisible="state not in ('out_for_delivery', 'cancel')"
+                            groups="courier_management.courier_management_group_administrator"
+                            string="Delivered"/>
+                    <button name="action_cancelled" class="btn btn-primary"
+                            type="object"
+                            invisible="state not in ('new', 'collected','dispatched','in_transit','arrived_at_destination','out_for_delivery','cancel')"
+                            groups="courier_management.courier_management_group_administrator"
+                            string="Cancel"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_invoices" type="object"
+                                class="oe_stat_button"
+                                icon="edit_square"
+                                invisible="invoice_count == 0">
+                            <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                        </button>
+                    </div>
+                    <h1>
+                        <field name="name"/>
+                    </h1>
+                    <group>
+                        <group string="Sender">
+                            <field name="sender_id"/>
+                            <span class="o_form_label o_td_label"
+                                  name="sender_address">
+                                Address
+                            </span>
+                            <div class="o_address_format">
+                                <field name="sender_street"
+                                       placeholder="Sender Street..."
+                                       class="o_address_street"/>
+                                <field name="sender_street2"
+                                       placeholder="Sender Street 2..."
+                                       class="o_address_street"/>
+                                <field name="sender_city"
+                                       placeholder="Sender City"
+                                       class="o_address_city"/>
+                                <field name="sender_zip"
+                                       placeholder="Sender ZIP"
+                                       class="o_address_zip"/>
+                                <field name="sender_state_id"
+                                       class="o_address_state"
+                                       placeholder="Sender State"/>
+                                <div name="sender_address_country_id"
+                                     class="d-flex justify-content-between">
+                                    <field name="sender_address_country_id"
+                                           placeholder="Sender Country"
+                                           class="o_address_country"/>
+                                </div>
+                            </div>
+                            <field name="sender_mobile_number"/>
+                            <field name="sender_email"/>
+                        </group>
+                        <group string="Receiver">
+                            <field name="receiver_id"/>
+                            <span class="o_form_label o_td_label"
+                                  name="receiver_address">
+                                Address
+                            </span>
+                            <div class="o_address_format">
+                                <field name="receiver_street"
+                                       placeholder="Receiver Street..."
+                                       class="o_address_street"/>
+                                <field name="receiver_street2"
+                                       placeholder="Receiver Street 2..."
+                                       class="o_address_street"/>
+                                <field name="receiver_city"
+                                       placeholder="Receiver City"
+                                       class="o_address_city"/>
+                                <field name="receiver_zip"
+                                       placeholder="Receiver ZIP"
+                                       class="o_address_zip"/>
+                                <field name="receiver_state_id"
+                                       class="o_address_state"
+                                       placeholder="Receiver State"/>
+                                <div name="receiver_address_country_id"
+                                     class="d-flex justify-content-between">
+                                    <field name="receiver_address_country_id"
+                                           placeholder="Receiver Country"
+                                           class="o_address_country"/>
+                                </div>
+                            </div>
+                            <field name="receiver_mobile_number"/>
+                            <field name="receiver_email"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Courier">
+                            <field name="registration_date"/>
+                            <field name="delivery_date"/>
+                            <field name="type_id"/>
+                            <field name="category_id"/>
+                            <field name="l_w_h_id"
+                                   options="{'no_open':True,'no_create': True}"/>
+                            <field name="volumetric_weight"/>
+                            <field name="volumetric_weight_price"
+                                   widget="monetary"/>
+                            <field name="priority_id"
+                                   options="{'no_open':True,'no_create': True}"/>
+                            <field name="priority_amount" widget="monetary"/>
+                        </group>
+                        <group string="Internal">
+                            <field name="tag_ids" widget="many2many_tags"
+                                   options="{'color_field': 'color'}"
+                                   optional="show"/>
+                            <field name="total_kilometres"/>
+                            <field name="distance_amount" force_save="1"
+                                   widget="monetary"/>
+                            <field name="responsible_user_id"/>
+                            <field name="company_id"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Courier Details">
+                            <field name="courier_details_ids">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="quantity" sum="quantity"/>
+                                    <field name="weight" sum="weight"/>
+                                    <field name="total_weight"
+                                           sum="total weight"/>
+                                    <field name="company_id" invisible="1"/>
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="weight_price"
+                                           sum="weight price"
+                                           widget="monetary"/>
+                                    <field name="sub_total" sum="sub total"
+                                           widget="monetary"/>
+                                </list>
+                            </field>
+                            <group col="12" class="oe_invoice_lines_tab">
+                                <group colspan="8">
+                                    <field name="description"/>
+                                    <field name="internal_note"/>
+                                </group>
+                                <group colspan="4" class="oe_subtotal_footer">
+                                    <field name="volumetric_weight_price"
+                                           widget="monetary"/>
+                                    <field name="priority_amount"
+                                           widget="monetary"/>
+                                    <field name="distance_amount"
+                                           widget="monetary"/>
+                                    <field name="total_courier_charges"
+                                           force_save="1" widget="monetary"/>
+                                    <div class="oe_subtotal_footer_separator oe_inline">
+                                        <label for="total"/>
+                                    </div>
+                                    <field name="total" nolabel="1"
+                                           class="oe_subtotal_footer_separator"
+                                           widget="monetary"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <!--        Courier requests kanban view-->
+    <record id="courier_request_view_kanban" model="ir.ui.view">
+        <field name="name">courier.request.view.kanban</field>
+        <field name="model">courier.request</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="sender_id"/>
+                <field name="receiver_id"/>
+                <field name="registration_date"/>
+                <field name="delivery_date"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_click">
+                            <div class="oe_kanban_card oe_kanban_global_click">
+                                <div>
+                                    <strong style="font-weight: 800;">
+                                        <field name="name"/>
+                                    </strong>
+                                </div>
+                                <div>
+                                    Sender:
+                                    <field name="sender_id"/>
+                                </div>
+                                Receiver:
+                                <field name="receiver_id"/>
+                                <div>
+                                    <strong>
+                                        <field name="delivery_date"
+                                               style="color:green"/>
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!--        Courier requests search view-->
+    <record id="courier_request_view_search" model="ir.ui.view">
+        <field name="name">courier.request.view.search</field>
+        <field name="model">courier.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <!-- Search fields -->
+                <field name="name"/>
+                <field name="sender_id"/>
+                <field name="receiver_id"/>
+                <field name="type_id"/>
+                <field name="priority_id"/>
+                <field name="category_id"/>
+
+                <!-- Quick filters -->
+                <filter string="My Courier Requests"
+                        name="my_courier_requests"
+                        domain="[('responsible_user_id', '=', uid)]"/>
+
+                <separator/>
+
+                <!-- State filters -->
+                <filter string="New"
+                        name="new"
+                        domain="[('state', '=', 'new')]"/>
+                <filter string="Collected"
+                        name="collected"
+                        domain="[('state', '=', 'collected')]"/>
+                <filter string="Invoiced"
+                        name="invoiced"
+                        domain="[('state', '=', 'invoiced')]"/>
+                <filter string="Dispatched"
+                        name="dispatched"
+                        domain="[('state', '=', 'dispatched')]"/>
+                <filter string="In Transit"
+                        name="in_transit"
+                        domain="[('state', '=', 'in_transit')]"/>
+                <filter string="Arrived At Destination"
+                        name="arrived_at_destination"
+                        domain="[('state', '=', 'arrived_at_destination')]"/>
+                <filter string="Out For Delivery"
+                        name="out_for_delivery"
+                        domain="[('state', '=', 'out_for_delivery')]"/>
+                <filter string="Delivered"
+                        name="delivered"
+                        domain="[('state', '=', 'delivered')]"/>
+                <filter string="Cancelled"
+                        name="cancelled"
+                        domain="[('state', '=', 'cancelled')]"/>
+
+                <!-- Group By section -->
+                <group>
+                    <filter string="Sender"
+                            name="group_sender_id"
+                            context="{'group_by': 'sender_id'}"/>
+                    <filter string="Receiver"
+                            name="group_receiver_id"
+                            context="{'group_by': 'receiver_id'}"/>
+                    <filter string="Responsible User"
+                            name="group_responsible_user_id"
+                            context="{'group_by': 'responsible_user_id'}"/>
+                    <filter string="Type"
+                            name="group_type_id"
+                            context="{'group_by': 'type_id'}"/>
+                    <filter string="Priority"
+                            name="group_priority_id"
+                            context="{'group_by': 'priority_id'}"/>
+                    <filter string="Category"
+                            name="group_category_id"
+                            context="{'group_by': 'category_id'}"/>
+                    <filter string="State"
+                            name="group_state"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!--        Courier requests calendar view-->
+    <record id="courier_request_view_calendar" model="ir.ui.view">
+        <field name="name">courier.request.view.calendar</field>
+        <field name="model">courier.request</field>
+        <field name="priority" eval="2"/>
+        <field name="arch" type="xml">
+            <calendar date_start="delivery_date"
+                      string="Courier Requests Calendar"
+                      mode="month" color="state"
+                      event_open_popup="true">
+                <field name="name"/>
+                <field name="sender_id" avatar_field="image_128"/>
+                <field name="receiver_id" avatar_field="image_128"/>
+                <field name="registration_date"/>
+                <field name="delivery_date"/>
+                <field name="type_id"/>
+                <field name="category_id"/>
+                <field name="l_w_h_id"/>
+                <field name="priority_id"/>
+                <field name="responsible_user_id" avatar_field="image_128"/>
+            </calendar>
+        </field>
+    </record>
+    <!--        Courier requests graph view-->
+    <record id="courier_request_view_graph" model="ir.ui.view">
+        <field name="name">courier.request.view.graph</field>
+        <field name="model">courier.request</field>
+        <field name="arch" type="xml">
+            <graph string="Courier Requests Analysis" sample="1">
+                <field name="name"/>
+                <field name="registration_date" interval="month"/>
+                <field name="delivery_date" interval="month"/>
+                <field name="sender_id"/>
+                <field name="receiver_id"/>
+                <field name="responsible_user_id"/>
+                <field name="type_id"/>
+                <field name="category_id"/>
+                <field name="l_w_h_id"/>
+                <field name="priority_id"/>
+            </graph>
+        </field>
+    </record>
+    <!--        Courier requests pivot view-->
+    <record id="courier_request_view_pivot" model="ir.ui.view">
+        <field name="name">courier.request.view.pivot</field>
+        <field name="model">courier.request</field>
+        <field name="arch" type="xml">
+            <pivot string="Courier Requests Items" sample="1">
+                <field name="name" type="row"/>
+                <field name="delivery_date" type="col"/>
+                <field name="total_courier_charges" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <!--    Courier Requests menu action-->
+    <record id="courier_request_action" model="ir.actions.act_window">
+        <field name="name">Courier Requests</field>
+        <field name="res_model">courier.request</field>
+        <field name="view_mode">list,form,kanban,calendar,graph,pivot</field>
+    </record>
+</odoo>

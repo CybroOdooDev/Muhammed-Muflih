@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data noupdate="1">
+        <!-- Courier requests administrator access -->
+        <record id="courier_requests_rule_administrator" model="ir.access">
+            <field name="name">Courier Requests Administrator</field>
+            <field name="model_id" ref="model_courier_request"/>
+            <field name="group_id" ref="courier_management.courier_management_group_administrator"/>
+            <field name="operation">crud</field>
+            <field name="domain">[(1, '=', 1)]</field>
+        </record>
+
+        <!-- Courier requests user access: own requests only -->
+        <record id="courier_requests_rule_user" model="ir.access">
+            <field name="name">Courier Requests User</field>
+            <field name="model_id" ref="model_courier_request"/>
+            <field name="group_id" ref="courier_management.courier_management_group_user"/>
+            <field name="operation">crud</field>
+            <field name="domain">[('sender_id', '=', user.partner_id.id)]</field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Courier Breadcrumbs -->
+    <template id="portal_layout_courier" inherit_id="portal.portal_breadcrumbs">
+        <xpath expr="//ol" position="inside">
+            <li t-if="page_name == 'courier_requests' or record_courier_requests"
+                t-attf-class="breadcrumb-item #{'active' if not record_courier_requests else ''}">
+                <a t-if="record_courier_requests" t-attf-href="/my/courier/requests?{{ keep_query() }}">Courier Requests</a>
+                <t t-else="">Courier Requests</t>
+            </li>
+            <li t-if="record_courier_requests" class="breadcrumb-item active">
+                <span t-field="record_courier_requests.name"/>
+            </li>
+        </xpath>
+    </template>
+
+    <!--Courier Request list -->
+    <template id="portal_my_courier_requests_list">
+        <t t-set="breadcrumbs_searchbar" t-value="True"/>
+        <t t-call="portal.portal_layout">
+            <div class="groupby_courier">
+                <t t-call="portal.portal_searchbar"/>
+                <div id="search_courier_requests_group" class="search_courier_requests">
+                    <t t-call="courier_management.portal_my_certificates_search"/>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!--Courier Request search-->
+    <template id="portal_my_certificates_search">
+        <t t-if="not courier_request">
+            <h5>There are currently no courier requests for your account.</h5>
+        </t>
+        <t t-if="courier_request" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th>Events #</th>
+                        <th class="text-end">Sender Name</th>
+                        <th class="text-end">Receiver Name</th>
+                        <th class="text-end">Registration Date</th>
+                        <th class="text-end">Delivery Date</th>
+                        <th class="text-end">Type</th>
+                        <th class="text-end">L x W x H</th>
+                        <th class="text-end">Category</th>
+                        <th class="text-end">Priority</th>
+                    </tr>
+                </thead>
+                <t t-foreach="courier_request" t-as="courier">
+                    <tr>
+                        <td id="my_selector">
+                            <a class="my_courier_request_link"
+                               t-attf-data-id="{{courier.id}}"
+                               t-attf-href="/my/courier/requests/form/{{courier.id}}">
+                                <t t-out="courier.name"/>
+                            </a>
+                        </td>
+                        <td class="text-end">
+                            <span t-field="courier.sender_id.name"/>
+                        </td>
+                        <td class="text-end">
+                            <span t-field="courier.receiver_id.name"/>
+                        </td>
+                        <td class="text-end">
+                            <span t-field="courier.registration_date"/>
+                        </td>
+                        <td class="text-end">
+                            <span t-field="courier.delivery_date"/>
+                        </td>
+                        <td class="text-end">
+                            <span t-field="courier.type_id.courier_type"/>
+                        </td>
+                        <td class="text-end">
+                            <span t-field="courier.l_w_h_id.name"/>
+                        </td>
+                        <td class="text-end">
+                            <span t-field="courier.category_id.courier_category"/>
+                        </td>
+                        <td class="text-end">
+                            <span t-field="courier.priority_id.name"/>
+                        </td>
+                    </tr>
+                </t>
+            </t>
+    </template>
+    <!--    Courier Request form template-->
+    <template id="portal_my_courier_requests_form"
+              name="Courier Request Form">
+        <t t-set="breadcrumbs_searchbar" t-value="True"/>
+        <t t-call="portal.portal_layout">
+            <t t-set="title">
+                <h4 class="mb-0 text-break">
+                    <span t-field="record_courier_requests.name"/>
+                </h4>
+            </t>
+            <t t-set="entries">
+                <div class="d-flex flex-column gap-4 mt-3">
+                    <div t-if="record_courier_requests.sender_id">
+                        <h6 class="small text-muted">Your Contact</h6>
+                        <t t-call="portal.portal_my_contact"
+                            _contact_avatar="image_data_uri(record_courier_requests.sender_id.avatar_128)"
+                            _contact_name="record_courier_requests.sender_id.name"
+                            _contact_link="True">
+                            <div t-field="record_courier_requests.sender_id"
+                                 t-options='{"widget": "contact", "fields": ["phone", "email"], "no_marker": False}'/>
+                        </t>
+                    </div>
+                </div>
+            </t>
+
+            <!-- Slidebar and Page Details -->
+            <div class="row mt16 o_portal_courier_sidebar">
+                <t t-call="portal.portal_record_sidebar"
+                    classes.f="col-lg-4 col-xxl-3 d-print-none"
+                    title="title"
+                    entries="entries"/>
+
+                <!-- Main Content Card -->
+                <div id="courier_requests_call_page_details"
+                     class="o_portal_content col-12 col-lg-8 col-xxl-9">
+                    <div class="card p-4 shadow-sm bg-white">
+                        <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+                            <h4 class="mb-0">
+                                <span t-field="record_courier_requests.name"/>
+                            </h4>
+                            <div>
+                                <span t-if="record_courier_requests.state == 'new'" class="badge rounded-pill text-bg-info">New</span>
+                                <span t-elif="record_courier_requests.state == 'collected'" class="badge rounded-pill text-bg-primary">Collected</span>
+                                <span t-elif="record_courier_requests.state == 'invoiced'" class="badge rounded-pill text-bg-success">Invoiced</span>
+                                <span t-elif="record_courier_requests.state == 'dispatched'" class="badge rounded-pill text-bg-warning">Dispatched</span>
+                                <span t-elif="record_courier_requests.state == 'in_transit'" class="badge rounded-pill text-bg-warning">In Transit</span>
+                                <span t-elif="record_courier_requests.state == 'arrived_at_destination'" class="badge rounded-pill text-bg-warning">Arrived At Destination</span>
+                                <span t-elif="record_courier_requests.state == 'out_for_delivery'" class="badge rounded-pill text-bg-warning">Out For Delivery</span>
+                                <span t-elif="record_courier_requests.state == 'delivered'" class="badge rounded-pill text-bg-success">Delivered</span>
+                                <span t-elif="record_courier_requests.state == 'cancelled'" class="badge rounded-pill text-bg-danger">Cancelled</span>
+                            </div>
+                        </div>
+
+                        <!-- Information Section -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-md-6">
+                                <div class="mb-2">
+                                    <strong class="text-muted d-block small">Delivery Date</strong>
+                                    <span t-field="record_courier_requests.delivery_date" t-options='{"widget": "date"}'/>
+                                </div>
+                                <div class="mb-2" t-if="record_courier_requests.type_id">
+                                    <strong class="text-muted d-block small">Courier Type</strong>
+                                    <span t-field="record_courier_requests.type_id.courier_type"/>
+                                </div>
+                                <div class="mb-2" t-if="record_courier_requests.category_id">
+                                    <strong class="text-muted d-block small">Category</strong>
+                                    <span t-field="record_courier_requests.category_id.courier_category"/>
+                                </div>
+                                <div class="mb-2" t-if="record_courier_requests.receiver_id">
+                                    <strong class="text-muted d-block small">Receiver Details</strong>
+                                    <div t-field="record_courier_requests.receiver_id"
+                                         t-options='{"widget": "contact", "fields": ["name", "address", "phone", "email"], "no_marker": True}'/>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="mb-2" t-if="record_courier_requests.priority_id">
+                                    <strong class="text-muted d-block small">Priority</strong>
+                                    <span t-field="record_courier_requests.priority_id.name"/>
+                                    (<span t-field="record_courier_requests.priority_amount"/>)
+                                </div>
+                                <div class="mb-2" t-if="record_courier_requests.l_w_h_id">
+                                    <strong class="text-muted d-block small">Dimensions (L x W x H)</strong>
+                                    <span t-field="record_courier_requests.l_w_h_id.name"/>
+                                </div>
+                                <div class="mb-2" t-if="record_courier_requests.volumetric_weight_price">
+                                    <strong class="text-muted d-block small">Volumetric Weight Price</strong>
+                                    <span t-field="record_courier_requests.volumetric_weight_price"/>
+                                </div>
+                                <div class="mb-2" t-if="record_courier_requests.distance_amount">
+                                    <strong class="text-muted d-block small">Distance Amount</strong>
+                                    <span t-field="record_courier_requests.distance_amount"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Courier Details Table -->
+                        <h5 class="mt-3 mb-2">Courier Details</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-end">Quantity</th>
+                                        <th class="text-end">Weight (kg)</th>
+                                        <th class="text-end">Total Weight (kg)</th>
+                                        <th class="text-end">Weight Price</th>
+                                        <th class="text-end">Sub Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="record_courier_requests.courier_details_ids" t-as="courier_details">
+                                        <tr>
+                                            <td><span t-field="courier_details.product_id.name"/></td>
+                                            <td class="text-end"><span t-field="courier_details.quantity"/></td>
+                                            <td class="text-end"><span t-field="courier_details.weight"/></td>
+                                            <td class="text-end"><span t-field="courier_details.total_weight"/></td>
+                                            <td class="text-end"><span t-field="courier_details.weight_price"/></td>
+                                            <td class="text-end"><span t-field="courier_details.sub_total"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Total Section -->
+                        <div class="row justify-content-end mt-3">
+                            <div class="col-12 col-md-5">
+                                <table class="table table-sm table-borderless">
+                                    <tr class="border-top fw-bold fs-5">
+                                        <td>Total</td>
+                                        <td class="text-end">
+                                            <span t-field="record_courier_requests.total"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!--    Courier request group by template-->
+    <template id="courier_requests_group_by_template">
+        <t t-if="not courier_request">
+            <h5>Choose A Group By Option</h5>
+        </t>
+        <t t-if="courier_request" t-call="portal.portal_table">
+            <thead>
+                <tr class="active">
+                    <th>Events #</th>
+                    <th class="text-end">Sender Name</th>
+                    <th class="text-end">Receiver Name</th>
+                    <th class="text-end">Registration Date</th>
+                    <th class="text-end">Delivery Date</th>
+                    <th class="text-end">Type</th>
+                    <th class="text-end">L x W x H</th>
+                    <th class="text-end">Category</th>
+                    <th class="text-end">Priority</th>
+                </tr>
+            </thead>
+            <tbody>
+                <t t-foreach="courier_request" t-as="group">
+                    <tr>
+                        <th class="table-light fw-bold" colspan="9">
+                            <t t-out="group['name']"/>
+                        </th>
+                    </tr>
+                    <t t-foreach="group['data']" t-as="data">
+                        <tr>
+                            <td>
+                                <a t-attf-href="/my/courier/requests/form/{{data.id}}">
+                                    <t t-out="data.name"/>
+                                </a>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="data.sender_id.name"/>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="data.receiver_id.name"/>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="data.registration_date"/>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="data.delivery_date"/>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="data.type_id.courier_type"/>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="data.l_w_h_id.name"/>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="data.category_id.courier_category"/>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="data.priority_id.name"/>
+                            </td>
+                        </tr>
+                    </t>
+                </t>
+            </tbody>
+        </t>
+    </template>
+</odoo>

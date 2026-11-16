@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="0">
+    <!-- Portal entry card for Courier Requests in Odoo 20 -->
+    <record id="portal_entry_courier_requests" model="portal.entry">
+        <field name="name">Courier Requests</field>
+        <field name="description">Check all your Courier Requests</field>
+        <field name="url">/my/courier/requests</field>
+        <field name="image" type="bytes" file="account/static/src/img/bill.svg"/>
+        <field name="placeholder_count">courier_requests_count</field>
+        <field name="category">client_category</field>
+        <field name="is_config_card" eval="True"/>
+        <field name="sequence" eval="60"/>
+    </record>
+</odoo>
+

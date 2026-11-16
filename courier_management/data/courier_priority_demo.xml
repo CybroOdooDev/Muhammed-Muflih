@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--    Courier priority demo data-->
+    <data noupdate="1">
+        <record id="courier_priority_standard_delivery_service" model="courier.priority">
+            <field name="name">Standard Delivery Service</field>
+            <field name="charges">10</field>
+        </record>
+        <record id="courier_priority_same_day_delivery" model="courier.priority">
+            <field name="name">Same Day Delivery</field>
+            <field name="charges">20</field>
+        </record>
+        <record id="courier_priority_overnight_shipping_service" model="courier.priority">
+            <field name="name">Overnight Shipping Service</field>
+            <field name="charges">15</field>
+        </record>
+        <record id="courier_priority_rush_and_on_demand_deliveries" model="courier.priority">
+            <field name="name">Rush And On-Demand Deliveries</field>
+            <field name="charges">25</field>
+        </record>
+        <record id="courier_priority_parsel_service" model="courier.priority">
+            <field name="name">Parsel Service</field>
+            <field name="charges">20</field>
+        </record>
+        <record id="courier_priority_luggage_delivery_service" model="courier.priority">
+            <field name="name">Luggage Delivery Service</field>
+            <field name="charges">18</field>
+        </record>
+        <record id="courier_priority_expensed_service" model="courier.priority">
+            <field name="name">Expensed Service</field>
+            <field name="charges">100</field>
+        </record>
+    </data>
+</odoo>

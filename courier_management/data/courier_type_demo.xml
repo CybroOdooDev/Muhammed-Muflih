@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--    Courier type demo data-->
+    <data noupdate="1">
+        <record id="courier_types_local" model="courier.type">
+            <field name="courier_type">Local</field>
+        </record>
+        <record id="courier_types_parsel" model="courier.type">
+            <field name="courier_type">Parsel</field>
+        </record>
+        <record id="courier_types_expense" model="courier.type">
+            <field name="courier_type">Expense</field>
+        </record>
+        <record id="courier_types_non_expense" model="courier.type">
+            <field name="courier_type">Non Expense</field>
+        </record>
+        <record id="courier_types_metals" model="courier.type">
+            <field name="courier_type">Metals</field>
+        </record>
+        <record id="courier_types_non_metals" model="courier.type">
+            <field name="courier_type">Non Metals</field>
+        </record>
+    </data>
+</odoo>

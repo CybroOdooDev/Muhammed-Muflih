@@ -19,7 +19,6 @@
     'name': 'Access Roles',
     'version': '20.0.1.0.0',
     'category': 'Security',
-    'sequence': 1,
     'summary': 'Access Roles for users',
     'description': """Manage user access roles and role-based permissions in Odoo.""",
     'author': 'Cybrosys Techno Solutions',
@@ -48,6 +47,5 @@
     },
     'images': ['static/description/banner.jpg'],
     'license': 'LGPL-3',
-    'installable': True,
     'application': True,
 }

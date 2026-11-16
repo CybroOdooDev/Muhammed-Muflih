@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--    Courier category demo data-->
+    <data noupdate="1">
+        <record id="courier_categories_wooden_products" model="courier.category">
+            <field name="courier_category">Wooden Products</field>
+        </record>
+        <record id="courier_categories_metal_products" model="courier.category">
+            <field name="courier_category">Metals Products</field>
+        </record>
+        <record id="courier_categories_ceramic_products" model="courier.category">
+            <field name="courier_category">Ceramic Products</field>
+        </record>
+        <record id="courier_categories_glass_products" model="courier.category">
+            <field name="courier_category">Glass Products</field>
+        </record>
+        <record id="courier_categories_plastic_products" model="courier.category">
+            <field name="courier_category">Plastic Products</field>
+        </record>
+        <record id="courier_categories_solid_products" model="courier.category">
+            <field name="courier_category">Solid Products</field>
+        </record>
+        <record id="courier_categories_other_products" model="courier.category">
+            <field name="courier_category">Other Products</field>
+        </record>
+    </data>
+</odoo>

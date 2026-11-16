@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Courier request search and group by template -->
+    <template id="website_portal_search_group_by_courier_requests"
+              inherit_id="portal.portal_searchbar">
+        <xpath expr="//div[@id='o_portal_navbar_content']" position="after">
+            <div t-if="page_name == 'courier_requests'"
+                 class="search_group_by_courier_requests ms-auto d-flex align-items-center gap-2">
+                <select id="group_select_courier_requests"
+                        class="form-select form-select-sm w-auto">
+                    <option value="0" class="text-muted">Group by</option>
+                    <option value="1">Type</option>
+                    <option value="2">Category</option>
+                </select>
+                <div class="input-group input-group-sm">
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Enter courier request number"
+                           id="courier_requests_search_box"/>
+                    <button type="button" class="btn btn-secondary"
+                            id="search_courier_requests_button">Search
+                    </button>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--    Courier distance price demo data-->
+    <data noupdate="1">
+        <record id="courier_distance_price_rule_5_to_15"
+                model="courier.distance.price">
+            <field name="name">If Distance 5.00 To 15.00 Kilometres</field>
+            <field name="minimum_distance">5.00</field>
+            <field name="maximum_distance">15.00</field>
+            <field name="price">20</field>
+        </record>
+        <record id="courier_distance_price_rule_15_to_30"
+                model="courier.distance.price">
+            <field name="name">If Distance 15.00 To 30.00 Kilometres</field>
+            <field name="minimum_distance">15.00</field>
+            <field name="maximum_distance">30.00</field>
+            <field name="price">35</field>
+        </record>
+        <record id="courier_distance_price_rule_30_to_50"
+                model="courier.distance.price">
+            <field name="name">If Distance 30.00 To 50.00 Kilometres</field>
+            <field name="minimum_distance">30.00</field>
+            <field name="maximum_distance">50.00</field>
+            <field name="price">45</field>
+        </record>
+        <record id="courier_distance_price_rule_50_to_80"
+                model="courier.distance.price">
+            <field name="name">If Distance 50.00 To 80.00 Kilometres</field>
+            <field name="minimum_distance">50.00</field>
+            <field name="maximum_distance">80.00</field>
+            <field name="price">60</field>
+        </record>
+        <record id="courier_distance_price_rule_80_to_100"
+                model="courier.distance.price">
+            <field name="name">If Distance 80.00 To 100.00 Kilometres</field>
+            <field name="minimum_distance">80.00</field>
+            <field name="maximum_distance">100.00</field>
+            <field name="price">75</field>
+        </record>
+        <record id="courier_distance_price_rule_100_to_130"
+                model="courier.distance.price">
+            <field name="name">If Distance 100.00 To 130.00 Kilometres</field>
+            <field name="minimum_distance">100.00</field>
+            <field name="maximum_distance">130.00</field>
+            <field name="price">90</field>
+        </record>
+        <record id="courier_distance_price_rule_130_to_150"
+                model="courier.distance.price">
+            <field name="name">If Distance 130.00 To 150.00 Kilometres</field>
+            <field name="minimum_distance">130.00</field>
+            <field name="maximum_distance">150.00</field>
+            <field name="price">100</field>
+        </record>
+        <record id="courier_distance_price_rule_150_to_200"
+                model="courier.distance.price">
+            <field name="name">If Distance 150.00 To 200.00 Kilometres</field>
+            <field name="minimum_distance">150.00</field>
+            <field name="maximum_distance">200.00</field>
+            <field name="price">150</field>
+        </record>
+    </data>
+</odoo>

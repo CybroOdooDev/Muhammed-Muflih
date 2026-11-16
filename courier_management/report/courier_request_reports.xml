@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+<!--        Courier requests report actions-->
+    <record id="action_courier_request_report" model="ir.actions.report">
+        <field name="name">Courier Request Report</field>
+        <field name="model">courier.request</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">courier_management.report_courier_request</field>
+        <field name="binding_model_id" ref="model_courier_request"/>
+        <field name="binding_type">report</field>
+        <field name="binding_view_types">form</field>
+    </record>
+</odoo>

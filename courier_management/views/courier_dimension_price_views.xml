@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--        Courier dimension price list view-->
+    <record id="courier_dimension_price_view_list" model="ir.ui.view">
+        <field name="name">courier.dimension.price.view.list</field>
+        <field name="model">courier.dimension.price</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="length"/>
+                <field name="width"/>
+                <field name="height"/>
+                <field name="volumetric_weight"/>
+                <field name="price"/>
+            </list>
+        </field>
+    </record>
+    <!--        Courier dimension price form  view-->
+    <record id="courier_dimension_price_view_form" model="ir.ui.view">
+        <field name="name">courier.dimension.price.view.form</field>
+        <field name="model">courier.dimension.price</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <h1 style="width:100%">
+                        <field name="name"/>
+                    </h1>
+                    <group>
+                        <group>
+                            <label for="length"/>
+                            <div class="o_row no-gutters d-flex">
+                                <div class="o_row">
+                                    <field name="length"/>X
+                                    <field name="width"/>X
+                                    <field name="height"/>
+                                </div>
+                            </div>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="volumetric_weight"/>
+                        <field name="company_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="price" widget="monetary"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--    Courier Dimension menu action-->
+    <record id="courier_dimension_price_action" model="ir.actions.act_window">
+        <field name="name">Dimension Price Rules</field>
+        <field name="res_model">courier.dimension.price</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

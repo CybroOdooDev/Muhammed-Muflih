@@ -435,3 +435,12 @@ class TestAccessRoles(TransactionCase):
         cat_id = cat.id
         cat.unlink()
         self.assertFalse(self.env['ir.module.category'].browse(cat_id).exists())
+
+    def test_15_security_acl_restrictions(self):
+        """Test that regular employees cannot write or unlink role management configuration."""
+        from odoo.exceptions import AccessError
+        user_rm = self.role_management.with_user(self.test_user)
+        with self.assertRaises(AccessError):
+            user_rm.write({'name': 'Tampered Role Management'})
+        with self.assertRaises(AccessError):
+            user_rm.unlink()

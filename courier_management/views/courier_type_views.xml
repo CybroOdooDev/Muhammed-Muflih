@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--        Courier type list view-->
+    <record id="courier_type_view_list" model="ir.ui.view">
+        <field name="name">courier.type.view.list</field>
+        <field name="model">courier.type</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="courier_type"/>
+            </list>
+        </field>
+    </record>
+    <!--    Courier Type menu action-->
+    <record id="courier_type_action" model="ir.actions.act_window">
+        <field name="name">Types</field>
+        <field name="res_model">courier.type</field>
+        <field name="view_mode">list</field>
+    </record>
+</odoo>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--        Courier details list view-->
+    <record id="courier_detail_view_list" model="ir.ui.view">
+        <field name="name">courier.detail.view.list</field>
+        <field name="model">courier.detail</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="product_id"/>
+                <field name="quantity"/>
+                <field name="weight"/>
+                <field name="total_weight"/>
+                <field name="weight_price"/>
+                <field name="sub_total"/>
+            </list>
+        </field>
+    </record>
+    <!--        Courier details form view-->
+    <record id="courier_detail_view_form" model="ir.ui.view">
+        <field name="name">courier.detail.view.form</field>
+        <field name="model">courier.detail</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="quantity"/>
+                            <field name="weight"/>
+                            <field name="total_weight"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="weight_price" widget="monetary"/>
+                            <field name="sub_total" widget="monetary"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

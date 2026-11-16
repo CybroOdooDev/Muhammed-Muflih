@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--    Courier weight price demo data-->
+    <data noupdate="1">
+        <record id="courier_weight_price_rule_1_to_5" model="courier.weight.price">
+            <field name="name">If Weight 1 To 5 Kilograms</field>
+            <field name="minimum_weight">1</field>
+            <field name="maximum_weight">5</field>
+            <field name="price">15</field>
+        </record>
+        <record id="courier_weight_price_rule_5_to_10" model="courier.weight.price">
+            <field name="name">If Weight 5 To 10 Kilograms</field>
+            <field name="minimum_weight">5</field>
+            <field name="maximum_weight">10</field>
+            <field name="price">25</field>
+        </record>
+        <record id="courier_weight_price_rule_5_to_15" model="courier.weight.price">
+            <field name="name">If Weight 5 To 15 Kilograms</field>
+            <field name="minimum_weight">5</field>
+            <field name="maximum_weight">15</field>
+            <field name="price">30</field>
+        </record>
+        <record id="courier_weight_price_rule_1_to_15" model="courier.weight.price">
+            <field name="name">If Weight 1 To 15 Kilograms</field>
+            <field name="minimum_weight">1</field>
+            <field name="maximum_weight">15</field>
+            <field name="price">9</field>
+        </record>
+        <record id="courier_weight_price_rule_15_to_20" model="courier.weight.price">
+            <field name="name">If Weight 15 To 20 Kilograms</field>
+            <field name="minimum_weight">15</field>
+            <field name="maximum_weight">20</field>
+            <field name="price">40</field>
+        </record>
+        <record id="courier_weight_price_rule_15_to_25" model="courier.weight.price">
+            <field name="name">If Weight 15 To 25 Kilograms</field>
+            <field name="minimum_weight">15</field>
+            <field name="maximum_weight">25</field>
+            <field name="price">45</field>
+        </record>
+        <record id="courier_weight_price_rule_20_to_30" model="courier.weight.price">
+            <field name="name">If Weight 20 To 30 Kilograms</field>
+            <field name="minimum_weight">20</field>
+            <field name="maximum_weight">30</field>
+            <field name="price">50</field>
+        </record>
+        <record id="courier_weight_price_rule_30_to_50" model="courier.weight.price">
+            <field name="name">If Weight 30 To 50 Kilograms</field>
+            <field name="minimum_weight">30</field>
+            <field name="maximum_weight">50</field>
+            <field name="price">100</field>
+        </record>
+        <record id="courier_weight_price_rule_30_to_40" model="courier.weight.price">
+            <field name="name">If Weight 30 To 40 Kilograms</field>
+            <field name="minimum_weight">30</field>
+            <field name="maximum_weight">40</field>
+            <field name="price">70</field>
+        </record>
+        <record id="courier_weight_price_rule_40_to_50" model="courier.weight.price">
+            <field name="name">If Weight 40 To 50 Kilograms</field>
+            <field name="minimum_weight">40</field>
+            <field name="maximum_weight">50</field>
+            <field name="price">99</field>
+        </record>
+        <record id="courier_weight_price_rule_01_to_1" model="courier.weight.price">
+            <field name="name">If Weight 0.01 To 1 Kilograms</field>
+            <field name="minimum_weight">0.01</field>
+            <field name="maximum_weight">1</field>
+            <field name="price">5</field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--    Courier tags demo data-->
+    <data noupdate="1">
+        <record id="courier_tags_service" model="courier.tag">
+            <field name="courier_tags">Courier Service</field>
+        </record>
+        <record id="courier_tags_logistics" model="courier.tag">
+            <field name="courier_tags">Logistics</field>
+        </record>
+        <record id="courier_tags_expensed" model="courier.tag">
+            <field name="courier_tags">Expensed</field>
+        </record>
+        <record id="courier_tags_important" model="courier.tag">
+            <field name="courier_tags">Important</field>
+        </record>
+        <record id="courier_tags_shipping" model="courier.tag">
+            <field name="courier_tags">Shipping</field>
+        </record>
+        <record id="courier_tags_weightless" model="courier.tag">
+            <field name="courier_tags">Weightless</field>
+        </record>
+        <record id="courier_tags_electrical" model="courier.tag">
+            <field name="courier_tags">Electrical</field>
+        </record>
+        <record id="courier_tags_handle_with_care" model="courier.tag">
+            <field name="courier_tags">Handle With Care</field>
+        </record>
+        <record id="courier_tags_cargo" model="courier.tag">
+            <field name="courier_tags">Cargo</field>
+        </record>
+        <record id="courier_tags_inventory" model="courier.tag">
+            <field name="courier_tags">Inventory</field>
+        </record>
+        <record id="courier_tags_cross_docking" model="courier.tag">
+            <field name="courier_tags">Cross Docking</field>
+        </record>
+    </data>
+</odoo>

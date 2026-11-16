@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--    Courier dimension price demo data-->
+    <data noupdate="1">
+        <record id="courier_dimension_price_rule_33_18_10"
+                model="courier.dimension.price">
+            <field name="name">33 X 18 X 10</field>
+            <field name="length">33</field>
+            <field name="width">18</field>
+            <field name="height">10</field>
+            <field name="price">15</field>
+        </record>
+        <record id="courier_dimension_price_rule_33_32_10"
+                model="courier.dimension.price">
+            <field name="name">33 X 32 X 10</field>
+            <field name="length">33</field>
+            <field name="width">32</field>
+            <field name="height">10</field>
+            <field name="price">15</field>
+        </record>
+        <record id="courier_dimension_price_rule_33_33_19"
+                model="courier.dimension.price">
+            <field name="name">33 X 33 X 19</field>
+            <field name="length">33</field>
+            <field name="width">33</field>
+            <field name="height">19</field>
+            <field name="price">15</field>
+        </record>
+        <record id="courier_dimension_price_rule_33_33_35"
+                model="courier.dimension.price">
+            <field name="name">33 X 33 X 35</field>
+            <field name="length">33</field>
+            <field name="width">33</field>
+            <field name="height">35</field>
+            <field name="price">25</field>
+        </record>
+        <record id="courier_dimension_price_rule_42_37_36"
+                model="courier.dimension.price">
+            <field name="name">42 X 37 X 36</field>
+            <field name="length">42</field>
+            <field name="width">37</field>
+            <field name="height">36</field>
+            <field name="price">35</field>
+        </record>
+        <record id="courier_dimension_price_rule_49_41_39"
+                model="courier.dimension.price">
+            <field name="name">49 X 41 X 39</field>
+            <field name="length">49</field>
+            <field name="width">41</field>
+            <field name="height">39</field>
+            <field name="price">50</field>
+        </record>
+        <record id="courier_dimension_price_rule_54_44_42"
+                model="courier.dimension.price">
+            <field name="name">54 X 44 X 42</field>
+            <field name="length">54</field>
+            <field name="width">44</field>
+            <field name="height">42</field>
+            <field name="price">55</field>
+        </record>
+        <record id="courier_dimension_price_rule_50_50_50"
+                model="courier.dimension.price">
+            <field name="name">50 X 50 X 50</field>
+            <field name="length">50</field>
+            <field name="width">50</field>
+            <field name="height">50</field>
+            <field name="price">60</field>
+        </record>
+        <record id="courier_dimension_price_rule_40_40_40"
+                model="courier.dimension.price">
+            <field name="name">40 X 40 X 40</field>
+            <field name="length">40</field>
+            <field name="width">40</field>
+            <field name="height">40</field>
+            <field name="price">47</field>
+        </record>
+    </data>
+</odoo>

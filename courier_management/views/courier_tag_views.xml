@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>    <!--        Courier tags list view-->
+    <record id="courier_tag_view_list" model="ir.ui.view">
+        <field name="name">courier.tag.view.list</field>
+        <field name="model">courier.tag</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="courier_tags"/>
+                <field name="color" string="Color" widget="color_picker"/>
+            </list>
+        </field>
+    </record>
+    <!--    Courier Tag menu action-->
+    <record id="courier_tag_action" model="ir.actions.act_window">
+        <field name="name">Courier Tags</field>
+        <field name="res_model">courier.tag</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

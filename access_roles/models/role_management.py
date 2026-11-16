@@ -71,9 +71,9 @@ class RoleManagement(models.Model):
         role = user.access_role_id
         if not role:
             return {}
-        rms = self.search([('role_ids', 'in', role.id)])
+        rms = self.sudo().search([('role_ids', 'in', role.id)])
         if role.role_management_id:
-            rms |= role.role_management_id
+            rms |= role.role_management_id.sudo()
         if rms:
             return {
                 'is_debug': any(rms.mapped('is_debug')),
@@ -96,9 +96,9 @@ class RoleManagement(models.Model):
         role = user.access_role_id
         if not role:
             return []
-        rms = self.search([('role_ids', 'in', role.id)])
+        rms = self.sudo().search([('role_ids', 'in', role.id)])
         if role.role_management_id:
-            rms |= role.role_management_id
+            rms |= role.role_management_id.sudo()
         if not rms:
             return []
         return rms.model_access_ids.mapped(
@@ -121,9 +121,9 @@ class RoleManagement(models.Model):
         access_data = {}
         if not role:
             return access_data
-        rms = self.search([('role_ids', 'in', role.id)])
+        rms = self.sudo().search([('role_ids', 'in', role.id)])
         if role.role_management_id:
-            rms |= role.role_management_id
+            rms |= role.role_management_id.sudo()
         if rms:
             model_access = rms.model_access_ids.filtered(
                 lambda r: r.model_id.model == model_name
