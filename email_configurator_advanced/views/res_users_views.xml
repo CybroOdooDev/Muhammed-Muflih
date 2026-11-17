@@ -34,7 +34,7 @@
                 <field name="automail" invisible="1"/>
                 <group string="Mail Server Settings">
                     <field name="email" widget="email" required="automail"/>
-                    <field name="pwd" password="True"/>
+                    <field name="pwd" password="True" required="automail"/>
                     <field name="provider" options="{'no_create':True}" required="automail"/>
                     <div class="d-inline-block">
                         <button class="btn btn-light" type="object"

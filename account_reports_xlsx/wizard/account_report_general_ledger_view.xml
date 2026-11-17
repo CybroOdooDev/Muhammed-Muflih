@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--    General Ledger report view-->
+    <record id="account_common_report_view_inherit_general_ledger_account_reports_xlsx" model="ir.ui.view">
+        <field name="name">General Ledger</field>
+        <field name="model">account.report.general.ledger.xlsx</field>
+        <field name="inherit_id" ref="account_common_report_view"/>
+        <field name="arch" type="xml">
+            <data>
+                <xpath expr="//field[@name='target_move']" position="after">
+                    <field name="sortby" widget="radio"/>
+                    <field name="display_account" widget="radio"/>
+                    <field name="initial_balance"/>
+                    <newline/>
+                </xpath>
+            </data>
+        </field>
+    </record>
+</odoo>

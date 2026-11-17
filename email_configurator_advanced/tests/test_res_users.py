@@ -353,3 +353,22 @@ class TestResUsers(TransactionCase):
                           return_value=None) as mock_fetch:
             self.env['res.users']._cron_fetch_mail()
             self.assertTrue(mock_fetch.called)
+
+    def test_regular_user_can_configure_own_preferences(self):
+        """A regular non-admin internal user can set their provider and app
+        password from their preferences without AccessError."""
+        employee = self.env['res.users'].create({
+            'name': 'Regular Employee',
+            'login': 'employee_preferences@example.com',
+            'email': 'employee_preferences@example.com',
+            'group_ids': [(6, 0, [self.env.ref('base.group_user').id])],
+        })
+        employee.with_user(employee).write({
+            'provider': self.provider.id,
+            'pwd': 'employee_secret_password',
+        })
+        self.assertEqual(employee.provider, self.provider)
+        self.assertTrue(employee.mail_server_id)
+        self.assertTrue(employee.fetchmail_server_id)
+        self.assertEqual(employee.mail_server_id.name, self.provider.name)
+        self.assertEqual(employee.fetchmail_server_id.name, self.provider.name)

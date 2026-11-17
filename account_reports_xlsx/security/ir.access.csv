@@ -1,0 +1,10 @@
+id,name,model_id,group_id/id,operation,domain
+access_xlsx_reports,account.financial.report.manager,account.financial.report,account.group_account_manager,crud,
+access_xlsx_reports_readonly,account.financial.report.readonly,account.financial.report,account.group_account_readonly,r,
+access_xlsx_reports_invoice,account.financial.report.invoice,account.financial.report,account.group_account_invoice,r,
+access_account_common_report_xlsx,access.account.common.report.xlsx,account.common.report.xlsx,base.group_user,crud,
+access_account_common_account_report_xlsx,access.account.common.account.report.xlsx,account.common.account.report.xlsx,base.group_user,crud,
+access_account_aged_trial_balance_xlsx,access.account.aged.trial.balance.xlsx,account.aged.trial.balance.xlsx,base.group_user,crud,
+access_account_report_partner_ledger_xlsx,access.account.report.partner.ledger.xlsx,account.report.partner.ledger.xlsx,base.group_user,crud,
+access_account_report_general_ledger_xlsx,access.account.report.general.ledger.xlsx,account.report.general.ledger.xlsx,base.group_user,crud,
+access_accounting_report_xlsx,access.accounting.report.xlsx,accounting.report.xlsx,base.group_user,crud,

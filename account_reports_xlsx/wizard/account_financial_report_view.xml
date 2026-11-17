@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<!--    Accounting report view is used for both balance sheet and profit
+    and loss report wizards as they share the same options.-->
+    <record id="account_common_report_view_inherit_financial_report_account_reports_xlsx" model="ir.ui.view">
+        <field name="name">Accounting Report</field>
+        <field name="model">accounting.report.xlsx</field>
+        <field name="inherit_id"
+               ref="account_reports_xlsx.account_common_report_view"/>
+        <field name="arch" type="xml">
+            <field name="target_move" position="before">
+                <field name="account_report_id"
+                       domain="[('parent_id','=',False)]"/>
+            </field>
+            <field name="target_move" position="after">
+                <field name="enable_filter"/>
+                <field name="debit_credit" invisible="enable_filter"/>
+            </field>
+            <field name="journal_ids" position="after">
+                <notebook tabpos="up" colspan="4">
+                    <page string="Comparison" name="comparison"
+                          invisible="not enable_filter">
+                        <group>
+                            <field name="label_filter"
+                                   required="enable_filter"/>
+                            <field name="filter_cmp"/>
+                        </group>
+                        <group string="Dates"
+                               invisible="filter_cmp != 'filter_date'">
+                            <field name="date_from_cmp"
+                                   required="filter_cmp == 'filter_date'"/>
+                            <field name="date_to_cmp"
+                                   required="filter_cmp == 'filter_date'"/>
+                        </group>
+                    </page>
+                </notebook>
+            </field>
+            <field name="journal_ids" position="replace"/>
+        </field>
+    </record>
+    <!--    Balance Sheet Action-->
+    <record id="action_account_report_bs" model="ir.actions.act_window">
+        <field name="name">Balance Sheet</field>
+        <field name="res_model">accounting.report.xlsx</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="account_common_report_view_inherit_financial_report_account_reports_xlsx"/>
+        <field name="target">new</field>
+    </record>
+    <!--    Profit and Loss Action-->
+    <record id="action_account_report_pl" model="ir.actions.act_window">
+        <field name="name">Profit and Loss</field>
+        <field name="res_model">accounting.report.xlsx</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="account_common_report_view_inherit_financial_report_account_reports_xlsx"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -27,20 +27,31 @@ class ResUsers(models.Model):
     pwd = fields.Char(
         string='App Password',
         compute='_compute_pwd', inverse='_inverse_pwd', copy=False,
+        user_writeable=True,
         help='Enter the app password of the email. It is write-only: it is '
              'saved on the mail servers (readable by administrators only) '
              'and never stored on the user.')
     provider = fields.Many2one(
         comodel_name='provider.server',
+        user_writeable=True,
         help='Select a provider from the list.')
+    mail_server_id = fields.Many2one(
+        comodel_name='ir.mail_server',
+        string='Outgoing Mail Server',
+        readonly=True,
+        ondelete='set null',
+        copy=False,
+        help='Outgoing mail server generated for this user.')
+    fetchmail_server_id = fields.Many2one(
+        comodel_name='fetchmail.server',
+        string='Incoming Mail Server',
+        readonly=True,
+        ondelete='set null',
+        copy=False,
+        help='Incoming mail server generated for this user.')
     automail = fields.Boolean(
         help='Enabled when mail server configuration fields are required on the user form.',
         compute='_compute_automail')
-
-    @property
-    def SELF_WRITEABLE_FIELDS(self):
-        """Allow users to set their own provider and password."""
-        return super().SELF_WRITEABLE_FIELDS + ['provider', 'pwd']
 
     def _compute_pwd(self):
         """The password is write-only, so it is never read back."""
@@ -76,12 +87,27 @@ class ResUsers(models.Model):
     def _get_mail_servers(self):
         """Return the user's (outgoing, incoming) servers, if they exist."""
         self.ensure_one()
-        email = self.email or self.partner_id.email
-        domain_name = ('name', '=', self.provider.name)
-        mail_server = self.env['ir.mail_server'].sudo().search([
-            ('smtp_user', '=', email), domain_name], limit=1)
-        fetchmail_server = self.env['fetchmail.server'].sudo().search([
-            ('user', '=', email), domain_name], limit=1)
+        mail_server = self.mail_server_id
+        fetchmail_server = self.fetchmail_server_id
+        # Fallback to link existing unlinked servers if present
+        if not mail_server and self.provider:
+            email = self.email or self.partner_id.email
+            if email:
+                mail_server = self.env['ir.mail_server'].sudo().search([
+                    ('smtp_user', '=', email),
+                    ('name', '=', self.provider.name),
+                ], limit=1)
+                if mail_server:
+                    self.sudo().mail_server_id = mail_server
+        if not fetchmail_server and self.provider:
+            email = self.email or self.partner_id.email
+            if email:
+                fetchmail_server = self.env['fetchmail.server'].sudo().search([
+                    ('user', '=', email),
+                    ('name', '=', self.provider.name),
+                ], limit=1)
+                if fetchmail_server:
+                    self.sudo().fetchmail_server_id = fetchmail_server
         return mail_server, fetchmail_server
 
     def _sync_mail_servers(self, password=None):
@@ -99,26 +125,30 @@ class ResUsers(models.Model):
             'smtp_debug': provider.smtp_debug,
             'smtp_host': provider.smtp_host,
             'smtp_port': provider.smtp_port,
+            'smtp_user': email,
         }
         fetch_vals = {
             'server': provider.server,
             'port': provider.port,
             'server_type': provider.server_type,
             'is_ssl': provider.is_ssl,
+            'user': email,
         }
         if password:
             smtp_vals['smtp_pass'] = password
             fetch_vals['password'] = password
         if mail_server:
-            mail_server.write(smtp_vals)
+            mail_server.sudo().write(smtp_vals)
         elif password:
             mail_server = self.env['ir.mail_server'].sudo().create(
-                dict(smtp_vals, name=provider.name, smtp_user=email))
+                dict(smtp_vals, name=provider.name))
+            self.sudo().mail_server_id = mail_server
         if fetchmail_server:
-            fetchmail_server.write(fetch_vals)
+            fetchmail_server.sudo().write(fetch_vals)
         elif password:
             fetchmail_server = self.env['fetchmail.server'].sudo().create(
-                dict(fetch_vals, name=provider.name, user=email))
+                dict(fetch_vals, name=provider.name))
+            self.sudo().fetchmail_server_id = fetchmail_server
         return mail_server, fetchmail_server
 
     def action_confirm(self):
@@ -131,8 +161,8 @@ class ResUsers(models.Model):
         if not (mail_server and fetchmail_server):
             raise UserError(self.env._(
                 'Enter the app password and save before testing.'))
-        mail_server.test_smtp_connection()
-        fetchmail_server.button_confirm_login()
+        mail_server.sudo().test_smtp_connection()
+        fetchmail_server.sudo().button_confirm_login()
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -153,7 +183,7 @@ class ResUsers(models.Model):
                 continue
             fetchmail_server = user._get_mail_servers()[1]
             if fetchmail_server:
-                fetchmail_server.fetch_mail()
+                fetchmail_server.sudo().fetch_mail()
 
     @api.model
     def _cron_fetch_mail(self):

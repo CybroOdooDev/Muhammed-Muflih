@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menu Action view for Financial Report -->
+    <record id="action_account_report" model="ir.actions.act_window">
+        <field name="name">Financial Reports</field>
+        <field name="res_model">accounting.report.xlsx</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="account_common_report_view_inherit_financial_report_account_reports_xlsx"/>
+        <field name="target">new</field>
+    </record>
+
+    <!--Menu Action view for General Ledger-->
+    <record id="action_account_general_ledger_menu" model="ir.actions.act_window">
+        <field name="name">General Ledger</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">account.report.general.ledger.xlsx</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="account_common_report_view_inherit_general_ledger_account_reports_xlsx"/>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="account.model_account_account"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!--Menu Action view for Aged Partner Ledger-->
+    <record id="action_account_aged_balance_view" model="ir.actions.act_window">
+        <field name="name">Aged Partner Balance</field>
+        <field name="res_model">account.aged.trial.balance.xlsx</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="account_aged_balance_view"/>
+        <field name="target">new</field>
+    </record>
+
+    <!--Menu Action view for Partner Ledger-->
+    <record id="action_view_partner_report" model="ir.actions.act_window">
+        <field name="name">Partner Ledger</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">account.report.partner.ledger.xlsx</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="account_common_report_view_inherit_partner_ledger_account_reports_xlsx"/>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="account.model_account_account"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Submenu under Reporting: Statement Reports -->
+    <menuitem id="account_reports_statements_menu" name="Statement Reports"
+              parent="account.menu_finance_reports"
+              groups="account.group_account_readonly,account.group_account_invoice"
+              sequence="1"/>
+
+    <!-- Menus under Statement Reports -->
+    <menuitem id="menu_account_report" name="Financial Report"
+              action="action_account_report"
+              parent="account_reports_statements_menu"
+              groups="account.group_account_readonly,account.group_account_invoice" sequence="1"/>
+
+    <menuitem id="menu_general_ledger" name="General Ledger"
+              action="action_account_general_ledger_menu"
+              parent="account_reports_statements_menu"
+              groups="account.group_account_readonly,account.group_account_invoice" sequence="2"/>
+
+    <!-- Menus under Partner Reports -->
+    <menuitem id="partner_report_child_menu" name="Partner Ledger"
+              action="action_view_partner_report"
+              parent="account.account_reports_partners_reports_menu"
+              groups="account.group_account_readonly,account.group_account_invoice" sequence="1"/>
+
+    <menuitem id="menu_aged_trial_balance" name="Aged Partner Balance"
+              action="action_account_aged_balance_view"
+              parent="account.account_reports_partners_reports_menu"
+              groups="account.group_account_readonly,account.group_account_invoice" sequence="2"/>
+</odoo>

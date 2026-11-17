@@ -1,0 +1,185 @@
+# -*- coding: utf-8 -*-
+################################################################################
+#
+#    Cybrosys Technologies Pvt. Ltd.
+#
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
+#
+#    This program is under the terms of Odoo Proprietary License v1.0 (OPL-1)
+#    It is forbidden to publish, distribute, sublicense, or sell copies of the
+#    Software or modified copies of the Software.
+#
+#    THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#    FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
+#    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,DAMAGES OR OTHER
+#    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,ARISING
+#    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#    DEALINGS IN THE SOFTWARE.
+#
+################################################################################
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError
+
+
+class ReportGeneralLedger(models.AbstractModel):
+    """
+    Model for generating the General Ledger report.
+    """
+    _name = 'report.account_reports_xlsx.report_generalledger'
+    _description = 'General Ledger Report'
+
+    def _get_account_move_entry(self, accounts, init_balance, sortby,
+                                display_account):
+        """
+        Function to retrieve and process account move entries for the General Ledger report.
+
+        :param accounts: Account records for which to generate the report.
+        :type accounts: account.account
+        :param init_balance: Flag indicating whether to include initial balances.
+        :type init_balance: bool
+        :param sortby: Sorting criterion ('sort_date' or 'sort_journal_partner').
+        :type sortby: str
+        :param display_account: Option to filter displayed accounts ('all', 'movement', 'not_zero').
+        :type display_account: str
+        :return: List of dictionaries containing processed account information.
+        :rtype: list
+        """
+        cr = self.env.cr
+        move_lines = dict(map(lambda x: (x, []), accounts.ids))
+
+        # Prepare initial balance query if requested
+        if init_balance:
+            init_tables, init_where_clause, init_where_params = (
+                self.env['account.move.line'].with_context(
+                    date_from=self.env.context.get('date_from'),
+                    date_to=False,
+                    initial_bal=True)._query_get())
+            init_wheres = [""]
+            if init_where_clause:
+                clause_code = init_where_clause if isinstance(init_where_clause, str) else (init_where_clause._sql_tuple[0] if hasattr(init_where_clause, '_sql_tuple') else str(init_where_clause))
+                if clause_code:
+                    init_wheres.append(clause_code)
+            init_filters = " AND ".join(init_wheres)
+            init_filters = init_filters.replace('account_move_line__move_id',
+                                                'm').replace(
+                '"account_move_line"', 'l').replace('account_move_line', 'l')
+            sql = ('''SELECT 0 AS lid, l.account_id AS account_id, '' AS ldate, '' AS lcode, 0.0 AS amount_currency, '' AS lref, 'Initial Balance' AS lname, COALESCE(SUM(l.debit),0.0) AS debit, COALESCE(SUM(l.credit),0.0) AS credit, COALESCE(SUM(l.debit),0) - COALESCE(SUM(l.credit), 0) as balance, '' AS lpartner_id,\
+                '' AS move_name, '' AS mmove_id, '' AS currency_code,\
+                NULL AS currency_id,\
+                '' AS partner_name\
+                FROM account_move_line l\
+                LEFT JOIN account_move m ON (l.move_id=m.id)\
+                LEFT JOIN res_currency c ON (l.currency_id=c.id)\
+                LEFT JOIN res_partner p ON (l.partner_id=p.id)\
+                JOIN account_journal j ON (l.journal_id=j.id)\
+                JOIN account_account acc ON (l.account_id = acc.id) \
+                WHERE l.account_id IN %s ''' + init_filters + ''' GROUP BY l.account_id''')
+            params = (tuple(accounts.ids),) + tuple(init_where_params)
+            cr.execute(sql, params)
+            for row in cr.dictfetchall():
+                move_lines[row.pop('account_id')].append(row)
+
+        sql_sort = 'l.date, l.move_id'
+        if sortby == 'sort_journal_partner':
+            sql_sort = 'j.code, p.name, l.move_id'
+
+        # Prepare normal move lines query
+        tables, where_clause, where_params = (
+            self.env['account.move.line']._query_get())
+        wheres = [""]
+        if where_clause:
+            clause_code = where_clause if isinstance(where_clause, str) else (where_clause._sql_tuple[0] if hasattr(where_clause, '_sql_tuple') else str(where_clause))
+            if clause_code:
+                wheres.append(clause_code)
+        filters = " AND ".join(wheres)
+        filters = filters.replace('account_move_line__move_id', 'm').replace('"account_move_line"', 'l').replace('account_move_line', 'l')
+
+        # Get move lines base on sql query and Calculate the total balance of
+        # move lines
+        sql = ('''SELECT l.id AS lid, l.account_id AS account_id, l.date AS ldate, j.code AS lcode, l.currency_id, l.amount_currency, l.ref AS lref, l.name AS lname, COALESCE(l.debit,0) AS debit, COALESCE(l.credit,0) AS credit, COALESCE(SUM(l.debit),0) - COALESCE(SUM(l.credit), 0) AS balance,\
+            m.name AS move_name, c.symbol AS currency_code, p.name AS partner_name\
+            FROM account_move_line l\
+            JOIN account_move m ON (l.move_id=m.id)\
+            LEFT JOIN res_currency c ON (l.currency_id=c.id)\
+            LEFT JOIN res_partner p ON (l.partner_id=p.id)\
+            JOIN account_journal j ON (l.journal_id=j.id)\
+            JOIN account_account acc ON (l.account_id = acc.id) \
+            WHERE l.account_id IN %s ''' + filters + ''' GROUP BY l.id, l.account_id, l.date, j.code, l.currency_id, l.amount_currency, l.ref, l.name, m.name, c.symbol, p.name ORDER BY ''' + sql_sort)
+        params = (tuple(accounts.ids),) + tuple(where_params)
+        cr.execute(sql, params)
+
+        for row in cr.dictfetchall():
+            balance = 0
+            for line in move_lines.get(row['account_id']):
+                balance += line['debit'] - line['credit']
+            row['balance'] += balance
+            move_lines[row.pop('account_id')].append(row)
+
+        # Calculate the debit, credit and balance for Accounts
+        account_res = []
+        company_currency = self.env.company.currency_id
+        for account in accounts:
+            currency = account.currency_id or company_currency
+            res = dict((fn, 0.0) for fn in ['credit', 'debit', 'balance'])
+            res['id'] = account.id
+            res['code'] = account.code
+            res['name'] = account.name
+            res['move_lines'] = move_lines[account.id]
+            for line in res['move_lines']:
+                res['debit'] += line['debit']
+                res['credit'] += line['credit']
+                res['balance'] = line['balance']
+            if display_account == 'all':
+                account_res.append(res)
+            if display_account == 'movement' and res['move_lines']:
+                account_res.append(res)
+            if display_account == 'not_zero' and not currency.is_zero(
+                    res['balance']):
+                account_res.append(res)
+        return account_res
+
+    @api.model
+    def get_report_values(self, docids, data=None):
+        """
+        Function to retrieve report values for the General Ledger report.
+
+        :param docids: Document IDs.
+        :type docids: list
+        :param data: Data containing report parameters.
+        :type data: dict or None
+        :return: Dictionary containing report values.
+        :rtype: dict
+        """
+        if not data.get('form') or not self.env.context.get('active_model'):
+            raise UserError(
+                _("Form content is missing, this report cannot be printed."))
+
+        self.model = self.env.context.get('active_model')
+        docs = self.env[self.model].browse(self.env.context.get('active_ids', []))
+
+        init_balance = data['form'].get('initial_balance', True)
+        sortby = data['form'].get('sortby', 'sort_date')
+        display_account = data['form']['display_account']
+        codes = []
+        if data['form'].get('journal_ids', False):
+            codes = [journal.code for journal in
+                     self.env['account.journal'].search(
+                         [('id', 'in', data['form']['journal_ids'])])]
+
+        accounts = docs if self.model == 'account.account' else self.env[
+            'account.account'].search([])
+        accounts_res = self.with_context(
+            data['form'].get('used_context', {}))._get_account_move_entry(
+            accounts, init_balance, sortby, display_account)
+
+        return {
+            'doc_ids': docids,
+            'doc_model': self.model,
+            'data': data['form'],
+            'docs': docs,
+            'time': fields.date.today(),
+            'Accounts': accounts_res,
+            'print_journal': codes,
+        }
