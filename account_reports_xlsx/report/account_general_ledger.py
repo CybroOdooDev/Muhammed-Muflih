@@ -58,9 +58,7 @@ class ReportGeneralLedger(models.AbstractModel):
                     initial_bal=True)._query_get())
             init_wheres = [""]
             if init_where_clause:
-                clause_code = init_where_clause if isinstance(init_where_clause, str) else (init_where_clause._sql_tuple[0] if hasattr(init_where_clause, '_sql_tuple') else str(init_where_clause))
-                if clause_code:
-                    init_wheres.append(clause_code)
+                init_wheres.append(init_where_clause)
             init_filters = " AND ".join(init_wheres)
             init_filters = init_filters.replace('account_move_line__move_id',
                                                 'm').replace(
@@ -90,9 +88,7 @@ class ReportGeneralLedger(models.AbstractModel):
             self.env['account.move.line']._query_get())
         wheres = [""]
         if where_clause:
-            clause_code = where_clause if isinstance(where_clause, str) else (where_clause._sql_tuple[0] if hasattr(where_clause, '_sql_tuple') else str(where_clause))
-            if clause_code:
-                wheres.append(clause_code)
+            wheres.append(where_clause)
         filters = " AND ".join(wheres)
         filters = filters.replace('account_move_line__move_id', 'm').replace('"account_move_line"', 'l').replace('account_move_line', 'l')
 

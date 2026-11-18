@@ -62,9 +62,7 @@ class AccountReportGeneralLedger(models.TransientModel):
         if data['form'].get('initial_balance') and not data['form'].get(
                 'date_from'):
             self.initial_balance = False
-        return self.env.ref(
-            'account.action_report_general_ledger').with_context(
-            landscape=True).report_action(self, data=data)
+        return self.check_report()
 
     def check_report(self):
         """
@@ -121,11 +119,6 @@ class AccountReportGeneralLedger(models.TransientModel):
         env_obj = self.env['report.account_reports_xlsx.report_generalledger']
         sortby = data['form'].get('sortby', 'sort_date')
         display_account = data['form']['display_account']
-        codes = []
-        if data['form'].get('journal_ids', False):
-            codes = [journal.code for journal in
-                     self.env['account.journal'].search(
-                         [('id', 'in', data['form']['journal_ids'])])]
         accounts = self.env['account.account'].browse(options['ids']) or \
                    self.env['account.account'].search([])
         init_balance = vals['initial_balance']
@@ -219,16 +212,18 @@ class AccountReportGeneralLedger(models.TransientModel):
         row_number = 11
         col_number = 0
         currency_sym = logged_users.currency_id.symbol or ''
+        format3.set_num_format(f"#,##0.00 {currency_sym}")
+        format5.set_num_format('#,##0.00')
         for values in report_obj:
             sheet.write(row_number, col_number, values.get('code') or '', format3)
             sheet.merge_range(row_number, col_number + 1, row_number,
                               col_number + 11, values.get('name') or '', format6)
             sheet.write(row_number, col_number + 12,
-                        f"{currency_sym} " + "{:,}".format(values['debit']), format3)
+                        values.get('debit', 0.0) or 0.0, format3)
             sheet.write(row_number, col_number + 13,
-                        f"{currency_sym} " + "{:,}".format(values['credit']), format3)
+                        values.get('credit', 0.0) or 0.0, format3)
             sheet.write(row_number, col_number + 14,
-                        f"{currency_sym} " + "{:,}".format(values['balance']), format3)
+                        values.get('balance', 0.0) or 0.0, format3)
             row_number += 1
             for lines in values['move_lines']:
                 sheet.write(row_number, col_number, str(lines['ldate'] or ''),
@@ -252,11 +247,11 @@ class AccountReportGeneralLedger(models.TransientModel):
                                   lines['lname'] or '',
                                   format4)
                 sheet.write(row_number, col_number + 12,
-                            "{:,}".format(lines['debit']), format5)
+                            lines.get('debit', 0.0) or 0.0, format5)
                 sheet.write(row_number, col_number + 13,
-                            "{:,}".format(lines['credit']), format5)
+                            lines.get('credit', 0.0) or 0.0, format5)
                 sheet.write(row_number, col_number + 14,
-                            "{:,}".format(lines['balance']), format5)
+                            lines.get('balance', 0.0) or 0.0, format5)
                 row_number += 1
         workbook.close()
         output.seek(0)

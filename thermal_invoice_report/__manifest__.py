@@ -33,6 +33,11 @@
         'report/account_move_reports.xml',
         'report/account_move_templates.xml',
     ],
+    'assets': {
+        'web.report_assets_common': [
+            'thermal_invoice_report/static/src/css/thermal_style.css',
+        ],
+    },
     'images': ['static/description/banner.jpg'],
     'license': 'LGPL-3',
 }

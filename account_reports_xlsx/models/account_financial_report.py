@@ -49,11 +49,12 @@ class AccountFinancialReport(models.Model):
         return res
 
     name = fields.Char('Report Name', required=True,
-                       translate=True, help='The name of the report line to be displayed in the ')
+                       translate=True,
+                       help='The name of the report line to be displayed in the financial report.')
     parent_id = fields.Many2one('account.financial.report',
                                 'Parent',
                                 recursive=True,
-                                help='The parent of the current report line in the report hierarchy. If you ')
+                                help='The parent of the current report line in the report hierarchy. If left empty, this line becomes a root report.')
     children_ids = fields.One2many('account.financial.report', 'parent_id',
                                    'Account Report')
     sequence = fields.Integer('Sequence',
@@ -103,9 +104,9 @@ class AccountFinancialReport(models.Model):
     )
     sign = fields.Selection([('-1', 'Reverse balance sign'), ('1', 'Preserve balance sign')], 'Sign on Reports',
                             required=True, default='1',
-                            help='For reports that projection is reverse ,例: '
-                                 'In case of balance sheet, Revenue & Equity has positive balance, but you want to '
-                                 'display it as negative. So you have to set sign as -1')
+                            help='For reports where balance projection is reversed. For example: '
+                                 'in case of balance sheet, Revenue and Equity have positive balance, but you want to '
+                                 'display it as negative. So you have to set sign as -1.')
     display_detail = fields.Selection([
         ('no_detail', 'No detail'),
         ('detail_flat', 'Display children flat'),

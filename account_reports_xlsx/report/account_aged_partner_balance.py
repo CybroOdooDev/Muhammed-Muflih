@@ -19,12 +19,11 @@
 #    DEALINGS IN THE SOFTWARE.
 #
 ################################################################################
-import time
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.tools import float_is_zero
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
 
 
 class ReportAgedPartnerBalance(models.AbstractModel):
@@ -34,14 +33,7 @@ class ReportAgedPartnerBalance(models.AbstractModel):
 
     def _get_partner_move_lines(self, account_type, date_from, target_move,
                                 period_length):
-        # This method can receive the context key 'include_nullified_amount'
-        # {Boolean} Do an invoice and a payment and unreconcile. The amount
-        # will be nullified By default, the partner wouldn't appear in this
-        # report. The context key allow it to appear In case of a
-        # period_length of 30 days as of 2020-02-08, we want the following
-        # periods: Name       Stop         Start 1 - 30   : 2020-02-07 -
-        # 2020-01-09 31 - 60  : 2020-01-08 - 2018-12-10 61 - 90  : 2018-12-09
-        # - 2018-11-10 91 - 120 : 2018-11-09 - 2018-10-11 +120     : 2018-10-10
+        """Retrieve partner move lines and calculate amounts across aging periods."""
         periods = {}
         if not date_from:
             raise UserError(_("You must set a start date"))
@@ -66,11 +58,11 @@ class ReportAgedPartnerBalance(models.AbstractModel):
         user_company = self.env.user.company_id
         user_currency = user_company.currency_id
         ResCurrency = self.env['res.currency'].with_context(date=date_from)
-        company_ids = self._context.get('company_ids') or [user_company.id]
+        company_ids = self.env.context.get('company_ids') or [user_company.id]
         move_state = ['draft', 'posted']
-        date = self._context.get('date') or fields.Date.today()
+        date = self.env.context.get('date') or fields.Date.today()
         company = self.env['res.company'].browse(
-            self._context.get('company_id')) or self.env.company
+            self.env.context.get('company_id')) or self.env.company
 
         if target_move == 'posted':
             move_state = ['posted']
@@ -256,13 +248,13 @@ class ReportAgedPartnerBalance(models.AbstractModel):
                 values['name'] = browsed_partner.name and len(
                     browsed_partner.name) >= 45 and browsed_partner.name[
                                                     0:40] + '...' or browsed_partner.name
-                values['trust'] = browsed_partner.trust
+                values['trust'] = getattr(browsed_partner, 'trust', False)
             else:
                 values['name'] = _('Unknown Partner')
                 values['trust'] = False
 
             if at_least_one_amount or (
-                    self._context.get('include_nullified_amount') and lines[
+                    self.env.context.get('include_nullified_amount') and lines[
                 partner['partner_id']]):
                 res.append(values)
 
@@ -289,7 +281,7 @@ class ReportAgedPartnerBalance(models.AbstractModel):
         docs = self.env[model].browse(self.env.context.get('active_id'))
 
         target_move = data['form'].get('target_move', 'all')
-        date_from = data['form'].get('date_from', time.strftime('%Y-%m-%d'))
+        date_from = data['form'].get('date_from', fields.Date.today())
 
         if data['form']['result_selection'] == 'customer':
             account_type = ['asset_receivable']
@@ -310,7 +302,7 @@ class ReportAgedPartnerBalance(models.AbstractModel):
             'doc_model': model,
             'data': data['form'],
             'docs': docs,
-            'time': time,
+            'time': fields.date.today(),
             'get_partner_lines': movelines,
             'get_direction': total,
         }

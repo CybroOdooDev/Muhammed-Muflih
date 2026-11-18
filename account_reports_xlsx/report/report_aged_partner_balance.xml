@@ -18,7 +18,7 @@
                     </div>
                     <div class="row mb32">
                         <div class="col-3">
-                            <strong>Partner's:</strong>
+                            <strong>Partners:</strong>
                             <p>
                                 <span t-if="data['result_selection'] == 'customer'">
                                     Receivable Accounts

@@ -89,6 +89,17 @@ class AccountCommonReport(models.TransientModel):
             result['company_id'] = self.env.company.id
         return result
 
+    def pre_print_report(self, data):
+        """
+        Prepares data before printing the report. Base implementation.
+
+            :param data: Dictionary containing report parameters.
+            :type data: dict
+            :return: Updated dictionary with additional parameters.
+            :rtype: dict
+        """
+        return data
+
     def _print_report(self, data):
         """
         Placeholder function for printing report. Actual implementation

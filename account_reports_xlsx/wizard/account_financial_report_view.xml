@@ -38,22 +38,4 @@
             <field name="journal_ids" position="replace"/>
         </field>
     </record>
-    <!--    Balance Sheet Action-->
-    <record id="action_account_report_bs" model="ir.actions.act_window">
-        <field name="name">Balance Sheet</field>
-        <field name="res_model">accounting.report.xlsx</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="view_mode">form</field>
-        <field name="view_id" ref="account_common_report_view_inherit_financial_report_account_reports_xlsx"/>
-        <field name="target">new</field>
-    </record>
-    <!--    Profit and Loss Action-->
-    <record id="action_account_report_pl" model="ir.actions.act_window">
-        <field name="name">Profit and Loss</field>
-        <field name="res_model">accounting.report.xlsx</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="view_mode">form</field>
-        <field name="view_id" ref="account_common_report_view_inherit_financial_report_account_reports_xlsx"/>
-        <field name="target">new</field>
-    </record>
 </odoo>

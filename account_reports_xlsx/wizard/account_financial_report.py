@@ -48,8 +48,8 @@ class AccountingReport(models.TransientModel):
         :rtype: account.financial.report or False
         """
         reports = []
-        if self._context.get('active_id'):
-            menu = self.env['ir.ui.menu'].browse(self._context.get('active_id')).name
+        if self.env.context.get('active_id'):
+            menu = self.env['ir.ui.menu'].browse(self.env.context.get('active_id')).name
             reports = self.env['account.financial.report'].search([('name', 'ilike', menu)])
         return reports and reports[0] or False
 
@@ -73,10 +73,10 @@ class AccountingReport(models.TransientModel):
         default='filter_no',
         help="Select the filter type for comparison.")
     date_from_cmp = fields.Date(
-        string='Start Date',
+        string='Comparison Start Date',
         help="Enter the start date for comparison.")
     date_to_cmp = fields.Date(
-        string='End Date',
+        string='Comparison End Date',
         help="Enter the end date for comparison.")
     debit_credit = fields.Boolean(
         string='Display Debit/Credit Columns',

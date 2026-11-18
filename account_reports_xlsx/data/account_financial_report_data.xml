@@ -16,7 +16,7 @@
                    ref="account_financial_report_profitandloss0"/>
             <field name="display_detail">detail_with_hierarchy</field>
             <field name="type">account_type</field>
-            <field name="account_type_ids">income_other</field>
+            <field name="account_type_ids">income</field>
         </record>
         <record id="account_financial_report_expense0"
                 model="account.financial.report">
@@ -40,7 +40,7 @@
                    ref="account_financial_report_balancesheet0"/>
             <field name="display_detail">detail_with_hierarchy</field>
             <field name="type">account_type</field>
-            <field name="account_type_ids">income_other</field>
+            <field name="account_type_ids">asset_current</field>
         </record>
         <record id="account_financial_report_liabilitysum0"
                 model="account.financial.report">
@@ -57,7 +57,7 @@
                    ref="account_financial_report_liabilitysum0"/>
             <field name="display_detail">detail_with_hierarchy</field>
             <field name="type">account_type</field>
-            <field name="account_type_ids">income_other</field>
+            <field name="account_type_ids">liability_current</field>
         </record>
         <record id="account_financial_report_profitloss_toreport0"
                 model="account.financial.report">

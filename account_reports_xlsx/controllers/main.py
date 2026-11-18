@@ -61,7 +61,7 @@ class XLSXReportController(http.Controller):
         :rtype: werkzeug.wrappers.Response
         """
         if model not in ALLOWED_REPORT_MODELS:
-            raise AccessError(_("Unauthorized report model: %s", model))
+            raise AccessError(f"Unauthorized report model: {model}")
 
         uid = request.session.uid
         report_obj = request.env[model].with_user(uid)

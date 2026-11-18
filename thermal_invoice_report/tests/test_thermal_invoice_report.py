@@ -50,7 +50,7 @@ class TestThermalInvoiceReport(TransactionCase):
             'type': 'consu',
         })
 
-        # Create a customer invoice
+        # Create a customer invoice with both product and description-only lines
         cls.invoice = cls.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': cls.partner.id,
@@ -62,6 +62,12 @@ class TestThermalInvoiceReport(TransactionCase):
                     'quantity': 2.0,
                     'price_unit': 100.0,
                     'discount': 10.0,
+                }),
+                Command.create({
+                    'name': 'Custom Line Without Product',
+                    'quantity': 1.0,
+                    'price_unit': 30.0,
+                    'discount': 0.0,
                 }),
             ],
         })
@@ -124,6 +130,8 @@ class TestThermalInvoiceReport(TransactionCase):
         decoded_html = html_content.decode('utf-8')
         self.assertIn('thermal-report-page', decoded_html, "HTML should contain thermal-report-page class.")
         self.assertIn(self.partner.name, decoded_html, "HTML should contain customer name.")
+        self.assertIn('Test Thermal Product Line', decoded_html, "Invoice line with product should be present.")
+        self.assertIn('Custom Line Without Product', decoded_html, "Invoice line without product should be present.")
 
     def test_05_render_multi_invoices(self):
         """Verify QWeb report rendering for multiple invoices (multi-recordset support)."""

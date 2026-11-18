@@ -22,7 +22,6 @@
 import io
 import json
 import zipfile
-from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 
 from odoo import Command, fields

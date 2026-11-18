@@ -40,14 +40,21 @@ class AccountAgedTrialBalance(models.TransientModel):
     _inherit = 'account.common.report.xlsx'
     _description = 'Account Aged Trial balance'
 
-    period_length = fields.Integer(string=_('Period Length (days)'),
+    period_length = fields.Integer(string='Period Length (days)',
                                    default=30, required=True)
-    result_selection = fields.Selection([('customer', _('Receivable Accounts')),
-                                         ('supplier', _('Payable Accounts')),
+    result_selection = fields.Selection([('customer', 'Receivable Accounts'),
+                                         ('supplier', 'Payable Accounts'),
                                          ('customer_supplier',
-                                          _('Receivable and Payable Accounts'))
-                                         ], string=_("Partner's"),
+                                          'Receivable and Payable Accounts')
+                                         ], string="Partners",
                                         required=True, default='customer')
+
+    def pre_print_report(self, data):
+        """Prepares data before printing the report."""
+        if 'form' not in data:
+            data['form'] = {}
+        data['form']['result_selection'] = self.result_selection
+        return data
 
     def _aged_buckets(self, date_from, period_length):
         """Calculate the 5 aging period buckets."""
@@ -78,17 +85,15 @@ class AccountAgedTrialBalance(models.TransientModel):
             :raises UserError: If period length is non-positive.
         """
         data = self.pre_print_report(data)
-        data['form'].update(self.read(['period_length', 'result_selection'])[0])
-        period_length = data['form']['period_length']
+        data['form'].update(self.read(['date_from', 'period_length', 'result_selection'])[0])
+        period_length = data['form'].get('period_length', 0)
         if period_length <= 0:
             raise UserError(_('You must set a period length greater than 0.'))
-        if not data['form']['date_from']:
+        if not data['form'].get('date_from'):
             raise UserError(_('You must set a start date.'))
         res = self._aged_buckets(data['form']['date_from'], period_length)
         data['form'].update(res)
-        return self.env.ref(
-            'account.action_report_aged_partner_balance').with_context(
-            landscape=True).report_action(self, data=data)
+        return self.check_report()
 
     def check_report(self):
         """Prepare and return the report action for generating the Excel report.
@@ -203,40 +208,28 @@ class AccountAgedTrialBalance(models.TransientModel):
         row_number = 11
         col_number = 0
         symbol = logged_users.currency_id.symbol or ''
+        format3.set_num_format(f"#,##0.00 {symbol}")
+        format5.set_num_format('#,##0.00')
         sheet.merge_range(row_number, col_number, row_number, col_number + 1,
                           _("Account Total"), format3)
-        sheet.write(row_number, col_number + 2,
-                    symbol + ' ' + "{:,}".format(total[6]), format3)
-        sheet.write(row_number, col_number + 3,
-                    symbol + ' ' + "{:,}".format(total[4]), format3)
-        sheet.write(row_number, col_number + 4,
-                    symbol + ' ' + "{:,}".format(total[3]), format3)
-        sheet.write(row_number, col_number + 5,
-                    symbol + ' ' + "{:,}".format(total[2]), format3)
-        sheet.write(row_number, col_number + 6,
-                    symbol + ' ' + "{:,}".format(total[1]), format3)
-        sheet.write(row_number, col_number + 7,
-                    symbol + ' ' + "{:,}".format(total[0]), format3)
-        sheet.write(row_number, col_number + 8,
-                    symbol + ' ' + "{:,}".format(total[5]), format3)
+        sheet.write(row_number, col_number + 2, total[6] or 0.0, format3)
+        sheet.write(row_number, col_number + 3, total[4] or 0.0, format3)
+        sheet.write(row_number, col_number + 4, total[3] or 0.0, format3)
+        sheet.write(row_number, col_number + 5, total[2] or 0.0, format3)
+        sheet.write(row_number, col_number + 6, total[1] or 0.0, format3)
+        sheet.write(row_number, col_number + 7, total[0] or 0.0, format3)
+        sheet.write(row_number, col_number + 8, total[5] or 0.0, format3)
         row_number += 1
         for values in move_lines:
             sheet.merge_range(row_number, col_number, row_number,
                               col_number + 1, values['name'], format4)
-            sheet.write(row_number, col_number + 2, "{:,}".format(values['direction']),
-                        format5)
-            sheet.write(row_number, col_number + 3, "{:,}".format(values['4']),
-                        format5)
-            sheet.write(row_number, col_number + 4, "{:,}".format(values['3']),
-                        format5)
-            sheet.write(row_number, col_number + 5, "{:,}".format(values['2']),
-                        format5)
-            sheet.write(row_number, col_number + 6, "{:,}".format(values['1']),
-                        format5)
-            sheet.write(row_number, col_number + 7, "{:,}".format(values['0']),
-                        format5)
-            sheet.write(row_number, col_number + 8, "{:,}".format(values['total']),
-                        format5)
+            sheet.write(row_number, col_number + 2, values['direction'] or 0.0, format5)
+            sheet.write(row_number, col_number + 3, values['4'] or 0.0, format5)
+            sheet.write(row_number, col_number + 4, values['3'] or 0.0, format5)
+            sheet.write(row_number, col_number + 5, values['2'] or 0.0, format5)
+            sheet.write(row_number, col_number + 6, values['1'] or 0.0, format5)
+            sheet.write(row_number, col_number + 7, values['0'] or 0.0, format5)
+            sheet.write(row_number, col_number + 8, values['total'] or 0.0, format5)
             row_number += 1
         workbook.close()
         output.seek(0)

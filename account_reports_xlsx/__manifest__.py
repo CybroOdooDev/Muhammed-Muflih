@@ -35,6 +35,9 @@
     'website': "https://www.cybrosys.com",
     'live_test_url': 'https://www.youtube.com/watch?v=Sch1VcrunT0&list=PLeJtXzTubzj_wOC0fzgSAyGln4TJWKV4k&index=33',
     'depends': ['account'],
+    'external_dependencies': {
+        'python': ['xlsxwriter'],
+    },
     'data': [
         'security/ir.access.csv',
         'data/account_financial_report_data.xml',

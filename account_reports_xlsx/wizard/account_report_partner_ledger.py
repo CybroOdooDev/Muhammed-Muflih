@@ -43,18 +43,18 @@ class AccountReportPartnerLedger(models.TransientModel):
         [('customer', 'Receivable Accounts'),
          ('supplier', 'Payable Accounts'),
          ('customer_supplier', 'Receivable and Payable Accounts')
-         ], string=_("Partner's"), required=True,
+         ], string="Partners", required=True,
         default='customer')
     amount_currency = fields.Boolean(
-        string=_("With Currency"),
+        string="With Currency",
         help="It adds the currency column on report if the "
              "currency differs from the company currency.")
     reconciled = fields.Boolean(
-        string=_('Reconciled Entries'),
+        string='Reconciled Entries',
         help="Check this box if you want to include reconciled entries.")
     partner_ids = fields.Many2many(
         'res.partner',
-        string=_('Partners'), help="Select partner.")
+        string='Partners', help="Select partner.")
 
     def pre_print_report(self, data):
         """Prepares data before printing the report.
@@ -80,9 +80,7 @@ class AccountReportPartnerLedger(models.TransientModel):
             """
         data = self.pre_print_report(data)
         data['form'].update(self.read(['result_selection'])[0])
-        return self.env.ref(
-            'account.action_report_partnerledger').report_action(self,
-                                                                 data=data)
+        return self.check_report()
 
     def check_report(self):
         """Checks and prepares data for generating the Partner Ledger report in Excel format.

@@ -39,7 +39,7 @@ class AccountMoveLine(models.Model):
         """
         self.check_access('read')
 
-        context = dict(self._context or {})
+        context = dict(self.env.context or {})
         domain = domain or []
         if not isinstance(domain, (list, tuple)):
             domain = ast.literal_eval(domain)
@@ -86,14 +86,6 @@ class AccountMoveLine(models.Model):
         if context.get('account_ids'):
             domain += [('account_id', 'in', context['account_ids'].ids)]
 
-        if context.get('analytic_tag_ids'):
-            domain += [
-                ('analytic_tag_ids', 'in', context['analytic_tag_ids'].ids)]
-
-        if context.get('analytic_account_ids'):
-            domain += [('analytic_account_id', 'in',
-                        context['analytic_account_ids'].ids)]
-
         if context.get('partner_ids'):
             domain += [('partner_id', 'in', context['partner_ids'].ids)]
 
@@ -109,23 +101,10 @@ class AccountMoveLine(models.Model):
                 ('display_type', 'not in', ('line_section', 'line_note')))
             domain.append(('parent_state', '!=', 'cancel'))
             query = self._search(domain)
-            if hasattr(query, 'from_clause') and query.from_clause:
-                tables = query.from_clause._sql_tuple[0] if hasattr(query.from_clause, '_sql_tuple') else str(query.from_clause)
-            elif hasattr(query, 'table'):
-                tables = str(query.table)
-            else:
-                tables = '"account_move_line"'
-
-            if hasattr(query, 'where_clause') and query.where_clause:
-                where_clause_obj = query.where_clause
-                if callable(where_clause_obj):
-                    where_clause_obj = where_clause_obj()
-                if hasattr(where_clause_obj, '_sql_tuple'):
-                    where_clause = where_clause_obj._sql_tuple[0]
-                    where_clause_params = list(where_clause_obj._sql_tuple[1])
-                else:
-                    where_clause = str(where_clause_obj)
-                    where_clause_params = list(getattr(where_clause_obj, 'params', []))
+            tables = query.from_clause._sql_tuple[0]
+            if query.where_clause:
+                where_clause = query.where_clause._sql_tuple[0]
+                where_clause_params = list(query.where_clause._sql_tuple[1])
             else:
                 where_clause = ""
                 where_clause_params = []

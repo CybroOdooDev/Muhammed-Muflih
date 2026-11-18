@@ -18,8 +18,6 @@
         <field name="view_mode">form</field>
         <field name="view_id" ref="account_common_report_view_inherit_general_ledger_account_reports_xlsx"/>
         <field name="target">new</field>
-        <field name="binding_model_id" ref="account.model_account_account"/>
-        <field name="binding_type">report</field>
     </record>
 
     <!--Menu Action view for Aged Partner Ledger-->
@@ -40,8 +38,6 @@
         <field name="view_mode">form</field>
         <field name="view_id" ref="account_common_report_view_inherit_partner_ledger_account_reports_xlsx"/>
         <field name="target">new</field>
-        <field name="binding_model_id" ref="account.model_account_account"/>
-        <field name="binding_type">report</field>
     </record>
 
     <!-- Submenu under Reporting: Statement Reports -->
