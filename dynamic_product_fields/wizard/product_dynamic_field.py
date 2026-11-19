@@ -24,8 +24,24 @@ class ProductDynamicField(models.TransientModel):
     """ For adding custom fields in product form."""
     _name = 'product.dynamic.fields'
     _description = 'Dynamic Fields'
-    _inherit = 'ir.model.fields'
 
+    name = fields.Char(
+        string='Field Name',
+        default='x_',
+        required=True,
+        help="Technical name of the field")
+    field_description = fields.Char(
+        string='Field Label',
+        default='',
+        required=True,
+        translate=True,
+        help="Label of the field")
+    state = fields.Selection(
+        [('manual', 'Custom Field'), ('base', 'Base Field')],
+        string='Type',
+        default='manual',
+        readonly=True,
+        help="Type of field")
     position_field = fields.Many2one(
         'ir.model.fields',
         domain=lambda self: self.set_domain(),
@@ -70,6 +86,32 @@ class ProductDynamicField(models.TransientModel):
     extra_features = fields.Boolean(
         string="Show Extra Properties",
         help="Extra properties for field")
+    required = fields.Boolean(
+        string="Required",
+        help="Whether this field is mandatory")
+    readonly = fields.Boolean(
+        string="Readonly",
+        help="Whether this field is read-only")
+    store = fields.Boolean(
+        string="Stored",
+        default=True,
+        help="Whether the value is stored in the database")
+    index = fields.Selection(
+        [
+            ('btree', 'B-tree'),
+            ('btree_not_null', 'B-tree, excluding nulls'),
+            ('trigram', 'Trigram'),
+        ],
+        string="Index",
+        help="The kind of database index requested for this field")
+    copied = fields.Boolean(
+        string="Copied",
+        default=True,
+        help="Whether the value is copied when duplicating a record")
+    help = fields.Text(
+        string="Field Help",
+        translate=True,
+        help="Help tooltip text for the field")
 
     @api.onchange('widget')
     def _onchange_widget(self):
@@ -125,19 +167,36 @@ class ProductDynamicField(models.TransientModel):
         return [(ft, ft) for ft in sorted(field_types)]
 
     def set_domain(self):
-        """ Return the fields that are currently present in the form."""
+        """ Return the fields that are currently present in the form, including dynamic fields."""
         view_id = self.env.ref('product.product_template_only_form_view')
-        view_arch = str(view_id.arch_base or view_id.arch or '')
         field_list = []
-        if view_arch:
-            doc = xee.fromstring(view_arch)
-            for tag in doc.findall('.//field'):
+        try:
+            combined_arch = view_id._get_combined_arch()
+            for tag in combined_arch.iter('field'):
                 name = tag.attrib.get('name')
-                if name:
+                if name and name not in field_list:
                     field_list.append(name)
+        except Exception:
+            view_arch = str(view_id.arch_base or view_id.arch or '')
+            if view_arch:
+                doc = xee.fromstring(view_arch)
+                for tag in doc.iter('field'):
+                    name = tag.attrib.get('name')
+                    if name and name not in field_list:
+                        field_list.append(name)
+
+        # Include all custom dynamic fields created for product.template
+        dynamic_fields = self.env['ir.model.fields'].sudo().search([
+            ('model', '=', 'product.template'),
+            ('is_dynamic', '=', True),
+        ]).mapped('name')
+        for fname in dynamic_fields:
+            if fname not in field_list:
+                field_list.append(fname)
+
         model_id = self.env['ir.model'].sudo().search([
             ('model', '=', 'product.template')], limit=1)
-        return [('model_id', '=', model_id.id), ('state', '=', 'base'),
+        return [('model_id', '=', model_id.id),
                 ('name', 'in', field_list)]
 
     def _get_model_domain(self):
@@ -187,6 +246,15 @@ class ProductDynamicField(models.TransientModel):
         xee.SubElement(pos_elem, 'field', new_field_attrs)
         arch_base = f'<?xml version="1.0"?>\n{xee.tostring(data_elem, encoding="unicode")}'
 
+        priority = 16
+        if self.position_field.is_dynamic:
+            prev_view = self.env['ir.ui.view'].sudo().search([
+                ('name', '=', f'product.template.dynamic.{self.position_field.name}'),
+                ('model', '=', 'product.template'),
+            ], limit=1)
+            if prev_view:
+                priority = (prev_view.priority or 16) + 1
+
         self.env['ir.ui.view'].sudo().create({
             'name': f'product.template.dynamic.{field_name}',
             'type': 'form',
@@ -194,6 +262,7 @@ class ProductDynamicField(models.TransientModel):
             'mode': 'extension',
             'inherit_id': inherit_id.id,
             'arch_base': arch_base,
+            'priority': priority,
             'active': True,
         })
         return {

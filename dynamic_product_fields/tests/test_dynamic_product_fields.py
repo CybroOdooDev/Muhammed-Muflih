@@ -209,3 +209,56 @@ class TestDynamicProductFields(TransactionCase):
         with self.assertRaises(UserError):
             wizard.create_fields()
 
+    def test_09_create_field_relative_to_dynamic_field(self):
+        """Verify positioning a new custom dynamic field relative to an existing custom field."""
+        # 1. Create first dynamic field
+        wizard_1 = self.env['product.dynamic.fields'].create({
+            'name': 'test_first_dynamic',
+            'field_description': 'First Dynamic Field',
+            'model_id': self.product_model.id,
+            'field_type': 'char',
+            'position_field': self.position_field.id,
+            'position': 'after',
+        })
+        wizard_1.create_fields()
+
+        first_field = self.env['ir.model.fields'].search([
+            ('model_id', '=', self.product_model.id),
+            ('name', '=', 'x_test_first_dynamic'),
+        ], limit=1)
+        self.assertTrue(first_field, "First dynamic field must exist in ir.model.fields.")
+        self.assertTrue(first_field.is_dynamic)
+
+        # 2. Verify first_field is in set_domain of wizard
+        wizard_2 = self.env['product.dynamic.fields'].new({
+            'model_id': self.product_model.id,
+        })
+        domain = wizard_2.set_domain()
+        available_fields = self.env['ir.model.fields'].search(domain)
+        self.assertIn(first_field, available_fields, "First dynamic field must be available in position_field domain.")
+
+        # 3. Create second dynamic field positioned relative to first dynamic field
+        wizard_2 = self.env['product.dynamic.fields'].create({
+            'name': 'test_second_dynamic',
+            'field_description': 'Second Dynamic Field',
+            'model_id': self.product_model.id,
+            'field_type': 'integer',
+            'position_field': first_field.id,
+            'position': 'after',
+        })
+        wizard_2.create_fields()
+
+        second_field = self.env['ir.model.fields'].search([
+            ('model_id', '=', self.product_model.id),
+            ('name', '=', 'x_test_second_dynamic'),
+        ], limit=1)
+        self.assertTrue(second_field, "Second dynamic field must exist in ir.model.fields.")
+        self.assertTrue(second_field.is_dynamic)
+
+        second_view = self.env['ir.ui.view'].search([
+            ('name', '=', 'product.template.dynamic.x_test_second_dynamic'),
+        ], limit=1)
+        self.assertTrue(second_view, "Inherited view for second dynamic field must be created.")
+        self.assertIn('x_test_first_dynamic', second_view.arch_base or second_view.arch)
+        self.assertIn('x_test_second_dynamic', second_view.arch_base or second_view.arch)
+

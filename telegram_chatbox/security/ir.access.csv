@@ -1,0 +1,8 @@
+id,name,model_id,group_id/id,operation,domain
+access_telegram_bot_admin,access.telegram.bot.admin,telegram.bot,telegram_chatbox.telegram_group_admin,crud,
+access_telegram_bot_manager,access.telegram.bot.manager,telegram.bot,base.group_system,crud,
+access_telegram_message_user,access.telegram.message.user,telegram.message,base.group_user,cru,
+access_telegram_message_manager,access.telegram.message.manager,telegram.message,base.group_system,crud,
+access_telegram_test_user,access.telegram.test.user,telegram.test,base.group_user,crud,
+access_telegram_template,access.telegram.template,telegram.template,base.group_user,crud,
+access_telegram_template_variable,access.telegram.template.variable,telegram.template.variable,base.group_user,crud,
