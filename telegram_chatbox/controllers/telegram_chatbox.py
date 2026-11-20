@@ -1,0 +1,104 @@
+# -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cybrosys Technologies Pvt. Ltd.
+#
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#############################################################################
+import json
+import logging
+from odoo import http
+from odoo.http import request
+from odoo.fields import Datetime
+
+_logger = logging.getLogger(__name__)
+
+
+class TelegramWebhookController(http.Controller):
+    """Controller for handling Telegram webhooks."""
+
+    @http.route(
+        [
+            '/telegram/webhook/<string:token>',
+            '/telegram/webhook/telegram/webhook/<string:token>',
+        ],
+        type='http',
+        auth='public',
+        methods=['POST'],
+        csrf=False
+    )
+    def telegram_webhook(self, token, **kwargs):
+        """
+        Handle incoming Telegram webhook requests.
+        Validates the bot token, parses the incoming payload, creates a
+        corresponding incoming message record, and updates the bot's sync timestamp.
+        """
+        bot = request.env['telegram.bot'].sudo().search(
+            [('token', '=', token)],
+            limit=1
+        )
+
+        if not bot:
+            _logger.warning("Telegram webhook hit with invalid token: %s", token)
+            return http.Response(
+                json.dumps({
+                    "ok": False,
+                    "error": "Invalid bot token"
+                }),
+                content_type="application/json",
+                status=404
+            )
+
+        try:
+            payload = None
+            if hasattr(request, 'get_json_data'):
+                try:
+                    payload = request.get_json_data()
+                except Exception:
+                    payload = None
+            if not payload and hasattr(request.httprequest, 'data') and request.httprequest.data:
+                payload = json.loads(request.httprequest.data.decode('utf-8'))
+
+            _logger.info("Received Telegram payload: %s", payload)
+
+            # Create incoming message record
+            request.env['telegram.message'].sudo().create_incoming(
+                bot,
+                payload
+            )
+            bot.sudo().write({
+                'last_sync': Datetime.now(),
+                'last_error_message': False,
+                'status': 'active'
+            })
+            return http.Response(
+                json.dumps({
+                    "ok": True
+                }),
+                content_type="application/json",
+                status=200
+            )
+        except Exception as e:
+            _logger.exception("Failed processing telegram webhook: %s", str(e))
+            bot.sudo().write({
+                'last_error_message': str(e),
+                'status': 'error'
+            })
+            return http.Response(
+                json.dumps({
+                    "ok": False,
+                    "error": str(e)
+                }),
+                content_type="application/json",
+                status=500
+            )
