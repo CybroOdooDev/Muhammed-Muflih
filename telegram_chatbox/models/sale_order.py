@@ -14,12 +14,7 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    (LGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
 #############################################################################
-import base64
 from markupsafe import Markup, escape
 from odoo import models, _
 from odoo.exceptions import ValidationError
@@ -80,35 +75,36 @@ class SaleOrder(models.Model):
 
     def action_send_telegram(self):
         """
-            Open the Telegram message wizard for the current Sale Order and
-            automatically attach the Sale Order PDF if available.
+        Open the Telegram message wizard for the current Sale Order and
+        automatically attach the Sale Order PDF if available.
 
-            This method checks for an existing PDF attachment linked to the Sale
-            Order. If no suitable attachment is found, it generates a PDF version
-            of the Sale Order report, creates an attachment, and preloads it into
-            the Telegram message wizard.
+        This method checks for an existing PDF attachment linked to the Sale
+        Order. If no suitable attachment is found, it generates a PDF version
+        of the Sale Order report, creates an attachment, and preloads it into
+        the Telegram message wizard.
         """
         self.ensure_one()
         
         report = self.env.ref('sale.action_report_saleorder', raise_if_not_found=False)
         pdf_attachment_id = False
-        
-        existing_attachment = self.env['ir.attachment'].search([
-            ('res_model', '=', 'sale.order'),
-            ('res_id', '=', self.id),
-            ('name', 'like', f"{self.name}%"),
-            ('mimetype', '=', 'application/pdf')
-        ], order="id desc", limit=1)
 
-        if existing_attachment:
-            pdf_attachment_id = existing_attachment.id
-        elif report:
+        if report:
+            pdf_content = None
             try:
-                html_rendered = self.env['ir.actions.report']._render_qweb_html('sale.action_report_saleorder', self.ids)[0]
-                pdf_content = self.env['ir.actions.report']._run_wkhtmltopdf([html_rendered])
-                
+                pdf_content, report_type = self.env['ir.actions.report']._render_qweb_pdf('sale.action_report_saleorder', self.ids)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning("Standard Sale Order PDF Generation failed: %s", e)
+                try:
+                    html_rendered = self.env['ir.actions.report']._render_qweb_html('sale.action_report_saleorder', self.ids)[0]
+                    pdf_content = self.env['ir.actions.report']._run_wkhtmltopdf([html_rendered])
+                except Exception as fallback_e:
+                    logging.getLogger(__name__).warning("Fallback Sale Order PDF rendering failed: %s", fallback_e)
+
+            if pdf_content:
+                attachment_name = (self.name or str(self.id)).replace('/', '_')
                 attachment = self.env['ir.attachment'].create({
-                    'name': f"{self.name}.pdf",
+                    'name': f"{attachment_name}.pdf",
                     'type': 'binary',
                     'raw': pdf_content,
                     'res_model': 'sale.order',
@@ -116,16 +112,23 @@ class SaleOrder(models.Model):
                     'mimetype': 'application/pdf'
                 })
                 pdf_attachment_id = attachment.id
-            except Exception as e:
-                import logging
-                logging.getLogger(__name__).warning("Telegram Sale Order PDF Generation suppressed due to environment error: %s", e)
+
+        if not pdf_attachment_id:
+            existing_attachment = self.env['ir.attachment'].search([
+                ('res_model', '=', 'sale.order'),
+                ('res_id', '=', self.id),
+                ('name', 'like', f"{self.name}%"),
+                ('mimetype', '=', 'application/pdf')
+            ], order="id desc", limit=1)
+            if existing_attachment:
+                pdf_attachment_id = existing_attachment.id
 
         ctx = {
             'default_partner_id': self.partner_id.id,
             'default_sale_order_id': self.id,
         }
         if pdf_attachment_id:
-            ctx['default_attachment_ids'] = [(6, 0, [pdf_attachment_id])]
+            ctx['default_attachment_ids'] = [pdf_attachment_id]
 
         return {
             'name': _("Send Telegram Message"),

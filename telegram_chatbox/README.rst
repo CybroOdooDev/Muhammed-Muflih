@@ -1,41 +1,53 @@
-.. image:: https://img.shields.io/badge/license-LGPL--3-green.svg
-    :target: https://www.gnu.org/licenses/lgpl-3.0-standalone.html
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
     :alt: License: LGPL-3
 
-Product Brand In Invoicing
-==========================
-* This module allows you to manage the Product brands easily.
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |maintainer|
+
+Odoo Telegram Integration
+=========================
+* Send and receive Telegram messages directly from Odoo business records.
+* Seamlessly communicate from Sales Orders, Purchase Orders, Invoices, Delivery Orders, and Contacts.
+* Automatically receive incoming messages and customer replies in the document chatter.
+
+Key Features
+------------
+
+* List the detailed features one by one
+
+Installation
+------------
+No external dependencies.
 
 Configuration
 =============
-- Additional configuration not required
-
-Installation
-============
-- www.odoo.com/documentation/17.0/setup/install.html
-- Install our custom addon
-
-License
--------
-Lesser General Public License, Version 3 (LGPL v3).
-(https://www.odoo.com/documentation/user/17.0/legal/licenses/licenses.html)
+- Configure Telegram Bot API token under Telegram -> Configuration -> Bots.
+- Register the Webhook URL with Telegram to receive real-time incoming messages.
 
 Company
 -------
 * `Cybrosys Techno Solutions <https://cybrosys.com/>`__
 
-Credits
+License
 -------
-* Developer:(V17) Arshad Ali
-  Contact : odoo@cybrosys.com
+Lesser General Public License, Version 3 (LGPL v3).
+(http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
+
+
 
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
+* Website : https://cybrosys.com
 
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
 
 Maintainer
 ==========
@@ -44,6 +56,3 @@ Maintainer
 
 For support and more information, please visit https://www.cybrosys.com
 
-Further information
-===================
-HTML Description: `<static/description/index.html>`__

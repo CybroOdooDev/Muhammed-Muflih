@@ -14,10 +14,6 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    (LGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
 #############################################################################
 from odoo import models, fields, api
 
@@ -91,7 +87,7 @@ class TelegramTest(models.TransientModel):
         document in the context and pre-filling the attachment.
         """
         res = super(TelegramTest, self).default_get(fields_list)
-        if 'attachment_ids' in fields_list:
+        if 'attachment_ids' in fields_list and not res.get('attachment_ids'):
             res_model, res_id = False, False
             if self.env.context.get('default_sale_order_id'):
                 res_model, res_id = 'sale.order', self.env.context.get('default_sale_order_id')

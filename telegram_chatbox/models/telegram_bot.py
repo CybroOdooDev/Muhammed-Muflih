@@ -14,14 +14,11 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    (LGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
 #############################################################################
 import logging
 import requests
 from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 from requests.exceptions import ConnectionError, Timeout
 
 _logger = logging.getLogger(__name__)
@@ -112,16 +109,28 @@ class TelegramBot(models.Model):
             displayed to the user.
         """
         for bot in self:
-            if bot.webhook_url:
-                webhook = bot.webhook_url.rstrip('/')
-            else:
-                base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
-                if not base_url:
-                    continue
+            token = (bot.token or '').strip()
+            if not token:
+                raise ValidationError(_("Please configure an API Token first."))
+
+            webhook = (bot.webhook_url or '').strip().rstrip('/')
+            if not webhook:
+                base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url', '').strip().rstrip('/')
                 if base_url.startswith('http://'):
                     base_url = base_url.replace('http://', 'https://', 1)
-                webhook = f"{base_url.rstrip('/')}/telegram/webhook/{bot.token}"
-                bot.webhook_url = webhook
+                webhook = base_url
+
+            # Ensure the webhook ends with /telegram/webhook/<token> exactly once without duplication
+            endpoint = f"/telegram/webhook/{token}"
+            if webhook.endswith(endpoint):
+                pass
+            elif '/telegram/webhook' in webhook:
+                base = webhook.split('/telegram/webhook')[0].rstrip('/')
+                webhook = f"{base}{endpoint}"
+            else:
+                webhook = f"{webhook}{endpoint}"
+
+            bot.webhook_url = webhook
 
             api = f"https://api.telegram.org/bot{bot.token}/setWebhook"
             try:
@@ -130,19 +139,10 @@ class TelegramBot(models.Model):
 
                 res.raise_for_status()
 
-                info_api = f"https://api.telegram.org/bot{bot.token}/getWebhookInfo"
-                info_res = requests.get(info_api, timeout=bot.timeout)
-                info_res.raise_for_status()
-                info_data = info_res.json()
-                
-                error_msg = False
-                if info_data.get("ok"):
-                    error_msg = info_data["result"].get("last_error_message", False)
-
                 result = res.json()
                 bot.last_sync = fields.Datetime.now()
                 bot.status = 'active'
-                bot.last_error_message = error_msg
+                bot.last_error_message = False
                 
                 if result.get("ok"):
                     return {
@@ -157,7 +157,7 @@ class TelegramBot(models.Model):
                         }
                     }
 
-            except (ConnectionError, Timeout) as e:
+            except (ConnectionError, Timeout):
                 bot.status = 'error'
                 bot.last_error_message = "Could not reach Telegram servers."
                 return {

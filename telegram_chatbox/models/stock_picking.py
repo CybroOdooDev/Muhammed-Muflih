@@ -14,12 +14,7 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    (LGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
 #############################################################################
-import base64
 from markupsafe import Markup, escape
 from odoo import models, _
 from odoo.exceptions import ValidationError
@@ -85,18 +80,11 @@ class StockPicking(models.Model):
         self.ensure_one()
         report = self.env.ref('stock.action_report_delivery', raise_if_not_found=False)
         pdf_attachment_id = False
-        existing_attachment = self.env['ir.attachment'].search([
-            ('res_model', '=', 'stock.picking'),
-            ('res_id', '=', self.id),
-            ('name', 'like', f"{self.name}%"),
-            ('mimetype', '=', 'application/pdf')
-        ], order="id desc", limit=1)
-        if existing_attachment:
-            pdf_attachment_id = existing_attachment.id
-        elif report:
+
+        if report:
             pdf_content = None
             try:
-                pdf_content, pdf_type = self.env['ir.actions.report']._render_qweb_pdf('stock.action_report_delivery', self.ids)
+                pdf_content, report_type = self.env['ir.actions.report']._render_qweb_pdf('stock.action_report_delivery', self.ids)
             except Exception as e:
                 import logging
                 logging.getLogger(__name__).warning("Standard Delivery PDF Generation failed: %s", e)
@@ -105,9 +93,9 @@ class StockPicking(models.Model):
                     pdf_content = self.env['ir.actions.report']._run_wkhtmltopdf([html_rendered])
                 except Exception as fallback_e:
                     logging.getLogger(__name__).warning("Fallback PDF rendering failed: %s", fallback_e)
-            
+
             if pdf_content:
-                attachment_name = self.name.replace('/', '_')
+                attachment_name = (self.name or str(self.id)).replace('/', '_')
                 attachment = self.env['ir.attachment'].create({
                     'name': f"{attachment_name}.pdf",
                     'type': 'binary',
@@ -117,6 +105,16 @@ class StockPicking(models.Model):
                     'mimetype': 'application/pdf'
                 })
                 pdf_attachment_id = attachment.id
+
+        if not pdf_attachment_id:
+            existing_attachment = self.env['ir.attachment'].search([
+                ('res_model', '=', 'stock.picking'),
+                ('res_id', '=', self.id),
+                ('name', 'like', f"{self.name}%"),
+                ('mimetype', '=', 'application/pdf')
+            ], order="id desc", limit=1)
+            if existing_attachment:
+                pdf_attachment_id = existing_attachment.id
 
         ctx = {
             'default_partner_id': self.partner_id.id,

@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Extension of Account Move (Customer Invoice / Vendor Bill) form view.
+    Adds the 'Send via Telegram' action button to the form header.
+-->
 <odoo>
     <record id="view_account_move_form_telegram" model="ir.ui.view">
         <field name="name">account.move.view.form.inherit.telegram</field>

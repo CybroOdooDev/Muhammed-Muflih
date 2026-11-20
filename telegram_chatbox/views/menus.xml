@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Menu architecture and action definitions for Telegram Chatbox.
+    Configures top-level Telegram app menu, submenus, and action bindings.
+-->
 <odoo>
+    <!-- Window Actions -->
     <record id="telegram_bot_action" model="ir.actions.act_window">
         <field name="name">Telegram Bots</field>
         <field name="res_model">telegram.bot</field>
@@ -18,6 +23,7 @@
         <field name="view_mode">list,form</field>
     </record>
 
+    <!-- Menu Structure -->
     <menuitem id="telegram_menu_root" name="Telegram" sequence="70" groups="telegram_chatbox.telegram_group_admin"/>
 
     <menuitem id="telegram_templates_menu" name="Telegram Templates"
@@ -34,5 +40,4 @@
     <menuitem id="menu_telegram_bots" name="Bots"
               parent="telegram_configuration_menu"
               action="telegram_chatbox.telegram_bot_action"/>
-
 </odoo>

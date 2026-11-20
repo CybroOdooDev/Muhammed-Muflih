@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Wizard view for composing and sending Telegram messages.
+    Allows selecting pre-configured templates and attaching document reports.
+-->
 <odoo>
+    <!-- Send Telegram Message Wizard Form -->
     <record id="telegram_test_view_form" model="ir.ui.view">
         <field name="name">telegram.test.view.form</field>
         <field name="model">telegram.test</field>
         <field name="arch" type="xml">
-            <form string="Send Test Telegram Message">
+            <form string="Send Telegram Message">
                 <group>
                     <field name="sale_order_id" invisible="1"/>
                     <field name="purchase_order_id" invisible="1"/>

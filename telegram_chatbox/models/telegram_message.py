@@ -14,10 +14,6 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    (LGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
 #############################################################################
 import base64
 import logging
@@ -191,18 +187,28 @@ class TelegramMessage(models.Model):
             escape(text).replace('\n', Markup('<br/>')) if text else '(media message)'
         )
 
+        author_id = msg_record.partner_id.id if msg_record.partner_id else False
+
         if doc_model and doc_id:
             record = self.env[doc_model].sudo().browse(doc_id)
             if record.exists():
-                record.message_post(
-                    body=chatter_body,
-                    attachment_ids=msg_record.attachment_ids.ids
-                )
+                post_kwargs = {
+                    'body': chatter_body,
+                    'attachment_ids': msg_record.attachment_ids.ids,
+                    'message_type': 'comment',
+                }
+                if author_id:
+                    post_kwargs['author_id'] = author_id
+                record.message_post(**post_kwargs)
         elif msg_record.partner_id:
-            msg_record.partner_id.message_post(
-                body=chatter_body,
-                attachment_ids=msg_record.attachment_ids.ids
-            )
+            post_kwargs = {
+                'body': chatter_body,
+                'attachment_ids': msg_record.attachment_ids.ids,
+                'message_type': 'comment',
+            }
+            if author_id:
+                post_kwargs['author_id'] = author_id
+            msg_record.partner_id.message_post(**post_kwargs)
 
         return msg_record
 

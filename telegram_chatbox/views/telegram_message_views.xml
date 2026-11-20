@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Views for Telegram message logging and tracking.
+    Provides list view, detail form view with attachments kanban, and search filters.
+-->
 <odoo>
+    <!-- Telegram Message List View -->
     <record id="telegram_message_view_list" model="ir.ui.view">
         <field name="name">telegram.message.view.list</field>
         <field name="model">telegram.message</field>
@@ -14,6 +19,7 @@
         </field>
     </record>
 
+    <!-- Telegram Message Form View -->
     <record id="telegram_message_view_form" model="ir.ui.view">
         <field name="name">telegram.message.view.form</field>
         <field name="model">telegram.message</field>
@@ -71,25 +77,11 @@
                                                     </t>
                                                 </div>
                                                 <div class="oe_kanban_details">
-                                                    <strong>
-                                                        <field name="name"/>
-                                                    </strong>
+                                                    <strong><field name="name"/></strong>
                                                     <div>
-                                                        <field name="file_size"
-                                                               widget="integer"/>
-                                                        bytes
-                                                    </div>
-                                                    <div>
-                                                        <field name="mimetype"/>
-                                                    </div>
-                                                    <div style="margin-top: 10px;">
-                                                        <a t-att-href="'/web/content/' + record.id.raw_value + '?download=true'"
-                                                           class="btn btn-primary btn-sm"
-                                                           onclick="event.stopPropagation();"
-                                                           target="_blank">
-                                                            <i class="fa fa-download"/>
-                                                            Download
-                                                        </a>
+                                                        <t t-if="record.file_size.raw_value">
+                                                            <t t-out="(record.file_size.raw_value / 1024).toFixed(2)"/> KB
+                                                        </t>
                                                     </div>
                                                 </div>
                                             </div>
@@ -104,6 +96,7 @@
         </field>
     </record>
 
+    <!-- Telegram Message Search View -->
     <record id="telegram_message_view_search" model="ir.ui.view">
         <field name="name">telegram.message.view.search</field>
         <field name="model">telegram.message</field>
@@ -114,36 +107,23 @@
                 <field name="direction"/>
                 <field name="state"/>
                 <field name="date"/>
-
-                <filter string="Incoming" name="incoming"
-                        domain="[('direction','=', 'incoming')]"/>
-                <filter string="Outgoing" name="outgoing"
-                        domain="[('direction','=', 'outgoing')]"/>
+                <filter string="Incoming" name="filter_incoming" domain="[('direction', '=', 'incoming')]"/>
+                <filter string="Outgoing" name="filter_outgoing" domain="[('direction', '=', 'outgoing')]"/>
                 <separator/>
-                <filter string="Sent" name="sent"
-                        domain="[('state','=', 'sent')]"/>
-                <filter string="Received" name="received"
-                        domain="[('state','=', 'received')]"/>
-                <filter string="Failed" name="failed"
-                        domain="[('state','=', 'error')]"/>
-                <filter string="Has Attachments" name="has_attachments"
-                        domain="[('attachment_ids','!=', False)]"/>
-
+                <filter string="Sent" name="filter_sent" domain="[('state', '=', 'sent')]"/>
+                <filter string="Received" name="filter_received" domain="[('state', '=', 'received')]"/>
+                <filter string="Failed" name="filter_error" domain="[('state', '=', 'error')]"/>
                 <group>
-                    <filter string="By Date" name="group_by_date"
-                            context="{'group_by':'date:day'}"/>
-                    <filter string="By Bot" name="group_by_bot"
-                            context="{'group_by':'bot_id'}"/>
-                    <filter string="By Partner" name="group_by_partner"
-                            context="{'group_by':'partner_id'}"/>
-                    <filter string="By Direction" name="group_by_direction"
-                            context="{'group_by':'direction'}"/>
+                    <filter string="Partner" name="group_by_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Bot" name="group_by_bot" context="{'group_by': 'bot_id'}"/>
+                    <filter string="Direction" name="group_by_direction" context="{'group_by': 'direction'}"/>
+                    <filter string="Status" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'date:day'}"/>
                 </group>
-
                 <searchpanel>
-                    <field name="state" icon="fa fa-envelope"/>
-                    <field name="direction" icon="fa fa-exchange"/>
-                    <field name="bot_id" icon="fa fa-robot"/>
+                    <field name="state" string="State" enable_counters="1"/>
+                    <field name="direction" string="Direction" enable_counters="1"/>
+                    <field name="bot_id" string="Bot" enable_counters="1"/>
                 </searchpanel>
             </search>
         </field>

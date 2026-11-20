@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Default Telegram Message Templates.
+    Preconfigures ready-to-use message templates with dynamic placeholders
+    for Sales Orders, Invoices, Purchase Orders, and Delivery Orders.
+-->
 <odoo noupdate="1">
+    <!-- Sale Order Confirmation Template -->
     <record id="telegram_template_sale_order" model="telegram.template">
         <field name="name">Sale Order Confirmation</field>
         <field name="model_id" ref="sale.model_sale_order"/>
@@ -23,6 +29,7 @@
         ]"/>
     </record>
 
+    <!-- Customer Invoice Notification Template -->
     <record id="telegram_template_invoice" model="telegram.template">
         <field name="name">Invoice Generation</field>
         <field name="model_id" ref="account.model_account_move"/>
@@ -46,7 +53,8 @@
         ]"/>
     </record>
 
-    <record id="telegram_template_purchase_order_confirm" model="telegram.template">
+    <!-- Purchase Order RFQ Template -->
+    <record id="telegram_template_purchase_order_rfq" model="telegram.template">
         <field name="name">Purchase Order RFQ</field>
         <field name="model_id" ref="purchase.model_purchase_order"/>
         <field name="message">Hi {{vendor_name}}, please confirm your order {{order_number}} for {{amount_total}}.</field>
@@ -68,6 +76,8 @@
             })
         ]"/>
     </record>
+
+    <!-- Purchase Order Confirmation Template -->
     <record id="telegram_template_purchase_order_confirm" model="telegram.template">
         <field name="name">Purchase Order Confirm</field>
         <field name="model_id" ref="purchase.model_purchase_order"/>
@@ -91,6 +101,7 @@
         ]"/>
     </record>
 
+    <!-- Delivery Order Notification Template -->
     <record id="telegram_template_delivery" model="telegram.template">
         <field name="name">Delivery Notification</field>
         <field name="model_id" ref="stock.model_stock_picking"/>

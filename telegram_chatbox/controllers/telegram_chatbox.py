@@ -14,10 +14,6 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    (LGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
 #############################################################################
 import json
 import logging
@@ -32,7 +28,10 @@ class TelegramWebhookController(http.Controller):
     """Controller for handling Telegram webhooks."""
 
     @http.route(
-        ['/telegram/webhook/<string:token>'],
+        [
+            '/telegram/webhook/<string:token>',
+            '/telegram/webhook/telegram/webhook/<string:token>',
+        ],
         type='http',
         auth='public',
         methods=['POST'],
@@ -40,10 +39,9 @@ class TelegramWebhookController(http.Controller):
     )
     def telegram_webhook(self, token, **kwargs):
         """
-       Handle incoming Telegram webhook requests.
-       This endpoint receives updates from Telegram, validates the bot token,
-       parses the incoming payload, creates a corresponding incoming message
-       record, and updates the bot's last synchronization timestamp.
+        Handle incoming Telegram webhook requests.
+        Validates the bot token, parses the incoming payload, creates a
+        corresponding incoming message record, and updates the bot's sync timestamp.
         """
         bot = request.env['telegram.bot'].sudo().search(
             [('token', '=', token)],
@@ -51,7 +49,7 @@ class TelegramWebhookController(http.Controller):
         )
 
         if not bot:
-            _logger.warning("Telegram webhook hit with invalid token")
+            _logger.warning("Telegram webhook hit with invalid token: %s", token)
             return http.Response(
                 json.dumps({
                     "ok": False,
@@ -62,18 +60,26 @@ class TelegramWebhookController(http.Controller):
             )
 
         try:
-            payload = json.loads(
-                request.httprequest.data.decode('utf-8')
-            )
+            payload = None
+            if hasattr(request, 'get_json_data'):
+                try:
+                    payload = request.get_json_data()
+                except Exception:
+                    payload = None
+            if not payload and hasattr(request.httprequest, 'data') and request.httprequest.data:
+                payload = json.loads(request.httprequest.data.decode('utf-8'))
 
             _logger.info("Received Telegram payload: %s", payload)
+
             # Create incoming message record
             request.env['telegram.message'].sudo().create_incoming(
                 bot,
                 payload
             )
             bot.sudo().write({
-                'last_sync': Datetime.now()
+                'last_sync': Datetime.now(),
+                'last_error_message': False,
+                'status': 'active'
             })
             return http.Response(
                 json.dumps({
@@ -83,10 +89,7 @@ class TelegramWebhookController(http.Controller):
                 status=200
             )
         except Exception as e:
-            _logger.exception(
-                "Failed processing telegram webhook: %s",
-                str(e)
-            )
+            _logger.exception("Failed processing telegram webhook: %s", str(e))
             bot.sudo().write({
                 'last_error_message': str(e),
                 'status': 'error'
