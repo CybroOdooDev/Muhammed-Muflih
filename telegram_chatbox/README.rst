@@ -4,7 +4,7 @@
 
 .. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
     :target: https://www.odoo.com
-    :alt: Odoo 20.0
+    :alt: Odoo 19.0
 
 .. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
     :target: https://cybrosys.com
@@ -20,8 +20,10 @@ Odoo Telegram Integration
 
 Key Features
 ------------
-
-* List the detailed features one by one
+* Send Telegram messages directly from Sales Orders, Purchase Orders, Invoices, Deliveries, and Contacts.
+* Automatic generation and attachment of official PDF reports (Quotations, Invoices, Purchase Orders, Delivery Slips).
+* Configurable Telegram message templates with dynamic variable placeholders.
+* Real-time incoming webhook processing logging customer replies, photos, documents, and media into Odoo chatter.
 
 Installation
 ------------

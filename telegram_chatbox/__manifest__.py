@@ -21,7 +21,7 @@
     'summary': 'Send Telegram messages directly from Odoo records',
     'description': '''This module integrates Telegram with Odoo, allowing users to 
     send messages directly from Odoo documents such as Sales Orders, Purchase Orders,
-    Invoices,and other business records.
+    Invoices, and other business records.
     ''',
     'category': 'Discuss',
     'author': 'Cybrosys Techno Solutions',
@@ -42,8 +42,8 @@
         'views/telegram_bot_views.xml',
         'views/telegram_message_views.xml',
         'views/telegram_template_views.xml',
-        'views/menus.xml',
-        'wizard/telegram_test_views.xml'
+        'wizard/telegram_test_views.xml',
+        'views/menus.xml'
     ],
     'license': 'LGPL-3',
     'installable': True,

@@ -325,8 +325,17 @@ class TelegramMessage(models.Model):
             filename = f"video_{file_unique_id}.mp4"
 
         elif message_data.get("sticker"):
-            file_id = message_data["sticker"]["file_id"]
-            file_unique_id = message_data["sticker"]["file_unique_id"]
+            sticker = message_data["sticker"]
+            thumb = sticker.get("thumbnail") or sticker.get("thumb")
+            # If the sticker is animated (.tgs Lottie) or video (.webm), download the
+            # static thumbnail (.webp) so the browser can natively render it in chatter.
+            if (sticker.get("is_animated") or sticker.get("is_video")) and thumb and thumb.get("file_id"):
+                file_id = thumb["file_id"]
+                file_unique_id = thumb.get("file_unique_id", sticker.get("file_unique_id", "thumb"))
+            else:
+                file_id = sticker["file_id"]
+                file_unique_id = sticker.get("file_unique_id", "sticker")
+
             mimetype = "image/webp"
             filename = f"sticker_{file_unique_id}.webp"
 

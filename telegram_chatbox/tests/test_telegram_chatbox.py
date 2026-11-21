@@ -357,3 +357,39 @@ class TestTelegramChatbox(TransactionCase):
         self.assertEqual(wizard.current_model_id.model, 'sale.order')
         action = wizard.action_send()
         self.assertTrue(action)
+
+    @patch('requests.get')
+    def test_13_incoming_animated_sticker(self, mock_get):
+        """Test receiving an animated sticker and downloading its static thumbnail."""
+        mock_info_resp = MagicMock()
+        mock_info_resp.status_code = 200
+        mock_info_resp.json.return_value = {
+            'ok': True,
+            'result': {'file_path': 'thumbnails/thumb_123.webp'}
+        }
+        mock_file_resp = MagicMock()
+        mock_file_resp.status_code = 200
+        mock_file_resp.content = b'RIFF....WEBPVP8'
+        mock_get.side_effect = [mock_info_resp, mock_file_resp]
+
+        payload = {
+            'message': {
+                'message_id': 9005,
+                'chat': {'id': int(self.partner.telegram_chat_id)},
+                'sticker': {
+                    'file_id': 'animated_raw_tgs_file_id',
+                    'file_unique_id': 'AgADanim123',
+                    'is_animated': True,
+                    'thumbnail': {
+                        'file_id': 'thumb_static_webp_file_id',
+                        'file_unique_id': 'AQADthumb123',
+                    },
+                    'emoji': '👍',
+                }
+            }
+        }
+        msg = self.env['telegram.message'].create_incoming(self.bot, payload)
+        self.assertTrue(msg)
+        self.assertEqual(len(msg.attachment_ids), 1)
+        self.assertTrue(msg.attachment_ids[0].name.endswith('.webp'))
+        self.assertEqual(msg.attachment_ids[0].mimetype, 'image/webp')
