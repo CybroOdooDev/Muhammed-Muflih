@@ -28,4 +28,13 @@
             </form>
         </field>
     </record>
+
+    <!-- Send Telegram Message Wizard Action -->
+    <record id="action_telegram_test" model="ir.actions.act_window">
+        <field name="name">Send Telegram Message</field>
+        <field name="res_model">telegram.test</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="telegram_test_view_form"/>
+    </record>
 </odoo>

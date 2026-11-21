@@ -20,8 +20,11 @@ Odoo Telegram Integration
 
 Key Features
 ------------
-
-* List the detailed features one by one
+* Multi-Bot Management: Configure and manage multiple Telegram bots with instant webhook registration.
+* Document-Driven Messaging: Send personalized messages and official PDF reports directly from Sales Orders, Purchase Orders, Customer Invoices, and Delivery Slips.
+* Interactive Wizard & Templates: Preview and customize dynamic message templates with live variable rendering before dispatch.
+* Two-Way Chatter Synchronization: Receive incoming Telegram text messages, photos, and document replies directly into the corresponding Odoo chatter thread.
+* Centralized Communication Logs: Full audit trail with status tracking (Draft, Sent, Received, Failed) and directional filtering.
 
 Installation
 ------------

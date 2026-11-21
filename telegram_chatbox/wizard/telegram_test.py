@@ -15,12 +15,12 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-from odoo import models, fields, api
+from odoo import Command, api, fields, models
 
 class TelegramTest(models.TransientModel):
     """Wizard to send a test Telegram message."""
     _name = "telegram.test"
-    _description = "Send Telegram Test Message"
+    _description = "Send Telegram Message"
 
     partner_id = fields.Many2one(
         'res.partner',
@@ -97,7 +97,7 @@ class TelegramTest(models.TransientModel):
                 res_model, res_id = 'account.move', self.env.context.get('default_invoice_id')
             elif self.env.context.get('default_picking_id'):
                 res_model, res_id = 'stock.picking', self.env.context.get('default_picking_id')
-                
+
             if res_model and res_id:
                 attachment = self.env['ir.attachment'].search([
                     ('res_model', '=', res_model),
@@ -105,7 +105,7 @@ class TelegramTest(models.TransientModel):
                     ('mimetype', '=', 'application/pdf')
                 ], order='id desc', limit=1)
                 if attachment:
-                    res['attachment_ids'] = [(6, 0, attachment.ids)]
+                    res['attachment_ids'] = [Command.set(attachment.ids)]
         return res
 
     @api.depends('sale_order_id', 'purchase_order_id', 'invoice_id', 'picking_id')
@@ -148,7 +148,7 @@ class TelegramTest(models.TransientModel):
             return self.invoice_id.send_telegram_message(self.message_text, self.telegram_template_id, attachment_ids=self.attachment_ids.ids)
         elif self.picking_id:
             return self.picking_id.send_telegram_message(self.message_text, self.telegram_template_id, attachment_ids=self.attachment_ids.ids)
-        
+
         return self.partner_id.send_telegram_message(self.message_text, self.telegram_template_id, attachment_ids=self.attachment_ids.ids)
 
     @api.onchange('telegram_template_id')

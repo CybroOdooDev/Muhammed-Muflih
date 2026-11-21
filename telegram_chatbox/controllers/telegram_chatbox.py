@@ -49,7 +49,7 @@ class TelegramWebhookController(http.Controller):
         )
 
         if not bot:
-            _logger.warning("Telegram webhook hit with invalid token: %s", token)
+            _logger.warning("Telegram webhook hit with an invalid token.")
             return http.Response(
                 json.dumps({
                     "ok": False,

@@ -78,28 +78,6 @@ class TelegramBot(models.Model):
         help="Last error message from webhook operations."
     )
 
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        """
-        Create one or more records.
-        This method extends the standard Odoo create operation and can be
-        customized to perform additional processing before or after record
-        creation."""
-
-        records = super().create(vals_list)
-        return records
-
-    def write(self, vals):
-        """
-        Update the values of existing records.
-        This method extends the standard Odoo write operation and can be
-        customized to perform additional processing before or after records
-        are updated."""
-
-        res = super().write(vals)
-        return res
-
     def action_set_webhook(self, url=None):
         """
             Configure the Telegram webhook for the selected bot(s).
@@ -122,13 +100,12 @@ class TelegramBot(models.Model):
 
             # Ensure the webhook ends with /telegram/webhook/<token> exactly once without duplication
             endpoint = f"/telegram/webhook/{token}"
-            if webhook.endswith(endpoint):
-                pass
-            elif '/telegram/webhook' in webhook:
-                base = webhook.split('/telegram/webhook')[0].rstrip('/')
-                webhook = f"{base}{endpoint}"
-            else:
-                webhook = f"{webhook}{endpoint}"
+            if not webhook.endswith(endpoint):
+                if '/telegram/webhook' in webhook:
+                    base = webhook.split('/telegram/webhook')[0].rstrip('/')
+                    webhook = f"{base}{endpoint}"
+                else:
+                    webhook = f"{webhook}{endpoint}"
 
             bot.webhook_url = webhook
 
@@ -143,14 +120,15 @@ class TelegramBot(models.Model):
                 bot.last_sync = fields.Datetime.now()
                 bot.status = 'active'
                 bot.last_error_message = False
-                
+
                 if result.get("ok"):
+                    desc = result.get("description") or _("Webhook successfully registered.")
                     return {
                         'type': 'ir.actions.client',
                         'tag': 'display_notification',
                         'params': {
                             'title': _("Successful"),
-                            'message': _(result.get("description")),
+                            'message': desc,
                             'type': 'success',
                             'sticky': False,
                             'next': {'type': 'ir.actions.act_window_close'},
@@ -184,7 +162,7 @@ class TelegramBot(models.Model):
                     'tag': 'display_notification',
                     'params': {
                         'title': _("Error"),
-                        'message': _(err_msg),
+                        'message': _("Telegram API Error: %s") % err_msg,
                         'type': 'danger',
                         'sticky': False,
                     }

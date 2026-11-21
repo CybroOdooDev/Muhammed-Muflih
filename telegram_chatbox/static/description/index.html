@@ -1,726 +1,1536 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Odoo Telegram Integration</title>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-          crossorigin="anonymous">
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet">
+    <!-- Google Fonts: Plus Jakarta Sans (Captions/Headings) & Inter (Text) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600;1,700&display=swap"
+        rel="stylesheet" />
+    <!-- Bootstrap 5.0.2 CSS (used only to power the tab navigation) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!--
+      NOTE: Everything that CAN be an inline style lives directly on the tag.
+      This block only holds what is impossible to write as an inline style="":
+        1) The @media rule for stacking columns on mobile.
+        2) Small overrides so Bootstrap's tab classes match the pill look.
+      Both are presentation-only. Every pane renders correctly with this whole
+      block removed — nothing here is load-bearing.
+    -->
+    <style>
+        /* Active tab pill. Must be !important: the pills carry their resting look
+           as inline styles (so it survives the Apps-list sanitizer, which drops
+           this whole block), and an inline style outranks a stylesheet rule.
+           On apps.odoo.com Bootstrap moves .active as you click and this repaints
+           the pill; in the Apps list the block is gone, every pill renders in its
+           resting state, and the anchors act as jump links. */
+        #cybrosys-acc-kit .nav-link.active {
+            background-color: #b12126 !important;
+            border-color: #b12126 !important;
+            color: #ffffff !important;
+            box-shadow: 0 8px 18px rgba(177, 33, 38, 0.28) !important;
+        }
+
+        @media screen and (max-width: 768px) {
+
+            #cybrosys-acc-kit .mob-stack,
+            #cybrosys-acc-kit .mob-stack>tbody,
+            #cybrosys-acc-kit .mob-stack>tbody>tr,
+            #cybrosys-acc-kit .mob-stack>tbody>tr>td {
+                display: block !important;
+                width: 100% !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+
+            #cybrosys-acc-kit .mob-space {
+                padding-bottom: 20px !important;
+            }
+
+            #cybrosys-acc-kit .mob-text-center {
+                text-align: center !important;
+            }
+        }
+    </style>
 </head>
-<body>
-<section>
-    <div class="container"
-         style="font-family: 'Inter', sans-serif !important;background-color: #fff !important;">
-        <div class="row">
-            <div class="col-sm-12 col-md-12 col-lg-12 d-flex justify-content-between flex-wrap align-items-sm-center"
-                 style="border-bottom:1px solid rgba(0, 0, 0, 0.22)">
-                <div class="my-3">
-                    <img src="assets/misc/logo.png"
-                         style="width:auto !important; height:40px !important">
-                </div>
-                <div class="my-3 d-flex align-items-center">
-                    <div class="text-center"
-                         style="background-color:#017E84 !important;font-size: 0.8rem !important; color:#fff !important; font-weight:500 !important; padding:4px !important; margin:0 3px !important; border-radius:50px !important; min-width: 120px !important;">
-                        Community
-                    </div>
-                    <div class="text-center"
-                         style="background-color:#875A7B !important; color:#fff !important;font-size: 0.8rem !important; font-weight:500 !important; padding:4px !important; margin:0 3px !important; border-radius:50px !important;min-width: 120px !important;">
-                        Enterprise
-                    </div>
-                    <div class="text-center"
-                         style="background-color:#7C7BAD !important; color:#fff !important;font-size: 0.8rem !important; font-weight:500 !important; padding:4px !important; margin:0 3px !important; border-radius:50px !important; min-width: 120px !important;">
-                        Odoo.sh
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-12 col-md-12 col-lg-12 text-center d-flex align-items-center flex-column"
-                 style="margin: 80px 0px !important;">
-                <h1 style="font-size: 2.8rem;font-weight: 700; color:
-                    #1A202C;">
-                    Odoo Telegram Integration</h1>
-                <p class="my-3 mb-4"
-                   style="max-width: 80%; font-weight: 400 !important; line-height: 32px; color: #718096;">
-                    Telegram Messaging from Odoo
-                </p>
-                <div style="width: 80%; margin-top: 3rem;">
-                    <img src="assets/screenshots/hero.gif"
-                         class="img-responsive" width="100%" height="auto">
-                </div>
-            </div>
-        </div>
-        <div class="container mt-5 mb-5">
-            <div class="col-lg-12 d-flex flex-column justify-content-center align-items-center mt-4">
-                <p class="m-0"
-                   style="font-weight: 600; font-size: 24px; color:#714b67 !important">
-                    Key Highlights
-                </p>
-            </div>
-            <div class="row py-4">
-                <div class="col-md-6 col-sm-12 p-3">
-                    <div class="d-flex   h-100" style="padding: 30px;border-radius: 12px;
-                                    background: #FFF;
-                                    box-shadow: 1px 2px 3px 0px rgba(0, 0, 0, 0.25); ">
-                        <div style="width: 36px; height: 36px; border-radius: 50%; background: #714B67;
-                                    display: flex; justify-content: center; align-items: center;
-                                    margin-right: 10px; flex-shrink: 0;">
-                            <i class="fa-solid fa-star  "
-                               style="color: #fff;font-size:14px;"></i>
-                        </div>
-                        <div>
-                            <p style="color: #1A202C;font-weight: 600;
-                                      font-size: 1.2rem; margin-bottom: 2px;">
-                                Send Telegram messages directly from Odoo records
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="container rounded">
-            <ul class="nav nav-tabs d-flex"
-                style="width: fit-content;margin: 0 auto;gap: 1rem;">
-                <li class="col text-center py-2 text-nowrap "
-                    style="color: #fff; background-color: #714B67;border-radius: 6px 6px 0px 0px;">
-                    <a class="active show" data-toggle="tab" href="#tab1"
-                            style="color: #fff;font-weight: 500; background-color: #714B67; text-decoration: none;">
-                        <i class="fa-regular fa-image  pr-2"
-                           style="color: #fff;"></i>
-                        Screenshots</a></li>
-                <li class="col text-center py-2 text-nowrap "
-                    style="color: #fff; background-color: #714B67;border-radius: 6px 6px 0px 0px;">
-                    <a
-                            data-toggle="tab" href="#tab2"
-                            style="color: #fff;font-weight: 500;  text-decoration: none;"><i
-                            class="fa-solid fa-star  pr-2"
-                            style="color: #fff;"></i>Features</a></li>
-                <li class="col text-center py-2 text-nowrap "
-                    style="color: #fff; background-color: #714B67;border-radius: 6px 6px 0px 0px;">
-                    <a
-                            data-toggle="tab" href="#tab3"
-                            style="color: #fff;font-weight: 500; text-decoration: none; background-color: #714B67;"><i
-                            class="fa-solid fa-book-open  pr-2"
-                            style="color: #fff;"></i>Released Notes</a></li>
-            </ul>
-            <div class="tab-content"
-                 style="background-color: rgba(121, 113, 119, 0.04);">
-                <div id="tab1" class="tab-pane fade in active show">
-                    <div class="col-lg-12 py-2"
-                         style="padding: 1rem 4rem !important;">
-                        <div
-                                style="border: 1px solid #d8d6d6; border-radius: 4px; background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                            <div class="row justify-content-center p-3 w-100 m-0">
-                                <img src="assets/screenshots/1.png"
-                                     class="img-responsive" width="100%"
-                                     height="auto">
-                            </div>
-                            <div class="px-3">
-                                <h4 class="mt-2"
-                                    style=" font-weight:600 !important; color:#282F33 !important; font-size:1.3rem !important">
-                                     Create Bot in Telegram and copy credentials.
-                                    Go to telegram and  Search @BotFather in the search area</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-12 py-2"
-                         style="padding: 1rem 4rem !important;">
-                        <div
-                                style="border: 1px solid #d8d6d6; border-radius: 4px;  background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                            <div class="row justify-content-center p-3 w-100 m-0">
-                                <img src="assets/screenshots/2.png"
-                                     class="img-responsive" width="100%"
-                                     height="auto">
-                            </div>
-                            <div class="px-3">
-                                <h4 class="mt-2"
-                                    style=" font-weight:600 !important; color:#282F33 !important; font-size:1.3rem !important">
-                                     Add API token and webhook URL:https://YOUR_DOMAIN/telegram/webhook/API_TOKEN</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-12 py-2"
-                         style="padding: 1rem 4rem !important;">
-                        <div
-                                style="border: 1px solid #d8d6d6; border-radius: 4px;  background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                            <div class="row justify-content-center p-3 w-100 m-0">
-                                <img src="assets/screenshots/3.png"
-                                     class="img-responsive" width="100%"
-                                     height="auto">
-                            </div>
-                            <div class="px-3">
-                                 <h4 class="mt-2"
-                                    style=" font-weight:600 !important; color:#282F33 !important; font-size:1.3rem !important">
-                            Select a customer and enter the required credentials in the Telegram tab.
-                        To get Chat Id of customer open the @userinfo bot and share the customer's profile.</h4>
-                        <h4 class="mt-2"
-                                    style=" font-weight:600 !important; color:#282F33 !important; font-size:1.3rem !important">
-            When a customer sends a message to the bot, a new contact is created for the customer if there is no contact with the same Telegram chat ID.</h4>
-                                </div>
-                        </div>
-                    </div>
-                                        <div class="col-lg-12 py-2"
-                         style="padding: 1rem 4rem !important;">
-                        <div
-                                style="border: 1px solid #d8d6d6; border-radius: 4px;  background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                            <div class="row justify-content-center p-3 w-100 m-0">
-                                <img src="assets/screenshots/4.png"
-                                     class="img-responsive" width="100%"
-                                     height="auto">
-                            </div>
-                            <div class="px-3">
-                                 <h4 class="mt-2"
-                                    style=" font-weight:600 !important; color:#282F33 !important; font-size:1.3rem !important">
-                          Create a Sales Order for the customer and send a message directly from the Sales Order using the Send via Telegram button.</h4>
-                                </div>
-                        </div>
-                    </div>
-                      <div class="col-lg-12 py-2"
-                         style="padding: 1rem 4rem !important;">
-                        <div
-                                style="border: 1px solid #d8d6d6; border-radius: 4px;  background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                            <div class="row justify-content-center p-3 w-100 m-0">
-                                <img src="assets/screenshots/5.png"
-                                     class="img-responsive" width="100%"
-                                     height="auto">
-                            </div>
-                            <div class="px-3">
-                                 <h4 class="mt-2"
-                                    style=" font-weight:600 !important; color:#282F33 !important; font-size:1.3rem !important">
-                         The Sales Order details were successfully received via Telegram.</h4>
-                                </div>
-                        </div>
-                    </div>
-                      <div class="col-lg-12 py-2"
-                         style="padding: 1rem 4rem !important;">
-                        <div
-                                style="border: 1px solid #d8d6d6; border-radius: 4px;  background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                            <div class="row justify-content-center p-3 w-100 m-0">
-                                <img src="assets/screenshots/6.png"
-                                     class="img-responsive" width="100%"
-                                     height="auto">
-                            </div>
-                            <div class="px-3">
-                                 <h4 class="mt-2"
-                                    style=" font-weight:600 !important; color:#282F33 !important; font-size:1.3rem !important">
-                          Create a Purchase Order for the customer and send a message directly from the Sales Order using the Send via Telegram button.</h4>
-                                </div>
-                        </div>
-                    </div>
-                      <div class="col-lg-12 py-2"
-                         style="padding: 1rem 4rem !important;">
-                        <div
-                                style="border: 1px solid #d8d6d6; border-radius: 4px;  background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                            <div class="row justify-content-center p-3 w-100 m-0">
-                                <img src="assets/screenshots/7.png"
-                                     class="img-responsive" width="100%"
-                                     height="auto">
-                            </div>
-                            <div class="px-3">
-                                 <h4 class="mt-2"
-                                    style=" font-weight:600 !important; color:#282F33 !important; font-size:1.3rem !important">
-                          The Purchase Order details were successfully received via Telegram.</h4>
-                                </div>
-                        </div>
-                    </div>
-                      <div class="col-lg-12 py-2"
-                         style="padding: 1rem 4rem !important;">
-                        <div
-                                style="border: 1px solid #d8d6d6; border-radius: 4px;  background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                            <div class="row justify-content-center p-3 w-100 m-0">
-                                <img src="assets/screenshots/8.png"
-                                     class="img-responsive" width="100%"
-                                     height="auto">
-                            </div>
-                            <div class="px-3">
-                                 <h4 class="mt-2"
-                                    style=" font-weight:600 !important; color:#282F33 !important; font-size:1.3rem !important">
-                          Create  Invoice for the customer and send a message directly from the Sales Order using the Send via Telegram button.</h4>
-                                </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-12 py-2"
-                         style="padding: 1rem 4rem !important;">
-                        <div
-                                style="border: 1px solid #d8d6d6; border-radius: 4px;  background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                            <div class="row justify-content-center p-3 w-100 m-0">
-                                <img src="assets/screenshots/9.png"
-                                     class="img-responsive" width="100%"
-                                     height="auto">
-                            </div>
-                            <div class="px-3">
-                                 <h4 class="mt-2"
-                                    style=" font-weight:600 !important; color:#282F33 !important; font-size:1.3rem !important">
-                          The Invoice details were successfully received via Telegram.</h4>
-                                </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-12 py-2"
-                         style="padding: 1rem 4rem !important;">
-                        <div
-                                style="border: 1px solid #d8d6d6; border-radius: 4px;  background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                            <div class="row justify-content-center p-3 w-100 m-0">
-                                <img src="assets/screenshots/10.png"
-                                     class="img-responsive" width="100%"
-                                     height="auto">
-                            </div>
-                            <div class="px-3">
-                                 <h4 class="mt-2"
-                                    style=" font-weight:600 !important; color:#282F33 !important; font-size:1.3rem !important">
-                         You can view both incoming and outgoing Telegram messages within Odoo.</h4>
-                                </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="tab2" class="tab-pane fade">
-                    <div class="col-mg-12" style="padding: 1rem 4rem;">
-                        <ul style="list-style: none; padding: 1rem 0;font-weight: 500;">
-                            <li class="py-3"
-                                style="font-weight: 500;background-color: #fff; border-radius: 4px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                                    <span style="margin-right: 12px;"><img
-                                            src="assets/misc/star (1) 2.svg"
-                                            alt=""
-                                            width="16px"></span>Send Telegram messages directly from Odoo records.
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div id="tab3" class="tab-pane fade">
-                    <div class="col-mg-12 active" style="padding: 1rem 4rem;">
-                        <div class="py-3"
-                             style="font-weight: 500;background-color: #fff; border-radius: 4px; padding: 1rem; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                            <div class="d-flex mb-3"
-                                 style="font-size: 0.8rem; font-weight: 500;"><span>Version
-                                        20.0.1.0.0</span><span
-                                    class="px-2">|</span><span
-                                    style="color: #714B67;font-weight: 600;">Released on:20th Nov 2026</span>
-                            </div>
-                            <p class="m-0"
-                               style=" color:#718096!important; font-size:1rem !important;line-height: 28px;">
-                                Initial commit for Odoo Telegram Integration</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="container mt-5">
-            <div class="col-lg-12 d-flex flex-column justify-content-center align-items-center mt-5">
-                <p class="m-0"
-                   style="font-weight: 600; font-size: 24px; color:#000 !important">
-                    Related Products</p>
-            </div>
-        </div>
-            <div id="myCarousel" class="carousel slide py-3" data-ride="carousel">
-                <div class="carousel-inner">
-                    <div class="carousel-item active">
-                        <div class="row p-4">
-                            <div class="col">
-                                <div class="p-3">
-                                    <a href="https://apps.odoo.com/apps/modules/20.0/base_accounting_kit/" style="color: #000; text-decoration: none;">
-                                        <div style="border:1px solid #CBCBCB !important;border-radius: 4px;">
-                                            <div style="width: 300px; ">
-                                                <img src="assets/modules/1.gif" alt="" width="100%" height="auto">
 
-                                            </div>
-                                            <p class="text-center pt-2 text-black font-weight-bold">Odoo 20 Full Accounting Kit</p>
-                                        </div>
+<body style="margin:0; padding:0;">
+
+    <div id="cybrosys-acc-kit"
+        style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background-color:#fafafa; color:#1e293b; margin:0; padding:0; line-height:1.6; -webkit-font-smoothing:antialiased;">
+        <div class="main-container"
+            style="width:100%; max-width:1240px; margin:0 auto; padding:24px 20px 60px; box-sizing:border-box;">
+
+            <!-- 1. HEADER BAR — logo left, capability rail right on two labelled rows:
+             editions above, deployment targets below. A supported item carries a
+             tick; an unsupported one carries a cross, a dashed edge, a struck
+             label and an explicit tag, so it never reads as supported. -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                style="background-color: #ffffff; border: 1px solid #f1ecee; border-radius: 12px; margin-bottom: 28px;">
+                <tr>
+                    <td style="padding: 16px 22px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mob-stack">
+                            <tr>
+
+                                <!-- Brand -->
+                                <td width="24%" valign="middle" class="mob-space mob-text-center">
+                                    <a href="https://www.cybrosys.com" target="_blank" rel="noopener"
+                                        style="text-decoration: none;">
+                                        <img src="./assets/icons/cybrosys.png"
+                                            alt="Cybrosys Technologies"
+                                            style="height: 40px; max-width: 100%; border: 0; vertical-align: middle;" />
                                     </a>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="p-3">
-                                    <a href="https://apps.odoo.com/apps/modules/20.0/invoice_format_editor/" style="color: #000; text-decoration: none;">
-                                        <div style="border:1px solid #CBCBCB !important;border-radius: 4px;">
-                                            <div style="width: 300px; ">
-                                                <img src="assets/modules/2.png" alt="" width="100%" height="auto">
+                                </td>
 
-                                            </div>
-                                            <p class="text-center pt-2 text-black font-weight-bold">Invoice Format Editor</p>
-                                        </div>
+                                <!-- Capability rail -->
+                                <td align="right" valign="middle" class="mob-text-center" style="padding-left: 26px;">
+                                    <table cellpadding="0" cellspacing="0" border="0" style="display: inline-table;">
+                                        <tr>
+                                            <td align="right" valign="middle"
+                                                style="padding: 0 0 7px; padding-right: 16px; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #f6f2f3; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: #94a3b8; white-space: nowrap;">
+                                                Edition
+                                            </td>
+                                            <td valign="middle"
+                                                style="padding: 0 0 7px; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #f6f2f3; white-space: nowrap;">
+                                                <span
+                                                    style="display: inline-block; background-color: #fdf3f4; border: 1px solid #f3e0e2; color: #0f172a; border-radius: 20px; padding: 6px 14px; margin-right: 7px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 700;">
+                                                    <img src="./assets/icons/ic-6db19ab6-b12126.png" alt=""
+                                                        style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 6px;" />
+                                                    <span style="vertical-align: middle;">Community</span>
+                                                </span>
+                                                <span
+                                                    style="display: inline-block; background-color: #fdf3f4; border: 1px solid #f3e0e2; color: #0f172a; border-radius: 20px; padding: 6px 14px; margin-right: 7px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 700;">
+                                                    <img src="./assets/icons/ic-6db19ab6-b12126.png" alt=""
+                                                        style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 6px;" />
+                                                    <span style="vertical-align: middle;">Enterprise</span>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td align="right" valign="middle"
+                                                style="padding: 7px 0; padding-right: 16px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: #94a3b8; white-space: nowrap;">
+                                                Deploys on
+                                            </td>
+                                            <td valign="middle" style="padding: 7px 0; white-space: nowrap;">
+                                                <span
+                                                    style="display: inline-block; background-color: #fdf3f4; border: 1px solid #f3e0e2; color: #0f172a; border-radius: 20px; padding: 6px 14px; margin-right: 7px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 700;">
+                                                    <img src="./assets/icons/ic-6db19ab6-b12126.png" alt=""
+                                                        style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 6px;" />
+                                                    <span style="vertical-align: middle;">Odoo.sh</span>
+                                                </span>
+                                                <span
+                                                    style="display: inline-block; background-color: #fdf3f4; border: 1px solid #f3e0e2; color: #0f172a; border-radius: 20px; padding: 6px 14px; margin-right: 7px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 700;">
+                                                    <img src="./assets/icons/ic-6db19ab6-b12126.png" alt=""
+                                                        style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 6px;" />
+                                                    <span style="vertical-align: middle;">On-Premise</span>
+                                                </span>
+                                                <span
+                                                    style="display: inline-block; background-color: #f4f5f7; border: 1px dashed #c9d0d8; color: #7c848f; border-radius: 20px; padding: 6px 12px 6px 14px; margin-right: 7px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 700;">
+                                                    <img src="./assets/icons/ic-588e724f-7c848f.png" alt=""
+                                                        style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 6px;" />
+                                                    <span
+                                                        style="vertical-align: middle; text-decoration: line-through;">Online</span>
+                                                    <span
+                                                        style="vertical-align: middle; margin-left: 7px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #ffffff; background-color: #9aa2ad; border-radius: 10px; padding: 2px 7px;">Not&nbsp;supported</span>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- 2. MINIMAL HERO SECTION (TABLE LAYOUT) -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                style="border-collapse: separate;background-color: #ffffff; background-repeat: no-repeat; background-position: top center; background-size: cover; border: 1px solid #b221261f; border-radius: 16px; margin-bottom: 28px;">
+                <tr>
+                    <td align="center" style="padding: 56px 28px 48px;">
+                        <!-- Hero Title (Plus Jakarta Sans) -->
+                        <h1
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 40px; font-weight: 900; color: #0f172a; line-height: 1.18; letter-spacing: -0.8px; margin: 0 auto 16px; max-width: 820px;">
+                            Odoo Telegram <span style="color: #b12126;">Integration</span>
+                        </h1>
+
+                        <!-- Hero Subtitle (Inter text font) -->
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 17px; color: #666; line-height: 1.65; max-width: 780px; margin: 0 auto 30px; font-weight: 400;">
+                            Send Telegram messages directly from Odoo records.
+                        </p>
+
+                        <!-- Contact Action Buttons (Plus Jakarta Sans Font) -->
+                        <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 24px;">
+                            <tr>
+                                <!-- Email Button (Primary #b12126) -->
+                                <td style="padding: 0 6px;">
+                                    <a href="mailto:odoo@cybrosys.com"
+                                        class="d-flex align-items-center justify-content-center gap-1" target="_blank"
+                                        rel="noopener"
+                                        style="width: 160px;text-align: center;    text-decoration: unset;font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; display: inline-block; background-color: #b12126; color: #ffffff; padding: 10px 26px; border-radius: 30px; font-size: 14px; font-weight: 700; border: 1px solid #b221261f;">
+                                        <img src="./assets/icons/ic-0b4c1767-ffffff.png" alt=""
+                                            style="width: 18px; height: 18px; display: inline-block; vertical-align: middle; margin-right: 8px;" />
+                                        <span style="vertical-align: middle;">Email Us</span>
                                     </a>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="p-3">
-                                    <a href="https://apps.odoo.com/apps/modules/20.0/inventory_barcode_scanning/" style="color: #000; text-decoration: none;">
-                                        <div style="border:1px solid #CBCBCB !important;border-radius: 4px;">
-                                            <div style="width: 300px; ">
-                                                <img src="assets/modules/3.png" alt="" width="100%" height="auto">
-
-                                            </div>
-                                            <p class="text-center pt-2 text-black font-weight-bold">Barcode scanning in Inventory</p>
-                                        </div>
+                                </td>
+                                <!-- WhatsApp Button (ONLY Exception in WhatsApp Green #25d366) -->
+                                <td style="padding: 0 6px;">
+                                    <a href="https://wa.me/919074270811"
+                                        class="d-flex align-items-center justify-content-center gap-1" target="_blank"
+                                        rel="noopener"
+                                        style="width: 160px;text-align: center;    text-decoration: unset;font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; display: inline-block;  color: #b12126; padding: 10px 26px; border-radius: 30px; font-size: 14px; font-weight: 700; border: 1px solid #b221261f;">
+                                        <img src="./assets/icons/ic-f466c5f2-b12126.png" alt=""
+                                            style="width: 24px; height: 24px; display: inline-block; vertical-align: middle;" />
+                                        <span style="vertical-align: middle;">Whatsapp</span>
                                     </a>
-                                </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Minimal Bullet Checklist (Inter font) -->
+                        <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+                            <tr>
+                                <td
+                                    style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; padding: 0 16px; font-size: 13px; font-weight: 600; color: #666;">
+                                    <img src="./assets/icons/ic-8a7643e9-b12126.png" alt=""
+                                        style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px;" />
+                                    Instant Telegram Notifications
+                                </td>
+                                <td
+                                    style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; padding: 0 16px; font-size: 13px; font-weight: 600; color: #666;">
+                                    <img src="./assets/icons/ic-8a7643e9-b12126.png" alt=""
+                                        style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px;" />
+                                    Two-Way Chatter Sync
+                                </td>
+                                <td
+                                    style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; padding: 0 16px; font-size: 13px; font-weight: 600; color: #666;">
+                                    <img src="./assets/icons/ic-8a7643e9-b12126.png" alt=""
+                                        style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px;" />
+                                    Document &amp; Media Sharing
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+
+            <div style="text-align: center; margin-bottom: 20px; margin-top: 40px;">
+                <h3
+                    style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 26px; font-weight: 800; color: #0f172a; margin: 0;">
+                    KEY <span style="color: #b12126;">HIGHLIGHTS</span>
+                </h3>
+            </div>
+
+            <!-- HIGHLIGHTS GRID: 1 row x 3 tiles -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 28px;"
+                class="mob-stack">
+                <tr>
+
+                    <td width="32%" valign="top" class="mob-space"
+                        style="background-color: #ffffff; border: 1px solid #f3e4e5; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.10);">
+                        <div style="padding: 24px 22px; min-height: 196px;">
+                            <div
+                                style="width: 48px; height: 48px; border-radius: 12px; background-color: #b12126; box-shadow: 0 8px 18px rgba(177, 33, 38, 0.28); color: #ffffff; text-align: center; line-height: 48px; margin-bottom: 16px;">
+                                <img src="./assets/icons/ic-f8f27dd0-ffffff.png" alt=""
+                                    style="width: 24px; height: 24px; display: inline-block; vertical-align: middle;" />
+                            </div>
+
+                            <h3
+                                style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 17px; font-weight: 700; color: #0f172a; line-height: 1.35; margin: 0;">
+                                Instant Telegram Notifications
+                            </h3>
+                            <div style="border-top: 1px solid #f6eaea; margin-top: 14px; padding-top: 14px;">
+                                <p
+                                    style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #64748b; line-height: 1.7; margin: 0;">
+                                    Send real-time updates and official document PDFs directly to customers and vendors
+                                    from Sales Orders, Purchase Orders, Invoices, and Delivery Slips.
+                                </p>
                             </div>
                         </div>
-                    </div>
-                    <div class="carousel-item">
-                        <div class="row p-4">
-                            <div class="col">
-                                <div class="p-3">
-                                    <a href="https://apps.odoo.com/apps/modules/20.0/whatsapp_redirect/" style="color: #000; text-decoration: none;">
-                                        <div style="border:1px solid #CBCBCB !important;border-radius: 4px;">
-                                            <div style="width: 300px; ">
-                                                <img src="assets/modules/4.jpg" alt="" width="100%" height="auto">
+                    </td>
 
-                                            </div>
-                                            <p class="text-center pt-2 text-black font-weight-bold">Send Whatsapp Message</p>
+                    <td width="2%" style="font-size: 0; line-height: 18px; height: 18px;">&nbsp;</td>
+
+                    <td width="32%" valign="top" class="mob-space"
+                        style="background-color: #ffffff; border: 1px solid #f3e4e5; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.10);">
+                        <div style="padding: 24px 22px; min-height: 196px;">
+                            <div
+                                style="width: 48px; height: 48px; border-radius: 12px; background-color: #b12126; box-shadow: 0 8px 18px rgba(177, 33, 38, 0.28); color: #ffffff; text-align: center; line-height: 48px; margin-bottom: 16px;">
+                                <img src="./assets/icons/ic-f8f27dd0-ffffff.png" alt=""
+                                    style="width: 24px; height: 24px; display: inline-block; vertical-align: middle;" />
+                            </div>
+
+                            <h3
+                                style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 17px; font-weight: 700; color: #0f172a; line-height: 1.35; margin: 0;">
+                                Two-Way Chatter Sync
+                            </h3>
+                            <div style="border-top: 1px solid #f6eaea; margin-top: 14px; padding-top: 14px;">
+                                <p
+                                    style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #64748b; line-height: 1.7; margin: 0;">
+                                    Customer and vendor replies via Telegram—including text, photos, and document
+                                    attachments—are automatically captured and routed directly into the Odoo record
+                                    chatter.
+                                </p>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td width="2%" style="font-size: 0; line-height: 18px; height: 18px;">&nbsp;</td>
+
+                    <td width="32%" valign="top" class="mob-space"
+                        style="background-color: #ffffff; border: 1px solid #f3e4e5; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.10);">
+                        <div style="padding: 24px 22px; min-height: 196px;">
+                            <div
+                                style="width: 48px; height: 48px; border-radius: 12px; background-color: #b12126; box-shadow: 0 8px 18px rgba(177, 33, 38, 0.28); color: #ffffff; text-align: center; line-height: 48px; margin-bottom: 16px;">
+                                <img src="./assets/icons/ic-f8f27dd0-ffffff.png" alt=""
+                                    style="width: 24px; height: 24px; display: inline-block; vertical-align: middle;" />
+                            </div>
+
+                            <h3
+                                style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 17px; font-weight: 700; color: #0f172a; line-height: 1.35; margin: 0;">
+                                Dynamic Message Templates
+                            </h3>
+                            <div style="border-top: 1px solid #f6eaea; margin-top: 14px; padding-top: 14px;">
+                                <p
+                                    style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #64748b; line-height: 1.7; margin: 0;">
+                                    Pre-configured and customizable Telegram templates with dynamic placeholder
+                                    variables for personalized order confirmations, RFQ updates, and delivery alerts.
+                                </p>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- 7. TAB STRIP — anchors, not form controls. The sanitizer removes a
+             form control along with its label text, but keeps an anchor. On apps.odoo.com Bootstrap
+             turns these into real tabs; in the Odoo Apps list, where the script
+             and stylesheet are stripped and every pane renders stacked, the same
+             anchors still show and jump to their section. Pill styling is inline
+             so it survives either way. The "nav" class is required: Bootstrap's
+             tab plugin walks closest(".nav, .list-group") to find the sibling
+             tabs, and silently throws without it. -->
+            <div id="cakTabs" class="nav" role="tablist"
+                style="text-align: center; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
+                <a href="#cak-pane-2" id="cak-tab-2-btn" class="nav-link active" data-bs-toggle="tab"
+                    data-bs-target="#cak-pane-2" role="tab" aria-controls="cak-pane-2" aria-selected="true"
+                    style="display: inline-block; text-decoration: none; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: 700; border-radius: 30px; padding: 10px 24px; margin: 4px 3px; background-color: #ffffff; border: 1px solid #f1dcdf; color: #5b6472;">Screenshots</a>
+                <a href="#cak-pane-3" id="cak-tab-3-btn" class="nav-link" data-bs-toggle="tab"
+                    data-bs-target="#cak-pane-3" role="tab" aria-controls="cak-pane-3" aria-selected="false"
+                    style="display: inline-block; text-decoration: none; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: 700; border-radius: 30px; padding: 10px 24px; margin: 4px 3px; background-color: #ffffff; border: 1px solid #f1dcdf; color: #5b6472;">Feature
+                    Matrix</a>
+                <a href="#cak-pane-1" id="cak-tab-1-btn" class="nav-link" data-bs-toggle="tab"
+                    data-bs-target="#cak-pane-1" role="tab" aria-controls="cak-pane-1" aria-selected="false"
+                    style="display: inline-block; text-decoration: none; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: 700; border-radius: 30px; padding: 10px 24px; margin: 4px 3px; background-color: #ffffff; border: 1px solid #f1dcdf; color: #5b6472;">Frequent
+                    Questions</a>
+                <a href="#cak-pane-4" id="cak-tab-4-btn" class="nav-link" data-bs-toggle="tab"
+                    data-bs-target="#cak-pane-4" role="tab" aria-controls="cak-pane-4" aria-selected="false"
+                    style="display: inline-block; text-decoration: none; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: 700; border-radius: 30px; padding: 10px 24px; margin: 4px 3px; background-color: #ffffff; border: 1px solid #f1dcdf; color: #5b6472;">Release
+                    Notes</a>
+            </div>
+
+            <!-- Tab Content Box -->
+            <div class="tab-content" id="cakTabsContent"
+                style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 12px; margin-bottom: 48px; padding: 28px 24px; box-sizing:border-box;">
+
+                <!-- TAB PANE: SCREENSHOTS -->
+                <div id="cak-pane-2" class="tab-pane fade show active" role="tabpanel" aria-labelledby="cak-tab-2-btn">
+                    <!-- Screenshot Item 1: Create Telegram Bot -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">
+                            Create Telegram Bot &amp; <span style="color: #b12126;">Get API Token</span>
+                        </h3>
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; max-width: 720px; margin: 0 auto; line-height: 1.6;">
+                            Search for @BotFather on Telegram, send /newbot to create your bot, and obtain the HTTP API
+                            token required to connect your Telegram bot with Odoo.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 14px; overflow: hidden; margin-bottom: 42px;">
+
+                        <div style="padding: 0;">
+                            <img src="./assets/screenshots/1.png" alt="Create Telegram Bot with BotFather"
+                                style="width: 100%; display: block;" />
+                        </div>
+                    </div>
+
+                    <!-- Screenshot Item 2: Telegram Bot Configuration -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">
+                            Configure Telegram Bot &amp; <span style="color: #b12126;">Webhook Setup</span>
+                        </h3>
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; max-width: 780px; margin: 0 auto; line-height: 1.6;">
+                            Navigate to <strong>Telegram &gt; Configuration &gt; Telegram Bots</strong>, enter your Bot API Token, and set the Webhook URL (format: <code style="background-color: #fdf2f2; color: #b12126; padding: 2px 6px; border-radius: 4px; font-size: 13px;">https://YOUR_DOMAIN/telegram/webhook/API_TOKEN</code>) to receive incoming messages. For local or testing environments, use a public tunneling tool like ngrok to forward webhook requests to your instance, whereas production servers require a public HTTPS domain. Click <strong>Set Webhook</strong> to activate the bot.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 14px; overflow: hidden; margin-bottom: 42px;">
+
+                        <div style="padding: 0;">
+                            <img src="./assets/screenshots/2.png" alt="Configure Telegram Bot and Webhook"
+                                style="width: 100%; display: block;" />
+                        </div>
+                    </div>
+
+                    <!-- Screenshot Item 3: Contact Matching & Telegram Tab -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">
+                            Automated Contact Matching &amp; <span style="color: #b12126;">Telegram Sync</span>
+                        </h3>
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; max-width: 760px; margin: 0 auto; line-height: 1.6;">
+                            When a customer starts or messages the bot on Telegram, Odoo automatically identifies them
+                            by matching their Telegram Chat ID, Username, or Profile Name—and creates a new contact if
+                            none exists. You can also manually connect existing Odoo contacts by filling their Telegram
+                            Chat ID and Username under the <strong>Telegram tab</strong> on the Contact form to enable
+                            real-time messaging and chatter synchronization.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 14px; overflow: hidden; margin-bottom: 12px;">
+
+                        <div style="padding: 0;">
+                            <img src="./assets/screenshots/3.png"
+                                alt="Automated Contact Matching and Telegram Integration"
+                                style="width: 100%; display: block;" />
+                        </div>
+                    </div>
+
+
+
+                    <!-- Screenshot Item 4: Send Quotations & Sales Orders via Telegram -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">
+                            Dispatch Quotations &amp; Orders <span style="color: #b12126;">via Telegram</span>
+                        </h3>
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; max-width: 780px; margin: 0 auto; line-height: 1.6;">
+                            Select a customer configured with Telegram and click <strong>Send via Telegram</strong> directly from the order screen. If the state is <strong>Quotation</strong>, it automatically generates and sends the Quotation PDF report to Telegram; once confirmed in the <strong>Sales Order</strong> stage, it attaches and delivers the official Sales Order confirmation document.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 14px; overflow: hidden; margin-bottom: 42px;">
+
+                        <div style="padding: 0;">
+                            <img src="./assets/screenshots/4.png" alt="Send Quotations and Sales Orders via Telegram"
+                                style="width: 100%; display: block;" />
+                        </div>
+                    </div>
+
+
+                    <!-- Screenshot Item 5: Send Telegram Message Wizard -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">
+                            Interactive Message Wizard &amp; <span style="color: #b12126;">Template Selection</span>
+                        </h3>
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; max-width: 780px; margin: 0 auto; line-height: 1.6;">
+                            Clicking <strong>Send via Telegram</strong> opens an interactive wizard allowing you to select a message template (e.g., Sales Order RFQ or Confirmation), preview dynamic variable values, and verify attached documents. Simply click <strong>Send</strong> to dispatch the message along with its PDF attachment directly to the recipient on Telegram.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 14px; overflow: hidden; margin-bottom: 42px;">
+
+                        <div style="padding: 0;">
+                            <img src="./assets/screenshots/5.png"
+                                alt="Send Telegram Message Wizard and Template Selection"
+                                style="width: 100%; display: block;" />
+                        </div>
+                    </div>
+
+
+                    <!-- Screenshot Item 6: Delivered Message on Telegram -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">
+                            Instant Delivery &amp; <span style="color: #b12126;">Telegram Message View</span>
+                        </h3>
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; max-width: 780px; margin: 0 auto; line-height: 1.6;">
+                            The recipient instantly receives the personalized message along with the attached PDF document directly in their Telegram chat. Customers can easily view order information, download official documents, and reply in real time.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 14px; overflow: hidden; margin-bottom: 42px;">
+
+                        <div style="padding: 0;">
+                            <img src="./assets/screenshots/6.png"
+                                alt="Instant Message and Document Delivery on Telegram"
+                                style="width: 100%; display: block;" />
+                        </div>
+                    </div>
+
+
+
+                    <!-- Screenshot Item 7: Send Delivery Slips via Telegram -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">
+                            Dispatch Delivery Slips <span style="color: #b12126;">via Telegram</span>
+                        </h3>
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; max-width: 780px; margin: 0 auto; line-height: 1.6;">
+                            Notify customers regarding shipment status with a single click. From any Delivery Order (Stock Picking), click <strong>Send via Telegram</strong> to automatically generate and send the official Delivery Slip PDF directly to the customer.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 14px; overflow: hidden; margin-bottom: 42px;">
+
+                        <div style="padding: 0;">
+                            <img src="./assets/screenshots/7.png"
+                                alt="Send Delivery Slips via Telegram"
+                                style="width: 100%; display: block;" />
+                        </div>
+                    </div>
+
+
+
+                    <!-- Screenshot Item 8: Delivery Slip on Telegram -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">
+                            Delivery Notification &amp; <span style="color: #b12126;">PDF Slip on Telegram</span>
+                        </h3>
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; max-width: 780px; margin: 0 auto; line-height: 1.6;">
+                            Customers receive real-time shipment updates directly on Telegram, complete with a personalized confirmation message and the official Delivery Slip PDF ready for instant download and review.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 14px; overflow: hidden; margin-bottom: 42px;">
+
+                        <div style="padding: 0;">
+                            <img src="./assets/screenshots/8.png"
+                                alt="Delivery Notification and PDF Slip on Telegram"
+                                style="width: 100%; display: block;" />
+                        </div>
+                    </div>
+
+                    <!-- Screenshot Item 9: Send RFQs & Purchase Orders via Telegram -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">
+                            Dispatch RFQs &amp; Purchase Orders <span style="color: #b12126;">via Telegram</span>
+                        </h3>
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; max-width: 780px; margin: 0 auto; line-height: 1.6;">
+                            Streamline vendor communication with a single click. From any Request for Quotation (RFQ) or confirmed Purchase Order, click <strong>Send via Telegram</strong> to automatically generate and deliver the official PDF report directly to the vendor on Telegram.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 14px; overflow: hidden; margin-bottom: 42px;">
+
+                        <div style="padding: 0;">
+                            <img src="./assets/screenshots/9.png"
+                                alt="Send RFQs and Purchase Orders via Telegram"
+                                style="width: 100%; display: block;" />
+                        </div>
+                    </div>
+
+
+
+                    <!-- Screenshot Item 10: Purchase Order on Telegram -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">
+                            Vendor PO Notification &amp; <span style="color: #b12126;">PDF Receipt on Telegram</span>
+                        </h3>
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; max-width: 780px; margin: 0 auto; line-height: 1.6;">
+                            Vendors receive real-time purchase order notifications directly on Telegram, complete with a personalized confirmation message and the official Purchase Order PDF ready for immediate download and review.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 14px; overflow: hidden; margin-bottom: 42px;">
+
+                        <div style="padding: 0;">
+                            <img src="./assets/screenshots/10.png"
+                                alt="Vendor Purchase Order Notification and PDF on Telegram"
+                                style="width: 100%; display: block;" />
+                        </div>
+                    </div>
+
+
+
+                    <!-- Screenshot Item 11: Send Receipts via Telegram -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">
+                            Dispatch Goods Receipts <span style="color: #b12126;">via Telegram</span>
+                        </h3>
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; max-width: 780px; margin: 0 auto; line-height: 1.6;">
+                            Confirm incoming shipments with suppliers in real time. From any Incoming Receipt (Stock Picking), click <strong>Send via Telegram</strong> to generate and dispatch the official goods receipt slip PDF directly to the vendor on Telegram.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 14px; overflow: hidden; margin-bottom: 42px;">
+
+                        <div style="padding: 0;">
+                            <img src="./assets/screenshots/11.png"
+                                alt="Send Goods Receipts via Telegram"
+                                style="width: 100%; display: block;" />
+                        </div>
+                    </div>
+
+                    <!-- Screenshot Item 12: Send Invoices via Telegram -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">
+                            Dispatch Invoices &amp; <span style="color: #b12126;">Notifications</span>
+                        </h3>
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; max-width: 780px; margin: 0 auto; line-height: 1.6;">
+                            Accelerate payment collections by sharing official invoices directly via Telegram. Click <strong>Send via Telegram</strong> from any Customer Invoice to automatically generate and attach the invoice PDF.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 14px; overflow: hidden; margin-bottom: 42px;">
+
+                        <div style="padding: 0;">
+                            <img src="./assets/screenshots/12.png"
+                                alt="Send Customer Invoices via Telegram"
+                                style="width: 100%; display: block;" />
+                        </div>
+                    </div>
+
+
+                    <!-- Screenshot Item 13: Invoice Delivery on Telegram -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">
+                            Instant Billing Notification &amp; <span style="color: #b12126;">Invoice PDF on Telegram</span>
+                        </h3>
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; max-width: 780px; margin: 0 auto; line-height: 1.6;">
+                            Customers receive instant billing notifications directly on Telegram with total amounts due, reference numbers, and the official PDF invoice attached for prompt review and payment clearance.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 14px; overflow: hidden; margin-bottom: 42px;">
+
+                        <div style="padding: 0;">
+                            <img src="./assets/screenshots/13.png"
+                                alt="Invoice Notification and PDF Delivery on Telegram"
+                                style="width: 100%; display: block;" />
+                        </div>
+                    </div>
+
+
+                    <!-- Screenshot Item 14: Centralized Telegram Message Logs -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">
+                            Centralized Message Logs &amp; <span style="color: #b12126;">Communication History</span>
+                        </h3>
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; max-width: 780px; margin: 0 auto; line-height: 1.6;">
+                            Monitor all incoming and outgoing Telegram interactions from a single centralized dashboard. Filter messages effortlessly by status (Draft, Received, Sent, Failed), direction (Incoming / Outgoing), contact, or bot for complete traceability.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 14px; overflow: hidden; margin-bottom: 42px;">
+
+                        <div style="padding: 0;">
+                            <img src="./assets/screenshots/14.png"
+                                alt="Centralized Telegram Message Logs and History"
+                                style="width: 100%; display: block;" />
+                        </div>
+                    </div>
+
+
+
+                    <!-- Screenshot Item 15: Telegram Message Templates -->
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">
+                            Pre-Configured &amp; <span style="color: #b12126;">Customizable Templates</span>
+                        </h3>
+                        <p
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; max-width: 780px; margin: 0 auto; line-height: 1.6;">
+                            Create and manage customizable Telegram message templates for Sales Orders, Invoices, Purchase Orders, and Delivery Slips. Use dynamic placeholders to automatically inject customer names, order numbers, and transaction amounts.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 14px; overflow: hidden; margin-bottom: 12px;">
+
+                        <div style="padding: 0;">
+                            <img src="./assets/screenshots/15.png"
+                                alt="Customizable Telegram Message Templates"
+                                style="width: 100%; display: block;" />
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+                <!-- TAB PANE: FEATURE MATRIX -->
+                <div id="cak-pane-3" class="tab-pane fade" role="tabpanel" aria-labelledby="cak-tab-3-btn">
+
+                    <!-- Pane heading -->
+                    <div style="text-align: center; margin-bottom: 26px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 12px 0 0;">
+                            DETAILED <span style="color: #b12126;">FEATURES</span>
+                        </h3>
+                    </div>
+
+                    <!-- Feature grid: card styling lives on the <td> so both cards in a
+                     row share one height, with padding on an inner <div> so the
+                     mobile stacking rule cannot flatten it. -->
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mob-stack">
+
+                        <!-- ROW 1 -->
+                        <tr>
+                            <td width="48%" valign="top" class="mob-space"
+                                style="background-color: #ffffff; border: 1px solid #f3e4e5; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.10);">
+                                <div style="padding: 22px 20px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="58" valign="top" style="padding-right: 14px;">
+                                                <div
+                                                    style="width: 44px; height: 44px; border-radius: 12px; background-color: #b12126; box-shadow: 0 8px 18px rgba(177, 33, 38, 0.28); text-align: center;">
+                                                    <span
+                                                        style="display: inline-block; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 16px; font-weight: 800; color: #ffffff; line-height: 44px;">01</span>
+                                                </div>
+                                            </td>
+                                            <td valign="top">
+                                                <div
+                                                    style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 700; color: #0f172a; line-height: 1.35; margin-bottom: 6px;">
+                                                    Multi-Document Dispatch
+                                                </div>
+                                                <div
+                                                    style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #64748b; line-height: 1.6;">
+                                                    Send instant Telegram messages and official PDF reports directly
+                                                    from Sales Orders, Purchase Orders, Invoices, Delivery Slips, and
+                                                    Contacts.
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </td>
+
+                            <td width="4%" style="font-size: 0; line-height: 18px; height: 18px;">&nbsp;</td>
+
+                            <td width="48%" valign="top"
+                                style="background-color: #ffffff; border: 1px solid #f3e4e5; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.10);">
+                                <div style="padding: 22px 20px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="58" valign="top" style="padding-right: 14px;">
+                                                <div
+                                                    style="width: 44px; height: 44px; border-radius: 12px; background-color: #b12126; box-shadow: 0 8px 18px rgba(177, 33, 38, 0.28); text-align: center;">
+                                                    <span
+                                                        style="display: inline-block; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 16px; font-weight: 800; color: #ffffff; line-height: 44px;">02</span>
+                                                </div>
+                                            </td>
+                                            <td valign="top">
+                                                <div
+                                                    style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 700; color: #0f172a; line-height: 1.35; margin-bottom: 6px;">
+                                                    Two-Way Chatter Synchronization
+                                                </div>
+                                                <div
+                                                    style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #64748b; line-height: 1.6;">
+                                                    Customer and vendor Telegram replies are captured via webhook and
+                                                    automatically routed into the document's chatter with proper contact
+                                                    attribution.
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- gutter -->
+                        <tr>
+                            <td colspan="3" style="font-size: 0; line-height: 18px; height: 18px;">&nbsp;</td>
+                        </tr>
+
+                        <!-- ROW 2 -->
+                        <tr>
+                            <td width="48%" valign="top" class="mob-space"
+                                style="background-color: #ffffff; border: 1px solid #f3e4e5; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.10);">
+                                <div style="padding: 22px 20px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="58" valign="top" style="padding-right: 14px;">
+                                                <div
+                                                    style="width: 44px; height: 44px; border-radius: 12px; background-color: #b12126; box-shadow: 0 8px 18px rgba(177, 33, 38, 0.28); text-align: center;">
+                                                    <span
+                                                        style="display: inline-block; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 16px; font-weight: 800; color: #ffffff; line-height: 44px;">03</span>
+                                                </div>
+                                            </td>
+                                            <td valign="top">
+                                                <div
+                                                    style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 700; color: #0f172a; line-height: 1.35; margin-bottom: 6px;">
+                                                    Media &amp; Attachment Exchange
+                                                </div>
+                                                <div
+                                                    style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #64748b; line-height: 1.6;">
+                                                    Seamlessly exchange photos, PDF documents, and transaction receipts
+                                                    between Telegram and Odoo document attachments and chatter.
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </td>
+
+                            <td width="4%" style="font-size: 0; line-height: 18px; height: 18px;">&nbsp;</td>
+
+                            <td width="48%" valign="top"
+                                style="background-color: #ffffff; border: 1px solid #f3e4e5; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.10);">
+                                <div style="padding: 22px 20px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="58" valign="top" style="padding-right: 14px;">
+                                                <div
+                                                    style="width: 44px; height: 44px; border-radius: 12px; background-color: #b12126; box-shadow: 0 8px 18px rgba(177, 33, 38, 0.28); text-align: center;">
+                                                    <span
+                                                        style="display: inline-block; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 16px; font-weight: 800; color: #ffffff; line-height: 44px;">04</span>
+                                                </div>
+                                            </td>
+                                            <td valign="top">
+                                                <div
+                                                    style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 700; color: #0f172a; line-height: 1.35; margin-bottom: 6px;">
+                                                    Dynamic Template Engine
+                                                </div>
+                                                <div
+                                                    style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #64748b; line-height: 1.6;">
+                                                    Create customizable message templates with dynamic variable
+                                                    placeholders for customer names, document totals, reference numbers,
+                                                    and dates.
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+
+
+                <!-- TAB PANE: FREQUENT QUESTIONS (static Q&A — no inputs, no stylesheet dependency) -->
+                <div id="cak-pane-1" class="tab-pane fade" role="tabpanel" aria-labelledby="cak-tab-1-btn">
+
+                    <!-- Pane heading -->
+                    <div style="text-align: center; margin-bottom: 26px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 12px 0 0;">
+                            Answers Before You <span style="color: #b12126;">Install</span>
+                        </h3>
+                    </div>
+
+                    <!-- Q&A cards. Card styling sits on the <td>; padding on an inner
+                     <div> so the mobile rule cannot flatten it. Every answer is
+                     always visible — nothing here depends on CSS state. -->
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+
+                        <!-- Q1 -->
+                        <tr>
+                            <td valign="top"
+                                style="background-color: #ffffff; border: 1px solid #f3e4e5; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.10);">
+                                <div style="padding: 22px 22px;">
+
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="52" valign="top" style="padding-right: 14px;">
+                                                <div
+                                                    style="width: 38px; height: 38px; border-radius: 10px; background-color: #b12126; box-shadow: 0 8px 18px rgba(177, 33, 38, 0.28); text-align: center;">
+                                                    <span
+                                                        style="display: inline-block; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 800; color: #ffffff; line-height: 38px;">Q</span>
+                                                </div>
+                                            </td>
+                                            <td valign="top">
+                                                <div
+                                                    style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 700; color: #0f172a; line-height: 1.5; padding-top: 7px;">
+                                                    Does this module support Odoo 20 Community Edition?
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <div style="border-top: 1px solid #f6eaea; margin-top: 16px; padding-top: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td width="52" valign="top" style="padding-right: 14px;">
+                                                    <div
+                                                        style="width: 36px; height: 36px; border-radius: 10px; background-color: #fdf2f2; border: 1px solid #f3e4e5; text-align: center;">
+                                                        <span
+                                                            style="display: inline-block; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: 800; color: #b12126; line-height: 36px;">A</span>
+                                                    </div>
+                                                </td>
+                                                <td valign="top">
+                                                    <div
+                                                        style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #64748b; line-height: 1.75;">
+                                                        Yes, it is fully certified for <strong
+                                                            style="color: #0f172a; font-weight: 600;">Odoo 20
+                                                            Community Edition</strong> and also operates seamlessly
+                                                        on Odoo 20 Enterprise and Odoo.sh. No proprietary Enterprise
+                                                        license or paid third-party gateway is required.
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- gutter -->
+                        <tr>
+                            <td style="font-size: 0; line-height: 18px; height: 18px;">&nbsp;</td>
+                        </tr>
+
+                        <!-- Q2 -->
+                        <tr>
+                            <td valign="top"
+                                style="background-color: #ffffff; border: 1px solid #f3e4e5; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.10);">
+                                <div style="padding: 22px 22px;">
+
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="52" valign="top" style="padding-right: 14px;">
+                                                <div
+                                                    style="width: 38px; height: 38px; border-radius: 10px; background-color: #b12126; box-shadow: 0 8px 18px rgba(177, 33, 38, 0.28); text-align: center;">
+                                                    <span
+                                                        style="display: inline-block; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 800; color: #ffffff; line-height: 38px;">Q</span>
+                                                </div>
+                                            </td>
+                                            <td valign="top">
+                                                <div
+                                                    style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 700; color: #0f172a; line-height: 1.5; padding-top: 7px;">
+                                                    How do I connect my Telegram bot with Odoo?
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <div style="border-top: 1px solid #f6eaea; margin-top: 16px; padding-top: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td width="52" valign="top" style="padding-right: 14px;">
+                                                    <div
+                                                        style="width: 36px; height: 36px; border-radius: 10px; background-color: #fdf2f2; border: 1px solid #f3e4e5; text-align: center;">
+                                                        <span
+                                                            style="display: inline-block; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: 800; color: #b12126; line-height: 36px;">A</span>
+                                                    </div>
+                                                </td>
+                                                <td valign="top">
+                                                    <div
+                                                        style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #64748b; line-height: 1.75;">
+                                                        Create a bot via Telegram's <strong
+                                                            style="color: #0f172a; font-weight: 600;">@BotFather</strong>,
+                                                        copy your Bot Token into Odoo Telegram Bot settings, and click
+                                                        <strong style="color: #0f172a; font-weight: 600;">Set
+                                                            Webhook</strong>.
+                                                        Odoo will immediately establish real-time two-way
+                                                        synchronization.
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- gutter -->
+                        <tr>
+                            <td style="font-size: 0; line-height: 18px; height: 18px;">&nbsp;</td>
+                        </tr>
+
+                        <!-- Q3 -->
+                        <tr>
+                            <td valign="top"
+                                style="background-color: #ffffff; border: 1px solid #f3e4e5; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.10);">
+                                <div style="padding: 22px 22px;">
+
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="52" valign="top" style="padding-right: 14px;">
+                                                <div
+                                                    style="width: 38px; height: 38px; border-radius: 10px; background-color: #b12126; box-shadow: 0 8px 18px rgba(177, 33, 38, 0.28); text-align: center;">
+                                                    <span
+                                                        style="display: inline-block; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 800; color: #ffffff; line-height: 38px;">Q</span>
+                                                </div>
+                                            </td>
+                                            <td valign="top">
+                                                <div
+                                                    style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 700; color: #0f172a; line-height: 1.5; padding-top: 7px;">
+                                                    How are customer and vendor replies tracked in Odoo?
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <div style="border-top: 1px solid #f6eaea; margin-top: 16px; padding-top: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td width="52" valign="top" style="padding-right: 14px;">
+                                                    <div
+                                                        style="width: 36px; height: 36px; border-radius: 10px; background-color: #fdf2f2; border: 1px solid #f3e4e5; text-align: center;">
+                                                        <span
+                                                            style="display: inline-block; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: 800; color: #b12126; line-height: 36px;">A</span>
+                                                    </div>
+                                                </td>
+                                                <td valign="top">
+                                                    <div
+                                                        style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #64748b; line-height: 1.75;">
+                                                        When a contact replies to a Telegram message sent from Odoo, the
+                                                        webhook
+                                                        identifies the linked record and automatically posts the
+                                                        response into the
+                                                        <strong style="color: #0f172a; font-weight: 600;">document
+                                                            chatter</strong>
+                                                        (Sales, Purchases, Invoices, Deliveries) with proper author
+                                                        attribution.
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- gutter -->
+                        <tr>
+                            <td style="font-size: 0; line-height: 18px; height: 18px;">&nbsp;</td>
+                        </tr>
+
+                        <!-- Q4 -->
+                        <tr>
+                            <td valign="top"
+                                style="background-color: #ffffff; border: 1px solid #f3e4e5; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.10);">
+                                <div style="padding: 22px 22px;">
+
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="52" valign="top" style="padding-right: 14px;">
+                                                <div
+                                                    style="width: 38px; height: 38px; border-radius: 10px; background-color: #b12126; box-shadow: 0 8px 18px rgba(177, 33, 38, 0.28); text-align: center;">
+                                                    <span
+                                                        style="display: inline-block; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 800; color: #ffffff; line-height: 38px;">Q</span>
+                                                </div>
+                                            </td>
+                                            <td valign="top">
+                                                <div
+                                                    style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 700; color: #0f172a; line-height: 1.5; padding-top: 7px;">
+                                                    Can I send and receive attachments, images, and PDF reports?
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <div style="border-top: 1px solid #f6eaea; margin-top: 16px; padding-top: 16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td width="52" valign="top" style="padding-right: 14px;">
+                                                    <div
+                                                        style="width: 36px; height: 36px; border-radius: 10px; background-color: #fdf2f2; border: 1px solid #f3e4e5; text-align: center;">
+                                                        <span
+                                                            style="display: inline-block; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: 800; color: #b12126; line-height: 36px;">A</span>
+                                                    </div>
+                                                </td>
+                                                <td valign="top">
+                                                    <div
+                                                        style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #64748b; line-height: 1.75;">
+                                                        Yes. Outgoing messages automatically attach official PDF reports
+                                                        (Quotations,
+                                                        Invoices, Purchase Orders, Delivery Slips). Additionally,
+                                                        incoming media and documents
+                                                        sent by users via Telegram are saved directly into the Odoo
+                                                        attachments and chatter.
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+
+
+                <!-- TAB PANE: RELEASES (static cards — no inputs, no svg, no stylesheet dependency) -->
+                <div id="cak-pane-4" class="tab-pane fade" role="tabpanel" aria-labelledby="cak-tab-4-btn">
+
+                    <!-- Pane heading -->
+                    <div style="text-align: center; margin-bottom: 26px;">
+                        <h3
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin: 0;">
+                            Changelog &amp; <span style="color: #b12126;">Version History</span>
+                        </h3>
+                        <div
+                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #64748b; line-height: 1.6; margin-top: 8px;">
+                            Initial release for Odoo 20. Future fixes and compatibility updates will be listed here.
+                        </div>
+                        <div style="margin-top: 14px;">
+                            <span
+                                style="display: inline-block; background-color: #b12126; color: #ffffff; border-radius: 20px; padding: 7px 16px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 700; box-shadow: 0 8px 18px rgba(177, 33, 38, 0.28);">
+                                Current: v20.0.1.0.0
+                            </span>
+                        </div>
+                    </div>
+
+                    <!--
+                  RELEASE GRID — three tiles per row.
+                  TO ADD THE NEXT RELEASE: copy one "RELEASE TILE" <td> block below
+                  (together with the 2% spacer <td> that follows it) into the slot
+                  marked "NEXT RELEASE GOES HERE", then edit four things inside it:
+                    1. the badge text   (Release / Update / Fix / Latest)
+                    2. the version      (v20.0.1.0.x)
+                    3. the date         (Month Year)
+                    4. the description  (one sentence)
+                  Delete one filler <td> each time so the row still totals 100%.
+                  Nothing else needs to change — no CSS, no ids, no classes.
+                -->
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mob-stack">
+                        <tr>
+
+                            <!-- ===== RELEASE TILE ===== -->
+                            <td width="32%" valign="top" class="mob-space"
+                                style="background-color: #ffffff; border: 1px solid #f3e4e5; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.10);">
+                                <div style="padding: 26px 24px; min-height: 248px;">
+                                    <div style="margin-bottom: 16px;">
+                                        <span
+                                            style="display: inline-block; background-color: #b12126; color: #ffffff; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: 700; padding: 4px 11px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em;">
+                                            Release
+                                        </span>
+                                    </div>
+                                    <div
+                                        style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 24px; font-weight: 800; color: #0f172a; line-height: 1.15;">
+                                        v20.0.1.0.0
+                                    </div>
+                                    <div
+                                        style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #94a3b8; margin-top: 6px;">
+                                        Nov 2026
+                                    </div>
+                                    <div style="border-top: 1px solid #f6eaea; margin-top: 18px; padding-top: 18px;">
+                                        <div
+                                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #64748b; line-height: 1.75;">
+                                            Initial release for Odoo 20.
                                         </div>
-                                    </a>
+                                    </div>
+                                </div>
+                            </td>
+                            <!-- ===== END RELEASE TILE ===== -->
+
+                            <td width="2%" style="font-size: 0; line-height: 18px; height: 18px;">&nbsp;</td>
+
+                            <!-- NEXT RELEASE GOES HERE (paste a RELEASE TILE <td> + spacer <td>) -->
+
+                            <!-- filler: keeps the single tile at 32% instead of stretching -->
+                            <td width="32%" valign="top">&nbsp;</td>
+                            <td width="2%" style="font-size: 0; line-height: 18px; height: 18px;">&nbsp;</td>
+                            <td width="32%" valign="top">&nbsp;</td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+
+            <!-- 8. MINIMAL SERVICES GRID -->
+            <div style="text-align: center; margin-bottom: 24px;">
+                <h2
+                    style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 26px; font-weight: 800; color: #0f172a; margin: 0;">
+                    Certified Odoo Implementation &amp; <span style="color: #b12126;"> Support</span>
+                </h2>
+            </div>
+
+            <!-- Services Row 1 -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;"
+                class="mob-stack">
+                <tr>
+                    <td width="25%" style="padding-right: 8px;" class="mob-space">
+                        <div
+                            style="border:1px solid #b221261f; border-radius:10px; background-color:#ffffff; padding:20px 14px; text-align:center; box-sizing:border-box;">
+                            <div
+                                style="background-color:#fdf2f2; color:#b12126; border:1px solid #b221261f; display:inline-flex; align-items:center; justify-content:center; width:56px; height:50px; margin:0 auto 14px; border-radius:6px; box-sizing:border-box; line-height:0;">
+                                <img src="./assets/icons/ic-e7da58c3-b12126.png" alt=""
+                                    style="width: 25px; height: 25px; display: inline-block; vertical-align: middle;" />
+                            </div>
+                            <div
+                                style="font-family:'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size:14px; font-weight:700; color:#0f172a;">
+                                Odoo Customization
+                            </div>
+                        </div>
+                    </td>
+
+                    <td width="25%" style="padding-left:4px; padding-right:4px;" class="mob-space">
+                        <div
+                            style="border:1px solid #b221261f; border-radius:10px; background-color:#ffffff; padding:20px 14px; text-align:center; box-sizing:border-box;">
+                            <div
+                                style="background-color:#fdf2f2; color:#b12126; border:1px solid #b221261f; display:inline-flex; align-items:center; justify-content:center; width:56px; height:50px; margin:0 auto 14px; border-radius:6px; box-sizing:border-box; line-height:0;">
+
+                                <img src="./assets/icons/ic-afc882f6-b12126.png" alt=""
+                                    style="width: 28px; height: 28px; display: inline-block; vertical-align: middle;" />
+
+
+                            </div>
+                            <div
+                                style="font-family:'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size:14px; font-weight:700; color:#0f172a;">
+                                Odoo Implementation
+                            </div>
+                        </div>
+                    </td>
+
+                    <td width="25%" style="padding-left:4px; padding-right:4px;" class="mob-space">
+                        <div
+                            style="border:1px solid #b221261f; border-radius:10px; background-color:#ffffff; padding:20px 14px; text-align:center; box-sizing:border-box;">
+                            <div
+                                style="background-color:#fdf2f2; color:#b12126; border:1px solid #b221261f; display:inline-flex; align-items:center; justify-content:center; width:56px; height:50px; margin:0 auto 14px; border-radius:6px; box-sizing:border-box; line-height:0;">
+                                <img src="./assets/icons/ic-8432255a-b12126.png" alt=""
+                                    style="width: 28px; height: 28px; display: inline-block; vertical-align: middle;" />
+                            </div>
+                            <div
+                                style="font-family:'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size:14px; font-weight:700; color:#0f172a;">
+                                Odoo Support
+                            </div>
+                        </div>
+                    </td>
+
+                    <td width="25%" style="padding-left:8px;">
+                        <div
+                            style="border:1px solid #b221261f; border-radius:10px; background-color:#ffffff; padding:20px 14px; text-align:center; box-sizing:border-box;">
+                            <div
+                                style="background-color:#fdf2f2; color:#b12126; border:1px solid #b221261f; display:inline-flex; align-items:center; justify-content:center; width:56px; height:50px; margin:0 auto 14px; border-radius:6px; box-sizing:border-box; line-height:0;">
+                                <img src="./assets/icons/ic-8d47220c-b12126.png" alt=""
+                                    style="width: 26px; height: 26px; display: inline-block; vertical-align: middle;" />
+                            </div>
+                            <div
+                                style="font-family:'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size:14px; font-weight:700; color:#0f172a;">
+                                Odoo Migration
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Services Row 2 -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:48px;"
+                class="mob-stack">
+                <tr>
+                    <td width="25%" style="padding-right:8px;" class="mob-space">
+                        <div
+                            style="border:1px solid #b221261f; border-radius:10px; background-color:#ffffff; padding:20px 14px; text-align:center; box-sizing:border-box;">
+                            <div
+                                style="background-color:#fdf2f2; color:#b12126; border:1px solid #b221261f; display:inline-flex; align-items:center; justify-content:center; width:56px; height:50px; margin:0 auto 14px; border-radius:6px; box-sizing:border-box; line-height:0;">
+                                <img src="./assets/icons/ic-910f2a2f-b12126.png" alt=""
+                                    style="width: 28px; height: 28px; display: inline-block; vertical-align: middle;" />
+                            </div>
+                            <div
+                                style="font-family:'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size:14px; font-weight:700; color:#0f172a;">
+                                Odoo Integration
+                            </div>
+                        </div>
+                    </td>
+
+                    <td width="25%" style="padding-left:4px; padding-right:4px;" class="mob-space">
+                        <div
+                            style="border:1px solid #b221261f; border-radius:10px; background-color:#ffffff; padding:20px 14px; text-align:center; box-sizing:border-box;">
+                            <div
+                                style="background-color:#fdf2f2; color:#b12126; border:1px solid #b221261f; display:inline-flex; align-items:center; justify-content:center; width:56px; height:50px; margin:0 auto 14px; border-radius:6px; box-sizing:border-box; line-height:0;">
+
+                                <img src="./assets/icons/ic-71169eb4-b12126.png" alt=""
+                                    style="width: 23px; height: 23px; display: inline-block; vertical-align: middle;" />
+
+                            </div>
+                            <div
+                                style="font-family:'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size:14px; font-weight:700; color:#0f172a;">
+                                Odoo Consultancy
+                            </div>
+                        </div>
+                    </td>
+
+                    <td width="25%" style="padding-left:4px; padding-right:4px;" class="mob-space">
+                        <div
+                            style="border:1px solid #b221261f; border-radius:10px; background-color:#ffffff; padding:20px 14px; text-align:center; box-sizing:border-box;">
+                            <div
+                                style="background-color:#fdf2f2; color:#b12126; border:1px solid #b221261f; display:inline-flex; align-items:center; justify-content:center; width:56px; height:50px; margin:0 auto 14px; border-radius:6px; box-sizing:border-box; line-height:0;">
+                                <img src="./assets/icons/ic-dbc8ec1a-b12126.png" alt=""
+                                    style="width: 25px; height: 25px; display: inline-block; vertical-align: middle;" />
+                            </div>
+                            <div
+                                style="font-family:'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size:14px; font-weight:700; color:#0f172a;">
+                                Odoo Licensing
+                            </div>
+                        </div>
+                    </td>
+
+                    <td width="25%" style="padding-left:8px;">
+                        <div
+                            style="border:1px solid #b221261f; border-radius:10px; background-color:#ffffff; padding:20px 14px; text-align:center; box-sizing:border-box;">
+                            <div
+                                style="background-color:#fdf2f2; color:#b12126; border:1px solid #b221261f; display:inline-flex; align-items:center; justify-content:center; width:56px; height:50px; margin:0 auto 14px; border-radius:6px; box-sizing:border-box; line-height:0;">
+                                <img src="./assets/icons/ic-f2398ec8-b12126.png" alt=""
+                                    style="width: 25px; height: 25px; display: inline-block; vertical-align: middle;" />
+                            </div>
+                            <div
+                                style="font-family:'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size:14px; font-weight:700; color:#0f172a;">
+                                Hire Developer
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- 9. RELATED MODULES — kanban cards in the brand red.
+                 Every colour is a solid fill or a solid border: no gradients. -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 14px;">
+                <tr>
+                    <td valign="bottom">
+                        <h2
+                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 26px; font-weight: 800; color: #0f172a; margin: 0;">
+                            Related <span style="color: #b12126;">Modules</span>
+                        </h2>
+                    </td>
+                    <td align="right" valign="bottom">
+                        <a href="https://apps.odoo.com/apps/modules/browse?search=cybrosys" target="_blank"
+                            rel="noopener"
+                            style="text-decoration: none; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 12.5px; font-weight: 600; color: #5b6472; white-space: nowrap;">All
+                            Cybrosys apps &nbsp;&rarr;</a>
+                    </td>
+                </tr>
+            </table>
+
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 48px;"
+                class="mob-stack">
+                <tr>
+
+                    <!-- KANBAN CARD — edit href, icon <path>, name and note -->
+                    <td width="32%" valign="top" class="mob-space"
+                        style="background-color: #ffffff; border: 1px solid #f1dcdf; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.13);">
+                        <a href="https://apps.odoo.com/apps/modules/20.0/auto_database_backup" target="_blank"
+                            rel="noopener" style="display: block; text-decoration: none;">
+
+                            <!-- name zone -->
+                            <div
+                                style="background-color: #fdf3f4; border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #f6e4e6; padding: 20px 20px 18px;">
+                                <div
+                                    style="width: 40px; height: 40px; border-radius: 11px; background-color: #b12126; box-shadow: 0 7px 16px rgba(177, 33, 38, 0.32); text-align: center; line-height: 40px; margin-bottom: 15px;">
+                                    <img src="./assets/icons/ic-c9b30746-ffffff.png" alt=""
+                                        style="width: 21px; height: 21px; display: inline-block; vertical-align: middle;" />
+                                </div>
+                                <div
+                                    style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 19px; font-weight: 800; color: #0f172a; line-height: 1.28; letter-spacing: -0.3px;">
+                                    Automatic Database Backup
+                                </div>
+                                <div
+                                    style="width: 34px; height: 3px; background-color: #b12126; border-radius: 2px; margin-top: 13px;">
                                 </div>
                             </div>
-                            <div class="col">
-                                <div class="p-3">
-                                    <a href="https://apps.odoo.com/apps/modules/20.0/base_account_budget/" style="color: #000; text-decoration: none;">
-                                        <div style="border:1px solid #CBCBCB !important;border-radius: 4px;">
-                                            <div style="width: 300px;">
-                                                <img src="assets/modules/5.jpg" alt="" width="100%" height="auto">
 
-                                            </div>
-                                            <p class="text-center pt-2 text-black font-weight-bold">Budget Management</p>
-                                        </div>
-                                    </a>
+                            <!-- note + action -->
+                            <div style="padding: 18px 20px 20px; min-height: 124px;">
+                                <div
+                                    style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #5b6472; line-height: 1.7;">
+                                    Schedule automatic database backups to local storage, remote servers, and the cloud
+                                    in Odoo 20 — complete with history, alerts, one-click manual backups, and
+                                    multi-database support.
                                 </div>
-                            </div>
-                            <div class="col">
-                                <div class="p-3">
-                                    <a href="https://apps.odoo.com/apps/modules/20.0/product_barcode/" style="color: #000; text-decoration: none;">
-                                        <div style="border:1px solid #CBCBCB !important;border-radius: 4px;">
-                                            <div style="width: 300px;">
-                                                <img src="assets/modules/6.png" alt="" width="100%" height="auto">
-                                            </div>
-                                            <p class="text-center pt-2 text-black font-weight-bold">Product Barcode Generator</p>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <a class="carousel-control-prev" href="#myCarousel" data-slide="prev" style="width: 35px; color: #000;">
-                    <span class="carousel-control-prev-icon">
-                        <i class="fa fa-chevron-left" style="font-size: 24px;"></i>
-                    </span>
-                </a>
-                <a class="carousel-control-next" href="#myCarousel" data-slide="next" style="width: 35px; color: #000;">
-                    <span class="carousel-control-next-icon">
-                        <i class="fa fa-chevron-right" style="font-size: 24px;"></i>
-                    </span>
-                </a>
-            </div>
-        <div class="container mt-5">
-            <div class="col-lg-12 d-flex flex-column justify-content-center align-items-center mt-4">
-                <p class="m-0"
-                   style="font-weight: 600; font-size: 24px; color:#000 !important">
-                    Our Services</p>
-
-            </div>
-        </div>
-        <div class="container my-5">
-            <div class="row py-3">
-                <div class="col-md-4 col-sm-6 px-4 py-4">
-                    <div
-                            style="background-color: #fff; padding: 25px; text-align: center;  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px; position: relative;border-radius: 4px;">
-                        <div style="position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);">
-                            <div style="background-color:#13EA36 ; border-radius: 50%; padding: 15px;    width: 68px;
-                                    height: 68px; display: inline-block; box-shadow:0px 4px 4px rgba(0, 0, 0, 0.25);">
-                                <img src="assets/icons/cogs.png"
-                                     alt="service-icon" width="38px"
-                                     height="auto">
-                            </div>
-                        </div>
-                        <p style="margin-top: 20px; font-weight: bold;">Odoo
-                            Customization</p>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 px-4 py-4">
-                    <div
-                            style="background-color: #fff; padding: 25px; text-align: center; box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px; position: relative;border-radius: 4px;">
-                        <div style="position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);">
-                            <div style="background-color:#DBC711; border-radius: 50%; padding: 15px;    width: 68px;
-                                    height: 68px; display: inline-block; box-shadow:0px 4px 4px rgba(0, 0, 0, 0.25);">
-                                <img src="assets/icons/wrench.png"
-                                     alt="service-icon" width="38px"
-                                     height="auto">
-                            </div>
-                        </div>
-                        <p style="margin-top: 20px; font-weight: bold;">Odoo
-                            Implementation</p>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 px-4 py-4">
-                    <div
-                            style="background-color: #fff; padding: 25px; text-align: center;  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px; position: relative; border-radius: 4px;">
-                        <div style="position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);">
-                            <div style="background-color:#FF6B6B ; border-radius: 50%; padding: 15px;    width: 68px;
-                                    height: 68px; display: inline-block; box-shadow:0px 4px 4px rgba(0, 0, 0, 0.25);">
-                                <img src="assets/icons/lifebuoy.png"
-                                     alt="service-icon" width="38px"
-                                     height="auto">
-                            </div>
-                        </div>
-                        <p style="margin-top: 20px; font-weight: bold;">Odoo
-                            Support</p>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 px-4 py-4">
-                    <div
-                            style="background-color: #fff; padding: 25px; text-align: center; box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px; position: relative; border-radius: 4px;">
-                        <div style="position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);">
-                            <div style="background-color:#FFA801 ; border-radius: 50%; padding: 15px;    width: 68px;
-                                    height: 68px; display: inline-block; box-shadow:0px 4px 4px rgba(0, 0, 0, 0.25);">
-                                <img src="assets/icons/user.png"
-                                     alt="service-icon" width="38px"
-                                     height="auto">
-                            </div>
-                        </div>
-                        <p style="margin-top: 20px; font-weight: bold;">Hire
-                            Odoo Developer</p>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 px-4 py-4">
-                    <div
-                            style="background-color: #fff; padding: 25px; text-align: center;  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px; position: relative; border-radius: 4px;">
-
-                        <div style="position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);">
-                            <div style="background-color:#54A0FF; border-radius: 50%; padding: 15px;    width: 68px;
-                                    height: 68px; display: inline-block; box-shadow:0px 4px 4px rgba(0, 0, 0, 0.25);">
-                                <img src="assets/icons/puzzle.png"
-                                     alt="service-icon" width="38px"
-                                     height="auto">
-                            </div>
-                        </div>
-                        <p style="margin-top: 20px; font-weight: bold;">Odoo
-                            Integration</p>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 px-4 py-4">
-                    <div
-                            style="background-color: #fff; padding: 25px; text-align: center;  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px; position: relative;border-radius: 4px;">
-                        <div style="position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);">
-                            <div style="background-color:#6D7680 ; border-radius: 50%; padding: 15px;    width: 68px;
-                                    height: 68px; display: inline-block; box-shadow:0px 4px 4px rgba(0, 0, 0, 0.25);">
-                                <img src="assets/icons/update.png"
-                                     alt="service-icon" width="38px"
-                                     height="auto">
-                            </div>
-                        </div>
-                        <p style="margin-top: 20px; font-weight: bold;">Odoo
-                            Migration</p>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 px-4 py-4">
-                    <div
-                            style="background-color: #fff; padding: 25px; text-align: center;  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px; position: relative;border-radius: 4px;">
-                        <div style="position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);">
-                            <div style="background-color:#786FA6 ; border-radius: 50%; padding: 15px;    width: 68px;
-                                    height: 68px; display: inline-block; box-shadow:0px 4px 4px rgba(0, 0, 0, 0.25);">
-                                <img src="assets/icons/consultation.png"
-                                     alt="service-icon" width="38px"
-                                     height="auto">
-                            </div>
-                        </div>
-                        <p style="margin-top: 20px; font-weight: bold;">Odoo
-                            Consultancy</p>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 px-4 py-4">
-                    <div
-                            style="background-color: #fff; padding: 25px; text-align: center; box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;position: relative;border-radius: 4px;">
-                        <div style="position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);">
-                            <div style="background-color:#F8A5C2 ; border-radius: 50%; padding: 15px;    width: 68px;
-                                    height: 68px; display: inline-block; box-shadow:0px 4px 4px rgba(0, 0, 0, 0.25);">
-                                <img src="assets/icons/training.png"
-                                     alt="service-icon" width="38px"
-                                     height="auto">
-                            </div>
-                        </div>
-                        <p style="margin-top: 20px; font-weight: bold;">Odoo
-                            Implementation</p>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 px-4 py-4">
-                    <div
-                            style="background-color: #fff; padding: 25px; text-align: center;  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px; position: relative;border-radius: 4px;">
-                        <div style="position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%);">
-                            <div style="background-color:#E6BE26; border-radius: 50%; padding: 15px;    width: 68px;
-                                    height: 68px; display: inline-block; box-shadow:0px 4px 4px rgba(0, 0, 0, 0.25);">
-                                <img src="assets/icons/license.png"
-                                     alt="service-icon" width="38px"
-                                     height="auto">
-                            </div>
-                        </div>
-                        <p style="margin-top: 20px; font-weight: bold;">Odoo
-                            Licensing Consultancy</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="container mt-5">
-            <div class="col-lg-12 d-flex flex-column justify-content-center align-items-center mt-4">
-                <p class="m-0"
-                   style="font-weight: 600; font-size: 24px; color:#000 !important">
-                    Our Industries</p>
-
-            </div>
-        </div>
-        <div class="container">
-            <div class="row my-5 py-4">
-                <div class="col-md-3 col-sm-6 p-0">
-                    <div class="d-flex flex-column h-100 "
-                         style="border-right: 1px solid rgb(209, 209, 209); border-bottom: 1px solid  rgb(209, 209, 209); padding: 30px; box-shadow: 6px 0 10px rgba(228, 227, 227, 0.373);">
-                        <img src="assets/icons/trading-black.png" width="42px"
-                             height="auto" alt="">
-                        <p style="color: #714B67;font-weight: 600; margin-top: 10px;
-                           font-size: 1.2rem; margin-bottom: 2px;">Trading</p>
-                        <p>Easily procure and sell your products</p>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6  p-0">
-                    <div class="d-flex flex-column h-100"
-                         style="border-right: 1px solid rgb(209, 209, 209);border-bottom: 1px solid  rgb(209, 209, 209); padding: 30px;">
-                        <img src="assets/icons/pos-black.png" width="42px"
-                             height="auto" alt="">
-                        <p style="color: #714B67;font-weight: 600; margin-top: 10px;
-                            font-size: 1.2rem; margin-bottom: 2px;">POS</p>
-                        <p>Easy configuration and convivial experience</p>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6  p-0">
-                    <div class="d-flex flex-column h-100"
-                         style="border-right: 1px solid  rgb(209, 209, 209);border-bottom: 1px solid   rgba(0, 0, 0, 0.2); padding: 30px; box-shadow: 0 5px 10px  rgba(228, 227, 227, 0.373)">
-                        <img src="assets/icons/education-black.png" width="42px"
-                             height="auto" alt="">
-                        <p style="color: #714B67;font-weight: 600; margin-top: 10px;
-                            font-size: 1.2rem; margin-bottom: 2px;">
-                            Education</p>
-                        <p>A platform for educational management</p>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6  p-0">
-                    <div class="d-flex flex-column h-100"
-                         style="border-bottom: 1px solid  rgb(209, 209, 209); padding: 30px; ">
-                        <img src="assets/icons/manufacturing-black.png"
-                             width="42px" height="auto" alt="">
-                        <p style="color: #714B67;font-weight: 600; margin-top: 10px;
-                            font-size: 1.2rem; margin-bottom: 2px;">
-                            Manufacturing</p>
-                        <p>Plan, track and schedule your operations</p>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6 p-0">
-                    <div class="d-flex flex-column h-100"
-                         style="border-right: 1px solid  rgb(209, 209, 209); padding: 30px;">
-                        <img src="assets/icons/ecom-black.png" width="42px"
-                             height="auto" alt="">
-                        <p style="color: #714B67;font-weight: 600; margin-top: 10px;
-                            font-size: 1.2rem; margin-bottom: 2px;">E-commerce &
-                            Website</p>
-                        <p>Mobile friendly, awe-inspiring product pages</p>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6   p-0">
-                    <div class="d-flex flex-column h-100"
-                         style="border-right: 1px solid  rgb(209, 209, 209); padding: 30px;box-shadow: 0 -5px 10px  rgba(228, 227, 227, 0.373);">
-                        <img src="assets/icons/service-black.png" width="42px"
-                             height="auto" alt="">
-                        <p style="color: #714B67;font-weight: 600; margin-top: 10px;
-                            font-size: 1.2rem; margin-bottom: 2px;">Service
-                            Management</p>
-                        <p>Keep track of services and invoice</p>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6    p-0">
-                    <div class="d-flex flex-column h-100"
-                         style="border-right: 1px solid  rgb(209, 209, 209); padding: 30px; ">
-                        <img src="assets/icons/restaurant-black.png"
-                             width="42px" height="auto" alt="">
-                        <p style="color: #714B67;font-weight: 600; margin-top: 10px;
-                            font-size: 1.2rem; margin-bottom: 2px;">
-                            Restaurant</p>
-                        <p>Run your bar or restaurant methodically</p>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6   p-0">
-                    <div class="d-flex flex-column h-100"
-                         style=" padding: 30px;box-shadow: -5px 0 10px  rgba(228, 227, 227, 0.373);">
-                        <img src="assets/icons/hotel-black.png" width="42px"
-                             height="auto" alt="">
-                        <p style="color: #714B67;font-weight: 600; margin-top: 10px;
-                            font-size: 1.2rem; margin-bottom: 2px;">Hotel
-                            Management</p>
-                        <p>An all-inclusive hotel management application</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="container mt-5">
-            <div class="col-lg-12 d-flex flex-column justify-content-center align-items-center mt-5">
-                <p class="m-0"
-                   style="font-weight: 600; font-size: 24px; color:#000 !important">
-                    Support</p>
-            </div>
-        </div>
-        <div class="container my-5">
-            <div class="row" style="background-color: #FFFAFE;">
-                <div class="col-md-6 pb-4  d-flex align-items-center justify-content-center"
-                     style="border-right: 1px solid #D9D9D9;">
-                    <div style="padding: 30px;">
-                        <div class="d-flex align-items-center">
-                            <img src="assets/misc/support (1) 1.svg" alt=""
-                                 width="60px" style="margin-right: 12px;">
-                            <div style="padding: 0px 8px;">
+                                <div
+                                    style="border-top-width: 1px; border-top-style: solid; border-top-color: #f6e4e6; margin-top: 16px; padding-top: 14px;">
                                     <span
-                                            style="color: #714B67;font-size: 24px;font-weight: 600;padding-bottom: 1rem;">Need
-                                        Help?</span>
-                                <p class="m-0" style="color:#718096;">Got
-                                    questions or need help? Get in touch.</p>
-                                <div style="font-weight: 400;"><span><img
-                                        src="assets/misc/support-email.svg"
-                                        alt=""
-                                        width="18px"
-                                        style="filter: invert(1);margin-right: 0.8rem;"></span>odoo@cybrosys.com
+                                        style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #b12126;">Explore
+                                        &nbsp;&rarr;</span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 pb-4 d-flex align-items-center justify-content-center">
-                    <div style="padding: 30px;">
-                        <div class="d-flex align-items-center">
-                            <img src="assets/misc/whatsapp 1.svg" alt=""
-                                 width="60px" style="margin-right: 12px;">
-                            <div>
-                                <span style="color: #714B67;font-size: 24px;font-weight: 600;">WhatsApp</span>
-                                <p class="m-0" style="color:#718096;">Say hi to
-                                    us on WhatsApp!</p>
-                                <div style="font-weight: 400; font-size: 16px;"><span><img
-                                        src="assets/misc/phone.svg"
-                                        alt="" width="14px"
-                                        style="filter: invert(1); margin-right: 0.8rem;"></span>+91
-                                    99456767686
+                        </a>
+                    </td>
+                    <td width="2%" style="font-size: 0; line-height: 18px; height: 18px;">&nbsp;</td>
+                    <!-- KANBAN CARD — edit href, icon <path>, name and note -->
+                    <td width="32%" valign="top" class="mob-space"
+                        style="background-color: #ffffff; border: 1px solid #f1dcdf; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.13);">
+                        <a href="https://apps.odoo.com/apps/modules/20.0/odoo_mcp_manager" target="_blank"
+                            rel="noopener" style="display: block; text-decoration: none;">
+
+                            <!-- name zone -->
+                            <div
+                                style="background-color: #fdf3f4; border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #f6e4e6; padding: 20px 20px 18px;">
+                                <div
+                                    style="width: 40px; height: 40px; border-radius: 11px; background-color: #b12126; box-shadow: 0 7px 16px rgba(177, 33, 38, 0.32); text-align: center; line-height: 40px; margin-bottom: 15px;">
+                                    <img src="./assets/icons/ic-c9b30746-ffffff.png" alt=""
+                                        style="width: 21px; height: 21px; display: inline-block; vertical-align: middle;" />
+                                </div>
+                                <div
+                                    style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 19px; font-weight: 800; color: #0f172a; line-height: 1.28; letter-spacing: -0.3px;">
+                                    Odoo MCP Server
+                                </div>
+                                <div
+                                    style="width: 34px; height: 3px; background-color: #b12126; border-radius: 2px; margin-top: 13px;">
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+                            <!-- note + action -->
+                            <div style="padding: 18px 20px 20px; min-height: 124px;">
+                                <div
+                                    style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #5b6472; line-height: 1.7;">
+                                    Connect AI assistants (Claude, Cursor, Codex) and chat bots (Telegram, WhatsApp,
+                                    Discord, Web) to your Odoo data through a single, secure Model Context Protocol
+                                    gateway.
+                                </div>
+                                <div
+                                    style="border-top-width: 1px; border-top-style: solid; border-top-color: #f6e4e6; margin-top: 16px; padding-top: 14px;">
+                                    <span
+                                        style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #b12126;">Explore
+                                        &nbsp;&rarr;</span>
+                                </div>
+                            </div>
+                        </a>
+                    </td>
+                    <td width="2%" style="font-size: 0; line-height: 18px; height: 18px;">&nbsp;</td>
+                    <!-- KANBAN CARD — edit href, icon <path>, name and note -->
+                    <td width="32%" valign="top" class="mob-space"
+                        style="background-color: #ffffff; border: 1px solid #f1dcdf; border-top: 3px solid #b12126; border-radius: 14px; box-shadow: 0 10px 26px rgba(177, 33, 38, 0.13);">
+                        <a href="https://apps.odoo.com/apps/modules/20.0/hide_menu_user" target="_blank" rel="noopener"
+                            style="display: block; text-decoration: none;">
+
+                            <!-- name zone -->
+                            <div
+                                style="background-color: #fdf3f4; border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #f6e4e6; padding: 20px 20px 18px;">
+                                <div
+                                    style="width: 40px; height: 40px; border-radius: 11px; background-color: #b12126; box-shadow: 0 7px 16px rgba(177, 33, 38, 0.32); text-align: center; line-height: 40px; margin-bottom: 15px;">
+                                    <img src="./assets/icons/ic-c9b30746-ffffff.png" alt=""
+                                        style="width: 21px; height: 21px; display: inline-block; vertical-align: middle;" />
+                                </div>
+                                <div
+                                    style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 19px; font-weight: 800; color: #0f172a; line-height: 1.28; letter-spacing: -0.3px;">
+                                    Hide Any Menu User & Group Wise
+                                </div>
+                                <div
+                                    style="width: 34px; height: 3px; background-color: #b12126; border-radius: 2px; margin-top: 13px;">
+                                </div>
+                            </div>
+
+                            <!-- note + action -->
+                            <div style="padding: 18px 20px 20px; min-height: 124px;">
+                                <div
+                                    style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #5b6472; line-height: 1.7;">
+                                    Hide or restrict any menu item on a per-user or per-group basis in Odoo 20 — so each
+                                    user only sees the parts of the system that are relevant to them.
+                                </div>
+                                <div
+                                    style="border-top-width: 1px; border-top-style: solid; border-top-color: #f6e4e6; margin-top: 16px; padding-top: 14px;">
+                                    <span
+                                        style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #b12126;">Explore
+                                        &nbsp;&rarr;</span>
+                                </div>
+                            </div>
+                        </a>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- 10. MINIMAL SUPPORT & GUARANTEE FOOTER -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                style="background-color: #ffffff; border: 1px solid #b221261f; border-radius: 16px; margin-bottom: 20px;">
+                <tr>
+                    <td style="padding: 44px 32px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mob-stack">
+                            <tr>
+                                <td width="68%" valign="middle" style="padding-right: 24px;" class="mob-space">
+                                    <h3
+                                        style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 26px; font-weight: 800; color: #0f172a; margin-top:0; margin-bottom: 8px;">
+                                        Need Customization or <span style="color: #b12126;">Migration Assistance?</span>
+                                    </h3>
+                                    <p
+                                        style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; color: #666; line-height: 1.6; margin-top:0; margin-bottom: 22px; max-width: 600px;">
+                                        Our certified team of 150+ Odoo professionals is ready to assist with
+                                        deployment,
+                                        custom localization modules, and chart of accounts migrations.
+                                    </p>
+                                    <table cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td style="padding-right: 10px;">
+                                                <a href="mailto:odoo@cybrosys.com" target="_blank" rel="noopener"
+                                                    style="    text-decoration: unset;font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; display: inline-block; background-color: #b12126; color: #ffffff; padding: 11px 22px; border-radius: 30px; font-size: 13px; font-weight: 700;">
+                                                    <img src="./assets/icons/ic-0b4c1767-ffffff.png" alt=""
+                                                        style="width: 18px; height: 18px; display: inline-block; vertical-align: middle; margin-right: 6px;" />
+                                                    Get Support
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="https://wa.me/919074270811" target="_blank" rel="noopener"
+                                                    style="    text-decoration: unset; text-align: center;font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; display: inline-block;  color: #b12126; padding: 10px 26px; border-radius: 30px; font-size: 14px; font-weight: 700; border: 1px solid #b221261f;">
+                                                    <img src="./assets/icons/ic-f466c5f2-b12126.png" alt=""
+                                                        style="width: 24px; height: 24px; display: inline-block; vertical-align: middle;" />
+                                                    WhatsApp
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+
+                                <td width="32%" valign="middle" align="center">
+                                    <div
+                                        style="background-color: #fdf2f2; border: 1px solid #b221261f; border-radius: 12px; padding: 24px 20px; text-align: center; max-width: 280px; box-sizing:border-box;">
+                                        <div
+                                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 36px; font-weight: 900; color: #b12126; line-height: 1;">
+                                            100%
+                                        </div>
+                                        <div
+                                            style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 700; color: #0f172a; margin-top: 6px;">
+                                            Bug Fix Commitment
+                                        </div>
+                                        <div
+                                            style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #666; margin-top: 6px; line-height: 1.5;">
+                                            Guaranteed fixes for any issue reported during the support window.
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
         </div>
     </div>
-</section>
-<!-- Optional JavaScript -->
-<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Bootstrap 5.0.2 JS bundle (required so data-bs-toggle="tab" actually switches panes) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
+
 </html>

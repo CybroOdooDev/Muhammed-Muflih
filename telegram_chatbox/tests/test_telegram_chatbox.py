@@ -237,6 +237,56 @@ class TestTelegramChatbox(TransactionCase):
         self.assertEqual(in_msg.res_model, 'sale.order')
         self.assertEqual(in_msg.res_id, self.sale_order.id)
 
+    @patch('requests.get')
+    def test_08b_incoming_reply_with_photo_to_sale_order(self, mock_get):
+        """Test incoming message with photo replying to a sale order."""
+        out_msg = self.env['telegram.message'].create({
+            'name': 'tg_556',
+            'direction': 'outgoing',
+            'chat_id': self.partner.telegram_chat_id,
+            'partner_id': self.partner.id,
+            'bot_id': self.bot.id,
+            'res_model': 'sale.order',
+            'res_id': self.sale_order.id,
+            'message_text': 'Please see quote S0002',
+            'state': 'sent',
+        })
+        self.assertTrue(out_msg)
+
+        # Mock getFile and file download
+        mock_file_info = MagicMock()
+        mock_file_info.status_code = 200
+        mock_file_info.json.return_value = {
+            'ok': True,
+            'result': {'file_path': 'photos/test.jpg'}
+        }
+        mock_file_bytes = MagicMock()
+        mock_file_bytes.status_code = 200
+        mock_file_bytes.content = b'fake_image_bytes'
+
+        mock_get.side_effect = [mock_file_info, mock_file_bytes]
+
+        payload = {
+            'message': {
+                'message_id': 9005,
+                'chat': {'id': int(self.partner.telegram_chat_id)},
+                'photo': [{'file_id': 'f123', 'file_unique_id': 'u123'}],
+                'reply_to_message': {
+                    'message_id': 556
+                }
+            }
+        }
+        in_msg = self.env['telegram.message'].create_incoming(self.bot, payload)
+        self.assertTrue(in_msg)
+        self.assertEqual(len(in_msg.attachment_ids), 1)
+
+        # Verify attachment is attached to the sale order chatter mail.message
+        last_mail_msg = self.env['mail.message'].search([
+            ('model', '=', 'sale.order'),
+            ('res_id', '=', self.sale_order.id)
+        ], order='id desc', limit=1)
+        self.assertIn(in_msg.attachment_ids[0].id, last_mail_msg.attachment_ids.ids)
+
     # -------------------------------------------------------------------------
     # 4. Outgoing Message Dispatch Tests
     # -------------------------------------------------------------------------

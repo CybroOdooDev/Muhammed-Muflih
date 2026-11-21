@@ -1,6 +1,6 @@
 ## Module <telegram_chatbox>
 
-#### 20.11.2026
+#### November 20, 2026
 #### Version 20.0.1.0.0
 #### ADD
 
