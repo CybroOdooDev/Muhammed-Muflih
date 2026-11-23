@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="telegram_group_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="telegram_chatbox.module_telegram_chatbox"/>
+        <field name="implied_ids" eval="[Command.link(ref('base.group_user'))]"/>
+    </record>
+
+    <record id="telegram_group_admin" model="res.groups">
+        <field name="name">Administrator</field>
+        <field name="category_id" ref="telegram_chatbox.module_telegram_chatbox"/>
+        <field name="implied_ids" eval="[Command.link(ref('telegram_chatbox.telegram_group_user'))]"/>
+        <field name="users" eval="[Command.link(ref('base.user_admin'))]"/>
+    </record>
+</odoo>
