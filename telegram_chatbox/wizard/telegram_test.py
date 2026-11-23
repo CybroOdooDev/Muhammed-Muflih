@@ -15,7 +15,7 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-from odoo import models, fields, api
+from odoo import Command, api, fields, models
 
 class TelegramTest(models.TransientModel):
     """Wizard to send a test Telegram message."""
@@ -90,7 +90,7 @@ class TelegramTest(models.TransientModel):
         if 'attachment_ids' in fields_list:
             existing = res.get('attachment_ids')
             if existing and isinstance(existing, list) and existing and isinstance(existing[0], int):
-                res['attachment_ids'] = [(6, 0, existing)]
+                res['attachment_ids'] = [Command.set(existing)]
             elif not existing:
                 res_model, res_id = False, False
                 if self.env.context.get('default_sale_order_id'):
@@ -103,13 +103,13 @@ class TelegramTest(models.TransientModel):
                     res_model, res_id = 'stock.picking', self.env.context.get('default_picking_id')
 
                 if res_model and res_id:
-                    attachment = self.env['ir.attachment'].search([
+                    attachment = self.env['ir.attachment'].sudo().search([
                         ('res_model', '=', res_model),
                         ('res_id', '=', res_id),
                         ('mimetype', '=', 'application/pdf')
                     ], order='id desc', limit=1)
                     if attachment:
-                        res['attachment_ids'] = [(6, 0, attachment.ids)]
+                        res['attachment_ids'] = [Command.set(attachment.ids)]
         return res
 
     @api.depends('sale_order_id', 'purchase_order_id', 'invoice_id', 'picking_id')

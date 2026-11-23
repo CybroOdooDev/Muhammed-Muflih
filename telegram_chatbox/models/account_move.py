@@ -15,9 +15,12 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
+import logging
 from markupsafe import Markup, escape
-from odoo import  models, _
+from odoo import Command, models, _
 from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
 
 class AccountMove(models.Model):
     """Extension of account.move to support sending Telegram messages."""
@@ -42,7 +45,7 @@ class AccountMove(models.Model):
         if not self.partner_id.telegram_chat_id:
             raise ValidationError(_("Telegram Chat ID is missing. Please link the customer with Telegram."))
 
-        bot = bot or self.partner_id.telegram_bot_id
+        bot = (bot or self.partner_id.telegram_bot_id).sudo()
         if not bot:
             raise ValidationError(_("No Telegram Bot configured. Please set a default bot on the customer."))
         msg = self.env['telegram.message'].create({
@@ -54,7 +57,7 @@ class AccountMove(models.Model):
             'res_model': 'account.move',
             'res_id': self.id,
             'message_text': converted_message,
-            'attachment_ids': [(6, 0, attachment_ids)] if attachment_ids else False,
+            'attachment_ids': [Command.set(attachment_ids)] if attachment_ids else False,
             'state': 'new',
         })
         msg.send_via_bot(converted_message, bot=bot)
@@ -69,12 +72,12 @@ class AccountMove(models.Model):
         """
        Open the Telegram message wizard for the current invoice and attach
        the invoice PDF if available.
-       This method attempts to locate an existing PDF attachment for the invoice.
-       If no PDF attachment exists, it generates the invoice PDF using the
-       configured invoice report, creates an attachment, and preloads it into
-       the Telegram message wizard.
+       Only posted customer invoices and credit notes can be sent via Telegram.
         """
         self.ensure_one()
+        if self.state != 'posted' or self.move_type not in ('out_invoice', 'out_refund'):
+            raise ValidationError(_("Telegram messages can only be sent for posted customer invoices."))
+
         report = self.env.ref('account.account_invoices', raise_if_not_found=False)
         pdf_attachment_id = False
 
@@ -83,14 +86,12 @@ class AccountMove(models.Model):
             try:
                 pdf_content, report_type = self.env['ir.actions.report']._render_qweb_pdf('account.account_invoices', self.ids)
             except Exception as e:
-                import logging
-                logging.getLogger(__name__).warning("Standard Invoice PDF Generation failed: %s", e)
+                _logger.warning("Standard Invoice PDF Generation failed: %s", e)
                 try:
                     html_rendered = self.env['ir.actions.report']._render_qweb_html('account.account_invoices', self.ids)[0]
                     pdf_content = self.env['ir.actions.report']._run_wkhtmltopdf([html_rendered])
                 except Exception as fallback_e:
-                    logging.getLogger(__name__).warning("Fallback PDF rendering failed: %s", fallback_e)
-
+                    _logger.warning("Fallback PDF rendering failed: %s", fallback_e)
             if pdf_content:
                 attachment_name = (self.name or str(self.id)).replace('/', '_')
                 attachment = self.env['ir.attachment'].create({
@@ -117,7 +118,7 @@ class AccountMove(models.Model):
             'default_invoice_id': self.id,
         }
         if pdf_attachment_id:
-            ctx['default_attachment_ids'] = [(6, 0, [pdf_attachment_id])]
+            ctx['default_attachment_ids'] = [Command.set([pdf_attachment_id])]
         return {
             'name': _("Send Telegram Message"),
             'type': 'ir.actions.act_window',

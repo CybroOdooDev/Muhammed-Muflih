@@ -19,8 +19,13 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import json
 from unittest.mock import patch, MagicMock
+from odoo import Command
+from odoo.exceptions import ValidationError
 from odoo.tests import TransactionCase, tagged
+from ..controllers import telegram_chatbox as tc_module
+from ..controllers.telegram_chatbox import TelegramWebhookController
 
 
 @tagged('post_install', '-at_install')
@@ -57,7 +62,7 @@ class TestTelegramChatbox(TransactionCase):
             'name': 'Customer Greeting',
             'model_id': partner_model.id,
             'message': 'Hello {{customer_name}}, welcome to our service!',
-            'dynamic_variable_ids': [(0, 0, {
+            'dynamic_variable_ids': [Command.create({
                 'name': 'customer_name',
                 'model_id': partner_model.id,
                 'field_id': name_field.id,
@@ -72,7 +77,7 @@ class TestTelegramChatbox(TransactionCase):
 
         cls.sale_order = cls.env['sale.order'].create({
             'partner_id': cls.partner.id,
-            'order_line': [(0, 0, {
+            'order_line': [Command.create({
                 'product_id': cls.product.id,
                 'product_uom_qty': 1,
                 'price_unit': 100.0,
@@ -81,12 +86,39 @@ class TestTelegramChatbox(TransactionCase):
 
         cls.purchase_order = cls.env['purchase.order'].create({
             'partner_id': cls.partner.id,
-            'order_line': [(0, 0, {
+            'order_line': [Command.create({
                 'product_id': cls.product.id,
                 'product_qty': 2,
                 'price_unit': 50.0,
             })],
         })
+
+        main_company = cls.env.company
+        sale_journal = cls.env['account.journal'].search([
+            ('type', '=', 'sale'),
+            ('company_id', '=', main_company.id)
+        ], limit=1)
+        if not sale_journal:
+            sale_journal = cls.env['account.journal'].create({
+                'name': 'Customer Invoices - Test',
+                'code': 'TJINV',
+                'type': 'sale',
+                'company_id': main_company.id,
+            })
+        cls.sale_journal = sale_journal
+
+        purchase_journal = cls.env['account.journal'].search([
+            ('type', '=', 'purchase'),
+            ('company_id', '=', main_company.id)
+        ], limit=1)
+        if not purchase_journal:
+            purchase_journal = cls.env['account.journal'].create({
+                'name': 'Vendor Bills - Test',
+                'code': 'TJBIL',
+                'type': 'purchase',
+                'company_id': main_company.id,
+            })
+        cls.purchase_journal = purchase_journal
 
     # -------------------------------------------------------------------------
     # 1. Telegram Bot Tests
@@ -113,6 +145,11 @@ class TestTelegramChatbox(TransactionCase):
         self.assertEqual(action.get('type'), 'ir.actions.client')
         self.assertEqual(self.bot.status, 'active')
         self.assertFalse(self.bot.last_error_message)
+        self.assertTrue(self.bot.webhook_secret)
+        self.assertTrue(self.bot.webhook_url.endswith('/telegram/webhook'))
+        mock_post.assert_called_once()
+        call_json = mock_post.call_args[1].get('json', {})
+        self.assertEqual(call_json.get('secret_token'), self.bot.webhook_secret)
 
     # -------------------------------------------------------------------------
     # 2. Telegram Template Tests
@@ -305,15 +342,29 @@ class TestTelegramChatbox(TransactionCase):
             self.assertNotEqual(att_po_1, att_po_2)
 
         # 3. Customer Invoice
+        draft_invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner.id,
+            'journal_id': self.sale_journal.id,
+        })
+        with self.assertRaises(ValidationError):
+            draft_invoice.action_send_telegram()
+
+        # Vendor bill should not allow sending via Telegram
+        vendor_bill = self.env['account.move'].create({
+            'move_type': 'in_invoice',
+            'partner_id': self.partner.id,
+            'journal_id': self.purchase_journal.id,
+        })
+        with self.assertRaises(ValidationError):
+            vendor_bill.action_send_telegram()
+
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': self.partner.id,
-            'invoice_line_ids': [(0, 0, {
-                'product_id': self.product.id,
-                'quantity': 1,
-                'price_unit': 100.0,
-            })],
+            'journal_id': self.sale_journal.id,
         })
+        invoice.sudo().write({'state': 'posted'})
         act_inv = invoice.action_send_telegram()
         self.assertEqual(act_inv.get('res_model'), 'telegram.test')
         self.assertEqual(act_inv.get('context', {}).get('default_invoice_id'), invoice.id)
@@ -393,3 +444,101 @@ class TestTelegramChatbox(TransactionCase):
         self.assertEqual(len(msg.attachment_ids), 1)
         self.assertTrue(msg.attachment_ids[0].name.endswith('.webp'))
         self.assertEqual(msg.attachment_ids[0].mimetype, 'image/webp')
+
+    def test_14_webhook_controller_authorized(self):
+        """Test incoming webhook request with valid secret token header."""
+        controller = TelegramWebhookController()
+        if not self.bot.webhook_secret:
+            self.bot.webhook_secret = 'test_webhook_secret_key_12345'
+        
+        payload = {
+            'update_id': 99991,
+            'message': {
+                'message_id': 8888,
+                'chat': {'id': int(self.partner.telegram_chat_id)},
+                'text': 'Hello from webhook test'
+            }
+        }
+        raw_body = json.dumps(payload).encode('utf-8')
+        mock_httprequest = MagicMock()
+        mock_httprequest.headers = {'X-Telegram-Bot-Api-Secret-Token': self.bot.webhook_secret}
+        mock_httprequest.data = raw_body
+
+        mock_request = MagicMock()
+        mock_request.httprequest = mock_httprequest
+        mock_request.env = self.env
+        del mock_request.get_json_data
+
+        with patch.object(tc_module, 'request', mock_request):
+            response = controller.telegram_webhook()
+            self.assertEqual(response.status_code, 200)
+            res_data = json.loads(response.data.decode('utf-8'))
+            self.assertTrue(res_data.get('ok'))
+
+        # Check incoming message was created
+        incoming_msg = self.env['telegram.message'].search([
+            ('chat_id', '=', self.partner.telegram_chat_id),
+            ('message_text', '=', 'Hello from webhook test')
+        ], limit=1)
+        self.assertTrue(incoming_msg)
+
+    def test_15_webhook_controller_unauthorized(self):
+        """Test incoming webhook request with invalid or missing secret token header."""
+        controller = TelegramWebhookController()
+        
+        # 1. Missing header
+        mock_httprequest_no_header = MagicMock()
+        mock_httprequest_no_header.headers = {}
+        mock_request = MagicMock()
+        mock_request.httprequest = mock_httprequest_no_header
+        mock_request.env = self.env
+
+        with patch.object(tc_module, 'request', mock_request):
+            response = controller.telegram_webhook()
+            self.assertEqual(response.status_code, 403)
+
+        # 2. Invalid header
+        mock_httprequest_invalid = MagicMock()
+        mock_httprequest_invalid.headers = {'X-Telegram-Bot-Api-Secret-Token': 'wrong_secret'}
+        mock_request.httprequest = mock_httprequest_invalid
+
+        with patch.object(tc_module, 'request', mock_request):
+            response = controller.telegram_webhook()
+            self.assertEqual(response.status_code, 403)
+
+    @patch('requests.post')
+    def test_16_non_admin_user_can_send_telegram(self, mock_post):
+        """Test that a regular non-admin internal user can send Telegram messages without AccessError."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {'ok': True, 'result': {'message_id': 9902}}
+        mock_post.return_value = mock_resp
+
+        sales_group = self.env.ref('sales_team.group_sale_salesman_all_leads', raise_if_not_found=False) or \
+                      self.env.ref('sales_team.group_sale_salesman', raise_if_not_found=False)
+        group_ids = [
+            Command.link(self.env.ref('base.group_user').id),
+            Command.link(self.env.ref('telegram_chatbox.telegram_group_user').id),
+        ]
+        if sales_group:
+            group_ids.append(Command.link(sales_group.id))
+
+        normal_user = self.env['res.users'].create({
+            'name': 'Regular Telegram User',
+            'login': 'reg_tg_user',
+            'email': 'reg_tg_user@test.com',
+            'group_ids': group_ids,
+        })
+        self.sale_order.user_id = normal_user.id
+
+        wizard = self.env['telegram.test'].with_user(normal_user).with_context(
+            default_partner_id=self.partner.id,
+            default_sale_order_id=self.sale_order.id,
+        ).create({
+            'partner_id': self.partner.id,
+            'sale_order_id': self.sale_order.id,
+            'message_text': 'Message from non-admin user',
+        })
+        action = wizard.action_send()
+        self.assertTrue(action)
+

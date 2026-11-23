@@ -2,7 +2,7 @@
     :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
     :alt: License: LGPL-3
 
-.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+.. |odoo| image:: https://img.shields.io/badge/Odoo-19.0-875A7B.svg
     :target: https://www.odoo.com
     :alt: Odoo 19.0
 

@@ -16,7 +16,7 @@
 #
 #############################################################################
 import re
-from odoo import api, models, fields
+from odoo import Command, api, fields, models
 
 class TelegramTemplateVariable(models.Model):
     """Model to define variables used within Telegram templates."""
@@ -101,7 +101,7 @@ class TelegramTemplate(models.Model):
         records accordingly."""
 
         if not self.message:
-            self.dynamic_variable_ids = [(5, 0, 0)]
+            self.dynamic_variable_ids = [Command.clear()]
             return
 
         placeholders = set(re.findall(r"\{\{(\w+)\}\}", self.message))
@@ -110,13 +110,13 @@ class TelegramTemplate(models.Model):
         
         for rec in self.dynamic_variable_ids:
             if rec.name not in placeholders:
-                commands.append((2, rec.id, 0))
+                commands.append(Command.delete(rec.id))
                 
         existing_names = set(self.dynamic_variable_ids.mapped('name'))
         new_names = placeholders - existing_names
         
         for name in new_names:
-            commands.append((0, 0, {'name': name}))
+            commands.append(Command.create({'name': name}))
             
         if commands:
             self.dynamic_variable_ids = commands

@@ -52,7 +52,7 @@
                     <notebook>
                         <page string="Message Body">
                             <field name="message_text"
-                                   placeholder="Internal notes..."/>
+                                   placeholder="Telegram message text..."/>
                         </page>
                         <page string="Attachments">
                             <field name="attachment_ids">
@@ -72,7 +72,7 @@
                                                     </t>
                                                     <t t-else="">
                                                         <div style="text-align: center; padding: 20px;">
-                                                            <i class="fa fa-file-o fa-3x"/>
+                                                            <i class="fa fa-file-o fa-3x" title="File"/>
                                                         </div>
                                                     </t>
                                                 </div>

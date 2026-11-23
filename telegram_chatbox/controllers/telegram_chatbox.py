@@ -28,35 +28,44 @@ class TelegramWebhookController(http.Controller):
     """Controller for handling Telegram webhooks."""
 
     @http.route(
-        [
-            '/telegram/webhook/<string:token>',
-            '/telegram/webhook/telegram/webhook/<string:token>',
-        ],
+        '/telegram/webhook',
         type='http',
         auth='public',
         methods=['POST'],
         csrf=False
     )
-    def telegram_webhook(self, token, **kwargs):
+    def telegram_webhook(self, **kwargs):
         """
         Handle incoming Telegram webhook requests.
-        Validates the bot token, parses the incoming payload, creates a
-        corresponding incoming message record, and updates the bot's sync timestamp.
+        Authenticates the request using the X-Telegram-Bot-Api-Secret-Token header.
+        Parses payload, creates incoming message, and updates bot sync timestamp.
         """
+        secret = request.httprequest.headers.get('X-Telegram-Bot-Api-Secret-Token')
+        if not secret:
+            _logger.warning("Telegram webhook rejected: missing secret header")
+            return http.Response(
+                json.dumps({
+                    "ok": False,
+                    "error": "Missing secret header"
+                }),
+                content_type="application/json",
+                status=403
+            )
+
         bot = request.env['telegram.bot'].sudo().search(
-            [('token', '=', token)],
+            [('webhook_secret', '=', secret)],
             limit=1
         )
 
         if not bot:
-            _logger.warning("Telegram webhook hit with invalid token: %s", token)
+            _logger.warning("Telegram webhook rejected: invalid or unknown secret")
             return http.Response(
                 json.dumps({
                     "ok": False,
-                    "error": "Invalid bot token"
+                    "error": "Unauthorized"
                 }),
                 content_type="application/json",
-                status=404
+                status=403
             )
 
         try:
@@ -69,7 +78,17 @@ class TelegramWebhookController(http.Controller):
             if not payload and hasattr(request.httprequest, 'data') and request.httprequest.data:
                 payload = json.loads(request.httprequest.data.decode('utf-8'))
 
-            _logger.info("Received Telegram payload: %s", payload)
+            if not payload or not isinstance(payload, dict):
+                return http.Response(
+                    json.dumps({
+                        "ok": False,
+                        "error": "Empty or invalid JSON payload"
+                    }),
+                    content_type="application/json",
+                    status=400
+                )
+
+            _logger.info("Received Telegram update (update_id: %s)", payload.get("update_id"))
 
             # Create incoming message record
             request.env['telegram.message'].sudo().create_incoming(

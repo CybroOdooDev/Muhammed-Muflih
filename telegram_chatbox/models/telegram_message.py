@@ -109,7 +109,7 @@ class TelegramMessage(models.Model):
 
             try:
                 requests.post(
-                    f"https://api.telegram.org/bot{bot.token}/answerCallbackQuery",
+                    f"https://api.telegram.org/bot{bot.sudo().token}/answerCallbackQuery",
                     json={"callback_query_id": callback_query.get('id')},
                     timeout=5
                 )
@@ -239,7 +239,7 @@ class TelegramMessage(models.Model):
         """Send an outgoing message via Telegram HTTP API."""
 
         for rec in self:
-            bot = bot or rec.bot_id
+            bot = (bot or rec.bot_id).sudo()
             if not bot or not bot.token or not rec.chat_id:
                 rec.state = 'error'
                 continue
@@ -255,7 +255,7 @@ class TelegramMessage(models.Model):
                     r.raise_for_status()
                     res_data = r.json()
                     if res_data.get('ok') and res_data.get('result'):
-                        rec.name = f"tg_{res_data['result'].get('message_id')}"
+                        rec.sudo().name = f"tg_{res_data['result'].get('message_id')}"
 
                 for attachment in rec.attachment_ids:
                     file_data = False
@@ -348,6 +348,7 @@ class TelegramMessage(models.Model):
         if not file_id:
             return False
 
+        bot = bot.sudo()
         binary_data = None
         for attempt in range(3):
             try:

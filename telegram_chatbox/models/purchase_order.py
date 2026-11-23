@@ -15,9 +15,12 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
+import logging
 from markupsafe import Markup, escape
-from odoo import  models, _
+from odoo import Command, models, _
 from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
 
 class PurchaseOrder(models.Model):
     """Extension of purchase.order to support sending Telegram messages."""
@@ -39,7 +42,7 @@ class PurchaseOrder(models.Model):
             raise ValidationError(_("Telegram messaging is disabled for this vendor."))
         if not self.partner_id.telegram_chat_id:
             raise ValidationError(_("Telegram Chat ID is missing. Please link the vendor with Telegram."))
-        bot = bot or self.partner_id.telegram_bot_id
+        bot = (bot or self.partner_id.telegram_bot_id).sudo()
         if not bot:
             raise ValidationError(_("No Telegram Bot configured. Please set a default bot on the vendor."))
         # Create message record
@@ -52,7 +55,7 @@ class PurchaseOrder(models.Model):
             'res_model': 'purchase.order',
             'res_id': self.id,
             'message_text': converted_message,
-            'attachment_ids': [(6, 0, attachment_ids)] if attachment_ids else False,
+            'attachment_ids': [Command.set(attachment_ids)] if attachment_ids else False,
             'state': 'new',
         })
         msg.send_via_bot(converted_message, bot=bot)
@@ -82,13 +85,12 @@ class PurchaseOrder(models.Model):
             try:
                 pdf_content, report_type = self.env['ir.actions.report']._render_qweb_pdf('purchase.action_report_purchase_order', self.ids)
             except Exception as e:
-                import logging
-                logging.getLogger(__name__).warning("Standard PO PDF Generation failed: %s", e)
+                _logger.warning("Standard PO PDF Generation failed: %s", e)
                 try:
                     html_rendered = self.env['ir.actions.report']._render_qweb_html('purchase.action_report_purchase_order', self.ids)[0]
                     pdf_content = self.env['ir.actions.report']._run_wkhtmltopdf([html_rendered])
                 except Exception as fallback_e:
-                    logging.getLogger(__name__).warning("Fallback PDF rendering failed: %s", fallback_e)
+                    _logger.warning("Fallback PDF rendering failed: %s", fallback_e)
 
             if pdf_content:
                 attachment_name = (self.name or str(self.id)).replace('/', '_')
@@ -117,7 +119,7 @@ class PurchaseOrder(models.Model):
             'default_purchase_order_id': self.id,
         }
         if pdf_attachment_id:
-            ctx['default_attachment_ids'] = [(6, 0, [pdf_attachment_id])]
+            ctx['default_attachment_ids'] = [Command.set([pdf_attachment_id])]
 
         return {
             'name': _("Send Telegram Message"),

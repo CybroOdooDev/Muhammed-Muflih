@@ -16,7 +16,7 @@
 #
 #############################################################################
 from markupsafe import Markup, escape
-from odoo import fields, models, _
+from odoo import Command, fields, models, _
 from odoo.exceptions import ValidationError
 
 
@@ -57,7 +57,7 @@ class ResPartner(models.Model):
         if not self.telegram_chat_id:
             raise ValidationError(_("Telegram Chat ID is missing. Please link the contact with Telegram."))
 
-        bot = bot or self.telegram_bot_id
+        bot = (bot or self.telegram_bot_id).sudo()
         if not bot:
             raise ValidationError(_("No Telegram Bot configured. Please set a default bot on the contact."))
 
@@ -70,7 +70,7 @@ class ResPartner(models.Model):
             'res_model': 'res.partner',
             'res_id': self.id,
             'message_text': converted_message,
-            'attachment_ids': [(6, 0, attachment_ids)] if attachment_ids else False,
+            'attachment_ids': [Command.set(attachment_ids)] if attachment_ids else False,
             'state': 'new',
         })
         msg.send_via_bot(converted_message, bot=bot)

@@ -15,9 +15,12 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
+import logging
 from markupsafe import Markup, escape
-from odoo import models, _
+from odoo import Command, models, _
 from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
 
 class StockPicking(models.Model):
     """Extension of stock.picking to support sending Telegram messages."""
@@ -43,7 +46,7 @@ class StockPicking(models.Model):
         if not self.partner_id.telegram_chat_id:
             raise ValidationError(_("Telegram Chat ID is missing. Please link the partner with Telegram."))
 
-        bot = bot or self.partner_id.telegram_bot_id
+        bot = (bot or self.partner_id.telegram_bot_id).sudo()
         if not bot:
             raise ValidationError(_("No Telegram Bot configured. Please set a default bot on the partner."))
 
@@ -56,7 +59,7 @@ class StockPicking(models.Model):
             'res_model': 'stock.picking',
             'res_id': self.id,
             'message_text': converted_message,
-            'attachment_ids': [(6, 0, attachment_ids)] if attachment_ids else False,
+            'attachment_ids': [Command.set(attachment_ids)] if attachment_ids else False,
             'state': 'new',
         })
 
@@ -86,13 +89,12 @@ class StockPicking(models.Model):
             try:
                 pdf_content, report_type = self.env['ir.actions.report']._render_qweb_pdf('stock.action_report_delivery', self.ids)
             except Exception as e:
-                import logging
-                logging.getLogger(__name__).warning("Standard Delivery PDF Generation failed: %s", e)
+                _logger.warning("Standard Delivery PDF Generation failed: %s", e)
                 try:
                     html_rendered = self.env['ir.actions.report']._render_qweb_html('stock.action_report_delivery', self.ids)[0]
                     pdf_content = self.env['ir.actions.report']._run_wkhtmltopdf([html_rendered])
                 except Exception as fallback_e:
-                    logging.getLogger(__name__).warning("Fallback PDF rendering failed: %s", fallback_e)
+                    _logger.warning("Fallback PDF rendering failed: %s", fallback_e)
 
             if pdf_content:
                 attachment_name = (self.name or str(self.id)).replace('/', '_')
@@ -121,7 +123,7 @@ class StockPicking(models.Model):
             'default_picking_id': self.id,
         }
         if pdf_attachment_id:
-            ctx['default_attachment_ids'] = [(6, 0, [pdf_attachment_id])]
+            ctx['default_attachment_ids'] = [Command.set([pdf_attachment_id])]
 
         return {
             'name': _("Send Telegram Message"),

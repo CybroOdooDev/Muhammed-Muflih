@@ -16,6 +16,7 @@
 #
 #############################################################################
 import logging
+import secrets
 import requests
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
@@ -51,6 +52,13 @@ class TelegramBot(models.Model):
         help="Public URL where Telegram sends incoming message updates."
     )
 
+    webhook_secret = fields.Char(
+        string="Webhook Secret",
+        copy=False,
+        groups='telegram_chatbox.telegram_group_admin',
+        help="Independent secret token sent in X-Telegram-Bot-Api-Secret-Token header."
+    )
+
     active = fields.Boolean(
         default=True,
         help="Enable or disable this bot configuration."
@@ -79,27 +87,6 @@ class TelegramBot(models.Model):
     )
 
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        """
-        Create one or more records.
-        This method extends the standard Odoo create operation and can be
-        customized to perform additional processing before or after record
-        creation."""
-
-        records = super().create(vals_list)
-        return records
-
-    def write(self, vals):
-        """
-        Update the values of existing records.
-        This method extends the standard Odoo write operation and can be
-        customized to perform additional processing before or after records
-        are updated."""
-
-        res = super().write(vals)
-        return res
-
     def action_set_webhook(self, url=None):
         """
             Configure the Telegram webhook for the selected bot(s).
@@ -113,6 +100,9 @@ class TelegramBot(models.Model):
             if not token:
                 raise ValidationError(_("Please configure an API Token first."))
 
+            if not bot.webhook_secret:
+                bot.webhook_secret = secrets.token_hex(20)
+
             webhook = (bot.webhook_url or '').strip().rstrip('/')
             if not webhook:
                 base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url', '').strip().rstrip('/')
@@ -120,21 +110,24 @@ class TelegramBot(models.Model):
                     base_url = base_url.replace('http://', 'https://', 1)
                 webhook = base_url
 
-            # Ensure the webhook ends with /telegram/webhook/<token> exactly once without duplication
-            endpoint = f"/telegram/webhook/{token}"
-            if webhook.endswith(endpoint):
-                pass
-            elif '/telegram/webhook' in webhook:
-                base = webhook.split('/telegram/webhook')[0].rstrip('/')
-                webhook = f"{base}{endpoint}"
-            else:
-                webhook = f"{webhook}{endpoint}"
+            # Ensure the webhook ends with /telegram/webhook exactly once without token in URL
+            endpoint = "/telegram/webhook"
+            if not webhook.endswith(endpoint):
+                if '/telegram/webhook' in webhook:
+                    base = webhook.split('/telegram/webhook')[0].rstrip('/')
+                    webhook = f"{base}{endpoint}"
+                else:
+                    webhook = f"{webhook}{endpoint}"
 
             bot.webhook_url = webhook
 
             api = f"https://api.telegram.org/bot{bot.token}/setWebhook"
+            payload = {
+                "url": webhook,
+                "secret_token": bot.webhook_secret,
+            }
             try:
-                res = requests.post(api, json={"url": webhook}, timeout=bot.timeout)
+                res = requests.post(api, json=payload, timeout=bot.timeout)
                 _logger.info("Webhook Response: %s", res.text)
 
                 res.raise_for_status()
@@ -150,7 +143,7 @@ class TelegramBot(models.Model):
                         'tag': 'display_notification',
                         'params': {
                             'title': _("Successful"),
-                            'message': _(result.get("description")),
+                            'message': _("Webhook registered successfully: %s") % (result.get("description") or "OK"),
                             'type': 'success',
                             'sticky': False,
                             'next': {'type': 'ir.actions.act_window_close'},
@@ -184,7 +177,7 @@ class TelegramBot(models.Model):
                     'tag': 'display_notification',
                     'params': {
                         'title': _("Error"),
-                        'message': _(err_msg),
+                        'message': _("Webhook configuration error: %s") % err_msg,
                         'type': 'danger',
                         'sticky': False,
                     }
@@ -197,4 +190,4 @@ class TelegramBot(models.Model):
         This method searches for a Telegram bot whose token matches the
         provided value and returns the first matching record.
         """
-        return self.search([('token', '=', token)], limit=1)
+        return self.sudo().search([('token', '=', token)], limit=1)
