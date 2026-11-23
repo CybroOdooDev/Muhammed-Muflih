@@ -27,8 +27,8 @@
                     </div>
                     <group>
                         <group>
-                            <field name="token"/>
-                            <field name="webhook_url"/>
+                            <field name="token" groups="telegram_chatbox.telegram_group_admin"/>
+                            <field name="webhook_url" groups="telegram_chatbox.telegram_group_admin"/>
                             <field name="last_error_message" readonly="1"/>
                         </group>
                         <group>

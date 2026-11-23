@@ -40,14 +40,12 @@ class TelegramBot(models.Model):
         string="API Token",
         required=True,
         tracking=True,
-        groups='telegram_chatbox.telegram_group_admin',
         help="Telegram Bot API token obtained from BotFather."
     )
 
     webhook_url = fields.Char(
         string="Webhook URL",
         tracking=True,
-        groups='telegram_chatbox.telegram_group_admin',
         help="Public URL where Telegram sends incoming message updates."
     )
 
@@ -98,8 +96,8 @@ class TelegramBot(models.Model):
                     base_url = base_url.replace('http://', 'https://', 1)
                 webhook = base_url
 
-            # Ensure the webhook ends with /telegram/webhook/<token> exactly once without duplication
-            endpoint = f"/telegram/webhook/{token}"
+            # Register webhook as /telegram/webhook/<bot_id> without exposing token in URL path
+            endpoint = f"/telegram/webhook/{bot.id}"
             if not webhook.endswith(endpoint):
                 if '/telegram/webhook' in webhook:
                     base = webhook.split('/telegram/webhook')[0].rstrip('/')
@@ -110,8 +108,13 @@ class TelegramBot(models.Model):
             bot.webhook_url = webhook
 
             api = f"https://api.telegram.org/bot{bot.token}/setWebhook"
+            secret_token = (bot.token or '').replace(':', '_')[:256]
+            webhook_payload = {
+                "url": webhook,
+                "secret_token": secret_token,
+            }
             try:
-                res = requests.post(api, json={"url": webhook}, timeout=bot.timeout)
+                res = requests.post(api, json=webhook_payload, timeout=bot.timeout)
                 _logger.info("Webhook Response: %s", res.text)
 
                 res.raise_for_status()

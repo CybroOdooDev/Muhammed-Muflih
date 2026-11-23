@@ -26,7 +26,7 @@ class ResPartner(models.Model):
     _description = 'Contact'
 
     telegram_chat_id = fields.Char(
-        string="Telegram Chat ID", 
+        string="Telegram Chat ID",
         index=True,
         help="The unique identifier for this contact's Telegram chat. Used by the system to route messages to the correct user in Telegram."
     )
@@ -35,12 +35,12 @@ class ResPartner(models.Model):
         help="The Telegram username of the contact. Useful for identifying the contact in Telegram."
     )
     telegram_opt_in = fields.Boolean(
-        string="Allow Telegram Messages", 
+        string="Allow Telegram Messages",
         default=True,
         help="If checked, the system will allow sending Telegram messages to this contact. Uncheck to opt-out the contact from Telegram communications."
     )
     telegram_bot_id = fields.Many2one(
-        'telegram.bot', 
+        'telegram.bot',
         string="Default Bot",
         help="The default Telegram bot used to communicate with this contact."
     )

@@ -20,6 +20,8 @@
 #
 #############################################################################
 from unittest.mock import patch, MagicMock
+from odoo import Command
+from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import TransactionCase, tagged
 
 
@@ -57,7 +59,7 @@ class TestTelegramChatbox(TransactionCase):
             'name': 'Customer Greeting',
             'model_id': partner_model.id,
             'message': 'Hello {{customer_name}}, welcome to our service!',
-            'dynamic_variable_ids': [(0, 0, {
+            'dynamic_variable_ids': [Command.create({
                 'name': 'customer_name',
                 'model_id': partner_model.id,
                 'field_id': name_field.id,
@@ -72,7 +74,7 @@ class TestTelegramChatbox(TransactionCase):
 
         cls.sale_order = cls.env['sale.order'].create({
             'partner_id': cls.partner.id,
-            'order_line': [(0, 0, {
+            'order_line': [Command.create({
                 'product_id': cls.product.id,
                 'product_uom_qty': 1,
                 'price_unit': 100.0,
@@ -81,7 +83,7 @@ class TestTelegramChatbox(TransactionCase):
 
         cls.purchase_order = cls.env['purchase.order'].create({
             'partner_id': cls.partner.id,
-            'order_line': [(0, 0, {
+            'order_line': [Command.create({
                 'product_id': cls.product.id,
                 'product_qty': 2,
                 'price_unit': 50.0,
@@ -358,7 +360,7 @@ class TestTelegramChatbox(TransactionCase):
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': self.partner.id,
-            'invoice_line_ids': [(0, 0, {
+            'invoice_line_ids': [Command.create({
                 'product_id': self.product.id,
                 'quantity': 1,
                 'price_unit': 100.0,
@@ -407,3 +409,108 @@ class TestTelegramChatbox(TransactionCase):
         self.assertEqual(wizard.current_model_id.model, 'sale.order')
         action = wizard.action_send()
         self.assertTrue(action)
+
+    # -------------------------------------------------------------------------
+    # 6. Opt-out, Validation & Security Tests
+    # -------------------------------------------------------------------------
+
+    def test_13_opt_out_and_missing_credentials_validation(self):
+        """Test opt-out validation and missing chat_id / bot validation."""
+        # Opt-out validation on sale order
+        self.partner.telegram_opt_in = False
+        with self.assertRaises(ValidationError):
+            self.sale_order.send_telegram_message("Test Opt-Out", False)
+
+        # Missing chat_id validation
+        self.partner.telegram_opt_in = True
+        self.partner.telegram_chat_id = False
+        with self.assertRaises(ValidationError):
+            self.sale_order.send_telegram_message("Test Missing Chat ID", False)
+
+        # Missing bot validation
+        self.partner.telegram_chat_id = "11223344"
+        self.partner.telegram_bot_id = False
+        with self.assertRaises(ValidationError):
+            self.sale_order.send_telegram_message("Test Missing Bot", False)
+
+        # Restore bot for following tests
+        self.partner.telegram_bot_id = self.bot.id
+
+    @patch('requests.post')
+    def test_14_user_vs_admin_security_access(self, mock_post):
+        """Test that regular Telegram user has read/create access to messages/templates,
+        can send messages via bot without token access errors,
+        but cannot modify telegram.bot configuration (restricted to admin)."""
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status.return_value = None
+        mock_resp.json.return_value = {"ok": True, "result": {"message_id": 999}}
+        mock_post.return_value = mock_resp
+
+        telegram_user = self.env['res.users'].create({
+            'name': 'Standard Telegram User',
+            'login': 'telegram_std_user',
+            'email': 'std_user@telegram.test',
+            'group_ids': [
+                Command.link(self.env.ref('base.group_user').id),
+                Command.link(self.env.ref('telegram_chatbox.telegram_group_user').id),
+            ],
+        })
+
+        # Regular user can read templates
+        templates = self.env['telegram.template'].with_user(telegram_user).search([])
+        self.assertTrue(templates)
+
+        # Regular user can create and send messages
+        msg = self.env['telegram.message'].with_user(telegram_user).create({
+            'direction': 'outgoing',
+            'chat_id': self.partner.telegram_chat_id,
+            'partner_id': self.partner.id,
+            'bot_id': self.bot.id,
+            'message_text': 'User test message',
+        })
+        self.assertTrue(msg.id)
+        msg.send_via_bot(msg.message_text)
+        self.assertEqual(msg.state, 'sent')
+
+        # Regular user CANNOT delete messages (cru permissions only, delete restricted to admin)
+        with self.assertRaises(AccessError):
+            msg.with_user(telegram_user).unlink()
+
+        # Regular user CANNOT create a telegram bot (restricted to admin)
+        with self.assertRaises(AccessError):
+            self.env['telegram.bot'].with_user(telegram_user).create({
+                'name': 'Unauthorized Bot',
+                'token': '999999:TEST_TOKEN',
+            })
+
+    @patch('requests.post')
+    def test_15_bot_error_and_failure_handling(self, mock_post):
+        """Test bot error handling when Telegram returns an HTTP/API error."""
+        import requests
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status.side_effect = requests.exceptions.HTTPError("Bad Request: chat not found")
+        mock_post.return_value = mock_resp
+
+        msg = self.env['telegram.message'].create({
+            'direction': 'outgoing',
+            'chat_id': '999999999',
+            'partner_id': self.partner.id,
+            'bot_id': self.bot.id,
+            'message_text': 'Message to invalid chat',
+        })
+        msg.send_via_bot('Message to invalid chat', bot=self.bot)
+        self.assertEqual(msg.state, 'error')
+
+    @patch('requests.post')
+    def test_16_webhook_endpoint_structure(self, mock_post):
+        """Test Telegram webhook URL formatting does not expose the token in URL path."""
+        mock_post_resp = MagicMock()
+        mock_post_resp.status_code = 200
+        mock_post_resp.json.return_value = {'ok': True, 'description': 'Webhook was set'}
+        mock_post.return_value = mock_post_resp
+
+        self.bot.action_set_webhook()
+        expected_endpoint = f"/telegram/webhook/{self.bot.id}"
+        self.assertTrue(self.bot.webhook_url.endswith(expected_endpoint))
+        self.assertNotIn(self.bot.token, self.bot.webhook_url)
+

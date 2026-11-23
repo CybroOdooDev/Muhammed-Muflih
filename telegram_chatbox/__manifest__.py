@@ -19,7 +19,7 @@
     'name': 'Odoo Telegram Integration',
     'version': '20.0.1.0.0',
     'summary': 'Send Telegram messages directly from Odoo records',
-    'description': '''This module integrates Telegram with Odoo, allowing users to 
+    'description': '''This module integrates Telegram with Odoo, allowing users to
     send messages directly from Odoo documents such as Sales Orders, Purchase Orders,
     Invoices, and other business records.
     ''',
@@ -28,7 +28,7 @@
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['mail', 'contacts', 'sale_management', 'account', 'purchase', 'stock', 'sale_stock'],
+    'depends': ['mail', 'sale_management', 'account', 'purchase', 'stock'],
     'data': [
         'data/ir_module_category_data.xml',
         'security/telegram_chatbox_groups.xml',
