@@ -128,3 +128,8 @@ class TestMultiFollower(TransactionCase):
             self.assertEqual(rec.states, 'cancel')
             self.assertTrue(rec.enabled_value)
             self.assertFalse(rec.window_action_ids)
+
+    def test_applied_to_ids_domain(self):
+        """Test that applied_to_ids field has domain restricting to is_mail_thread models."""
+        field = self.env['multi.follower']._fields['applied_to_ids']
+        self.assertEqual(field.domain, "[('is_mail_thread', '=', True)]")

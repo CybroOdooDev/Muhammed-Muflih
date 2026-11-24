@@ -16,6 +16,7 @@
 #############################################################################
 from unittest.mock import patch
 
+from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, tagged
 
 
@@ -146,3 +147,20 @@ class TestFollowerAddingRemoving(TransactionCase):
         self.assertIn('b@test.com', values['email_to'])
         self.assertTrue(values['reply_to_force_new'])
         self.assertTrue(values['email_add_signature'])
+
+    def test_action_submit_non_chatter_model_raises_user_error(self):
+        """Test that action_submit raises UserError for models without chatter support."""
+        country = self.env['res.country'].search([], limit=1)
+        if not country:
+            country = self.env['res.country'].create({'name': 'Test Country', 'code': 'ZZ'})
+        wizard = self.env['follower.adding.removing'].with_context(
+            active_model='res.country',
+            active_ids=[country.id],
+        ).create({
+            'type': 'add',
+            'partner_ids': [(6, 0, [self.partner_a.id])],
+            'send_mail': False,
+            'message': '',
+        })
+        with self.assertRaises(UserError):
+            wizard.action_submit()

@@ -27,6 +27,7 @@ class MultiFollower(models.Model):
                                    "appropriate model's action menu.",
                               required=True)
     applied_to_ids = fields.Many2many('ir.model',
+                                      domain="[('is_mail_thread', '=', True)]",
                                       help='Select the model to which you '
                                            'want to apply this action.',
                                       required=True)

@@ -18,6 +18,7 @@ from lxml import etree
 from lxml.html import builder as html
 
 from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 
 class FollowerAddingRemoving(models.TransientModel):
@@ -59,6 +60,11 @@ class FollowerAddingRemoving(models.TransientModel):
         for wizard in self:
             if model_name_key and active_ids:
                 records = self.env[model_name_key].browse(active_ids)
+                if not hasattr(records, 'message_subscribe'):
+                    raise UserError(self.env._(
+                        "The selected model '%(model)s' does not support followers.",
+                        model=model_info.display_name or model_name_key,
+                    ))
                 if wizard.type == 'add':
                     records.message_subscribe(partner_ids=wizard.partner_ids.ids)
                 elif wizard.type == 'remove':
