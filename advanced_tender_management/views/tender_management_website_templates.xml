@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Action to open the Tender Snippet Template page on the website -->
+    <template id="tender_snippet_template" name="Tender Snippet Template">
+        <t t-call="website.layout">
+            <div id="tender-snippet-container" class="oe_structure oe_empty">
+                <section class="container py-4 dynamic_snippet_blog">
+                    <div class="row">
+                        <div class="col-12 text-center mb-4">
+                            <h2 class="fw-bold">Available Tenders</h2>
+                        </div>
+                    </div>
+                    <div class="row w-100 mx-auto oe_tender_carousel" id="carousel">
+                        <t t-if="tenders">
+                            <t t-foreach="tenders" t-as="item">
+                                <div class="col-md-4 col-sm-6 mb-4 oe_tender_card">
+                                    <div class="card oe_tender_card_content h-100 p-3 shadow-sm border-0">
+                                        <div class="oe_tender_type mb-2">
+                                            <span class="badge bg-primary" t-if="item.tender_type == 'single_vendor'">Single Vendor</span>
+                                            <span class="badge bg-info" t-if="item.tender_type == 'product_wise_vendor'">Product-Wise Vendor</span>
+                                        </div>
+                                        <div class="oe_tender_group">
+                                            <h5 class="mb-2 oe_tender_title fw-bold">
+                                                <span t-out="item.name"/>
+                                            </h5>
+                                            <div class="oe_tender_group_category text-muted mb-2">
+                                                <i class="fa fa-tag me-1"/>
+                                                <span t-out="item.tender_category_id.name"/>
+                                            </div>
+                                        </div>
+                                        <div class="oe_tender_date_group small text-muted my-2">
+                                            <div>Tender: <strong t-out="item.tender_start_date"/> to <strong t-out="item.tender_end_date"/></div>
+                                            <div>Bidding: <strong t-out="item.bid_start_date"/> to <strong t-out="item.bid_end_date"/></div>
+                                        </div>
+                                        <div class="mt-auto pt-3">
+                                            <a t-attf-href="/show_tender/#{item.id}" class="btn btn-primary w-100 oe_tender_button">
+                                                Show Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                        </t>
+                        <t t-else="">
+                            <div class="col-12 text-center py-5">
+                                <p class="text-muted fs-5">No tenders available for your category at the moment.</p>
+                            </div>
+                        </t>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+</odoo>
