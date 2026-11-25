@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Inherit partner ledger QWeb report template to add initial/closing balances and proper table outline -->
+    <template id="report_partnerledger_inherited"
+              inherit_id="base_accounting_kit.report_partnerledger">
+
+        <xpath expr="//table[contains(@class, 'table-reports')]" position="attributes">
+            <attribute name="class">table table-sm table-bordered table-reports o_partner_ledger_table</attribute>
+        </xpath>
+
+        <xpath expr="//table[contains(@class, 'table-reports')]/thead" position="replace">
+            <thead>
+                <tr>
+                    <th class="o_pl_nowrap">Date</th>
+                    <th class="o_pl_nowrap">JRNL</th>
+                    <th>Ref</th>
+                    <th class="text-end o_pl_num">Debit</th>
+                    <th class="text-end o_pl_num">Credit</th>
+                    <th class="text-end o_pl_num">Balance</th>
+                    <th t-if="data['form']['amount_currency']" class="text-end o_pl_num">Currency</th>
+                </tr>
+            </thead>
+        </xpath>
+
+        <xpath expr="//t[@t-foreach='docs']//tbody" position="replace">
+            <tbody>
+
+                <!-- ================= INITIAL VALUES ================= -->
+                <t t-set="initial_debit" t-value="0.0"/>
+                <t t-set="initial_credit" t-value="0.0"/>
+                <t t-set="initial_balance" t-value="0.0"/>
+
+                <!-- ================= INITIAL BALANCE ================= -->
+                <t t-if="data['form'].get('initial_balance')">
+                    <t t-foreach="response" t-as="res">
+                        <t t-if="res.get('partner_id') == o.id or (not res.get('partner_id') and res.get('name') == o.name)">
+                            <t t-set="initial_debit" t-value="res['initial_debit']"/>
+                            <t t-set="initial_credit" t-value="res['initial_credit']"/>
+                            <t t-set="initial_balance"
+                               t-value="res['initial_debit'] - res['initial_credit']"/>
+                        </t>
+                    </t>
+
+                    <tr class="o_pl_initial_row">
+                        <td colspan="3"><strong>Initial Balance</strong></td>
+
+                        <!-- Debit -->
+                        <td class="text-end o_pl_num">
+                            <span t-out="initial_debit"
+                                  t-options="{'widget':'monetary','display_currency':env.company.currency_id}"/>
+                        </td>
+
+                        <!-- Credit -->
+                        <td class="text-end o_pl_num">
+                            <span t-out="initial_credit"
+                                  t-options="{'widget':'monetary','display_currency':env.company.currency_id}"/>
+                        </td>
+
+                        <!-- Balance -->
+                        <td class="text-end o_pl_num">
+                            <span t-out="initial_balance"
+                                  t-options="{'widget':'monetary','display_currency':env.company.currency_id}"/>
+                        </td>
+
+                        <td t-if="data['form']['amount_currency']" class="text-end o_pl_num"/>
+                    </tr>
+                </t>
+
+                <!-- ================= PARTNER HEADER ================= -->
+                <tr class="o_pl_partner_row">
+                    <td colspan="3">
+                        <t t-if="o.ref">
+                            <strong t-out="o.ref"/> -
+                        </t>
+                        <strong t-out="o.name"/>
+                    </td>
+
+                    <!-- Period Debit -->
+                    <td class="text-end o_pl_num">
+                        <strong t-out="sum_partner(data, o, 'debit')"
+                                t-options="{'widget':'monetary','display_currency':env.company.currency_id}"/>
+                    </td>
+
+                    <!-- Period Credit -->
+                    <td class="text-end o_pl_num">
+                        <strong t-out="sum_partner(data, o, 'credit')"
+                                t-options="{'widget':'monetary','display_currency':env.company.currency_id}"/>
+                    </td>
+
+                    <!-- Balance -->
+                    <td class="text-end o_pl_num">
+                        <strong t-out="sum_partner(data, o, 'debit - credit')"
+                                t-options="{'widget':'monetary','display_currency':env.company.currency_id}"/>
+                    </td>
+
+                    <td t-if="data['form']['amount_currency']" class="text-end o_pl_num"/>
+                </tr>
+
+                <!-- ================= MOVE LINES ================= -->
+                <tr t-foreach="lines(data, o)" t-as="line">
+                    <td class="o_pl_nowrap"><span t-out="line['date']"/></td>
+                    <td class="o_pl_nowrap"><span t-out="line['code']"/></td>
+                    <td><span t-out="line['displayed_name']"/></td>
+
+                    <td class="text-end o_pl_num">
+                        <span t-out="line['debit']"
+                              t-options="{'widget':'monetary','display_currency':env.company.currency_id}"/>
+                    </td>
+
+                    <td class="text-end o_pl_num">
+                        <span t-out="line['credit']"
+                              t-options="{'widget':'monetary','display_currency':env.company.currency_id}"/>
+                    </td>
+
+                    <td class="text-end o_pl_num">
+                        <span t-out="line['progress'] + initial_balance"
+                              t-options="{'widget':'monetary','display_currency':env.company.currency_id}"/>
+                    </td>
+
+                    <td t-if="data['form']['amount_currency']" class="text-end o_pl_num">
+                        <t t-if="line['currency_id']">
+                            <span t-out="line['amount_currency']"
+                                  t-options="{'widget':'monetary','display_currency':line['currency_id']}"/>
+                        </t>
+                    </td>
+                </tr>
+
+                <!-- ================= CLOSING BALANCE ================= -->
+                <t t-set="closing_balance"
+                   t-value="initial_balance + sum_partner(data, o, 'debit - credit')"/>
+
+                <tr class="o_pl_closing_row">
+                    <td colspan="3"><strong>Closing Balance</strong></td>
+
+                    <!-- Debit -->
+                    <td class="text-end o_pl_num">
+                        <strong t-out="closing_balance &gt; 0 and closing_balance or 0.0"
+                                t-options="{'widget':'monetary','display_currency':env.company.currency_id}"/>
+                    </td>
+
+                    <!-- Credit -->
+                    <td class="text-end o_pl_num">
+                        <strong t-out="closing_balance &lt; 0 and -closing_balance or 0.0"
+                                t-options="{'widget':'monetary','display_currency':env.company.currency_id}"/>
+                    </td>
+
+                    <!-- Balance -->
+                    <td class="text-end o_pl_num">
+                        <strong t-out="closing_balance"
+                                t-options="{'widget':'monetary','display_currency':env.company.currency_id}"/>
+                    </td>
+
+                    <td t-if="data['form']['amount_currency']" class="text-end o_pl_num"/>
+                </tr>
+            </tbody>
+        </xpath>
+
+    </template>
+</odoo>

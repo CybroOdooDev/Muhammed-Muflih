@@ -34,7 +34,7 @@
                                                  t-as="attribute">
                                                 <div>
                                                     <span t-field="attribute.attribute_id.name"/>:
-                                                    <span t-esc="attribute.name"/>
+                                                    <span t-out="attribute.name"/>
                                                 </div>
                                             </div>
                                         </div>

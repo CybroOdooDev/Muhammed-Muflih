@@ -1,0 +1,54 @@
+table.table.o_partner_ledger_table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #212529;
+    margin-top: 8px;
+}
+
+table.table.o_partner_ledger_table > thead {
+    display: table-header-group;
+}
+
+table.table.o_partner_ledger_table > thead > tr > th,
+table.table.o_partner_ledger_table > tbody > tr > td {
+    border: 1px solid #212529;
+    padding: 5px 7px;
+    vertical-align: top;
+}
+
+table.table.o_partner_ledger_table > thead > tr > th {
+    border-bottom: 1.5px solid #212529;
+    background-color: #ffffff;
+    color: #212529;
+    font-weight: 600;
+    text-align: left;
+    vertical-align: middle;
+}
+
+table.table.o_partner_ledger_table > tbody > tr.o_pl_initial_row > td {
+    background-color: #f0f0f0;
+}
+
+table.table.o_partner_ledger_table > tbody > tr.o_pl_partner_row > td {
+    background-color: #ffffff;
+}
+
+table.table.o_partner_ledger_table > tbody > tr.o_pl_closing_row > td {
+    background-color: #e8e8e8;
+}
+
+table.table.o_partner_ledger_table > thead > tr,
+table.table.o_partner_ledger_table > tbody > tr {
+    page-break-inside: avoid;
+}
+
+table.table.o_partner_ledger_table .o_pl_nowrap {
+    white-space: nowrap;
+}
+
+table.table.o_partner_ledger_table > thead > tr > th.o_pl_num,
+table.table.o_partner_ledger_table > tbody > tr > td.o_pl_num {
+    text-align: right;
+    white-space: nowrap;
+}
+
