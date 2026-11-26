@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="export_x2many.ExportDataDialog" t-inherit="web.ExportDataDialog" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o_export_grid')]/div[1]/CheckBox" position="attributes">
+            <attribute name="className">'o_export_compatible'</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('o_export_grid')]//div[hasclass('o_left_field_panel')]" position="attributes">
+            <attribute name="class" add="flex-grow-1" separator=" "/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_export_grid')]//div[hasclass('o_right_field_panel')]" position="attributes">
+            <attribute name="class" add="flex-grow-1" separator=" "/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_export_grid')]/div[1]" position="attributes">
+            <attribute name="class">o_export_x2many_left d-flex flex-column gap-2 w-100</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('o_export_x2many_left')]/h4" position="before">
+            <div class="o_export_x2many_options d-flex flex-column gap-1 mb-1">
+                <CheckBox value="this.state.includeChildren" onChange.bind="this.onToggleIncludeChildren">
+                    Select child fields<sup class="d-print-none text-info p-1"
+                        title="Enable to auto-select direct child fields of the selected field">?</sup>
+                </CheckBox>
+                <div class="ms-4" t-if="this.state.includeChildren">
+                    <CheckBox value="this.state.includeRelatedChildren" onChange.bind="this.onToggleIncludeRelatedChildren">
+                        Select related child fields<sup class="d-print-none text-info p-1"
+                            title="Enable to auto-select all nested child fields along with direct child fields of the selected field">?</sup>
+                    </CheckBox>
+                </div>
+                <t t-if="this.availableFormats[this.state.selectedFormat]?.tag === 'xlsx'">
+                    <CheckBox value="this.state.groupData" onChange.bind="this.onToggleEnableGroup">
+                        Enable data grouping<sup class="d-print-none text-info p-1"
+                            title="Filter data and export as multiple sheets in a single workbook">?</sup>
+                    </CheckBox>
+                </t>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('o_export_x2many_options')]/CheckBox[1]" position="before">
+            <xpath expr="//div[hasclass('o_export_x2many_left')]/CheckBox" position="move"/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_export_x2many_left')]" position="inside">
+            <xpath expr="//div[hasclass('o_export_grid')]//input[hasclass('o_export_search_input')]/.." position="move"/>
+            <xpath expr="//div[hasclass('o_export_grid')]//div[hasclass('o_left_field_panel')]" position="move"/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_export_grid')]/label" position="replace">
+            <div class="o_export_x2many_right d-flex flex-column gap-2 w-100">
+                <div class="d-flex align-items-center gap-3 flex-wrap mb-1">
+                    <span class="fw-bold">Export Format:</span>
+                    <t t-foreach="this.availableFormats" t-as="format" t-key="format.tag">
+                        <div class="form-check form-check-inline mb-0">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="export_format"
+                                t-att-id="'o_export_format_' + format.tag"
+                                t-att-value="format.tag"
+                                t-att-checked="format.tag === this.availableFormats[this.state.selectedFormat]?.tag"
+                                t-on-change="this.setFormat"
+                            />
+                            <label
+                                class="form-check-label"
+                                t-att-for="'o_export_format_' + format.tag"
+                                t-att-title="format.label"
+                                t-out="format.tag.toUpperCase()"
+                            />
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('o_export_x2many_right')]" position="inside">
+            <xpath expr="//div[hasclass('o_export_grid')]/div[h4 and not(hasclass('o_export_x2many_left'))]" position="move"/>
+            <xpath expr="//div[hasclass('o_export_grid')]/div[hasclass('o_exported_lists')]" position="move"/>
+            <xpath expr="//div[hasclass('o_export_grid')]//div[hasclass('o_right_field_panel')]" position="move"/>
+            <xpath expr="//div[hasclass('o_export_grid')]/div[div[hasclass('o_export_languages')]]" position="move"/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_export_grid')]" position="attributes">
+            <attribute name="class">o_export_x2many_columns d-flex flex-column flex-md-row gap-4 w-100 flex-grow-1</attribute>
+        </xpath>
+    </t>
+</templates>

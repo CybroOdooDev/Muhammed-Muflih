@@ -9,7 +9,7 @@
                 <block id="website_address_management_block">
                     <div class="card border rounded my-3 w-100 p-0 shadow-sm overflow-hidden">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark border-bottom fs-6">
-                            ECommerce Address
+                            eCommerce Address
                         </div>
                         <div class="card-body p-4 bg-white">
                             <div class="row">

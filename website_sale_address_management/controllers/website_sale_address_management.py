@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
@@ -16,6 +15,7 @@
 #
 #############################################################################
 from odoo.http import request
+
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 
 MANAGED_FIELDS = ('phone', 'street', 'city', 'zip')
@@ -30,38 +30,6 @@ class CustomWebsiteSale(WebsiteSale):
         return request.env['res.config.settings'].sudo(
         ).get_address_field_config(address_type)
 
-    def _apply_address_config(self, fields_set, address_type):
-        """Adapt a set of mandatory fields to the module configuration:
-        fields that are not configured as required are dropped and the ones
-        configured as required (and visible) are added."""
-        config = self._get_address_config(address_type)
-        for fname in MANAGED_FIELDS:
-            if config[fname]['required']:
-                fields_set.add(fname)
-            else:
-                fields_set.discard(fname)
-        return fields_set
-
-    def _get_mandatory_delivery_address_fields(self, country_sudo):
-        """Return the mandatory fields of a delivery address."""
-        if hasattr(super(), '_get_mandatory_delivery_address_fields'):
-            mandatory_fields = set(
-                super()._get_mandatory_delivery_address_fields(country_sudo))
-        else:
-            mandatory_fields = set(
-                request.env['res.partner']._get_mandatory_delivery_address_fields(country_sudo))
-        return self._apply_address_config(mandatory_fields, 'delivery')
-
-    def _get_mandatory_billing_address_fields(self, country_sudo):
-        """Return the mandatory fields of a billing address."""
-        if hasattr(super(), '_get_mandatory_billing_address_fields'):
-            mandatory_fields = set(
-                super()._get_mandatory_billing_address_fields(country_sudo))
-        else:
-            mandatory_fields = set(
-                request.env['res.partner']._get_mandatory_billing_address_fields(country_sudo))
-        return self._apply_address_config(mandatory_fields, 'billing')
-
     def _prepare_address_form_values(self, *args, address_type='billing',
                                      **kwargs):
         """Preselect the configured default country of a new address."""
@@ -73,25 +41,44 @@ class CustomWebsiteSale(WebsiteSale):
 
         config = self._get_address_config(address_type)
         country_id = config.get('default_country_id')
-        if not country_id:
-            # Fallback to the other address type if only one was configured
-            alt_type = 'delivery' if address_type == 'billing' else 'billing'
-            country_id = self._get_address_config(alt_type).get('default_country_id')
 
         if country_id:
             country = request.env['res.country'].sudo().browse(country_id).exists()
             if country:
-                address_fields = country.get_address_fields()
+                empty_state = request.env['res.country.state']
+                cities_data = (
+                    country._enforce_city_choice()
+                    and country._get_cities_data(empty_state.id)
+                )
+                extra_kwargs = {
+                    k: v for k, v in kwargs.items() if k != 'use_delivery_as_billing'
+                }
+                use_delivery_as_billing = rendering_values.get(
+                    'use_delivery_as_billing', False,
+                )
                 rendering_values.update({
                     'country': country,
                     'states': country.state_ids,
-                    'country_states': country.state_ids,
-                    'state': request.env['res.country.state'],
-                    'phone_code': f'+{country.phone_code}' if country.phone_code != 0 else '',
-                    'zip_before_city': (
-                        'zip' in address_fields and 'city' in address_fields
-                        and address_fields.index('zip')
-                        < address_fields.index('city')
+                    'state': empty_state,
+                    'city': (
+                        rendering_values['city'][:0]
+                        if rendering_values.get('city')
+                        else rendering_values.get('city')
+                    ),
+                    'cities_data': cities_data,
+                    'phone_code': (
+                        f'+{country.phone_code}' if country.phone_code != 0 else ''
+                    ),
+                    'zip_applicability': country.zip_applicability,
+                    'zip_before_city': country._is_zip_before_city(),
+                    'vat_label': country._get_vat_label(),
+                    'required_fields': (
+                        request.env['res.partner']._get_required_address_fields(
+                            address_type,
+                            country,
+                            use_delivery_as_billing=use_delivery_as_billing,
+                            **extra_kwargs,
+                        )
                     ),
                 })
         return rendering_values

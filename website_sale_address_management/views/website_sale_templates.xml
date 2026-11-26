@@ -2,7 +2,7 @@
 <odoo>
     <!-- Show, hide and mark the address fields according to the module
          settings. The core address form is kept and only extended. -->
-    <template id="address_form_fields"
+    <template id="address_form_fields_inherit_website_sale_address_management"
               inherit_id="website_sale.address_form_fields">
         <xpath expr="//div[@id='div_name']" position="before">
             <t t-set="addr_cfg"
@@ -31,7 +31,8 @@
     </template>
 
     <!-- Add Discard and Save address buttons to the eCommerce address form -->
-    <template id="address" inherit_id="website_sale.address">
+    <template id="address_inherit_website_sale_address_management"
+              inherit_id="website_sale.address">
         <xpath expr="//form[@name='address_form']//div[hasclass('row')]" position="after">
             <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mt-4 mb-4">
                 <a

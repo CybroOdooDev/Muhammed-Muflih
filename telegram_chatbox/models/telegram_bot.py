@@ -17,6 +17,7 @@
 #############################################################################
 import logging
 import requests
+import secrets
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from requests.exceptions import ConnectionError, Timeout
@@ -47,6 +48,13 @@ class TelegramBot(models.Model):
         string="Webhook URL",
         tracking=True,
         help="Public URL where Telegram sends incoming message updates."
+    )
+
+    webhook_secret = fields.Char(
+        string="Webhook Secret",
+        copy=False,
+        groups='telegram_chatbox.telegram_group_admin',
+        help="Independent secret token sent in X-Telegram-Bot-Api-Secret-Token header."
     )
 
     active = fields.Boolean(
@@ -89,15 +97,23 @@ class TelegramBot(models.Model):
             if not token:
                 raise ValidationError(_("Please configure an API Token first."))
 
-            webhook = (bot.webhook_url or '').strip().rstrip('/')
+            if not bot.webhook_secret:
+                bot.webhook_secret = secrets.token_hex(20)
+
+            webhook = (url or bot.webhook_url or '').strip().rstrip('/')
             if not webhook:
-                base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url', '').strip().rstrip('/')
+                base_url = (
+                    self.env['ir.config_parameter'].sudo().get_str('web.base.url', '')
+                    or ''
+                ).strip().rstrip('/')
                 if base_url.startswith('http://'):
                     base_url = base_url.replace('http://', 'https://', 1)
                 webhook = base_url
+            if not webhook:
+                raise ValidationError(_("Please configure a Webhook URL first."))
 
-            # Register webhook as /telegram/webhook/<bot_id> without exposing token in URL path
-            endpoint = f"/telegram/webhook/{bot.id}"
+            # Ensure the webhook ends with /telegram/webhook without exposing token or ID in URL path
+            endpoint = "/telegram/webhook"
             if not webhook.endswith(endpoint):
                 if '/telegram/webhook' in webhook:
                     base = webhook.split('/telegram/webhook')[0].rstrip('/')
@@ -108,10 +124,9 @@ class TelegramBot(models.Model):
             bot.webhook_url = webhook
 
             api = f"https://api.telegram.org/bot{bot.token}/setWebhook"
-            secret_token = (bot.token or '').replace(':', '_')[:256]
             webhook_payload = {
                 "url": webhook,
-                "secret_token": secret_token,
+                "secret_token": bot.webhook_secret,
             }
             try:
                 res = requests.post(api, json=webhook_payload, timeout=bot.timeout)

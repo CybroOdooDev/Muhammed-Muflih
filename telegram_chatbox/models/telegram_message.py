@@ -168,11 +168,31 @@ class TelegramMessage(models.Model):
             'state': 'received',
         }
         msg_record = self.sudo().create(vals)
-        self._handle_telegram_attachments(bot, msg_record, message)
+        attachment = self._handle_telegram_attachments(bot, msg_record, message)
+        attachment_ids = [attachment.id] if attachment else msg_record.attachment_ids.ids
 
-        chatter_body = Markup("<b>Incoming Telegram:</b><br/>%s") % (
-            escape(text).replace('\n', Markup('<br/>')) if text else '(media message)'
-        )
+        media_desc = ""
+        if attachment:
+            media_desc = f"📎 {attachment.name}"
+        elif msg_record.attachment_ids:
+            media_desc = f"📎 {', '.join(msg_record.attachment_ids.mapped('name'))}"
+
+        if text and media_desc:
+            body_content = Markup("%s<br/>%s") % (
+                escape(text).replace('\n', Markup('<br/>')),
+                escape(media_desc),
+            )
+        elif text:
+            body_content = escape(text).replace('\n', Markup('<br/>'))
+        elif media_desc:
+            body_content = escape(media_desc)
+        elif message.get("sticker"):
+            emoji = message["sticker"].get("emoji", "")
+            body_content = f"Sticker {emoji}".strip()
+        else:
+            body_content = "(media message)"
+
+        chatter_body = Markup("<b>Incoming Telegram:</b><br/>%s") % body_content
         author_id = msg_record.partner_id.id if msg_record.partner_id else False
 
         if doc_model and doc_id:
@@ -180,7 +200,7 @@ class TelegramMessage(models.Model):
             if record.exists():
                 post_kwargs = {
                     'body': chatter_body,
-                    'attachment_ids': msg_record.attachment_ids.ids,
+                    'attachment_ids': attachment_ids,
                     'message_type': 'comment',
                 }
                 if author_id:
@@ -189,7 +209,7 @@ class TelegramMessage(models.Model):
         elif msg_record.partner_id:
             post_kwargs = {
                 'body': chatter_body,
-                'attachment_ids': msg_record.attachment_ids.ids,
+                'attachment_ids': attachment_ids,
                 'message_type': 'comment',
             }
             if author_id:
@@ -245,7 +265,7 @@ class TelegramMessage(models.Model):
 
     def _handle_telegram_attachments(self, bot, msg_record, message_data):
         """
-        Download attachments (photo, document, voice, audio, video)
+        Download attachments (photo, document, voice, audio, video, sticker, animation)
         with timeout + error handling.
         """
         file_id = False
@@ -277,6 +297,25 @@ class TelegramMessage(models.Model):
             file_unique_id = message_data["video"]["file_unique_id"]
             mimetype = "video/mp4"
             filename = f"video_{file_unique_id}.mp4"
+        elif message_data.get("sticker"):
+            sticker = message_data["sticker"]
+            thumb = sticker.get("thumbnail") or sticker.get("thumb")
+            # Download static .webp thumbnail for animated (.tgs) or video (.webm) stickers
+            # so Odoo chatter can render them natively.
+            if (sticker.get("is_animated") or sticker.get("is_video")) and thumb and thumb.get("file_id"):
+                file_id = thumb.get("file_id")
+                file_unique_id = thumb.get("file_unique_id") or sticker.get("file_unique_id") or "thumb"
+            else:
+                file_id = sticker.get("file_id")
+                file_unique_id = sticker.get("file_unique_id") or "sticker"
+            mimetype = "image/webp"
+            filename = f"sticker_{file_unique_id}.webp"
+        elif message_data.get("animation"):
+            animation = message_data["animation"]
+            file_id = animation.get("file_id")
+            file_unique_id = animation.get("file_unique_id") or "animation"
+            mimetype = animation.get("mime_type", "video/mp4")
+            filename = animation.get("file_name", f"animation_{file_unique_id}.mp4")
 
         if not file_id:
             return False

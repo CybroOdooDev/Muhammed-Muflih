@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
@@ -17,11 +16,17 @@
 #############################################################################
 from unittest.mock import patch
 
+from lxml import html as lxml_html
+
+from odoo.fields import Command
+from odoo.tests import HttpCase, TransactionCase, tagged
+
 from odoo.addons.http_routing.tests.common import MockRequest
 from odoo.addons.website_sale.controllers.main import WebsiteSale
+from odoo.addons.website_sale.models.website import CART_SESSION_CACHE_KEY
+from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
 from odoo.addons.website_sale_address_management.controllers.\
     website_sale_address_management import CustomWebsiteSale
-from odoo.tests import TransactionCase, tagged
 
 PREFIX = 'website_sale_address_management.'
 
@@ -36,23 +41,35 @@ class TestWebsiteSaleAddressManagement(TransactionCase):
         cls.country_us = cls.env.ref('base.us')
         cls.Config = cls.env['ir.config_parameter'].sudo()
         cls.Settings = cls.env['res.config.settings']
-        cls.website = cls.env.ref('website.default_website')
+        cls.website = (
+            cls.env.ref('website.default_website', raise_if_not_found=False)
+            or cls.env['website'].search([], limit=1)
+            or cls.env['website'].create({
+                'name': 'Test Website',
+                'company_id': cls.env.company.id,
+            })
+        )
 
     def _set_param(self, key, value):
+        if key.endswith('_country'):
+            int_val = int(value) if value else None
+            if hasattr(self.Config, 'set_int'):
+                self.Config.set_int(key, int_val)
+            else:
+                self.Config.set_param(key, int_val or False)
+            return
         if isinstance(value, bool):
             if hasattr(self.Config, 'set_bool'):
                 self.Config.set_bool(key, value)
             else:
                 self.Config.set_param(key, value)
-        elif isinstance(value, int) and not isinstance(value, bool):
+        elif isinstance(value, int):
             if hasattr(self.Config, 'set_int'):
                 self.Config.set_int(key, value)
             else:
                 self.Config.set_param(key, value)
-        elif value is None or value is False:
-            if hasattr(self.Config, 'set_bool'):
-                self.Config.set_bool(key, False)
-            elif hasattr(self.Config, 'set_str'):
+        elif value is None:
+            if hasattr(self.Config, 'set_str'):
                 self.Config.set_str(key, None)
             else:
                 self.Config.set_param(key, False)
@@ -77,9 +94,9 @@ class TestWebsiteSaleAddressManagement(TransactionCase):
         for prefix in ('billing', 'shipping'):
             for key in ('phone', 'street', 'street2', 'city', 'zip_code'):
                 self._set_param(
-                    '%sis_%s_%s' % (PREFIX, prefix, key), False)
+                    f'{PREFIX}is_{prefix}_{key}', False)
                 self._set_param(
-                    '%sis_%s_%s_is_required' % (PREFIX, prefix, key), False)
+                    f'{PREFIX}is_{prefix}_{key}_is_required', False)
 
     def test_01_mandatory_fields_logic(self):
         """Required flags are stored as 'True' and removed when unset."""
@@ -107,7 +124,7 @@ class TestWebsiteSaleAddressManagement(TransactionCase):
     def test_04_field_config_helper(self):
         """Only toggled-on fields are visible; required needs visible."""
         self._clear()
-        self._set_param(PREFIX + 'billing_country', False)
+        self._set_param(PREFIX + 'billing_country', None)
         cfg = self.Settings.get_address_field_config('billing')
         self.assertFalse(any(cfg[f]['visible'] for f in
                              ('phone', 'street', 'street2', 'city', 'zip')))
@@ -139,36 +156,48 @@ class TestWebsiteSaleAddressManagement(TransactionCase):
         vals = {}
         for prefix in ('billing', 'shipping'):
             for name in names:
-                vals['is_%s_%s' % (prefix, name)] = False
-                vals['is_%s_%s_is_required' % (prefix, name)] = True
+                vals[f'is_{prefix}_{name}'] = False
+                vals[f'is_{prefix}_{name}_is_required'] = True
         settings = self.Settings.new(vals)
         settings._onchange_fields()
         for prefix in ('billing', 'shipping'):
             for name in names:
                 self.assertFalse(
-                    settings['is_%s_%s_is_required' % (prefix, name)])
+                    settings[f'is_{prefix}_{name}_is_required'])
         # fields left on keep their required flag
         settings = self.Settings.new({
             'is_billing_phone': True, 'is_billing_phone_is_required': True})
         settings._onchange_fields()
         self.assertTrue(settings.is_billing_phone_is_required)
 
-    def test_06_controller_mandatory_fields(self):
+    def test_06_required_address_fields(self):
+        """Partner required address fields follow billing/delivery configuration."""
         self._clear()
-        controller = CustomWebsiteSale()
+        partner = self.env['res.partner']
         with MockRequest(self.env, website=self.website):
-            for getter, prefix in (
-                (controller._get_mandatory_billing_address_fields,
-                 'billing'),
-                (controller._get_mandatory_delivery_address_fields,
-                 'shipping'),
+            for address_type, prefix in (
+                ('billing', 'billing'),
+                ('delivery', 'shipping'),
             ):
-                fields = getter(self.country_in)
+                fields = partner._get_required_address_fields(
+                    address_type, self.country_in,
+                )
                 self.assertFalse(fields & {'phone', 'street', 'city', 'zip'})
-                self._set_param(PREFIX + 'is_%s_street' % prefix, True)
+                self._set_param(f'{PREFIX}is_{prefix}_street', True)
                 self._set_param(
-                    PREFIX + 'is_%s_street_is_required' % prefix, True)
-                self.assertIn('street', getter(self.country_in))
+                    f'{PREFIX}is_{prefix}_street_is_required', True,
+                )
+                self.assertIn(
+                    'street',
+                    partner._get_required_address_fields(
+                        address_type, self.country_in,
+                    ),
+                )
+            # use_delivery_as_billing merges billing and delivery requirements
+            combined = partner._get_required_address_fields(
+                'delivery', self.country_in, use_delivery_as_billing=True,
+            )
+            self.assertIn('street', combined)
 
     def test_07_controller_validation(self):
         self._clear()
@@ -243,8 +272,8 @@ class TestWebsiteSaleAddressManagement(TransactionCase):
         """The configured default country is preselected on a new address
         of the cart, and does not replace the country of an address."""
         self._clear()
-        self._set_param(PREFIX + 'billing_country', False)
-        self._set_param(PREFIX + 'shipping_country', False)
+        self._set_param(PREFIX + 'billing_country', None)
+        self._set_param(PREFIX + 'shipping_country', None)
         controller = CustomWebsiteSale()
         customer = self.env['res.partner'].create({'name': 'Cart Customer'})
         order = self.env['sale.order'].create({
@@ -259,7 +288,39 @@ class TestWebsiteSaleAddressManagement(TransactionCase):
         values = self._prepare_form_values(controller, new_address, order)
         self.assertEqual(values['country'], self.country_in)
         self.assertEqual(values['states'], self.country_in.state_ids)
-        self.assertEqual(values['country_states'], self.country_in.state_ids)
+        self.assertEqual(
+            values['zip_applicability'], self.country_in.zip_applicability,
+        )
+        self.assertEqual(
+            values['zip_before_city'], self.country_in._is_zip_before_city(),
+        )
+        self.assertEqual(values['vat_label'], self.country_in._get_vat_label())
+        self.assertEqual(
+            values['required_fields'],
+            self.env['res.partner']._get_required_address_fields(
+                'billing', self.country_in, order_sudo=order,
+            ),
+        )
+
+        # Delivery stays unset when only billing_country is configured.
+        with MockRequest(self.env, website=self.website), patch.object(
+            WebsiteSale, '_get_default_country',
+            return_value=self.env['res.country'],
+        ):
+            delivery_values = controller._prepare_address_form_values(
+                new_address, address_type='delivery', order_sudo=order,
+            )
+        self.assertFalse(delivery_values['country'])
+
+        # Overriding a customer's country also updates country-dependent keys.
+        country_be = self.env.ref('base.be')
+        customer.country_id = self.country_us
+        self._set_param(PREFIX + 'billing_country', country_be.id)
+        be_values = self._prepare_form_values(controller, new_address, order)
+        self.assertEqual(be_values['country'], country_be)
+        self.assertNotIn('state_id', be_values['required_fields'])
+        self.assertEqual(be_values['zip_before_city'], country_be._is_zip_before_city())
+        self.assertEqual(be_values['vat_label'], country_be._get_vat_label())
 
         # The delivery address uses its own default country.
         self._set_param(PREFIX + 'shipping_country', self.country_us.id)
@@ -270,6 +331,7 @@ class TestWebsiteSaleAddressManagement(TransactionCase):
             values = controller._prepare_address_form_values(
                 new_address, address_type='delivery', order_sudo=order)
         self.assertEqual(values['country'], self.country_us)
+        self.assertIn('state_id', values['required_fields'])
 
         # An existing address keeps its own country.
         existing = self.env['res.partner'].create({
@@ -285,12 +347,14 @@ class TestWebsiteSaleAddressManagement(TransactionCase):
         """The module extends the core address fields template instead of
         replacing the address form."""
         view = self.env.ref(
-            'website_sale_address_management.address_form_fields')
+            'website_sale_address_management.'
+            'address_form_fields_inherit_website_sale_address_management',
+        )
         self.assertTrue(view.active)
         self.assertEqual(
             view.inherit_id, self.env.ref('website_sale.address_form_fields'))
         for fname in ('phone', 'street', 'street2', 'city', 'zip'):
-            self.assertIn("addr_cfg['%s']['visible']" % fname, view.arch_db)
+            self.assertIn(f"addr_cfg['{fname}']['visible']", view.arch_db)
 
     def test_12_partner_mandatory_fields(self):
         """res.partner mandatory fields reflect the module configuration."""
@@ -316,7 +380,9 @@ class TestWebsiteSaleAddressManagement(TransactionCase):
     def test_13_address_template_buttons(self):
         """The address template adds Save address and Discard buttons."""
         view = self.env.ref(
-            'website_sale_address_management.address')
+            'website_sale_address_management.'
+            'address_inherit_website_sale_address_management',
+        )
         self.assertTrue(view.active)
         self.assertEqual(
             view.inherit_id, self.env.ref('website_sale.address'))
@@ -324,3 +390,148 @@ class TestWebsiteSaleAddressManagement(TransactionCase):
         self.assertIn('Discard', view.arch_db)
         self.assertIn('discard_url', view.arch_db)
 
+    def test_14_res_config_settings_save_and_load(self):
+        """Saving res.config.settings persists values and reloads via default_get."""
+        config_env = self.Settings.sudo().with_company(self.website.company_id)
+        settings = config_env.create({
+            'is_billing_phone': True,
+            'is_billing_phone_is_required': True,
+            'is_billing_street': False,
+            'is_billing_street_is_required': False,
+            'is_billing_street2': False,
+            'is_billing_city': True,
+            'is_billing_city_is_required': True,
+            'is_billing_zip_code': True,
+            'is_billing_zip_code_is_required': False,
+            'billing_country_id': self.country_in.id,
+            'is_shipping_phone': False,
+            'is_shipping_phone_is_required': False,
+            'is_shipping_street': True,
+            'is_shipping_street_is_required': True,
+            'is_shipping_street2': False,
+            'is_shipping_city': False,
+            'is_shipping_city_is_required': False,
+            'is_shipping_zip_code': True,
+            'is_shipping_zip_code_is_required': True,
+            'shipping_country_id': self.country_us.id,
+        })
+        settings.execute()
+
+        loaded = config_env.default_get([
+            'is_billing_phone',
+            'is_billing_phone_is_required',
+            'is_billing_street',
+            'is_billing_street2',
+            'is_billing_city_is_required',
+            'billing_country_id',
+            'is_shipping_street',
+            'is_shipping_street_is_required',
+            'is_shipping_zip_code_is_required',
+            'shipping_country_id',
+        ])
+        self.assertTrue(loaded['is_billing_phone'])
+        self.assertTrue(loaded['is_billing_phone_is_required'])
+        self.assertFalse(loaded['is_billing_street'])
+        self.assertFalse(loaded['is_billing_street2'])
+        self.assertTrue(loaded['is_billing_city_is_required'])
+        self.assertEqual(loaded['billing_country_id'], self.country_in.id)
+        self.assertTrue(loaded['is_shipping_street'])
+        self.assertTrue(loaded['is_shipping_street_is_required'])
+        self.assertTrue(loaded['is_shipping_zip_code_is_required'])
+        self.assertEqual(loaded['shipping_country_id'], self.country_us.id)
+
+        billing_cfg = self.Settings.get_address_field_config('billing')
+        self.assertEqual(billing_cfg['street'], {'visible': False, 'required': False})
+        self.assertEqual(billing_cfg['phone'], {'visible': True, 'required': True})
+        self.assertEqual(billing_cfg['default_country_id'], self.country_in.id)
+
+        # Clearing a Many2one country parameter stores undefined without errors.
+        config_env.create({'billing_country_id': False}).execute()
+        cleared = config_env.default_get(['billing_country_id'])
+        self.assertFalse(cleared['billing_country_id'])
+        self.assertFalse(
+            self.Settings.get_address_field_config('billing')['default_country_id'],
+        )
+
+
+@tagged('post_install', '-at_install')
+class TestWebsiteSaleAddressManagementHttp(WebsiteSaleCommon, HttpCase):
+    """HTTP route tests for /shop/address and /shop/address/submit."""
+
+    def _set_address_settings(self, vals):
+        config_env = self.env['res.config.settings'].sudo().with_company(
+            self.website.company_id,
+        )
+        config_env.create(vals).execute()
+
+    def test_shop_address_get_and_submit(self):
+        """Checkout address form hides disabled fields, preselects country, and submits."""
+        self.website.sudo().account_on_checkout = 'optional'
+        self._set_address_settings({
+            'is_billing_phone': True,
+            'is_billing_phone_is_required': False,
+            'is_billing_street': False,
+            'is_billing_street_is_required': False,
+            'is_billing_street2': False,
+            'is_billing_city': True,
+            'is_billing_city_is_required': False,
+            'is_billing_zip_code': True,
+            'is_billing_zip_code_is_required': False,
+            'billing_country_id': self.country_us.id,
+        })
+
+        anon_cart = self.env['sale.order'].create({
+            'partner_id': self.public_partner.id,
+            'website_id': self.website.id,
+            'order_line': [
+                Command.create({'product_id': self.product.id, 'product_uom_qty': 1.0}),
+            ],
+        })
+        self.authenticate(None, None)
+        self.update_session(**{CART_SESSION_CACHE_KEY: anon_cart.id})
+
+        get_res = self.url_open('/shop/address?address_type=billing')
+        self.assertEqual(get_res.status_code, 200)
+        root = lxml_html.fromstring(get_res.content)
+        self.assertFalse(root.xpath('//form[@name="address_form"]//input[@name="street"]'))
+        self.assertFalse(root.xpath('//form[@name="address_form"]//input[@name="street2"]'))
+        self.assertTrue(root.xpath('//form[@name="address_form"]//input[@name="phone"]'))
+        self.assertTrue(root.xpath('//form[@name="address_form"]//input[@name="city"]'))
+        self.assertTrue(root.xpath('//form[@name="address_form"]//input[@name="zip"]'))
+        selected_country = root.xpath(
+            '//form[@name="address_form"]//select[@name="country_id"]/option[@selected]/@value',
+        )
+        self.assertEqual(selected_country, [str(self.country_us.id)])
+
+        csrf_token = root.xpath(
+            '//form[@name="address_form"]//input[@name="csrf_token"]/@value',
+        )[0]
+        base_payload = {
+            'csrf_token': csrf_token,
+            'name': 'HTTP Checkout Customer',
+            'email': 'http.customer@example.com',
+            'country_id': str(self.country_us.id),
+            'state_id': str(self.country_us_state_id),
+            'address_type': 'billing',
+            'use_delivery_as_billing': 'False',
+            'required_fields': 'name,email',
+            'phone': '',
+            'city': '',
+            'zip': '',
+        }
+
+        # Enabling required city fails validation when city is omitted.
+        self._set_address_settings({'is_billing_city_is_required': True})
+        err_res = self.url_open('/shop/address/submit', data=base_payload)
+        self.assertEqual(err_res.status_code, 200)
+        err_data = err_res.json()
+        self.assertIn('city', err_data.get('invalid_fields', []))
+        self.assertTrue(err_data.get('messages'))
+
+        # With city optional and street hidden, submission succeeds without street/zip/phone.
+        self._set_address_settings({'is_billing_city_is_required': False})
+        ok_res = self.url_open('/shop/address/submit', data=base_payload)
+        self.assertEqual(ok_res.status_code, 200)
+        ok_data = ok_res.json()
+        self.assertTrue(ok_data.get('redirectUrl'))
+        self.assertFalse(ok_data.get('invalid_fields'))

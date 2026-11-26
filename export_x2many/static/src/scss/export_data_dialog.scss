@@ -1,0 +1,17 @@
+.o_export_data_dialog {
+    .o_export_x2many_columns {
+        min-height: 0;
+    }
+
+    .o_export_x2many_left,
+    .o_export_x2many_right {
+        min-width: 0;
+        min-height: 0;
+    }
+
+    .o_left_field_panel,
+    .o_right_field_panel {
+        min-height: 0;
+    }
+}
+

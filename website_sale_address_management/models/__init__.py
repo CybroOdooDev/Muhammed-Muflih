@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
@@ -16,5 +15,4 @@
 #
 #############################################################################
 # ruff: noqa: F401
-from . import res_config_settings
-from . import res_partner
+from . import res_config_settings, res_partner

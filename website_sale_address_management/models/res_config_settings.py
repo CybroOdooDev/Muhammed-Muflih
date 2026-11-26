@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
@@ -20,9 +19,9 @@ from odoo import api, fields, models
 
 class ResConfigSettings(models.TransientModel):
     """Inheriting ResConfigSettings Model.
-        This class extends the functionality of the 'res.config.settings'
-        model.It allows customizing and managing configuration settings
-        for the module """
+    This class extends the functionality of the 'res.config.settings'
+    model. It allows customizing and managing configuration settings
+    for the module."""
     _inherit = 'res.config.settings'
 
     is_billing_phone = fields.Boolean(
@@ -130,7 +129,7 @@ class ResConfigSettings(models.TransientModel):
         """
         prefix = 'billing' if address_type == 'billing' else 'shipping'
         params = self.env['ir.config_parameter'].sudo()
-        base = 'website_sale_address_management.is_%s_' % prefix
+        base = f'website_sale_address_management.is_{prefix}_'
 
         def _is_on(key):
             if hasattr(params, 'get_bool'):
@@ -146,7 +145,7 @@ class ResConfigSettings(models.TransientModel):
                         and _is_on(base + suffix + '_is_required'))
             result[fname] = {'visible': visible, 'required': required}
 
-        country_key = 'website_sale_address_management.%s_country' % prefix
+        country_key = f'website_sale_address_management.{prefix}_country'
         if hasattr(params, 'get_int'):
             result['default_country_id'] = params.get_int(country_key) or False
         else:

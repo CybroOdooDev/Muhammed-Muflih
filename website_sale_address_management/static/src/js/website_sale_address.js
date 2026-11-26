@@ -1,10 +1,6 @@
-/** @odoo-module **/
-
 import { CustomerAddress } from '@portal/interactions/address';
-import { SKIP_IMPLICIT_UPDATE } from '@web/public/colibri';
 import { patch } from '@web/core/utils/patch';
 import { rpc } from '@web/core/network/rpc';
-import { redirect } from '@web/core/utils/urls';
 
 /**
  * The address fields can be hidden from the form by the module settings, so
@@ -78,21 +74,14 @@ patch(CustomerAddress.prototype, {
 
     async onChangeState() {
         if (!this.addressForm?.city_id) {
-            return SKIP_IMPLICIT_UPDATE;
+            return;
         }
         const countryId = parseInt(this.addressForm.country_id?.value);
         const stateId = parseInt(this.addressForm.state_id?.value);
         if (!countryId || !stateId) {
-            return SKIP_IMPLICIT_UPDATE;
+            return;
         }
-        const data = await rpc('/my/address/state_info', {
-            country_id: countryId,
-            state_id: stateId,
-        });
-        if (data?.cities) {
-            this._setFieldChoices('city_id', data.cities);
-        }
-        return SKIP_IMPLICIT_UPDATE;
+        return super.onChangeState(...arguments);
     },
 
     async onChangeCountry() {
@@ -181,29 +170,25 @@ patch(CustomerAddress.prototype, {
     },
 
     async saveAddress(ev) {
-        ev.preventDefault();
-        if (!this.addressForm.reportValidity()) {
-            return;
-        }
-
-        const result = await this.waitFor(
-            this.http.post(this.addressForm.dataset.submitUrl, new FormData(this.addressForm))
-        );
-        if (result.redirectUrl) {
-            redirect(result.redirectUrl);
-        } else {
-            // Highlight missing/invalid form values
-            this.el.querySelectorAll('.is-invalid').forEach((element) => {
-                if (!result.invalid_fields?.includes(element.name)) {
-                    element.classList.remove('is-invalid');
-                    element.removeAttribute('aria-invalid');
+        const origHttp = this.http;
+        if (origHttp?.post) {
+            const wrappedHttp = Object.create(origHttp);
+            wrappedHttp.post = async (...args) => {
+                const result = await origHttp.post(...args);
+                if (result && !result.redirectUrl) {
+                    result.invalid_fields = (result.invalid_fields || []).filter(
+                        (fieldName) => Boolean(this.addressForm?.[fieldName])
+                    );
+                    result.messages = result.messages || [];
                 }
-            });
-            result.invalid_fields?.forEach((fieldName) => {
-                this.addressForm[fieldName]?.classList.add('is-invalid');
-            });
-
-            this._replaceErrorMessages(result.messages || []);
+                return result;
+            };
+            this.http = wrappedHttp;
+        }
+        try {
+            return await super.saveAddress(...arguments);
+        } finally {
+            this.http = origHttp;
         }
     },
 });

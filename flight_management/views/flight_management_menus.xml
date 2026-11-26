@@ -3,7 +3,7 @@
 
     <!-- Defines the root menu for the Flight Management module. -->
     <menuitem id="menu_flight_management_root" name="Flight Management" sequence="10"
-              groups="group_flight_management_user"/>
+              groups="group_flight_management_user" web_icon="flight_management,static/description/icon.png"/>
 
     <!-- Defines the Operations menu under Flight Management. -->
     <menuitem id="menu_flight_operations" name="Operations" parent="menu_flight_management_root" sequence="10"/>

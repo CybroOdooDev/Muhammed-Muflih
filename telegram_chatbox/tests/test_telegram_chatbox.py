@@ -19,10 +19,14 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import json
 from unittest.mock import patch, MagicMock
+import requests
 from odoo import Command
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import TransactionCase, tagged
+from ..controllers import telegram_chatbox as tc_module
+from ..controllers.telegram_chatbox import TelegramWebhookController
 
 
 @tagged('post_install', '-at_install')
@@ -36,7 +40,7 @@ class TestTelegramChatbox(TransactionCase):
         cls.bot = cls.env['telegram.bot'].create({
             'name': 'Test Bot',
             'token': '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11',
-            'webhook_url': 'https://example.com/telegram/webhook/123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11',
+            'webhook_url': 'https://example.com/telegram/webhook',
             'status': 'active',
             'active': True,
         })
@@ -115,6 +119,10 @@ class TestTelegramChatbox(TransactionCase):
         self.assertEqual(action.get('type'), 'ir.actions.client')
         self.assertEqual(self.bot.status, 'active')
         self.assertFalse(self.bot.last_error_message)
+        self.assertTrue(self.bot.webhook_secret)
+        self.assertTrue(self.bot.webhook_url.endswith('/telegram/webhook'))
+        call_json = mock_post.call_args[1].get('json', {})
+        self.assertEqual(call_json.get('secret_token'), self.bot.webhook_secret)
 
     # -------------------------------------------------------------------------
     # 2. Telegram Template Tests
@@ -503,14 +511,179 @@ class TestTelegramChatbox(TransactionCase):
 
     @patch('requests.post')
     def test_16_webhook_endpoint_structure(self, mock_post):
-        """Test Telegram webhook URL formatting does not expose the token in URL path."""
+        """Test Telegram webhook URL formatting and independent webhook_secret generation."""
         mock_post_resp = MagicMock()
         mock_post_resp.status_code = 200
         mock_post_resp.json.return_value = {'ok': True, 'description': 'Webhook was set'}
         mock_post.return_value = mock_post_resp
 
+        self.bot.webhook_url = 'https://example.com/telegram/webhook/legacy_suffix'
         self.bot.action_set_webhook()
-        expected_endpoint = f"/telegram/webhook/{self.bot.id}"
-        self.assertTrue(self.bot.webhook_url.endswith(expected_endpoint))
+        self.assertEqual(self.bot.webhook_url, 'https://example.com/telegram/webhook')
         self.assertNotIn(self.bot.token, self.bot.webhook_url)
+        self.assertTrue(self.bot.webhook_secret)
+        self.assertNotEqual(self.bot.webhook_secret, self.bot.token)
+        self.assertNotEqual(self.bot.webhook_secret, self.bot.token.replace(':', '_'))
+
+        call_json = mock_post.call_args[1].get('json', {})
+        self.assertEqual(call_json.get('url'), 'https://example.com/telegram/webhook')
+        self.assertEqual(call_json.get('secret_token'), self.bot.webhook_secret)
+
+        # Also verify fallback to web.base.url when webhook_url is empty
+        self.env['ir.config_parameter'].sudo().set_str('web.base.url', 'http://example-odoo.test')
+        self.bot.webhook_url = False
+        self.bot.action_set_webhook()
+        self.assertEqual(self.bot.webhook_url, 'https://example-odoo.test/telegram/webhook')
+
+    def test_17_webhook_controller_authorized(self):
+        """Test incoming webhook request with valid X-Telegram-Bot-Api-Secret-Token header."""
+        controller = TelegramWebhookController()
+        if not self.bot.webhook_secret:
+            self.bot.webhook_secret = 'test_webhook_secret_key_12345'
+
+        payload = {
+            'update_id': 99991,
+            'message': {
+                'message_id': 8888,
+                'chat': {'id': int(self.partner.telegram_chat_id)},
+                'text': 'Hello from webhook test'
+            }
+        }
+        raw_body = json.dumps(payload).encode('utf-8')
+        mock_httprequest = MagicMock()
+        mock_httprequest.headers = {'X-Telegram-Bot-Api-Secret-Token': self.bot.webhook_secret}
+        mock_httprequest.data = raw_body
+
+        mock_request = MagicMock()
+        mock_request.httprequest = mock_httprequest
+        mock_request.env = self.env
+        del mock_request.get_json_data
+
+        with patch.object(tc_module, 'request', mock_request):
+            response = controller.telegram_webhook()
+            self.assertEqual(response.status_code, 200)
+            res_data = json.loads(response.data.decode('utf-8'))
+            self.assertTrue(res_data.get('ok'))
+
+        incoming_msg = self.env['telegram.message'].search([
+            ('chat_id', '=', self.partner.telegram_chat_id),
+            ('message_text', '=', 'Hello from webhook test')
+        ], limit=1)
+        self.assertTrue(incoming_msg)
+        self.assertEqual(self.bot.status, 'active')
+        self.assertTrue(self.bot.last_sync)
+
+    def test_18_webhook_controller_unauthorized(self):
+        """Test incoming webhook rejects missing, wrong, or token-derived secret headers."""
+        controller = TelegramWebhookController()
+        if not self.bot.webhook_secret:
+            self.bot.webhook_secret = 'test_webhook_secret_key_12345'
+
+        mock_request = MagicMock()
+        mock_request.env = self.env
+        del mock_request.get_json_data
+
+        # 1. Missing secret header
+        mock_httprequest_no_header = MagicMock()
+        mock_httprequest_no_header.headers = {}
+        mock_request.httprequest = mock_httprequest_no_header
+        with patch.object(tc_module, 'request', mock_request):
+            response = controller.telegram_webhook()
+            self.assertEqual(response.status_code, 403)
+
+        # 2. Invalid secret header
+        mock_httprequest_invalid = MagicMock()
+        mock_httprequest_invalid.headers = {'X-Telegram-Bot-Api-Secret-Token': 'wrong_secret'}
+        mock_request.httprequest = mock_httprequest_invalid
+        with patch.object(tc_module, 'request', mock_request):
+            response = controller.telegram_webhook()
+            self.assertEqual(response.status_code, 403)
+
+        # 3. Bot token and token-derived secret must also be rejected
+        for legacy_secret in (self.bot.token, self.bot.token.replace(':', '_')):
+            mock_httprequest_token = MagicMock()
+            mock_httprequest_token.headers = {'X-Telegram-Bot-Api-Secret-Token': legacy_secret}
+            mock_request.httprequest = mock_httprequest_token
+            with patch.object(tc_module, 'request', mock_request):
+                response = controller.telegram_webhook()
+                self.assertEqual(response.status_code, 403)
+
+        # 4. Valid secret with invalid JSON payload returns 400
+        mock_httprequest_bad_json = MagicMock()
+        mock_httprequest_bad_json.headers = {'X-Telegram-Bot-Api-Secret-Token': self.bot.webhook_secret}
+        mock_httprequest_bad_json.data = b'not-json'
+        mock_request.httprequest = mock_httprequest_bad_json
+        with patch.object(tc_module, 'request', mock_request):
+            response = controller.telegram_webhook()
+            self.assertEqual(response.status_code, 400)
+
+    @patch('requests.get')
+    def test_19_incoming_animated_sticker_thumbnail(self, mock_get):
+        """Test downloading .webp thumbnail for animated/video Telegram stickers."""
+        mock_info_resp = MagicMock()
+        mock_info_resp.status_code = 200
+        mock_info_resp.json.return_value = {
+            'ok': True,
+            'result': {'file_path': 'thumbnails/thumb_123.webp'}
+        }
+        mock_file_resp = MagicMock()
+        mock_file_resp.status_code = 200
+        mock_file_resp.content = b'RIFF....WEBPVP8'
+        mock_get.side_effect = [mock_info_resp, mock_file_resp]
+
+        payload = {
+            'message': {
+                'message_id': 9006,
+                'chat': {'id': int(self.partner.telegram_chat_id)},
+                'sticker': {
+                    'file_id': 'animated_raw_tgs_file_id',
+                    'file_unique_id': 'AgADanim123',
+                    'is_animated': True,
+                    'thumbnail': {
+                        'file_id': 'thumb_static_webp_file_id',
+                        'file_unique_id': 'AQADthumb123',
+                    },
+                    'emoji': '👍',
+                }
+            }
+        }
+        msg = self.env['telegram.message'].create_incoming(self.bot, payload)
+        self.assertTrue(msg)
+        self.assertEqual(len(msg.attachment_ids), 1)
+        self.assertTrue(msg.attachment_ids[0].name.endswith('.webp'))
+        self.assertEqual(msg.attachment_ids[0].mimetype, 'image/webp')
+
+        last_mail_msg = self.env['mail.message'].search([
+            ('model', '=', 'res.partner'),
+            ('res_id', '=', self.partner.id),
+        ], order='id desc', limit=1)
+        self.assertIn(msg.attachment_ids[0].id, last_mail_msg.attachment_ids.ids)
+        self.assertIn('sticker_AQADthumb123.webp', last_mail_msg.body)
+
+    @patch('requests.get')
+    def test_20_incoming_sticker_emoji_fallback(self, mock_get):
+        """Test incoming sticker shows emoji fallback when download fails."""
+        mock_get.side_effect = requests.exceptions.Timeout("Timed out")
+
+        payload = {
+            'message': {
+                'message_id': 9007,
+                'chat': {'id': int(self.partner.telegram_chat_id)},
+                'sticker': {
+                    'file_id': 'static_sticker_id',
+                    'file_unique_id': 'AgADstatic123',
+                    'emoji': '👍',
+                }
+            }
+        }
+        msg = self.env['telegram.message'].create_incoming(self.bot, payload)
+        self.assertTrue(msg)
+        self.assertEqual(msg.state, 'error')
+
+        last_mail_msg = self.env['mail.message'].search([
+            ('model', '=', 'res.partner'),
+            ('res_id', '=', self.partner.id),
+        ], order='id desc', limit=1)
+        self.assertIn('Sticker', last_mail_msg.body)
+        self.assertNotIn('(media message)', last_mail_msg.body)
 

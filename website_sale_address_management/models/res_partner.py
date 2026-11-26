@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
@@ -21,9 +20,12 @@ MANAGED_FIELDS = ('phone', 'street', 'city', 'zip')
 
 
 class ResPartner(models.Model):
+    """Apply configured billing and delivery mandatory address field rules."""
+
     _inherit = 'res.partner'
 
     def _get_mandatory_billing_address_fields(self, country_sudo, **kwargs):
+        """Return mandatory billing address field names per module configuration."""
         mandatory = super()._get_mandatory_billing_address_fields(
             country_sudo, **kwargs)
         config = self.env['res.config.settings'].sudo().get_address_field_config('billing')
@@ -35,6 +37,7 @@ class ResPartner(models.Model):
         return mandatory
 
     def _get_mandatory_delivery_address_fields(self, country_sudo, **kwargs):
+        """Return mandatory delivery address field names per module configuration."""
         mandatory = super()._get_mandatory_delivery_address_fields(
             country_sudo, **kwargs)
         config = self.env['res.config.settings'].sudo().get_address_field_config('delivery')
@@ -44,4 +47,3 @@ class ResPartner(models.Model):
             else:
                 mandatory.discard(fname)
         return mandatory
-
