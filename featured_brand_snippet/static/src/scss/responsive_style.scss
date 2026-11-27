@@ -1,0 +1,46 @@
+.dynamic_snippet_brand {
+    .o_brand_card,
+    .o_brand_demo_card {
+        min-height: 320px;
+    }
+    .o_brand_img_wrap {
+        height: 200px;
+    }
+    .o_brand_img {
+        max-height: 180px;
+    }
+    .o_brand_carousel_prev {
+        left: -15px;
+    }
+    .o_brand_carousel_next {
+        right: -15px;
+    }
+    .o_brand_carousel_icon {
+        color: #000;
+    }
+}
+
+/* Mobile-specific fixes */
+@media (max-width: 575.98px) {
+    .dynamic_snippet_brand {
+        .carousel-inner {
+            overflow: hidden;
+        }
+        .carousel-item {
+            transition: transform 0.6s ease;
+        }
+        .o_brand_carousel_prev {
+            left: 0;
+        }
+        .o_brand_carousel_next {
+            right: 0;
+        }
+    }
+}
+
+/* Hide the static demo on the live website until the widget has loaded the
+   real brands. It stays visible in the editor and in the "Insert a block"
+   preview. */
+html:not(.o_add_snippets_preview) body:not(.editor_enable) .dynamic_snippet_brand .o_brand_demo {
+    opacity: 0;
+}

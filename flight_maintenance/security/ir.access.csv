@@ -1,0 +1,5 @@
+id,name,model_id,group_id/id,operation,domain
+access_flight_aircraft_metric_user,flight.aircraft.metric.user,flight.aircraft.metric,flight_management.group_flight_management_user,r,
+access_flight_aircraft_metric_tech,flight.aircraft.metric.tech,flight.aircraft.metric,flight_maintenance.group_flight_maintenance_tech,cru,
+access_flight_aircraft_metric_manager,flight.aircraft.metric.manager,flight.aircraft.metric,flight_management.group_flight_management_manager,crud,
+
